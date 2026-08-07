@@ -1,0 +1,7001 @@
+{
+  "document": {
+    "id": "TRACE-001",
+    "title": "Design Element Register and Requirement Allocation",
+    "version": "0.1",
+    "status": "Draft \u2014 tracks SRS-001 v0.1 (not baselined)",
+    "upstream": [
+      {
+        "id": "SRS-001",
+        "version": "0.1",
+        "path": "SRS-001-requirements.md"
+      },
+      {
+        "id": "ADR-001",
+        "version": "analysis, no decision recorded",
+        "path": "ADR-001-architecture-decisions.md"
+      }
+    ]
+  },
+  "generated_from": {
+    "requirements": 323,
+    "elements": 237
+  },
+  "requirements": {
+    "TOOL-AIF-010": {
+      "id": "TOOL-AIF-010",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "All AI-assisted features shall be optional; the tool shall provide its full non-AI functionality with AI disabled, and AI shall be disabled by default.",
+      "satisfied_by": [
+        "DSN-AIF-010"
+      ]
+    },
+    "TOOL-AIF-020": {
+      "id": "TOOL-AIF-020",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support a locally-executed model requiring no network access.",
+      "satisfied_by": [
+        "DSN-AIF-030"
+      ]
+    },
+    "TOOL-AIF-030": {
+      "id": "TOOL-AIF-030",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall not transmit user source code, test data, or project metadata to any external service unless the user has explicitly enabled a remote provider for that session.",
+      "satisfied_by": [
+        "DSN-AIF-040"
+      ]
+    },
+    "TOOL-AIF-040": {
+      "id": "TOOL-AIF-040",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall display, before first use of a remote provider, exactly what data will be transmitted and to whom.",
+      "satisfied_by": [
+        "DSN-AIF-040"
+      ]
+    },
+    "TOOL-AIF-050": {
+      "id": "TOOL-AIF-050",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The tool shall abstract AI providers behind a single interface supporting local runtimes and remote APIs interchangeably.",
+      "satisfied_by": [
+        "DSN-AIF-020"
+      ]
+    },
+    "TOOL-AIF-060": {
+      "id": "TOOL-AIF-060",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support AI-assisted generation of test cases targeting specified uncovered code.",
+      "satisfied_by": [
+        "DSN-AIF-050"
+      ]
+    },
+    "TOOL-AIF-070": {
+      "id": "TOOL-AIF-070",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Every AI-generated artifact shall be compiled and executed before presentation; artifacts that fail to compile, crash, or fail to increase coverage shall be discarded or presented as rejected.",
+      "satisfied_by": [
+        "DSN-AIF-100"
+      ]
+    },
+    "TOOL-AIF-080": {
+      "id": "TOOL-AIF-080",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "Every AI-generated artifact shall be permanently and visibly marked as AI-generated, including the model identifier and generation timestamp, in the artifact and in all reports.",
+      "satisfied_by": [
+        "DSN-AIF-110"
+      ]
+    },
+    "TOOL-AIF-090": {
+      "id": "TOOL-AIF-090",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "AI-generated artifacts shall be recorded as unreviewed until explicitly marked reviewed by an identified user, and reports shall distinguish reviewed from unreviewed.",
+      "satisfied_by": [
+        "DSN-AIF-110"
+      ]
+    },
+    "TOOL-AIF-100": {
+      "id": "TOOL-AIF-100",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support a configuration mode that prohibits AI-generated artifacts from contributing to certification evidence.",
+      "satisfied_by": [
+        "DSN-AIF-120"
+      ]
+    },
+    "TOOL-AIF-110": {
+      "id": "TOOL-AIF-110",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support AI-assisted generation of stub bodies from calling context.",
+      "satisfied_by": [
+        "DSN-AIF-060"
+      ]
+    },
+    "TOOL-AIF-120": {
+      "id": "TOOL-AIF-120",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support AI-assisted explanation of test failures in natural language.",
+      "satisfied_by": [
+        "DSN-AIF-070"
+      ]
+    },
+    "TOOL-AIF-130": {
+      "id": "TOOL-AIF-130",
+      "category": "AIF",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support AI-assisted proposal of links between requirements text and test cases, presented as suggestions requiring confirmation.",
+      "satisfied_by": [
+        "DSN-AIF-080"
+      ]
+    },
+    "TOOL-AIF-140": {
+      "id": "TOOL-AIF-140",
+      "category": "AIF",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support AI-assisted naming and documentation of generated test cases.",
+      "satisfied_by": [
+        "DSN-AIF-090"
+      ]
+    },
+    "TOOL-AIF-150": {
+      "id": "TOOL-AIF-150",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "AI operations shall be bounded by configurable time and token limits and shall fail without blocking the surrounding workflow.",
+      "satisfied_by": [
+        "DSN-AIF-130"
+      ]
+    },
+    "TOOL-AIF-160": {
+      "id": "TOOL-AIF-160",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The tool shall record the prompt, model, and parameters used for each AI-generated artifact, for auditability.",
+      "satisfied_by": [
+        "DSN-AIF-110"
+      ]
+    },
+    "TOOL-AIF-170": {
+      "id": "TOOL-AIF-170",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The tool shall document the minimum hardware required for each supported local model configuration.",
+      "satisfied_by": [
+        "DSN-AIF-030"
+      ]
+    },
+    "TOOL-AIF-180": {
+      "id": "TOOL-AIF-180",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "AI generation parameters affecting output variability, including sampling temperature and random seed, shall be user-configurable and recorded with each generated artifact.",
+      "satisfied_by": [
+        "DSN-AIF-110"
+      ]
+    },
+    "TOOL-AIF-190": {
+      "id": "TOOL-AIF-190",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The tool shall record the identity and version of the model used to produce each artifact, in a form that remains meaningful after the model is superseded.",
+      "satisfied_by": [
+        "DSN-AIF-110"
+      ]
+    },
+    "TOOL-AIF-200": {
+      "id": "TOOL-AIF-200",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall verify the integrity of a locally installed model against a published hash before use.",
+      "satisfied_by": [
+        "DSN-AIF-030"
+      ]
+    },
+    "TOOL-AIF-210": {
+      "id": "TOOL-AIF-210",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Where an AI-generated artifact is rejected by the validation required in TOOL-AIF-070, the tool shall record that a rejection occurred, so that acceptance rates are visible rather than hidden.",
+      "satisfied_by": [
+        "DSN-AIF-100"
+      ]
+    },
+    "TOOL-ATG-010": {
+      "id": "TOOL-ATG-010",
+      "category": "ATG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall automatically generate test cases intended to maximize structural coverage of a designated function.",
+      "satisfied_by": [
+        "DSN-ATG-010"
+      ]
+    },
+    "TOOL-ATG-020": {
+      "id": "TOOL-ATG-020",
+      "category": "ATG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support automatic test vector generation via symbolic execution of the UUT.",
+      "satisfied_by": [
+        "DSN-ATG-020"
+      ]
+    },
+    "TOOL-ATG-030": {
+      "id": "TOOL-ATG-030",
+      "category": "ATG",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support automatic test vector generation via bounded model checking as an alternative or complementary engine.",
+      "satisfied_by": [
+        "DSN-ATG-030"
+      ]
+    },
+    "TOOL-ATG-040": {
+      "id": "TOOL-ATG-040",
+      "category": "ATG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Every automatically generated test case shall be emitted in the same format as a manually authored test case and shall be editable thereafter.",
+      "satisfied_by": [
+        "DSN-ATG-040"
+      ]
+    },
+    "TOOL-ATG-050": {
+      "id": "TOOL-ATG-050",
+      "category": "ATG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Every automatically generated test case shall be compiled and executed before being presented to the user; test cases that fail to compile or crash the harness shall not be presented as valid.",
+      "satisfied_by": [
+        "DSN-ATG-050"
+      ]
+    },
+    "TOOL-ATG-060": {
+      "id": "TOOL-ATG-060",
+      "category": "ATG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall report, per generation run: number of test cases generated, coverage achieved, and the specific code constructs left uncovered.",
+      "satisfied_by": [
+        "DSN-ATG-060"
+      ]
+    },
+    "TOOL-ATG-070": {
+      "id": "TOOL-ATG-070",
+      "category": "ATG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "Automatically generated test cases shall be clearly marked as machine-generated in both the artifact and all reports.",
+      "satisfied_by": [
+        "DSN-ATG-070"
+      ]
+    },
+    "TOOL-ATG-080": {
+      "id": "TOOL-ATG-080",
+      "category": "ATG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Generated test cases shall record the observed behavior as the expected value, and shall mark that expected value as unreviewed until a user confirms it.",
+      "satisfied_by": [
+        "DSN-ATG-080"
+      ]
+    },
+    "TOOL-ATG-090": {
+      "id": "TOOL-ATG-090",
+      "category": "ATG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support targeted generation against a specified uncovered line, branch, or condition, rather than whole-function generation only.",
+      "satisfied_by": [
+        "DSN-ATG-010"
+      ]
+    },
+    "TOOL-ATG-100": {
+      "id": "TOOL-ATG-100",
+      "category": "ATG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall bound generation effort by configurable time and memory limits and shall terminate gracefully, returning whatever was generated.",
+      "satisfied_by": [
+        "DSN-ATG-090"
+      ]
+    },
+    "TOOL-ATG-110": {
+      "id": "TOOL-ATG-110",
+      "category": "ATG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall report constructs the generation engine cannot handle (e.g. dynamic memory, floating point, concurrency, inline assembly) rather than failing silently.",
+      "satisfied_by": [
+        "DSN-ATG-100"
+      ]
+    },
+    "TOOL-CBT-010": {
+      "id": "TOOL-CBT-010",
+      "category": "CBT",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall re-execute an existing test suite without regeneration or manual reconfiguration.",
+      "satisfied_by": [
+        "DSN-CBT-010"
+      ]
+    },
+    "TOOL-CBT-020": {
+      "id": "TOOL-CBT-020",
+      "category": "CBT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall determine, from a source change, the set of test cases whose covered code was affected.",
+      "satisfied_by": [
+        "DSN-CBT-020"
+      ]
+    },
+    "TOOL-CBT-030": {
+      "id": "TOOL-CBT-030",
+      "category": "CBT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support executing only the affected subset identified under TOOL-CBT-020.",
+      "satisfied_by": [
+        "DSN-CBT-020"
+      ]
+    },
+    "TOOL-CBT-040": {
+      "id": "TOOL-CBT-040",
+      "category": "CBT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "When a subset is executed, all reports shall state clearly that the run was partial and identify which tests were not executed.",
+      "satisfied_by": [
+        "DSN-CBT-030"
+      ]
+    },
+    "TOOL-CBT-050": {
+      "id": "TOOL-CBT-050",
+      "category": "CBT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall compare a test run against a previous run and report newly failing, newly passing, and newly added tests.",
+      "satisfied_by": [
+        "DSN-CBT-040"
+      ]
+    },
+    "TOOL-CBT-060": {
+      "id": "TOOL-CBT-060",
+      "category": "CBT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall report coverage change relative to a baseline run.",
+      "satisfied_by": [
+        "DSN-CBT-040"
+      ]
+    },
+    "TOOL-CBT-070": {
+      "id": "TOOL-CBT-070",
+      "category": "CBT",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect that a test case is stale because the interface it exercises has changed.",
+      "satisfied_by": [
+        "DSN-GEN-080"
+      ]
+    },
+    "TOOL-CBT-080": {
+      "id": "TOOL-CBT-080",
+      "category": "CBT",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support test suite minimization, identifying redundant test cases contributing no unique coverage.",
+      "satisfied_by": [
+        "DSN-CBT-050"
+      ]
+    },
+    "TOOL-CIC-010": {
+      "id": "TOOL-CIC-010",
+      "category": "CIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "D",
+      "text": "All tool functionality required for automated verification shall be accessible from a non-interactive command-line interface.",
+      "satisfied_by": [
+        "DSN-CLI-010"
+      ]
+    },
+    "TOOL-CIC-020": {
+      "id": "TOOL-CIC-020",
+      "category": "CIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall operate without a graphical environment or display server.",
+      "satisfied_by": [
+        "DSN-CLI-010"
+      ]
+    },
+    "TOOL-CIC-030": {
+      "id": "TOOL-CIC-030",
+      "category": "CIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall use documented, stable exit codes distinguishing: success, test failure, coverage threshold failure, and tool error.",
+      "satisfied_by": [
+        "DSN-CLI-020"
+      ]
+    },
+    "TOOL-CIC-040": {
+      "id": "TOOL-CIC-040",
+      "category": "CIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "D",
+      "text": "The tool shall be installable and executable within a container image.",
+      "satisfied_by": [
+        "DSN-CLI-030"
+      ]
+    },
+    "TOOL-CIC-050": {
+      "id": "TOOL-CIC-050",
+      "category": "CIC",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The project shall provide reference pipeline configurations for GitHub Actions and GitLab CI.",
+      "satisfied_by": [
+        "DSN-CLI-040"
+      ]
+    },
+    "TOOL-CIC-060": {
+      "id": "TOOL-CIC-060",
+      "category": "CIC",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support sharding a test suite across multiple CI runners and merging the resulting reports.",
+      "satisfied_by": [
+        "DSN-CLI-050"
+      ]
+    },
+    "TOOL-CIC-070": {
+      "id": "TOOL-CIC-070",
+      "category": "CIC",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support caching of ingestion and analysis artifacts across CI runs.",
+      "satisfied_by": [
+        "DSN-CLI-060"
+      ]
+    },
+    "TOOL-CIC-080": {
+      "id": "TOOL-CIC-080",
+      "category": "CIC",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "I",
+      "text": "All tool configuration shall be expressible in version-controlled files; no configuration shall exist only in a GUI or local state.",
+      "satisfied_by": [
+        "DSN-PRJ-080"
+      ]
+    },
+    "TOOL-COV-010": {
+      "id": "TOOL-COV-010",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall measure statement coverage.",
+      "satisfied_by": [
+        "DSN-COV-010"
+      ]
+    },
+    "TOOL-COV-020": {
+      "id": "TOOL-COV-020",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall measure branch/decision coverage.",
+      "satisfied_by": [
+        "DSN-COV-010"
+      ]
+    },
+    "TOOL-COV-030": {
+      "id": "TOOL-COV-030",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall measure function coverage.",
+      "satisfied_by": [
+        "DSN-COV-010"
+      ]
+    },
+    "TOOL-COV-040": {
+      "id": "TOOL-COV-040",
+      "category": "COV",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall measure function call coverage.",
+      "satisfied_by": [
+        "DSN-COV-010"
+      ]
+    },
+    "TOOL-COV-050": {
+      "id": "TOOL-COV-050",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall measure Modified Condition/Decision Coverage (MC/DC).",
+      "satisfied_by": [
+        "DSN-COV-020"
+      ]
+    },
+    "TOOL-COV-060": {
+      "id": "TOOL-COV-060",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The tool shall state explicitly, in the user documentation and in every report, which MC/DC form is measured (masking or unique-cause) and by which compiler mechanism.",
+      "satisfied_by": [
+        "DSN-COV-020"
+      ]
+    },
+    "TOOL-COV-070": {
+      "id": "TOOL-COV-070",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall report, for each partially covered decision, which individual conditions were not exercised true and which were not exercised false.",
+      "satisfied_by": [
+        "DSN-COV-030"
+      ]
+    },
+    "TOOL-COV-080": {
+      "id": "TOOL-COV-080",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall detect and report boolean expressions that the compiler could not instrument for MC/DC, including those exceeding compiler condition-count limits.",
+      "satisfied_by": [
+        "DSN-COV-040"
+      ]
+    },
+    "TOOL-COV-090": {
+      "id": "TOOL-COV-090",
+      "category": "COV",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support unique-cause MC/DC, or shall document the precise gap between the supported form and unique-cause MC/DC.",
+      "satisfied_by": [
+        "DSN-COV-020"
+      ]
+    },
+    "TOOL-COV-100": {
+      "id": "TOOL-COV-100",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall retrieve coverage data from bare-metal targets with no filesystem and no operating system.",
+      "satisfied_by": [
+        "DSN-COV-050"
+      ]
+    },
+    "TOOL-COV-110": {
+      "id": "TOOL-COV-110",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall merge coverage data across multiple test executions into a single result set.",
+      "satisfied_by": [
+        "DSN-COV-060"
+      ]
+    },
+    "TOOL-COV-120": {
+      "id": "TOOL-COV-120",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall attribute coverage to individual test cases, enabling per-test coverage reporting.",
+      "satisfied_by": [
+        "DSN-COV-060"
+      ]
+    },
+    "TOOL-COV-130": {
+      "id": "TOOL-COV-130",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall enforce configurable minimum coverage thresholds per metric and fail the run when they are not met.",
+      "satisfied_by": [
+        "DSN-COV-070"
+      ]
+    },
+    "TOOL-COV-140": {
+      "id": "TOOL-COV-140",
+      "category": "COV",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support coverage-by-analysis: recording a user-supplied justification for code that cannot be covered by test, and reflecting it in reports as justified rather than covered.",
+      "satisfied_by": [
+        "DSN-COV-080"
+      ]
+    },
+    "TOOL-COV-150": {
+      "id": "TOOL-COV-150",
+      "category": "COV",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "I",
+      "text": "Justifications under TOOL-COV-140 shall record author, date, and rationale, and shall be invalidated when the associated source changes.",
+      "satisfied_by": [
+        "DSN-COV-080"
+      ]
+    },
+    "TOOL-COV-160": {
+      "id": "TOOL-COV-160",
+      "category": "COV",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall report coverage of the unit under test separately from coverage of harness, stub, and framework code.",
+      "satisfied_by": [
+        "DSN-COV-090"
+      ]
+    },
+    "TOOL-COV-170": {
+      "id": "TOOL-COV-170",
+      "category": "COV",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support control coupling and data coupling analysis between integrated units.",
+      "satisfied_by": [
+        "DSN-COV-100"
+      ]
+    },
+    "TOOL-EXE-010": {
+      "id": "TOOL-EXE-010",
+      "category": "EXE",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall build and execute the test harness on the development host.",
+      "satisfied_by": [
+        "DSN-BLD-010"
+      ]
+    },
+    "TOOL-EXE-020": {
+      "id": "TOOL-EXE-020",
+      "category": "EXE",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall report, per test case: pass, fail, or error, with failures identifying the assertion, expected value, actual value, and source location.",
+      "satisfied_by": [
+        "DSN-EXH-010"
+      ]
+    },
+    "TOOL-EXE-030": {
+      "id": "TOOL-EXE-030",
+      "category": "EXE",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall isolate test execution such that a crash, hang, or abort in one test case does not prevent the remaining test cases from executing.",
+      "satisfied_by": [
+        "DSN-EXH-020"
+      ]
+    },
+    "TOOL-EXE-040": {
+      "id": "TOOL-EXE-040",
+      "category": "EXE",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall enforce a configurable per-test timeout and report timed-out tests as failures.",
+      "satisfied_by": [
+        "DSN-EXH-030"
+      ]
+    },
+    "TOOL-EXE-050": {
+      "id": "TOOL-EXE-050",
+      "category": "EXE",
+      "priority": "S",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall execute independent test executables in parallel, with configurable concurrency.",
+      "satisfied_by": [
+        "DSN-EXH-040"
+      ]
+    },
+    "TOOL-EXE-060": {
+      "id": "TOOL-EXE-060",
+      "category": "EXE",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall return a non-zero process exit status when any test fails, for CI consumption.",
+      "satisfied_by": [
+        "DSN-EXH-050"
+      ]
+    },
+    "TOOL-EXE-070": {
+      "id": "TOOL-EXE-070",
+      "category": "EXE",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support launching a test case under a debugger, with the harness prepared and execution stopped at entry to the function under test.",
+      "satisfied_by": [
+        "DSN-EXH-060"
+      ]
+    },
+    "TOOL-EXE-080": {
+      "id": "TOOL-EXE-080",
+      "category": "EXE",
+      "priority": "S",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall support incremental rebuild, recompiling only artifacts affected by a change.",
+      "satisfied_by": [
+        "DSN-BLD-020"
+      ]
+    },
+    "TOOL-EXE-090": {
+      "id": "TOOL-EXE-090",
+      "category": "EXE",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect and report memory errors during host execution via sanitizer integration, without such detection being mandatory.",
+      "satisfied_by": [
+        "DSN-BLD-040"
+      ]
+    },
+    "TOOL-HAR-010": {
+      "id": "TOOL-HAR-010",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall generate a compilable test harness for a designated unit under test (UUT) from the analysis model, without manual editing.",
+      "satisfied_by": [
+        "DSN-GEN-010"
+      ]
+    },
+    "TOOL-HAR-020": {
+      "id": "TOOL-HAR-020",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The generated harness shall expose every non-static function of the UUT as directly callable from test code.",
+      "satisfied_by": [
+        "DSN-GEN-010"
+      ]
+    },
+    "TOOL-HAR-030": {
+      "id": "TOOL-HAR-030",
+      "category": "HAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The generated harness shall optionally expose `static` functions of the UUT for testing.",
+      "satisfied_by": [
+        "DSN-GEN-020"
+      ]
+    },
+    "TOOL-HAR-040": {
+      "id": "TOOL-HAR-040",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The generated harness shall provide read and write access to global and file-static variables identified by TOOL-PAR-050.",
+      "satisfied_by": [
+        "DSN-GEN-020"
+      ]
+    },
+    "TOOL-HAR-050": {
+      "id": "TOOL-HAR-050",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The generated harness shall include per-test setup and teardown hooks.",
+      "satisfied_by": [
+        "DSN-GEN-030"
+      ]
+    },
+    "TOOL-HAR-060": {
+      "id": "TOOL-HAR-060",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall generate harnesses targeting a configurable test framework back-end, supporting at minimum Unity and cmocka. Neither back-end shall introduce a C++ compilation or runtime dependency.",
+      "satisfied_by": [
+        "DSN-GEN-040"
+      ]
+    },
+    "TOOL-HAR-065": {
+      "id": "TOOL-HAR-065",
+      "category": "HAR",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall provide an optional GoogleTest back-end for host-only execution, for interoperability with existing GoogleTest suites and tooling. This back-end shall not be required for any documented workflow.",
+      "satisfied_by": [
+        "DSN-GEN-040"
+      ]
+    },
+    "TOOL-HAR-070": {
+      "id": "TOOL-HAR-070",
+      "category": "HAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "A",
+      "text": "Harness generation shall be template-driven such that support for an additional test framework requires only new templates, not tool source changes.",
+      "satisfied_by": [
+        "DSN-GEN-040"
+      ]
+    },
+    "TOOL-HAR-080": {
+      "id": "TOOL-HAR-080",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall generate an integration-level harness spanning two or more units, stubbing only dependencies external to the selected set.",
+      "satisfied_by": [
+        "DSN-GEN-050"
+      ]
+    },
+    "TOOL-HAR-090": {
+      "id": "TOOL-HAR-090",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Generated harness code shall be human-readable, deterministically formatted, and carry a header identifying it as generated, the generating tool version, and the source model.",
+      "satisfied_by": [
+        "DSN-GEN-060"
+      ]
+    },
+    "TOOL-HAR-100": {
+      "id": "TOOL-HAR-100",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Regenerating a harness shall preserve user modifications in designated user-editable regions, or shall detect and report conflicts rather than silently overwriting.",
+      "satisfied_by": [
+        "DSN-GEN-070"
+      ]
+    },
+    "TOOL-HAR-110": {
+      "id": "TOOL-HAR-110",
+      "category": "HAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect and report when the UUT interface has changed such that an existing harness is stale.",
+      "satisfied_by": [
+        "DSN-GEN-080"
+      ]
+    },
+    "TOOL-HAR-120": {
+      "id": "TOOL-HAR-120",
+      "category": "HAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall resolve all undefined external references in the harness link step, either by stub generation or by explicit user-supplied linkage, and shall report any that remain unresolved.",
+      "satisfied_by": [
+        "DSN-GEN-090"
+      ]
+    },
+    "TOOL-ING-010": {
+      "id": "TOOL-ING-010",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall accept a JSON compilation database (`compile_commands.json`) as the primary description of a user's project.",
+      "satisfied_by": [
+        "DSN-ING-010"
+      ]
+    },
+    "TOOL-ING-020": {
+      "id": "TOOL-ING-020",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall parse both the `command` (string) and `arguments` (array) forms of compilation database entries and normalize them internally.",
+      "satisfied_by": [
+        "DSN-ING-010"
+      ]
+    },
+    "TOOL-ING-030": {
+      "id": "TOOL-ING-030",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall extract, per translation unit: source path, working directory, include paths, preprocessor definitions, language standard, and compiler invocation.",
+      "satisfied_by": [
+        "DSN-ING-010"
+      ]
+    },
+    "TOOL-ING-040": {
+      "id": "TOOL-ING-040",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "D",
+      "text": "The tool shall document and support generating a compilation database via CMake (`CMAKE_EXPORT_COMPILE_COMMANDS`) as the recommended path.",
+      "satisfied_by": [
+        "DSN-ING-020"
+      ]
+    },
+    "TOOL-ING-050": {
+      "id": "TOOL-ING-050",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall support generating a compilation database via build interception (e.g. Bear) for projects without native export.",
+      "satisfied_by": [
+        "DSN-ING-020"
+      ]
+    },
+    "TOOL-ING-060": {
+      "id": "TOOL-ING-060",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall operate on a single `.c` file with user-supplied include paths and defines when no build system is available.",
+      "satisfied_by": [
+        "DSN-ING-030"
+      ]
+    },
+    "TOOL-ING-070": {
+      "id": "TOOL-ING-070",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect and report ingestion failures \u2014 missing headers, unresolvable include paths, unknown compiler flags \u2014 with the offending file and flag identified.",
+      "satisfied_by": [
+        "DSN-ING-050"
+      ]
+    },
+    "TOOL-ING-080": {
+      "id": "TOOL-ING-080",
+      "category": "ING",
+      "priority": "C",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall import project configuration from Keil uVision (`.uvprojx`), IAR EW (`.ewp`), and Eclipse/STM32CubeIDE project files.",
+      "satisfied_by": [
+        "DSN-ING-040"
+      ]
+    },
+    "TOOL-ING-090": {
+      "id": "TOOL-ING-090",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall persist the ingested project model to a version-controllable text format so ingestion need not be repeated on every invocation.",
+      "satisfied_by": [
+        "DSN-ING-060"
+      ]
+    },
+    "TOOL-ING-100": {
+      "id": "TOOL-ING-100",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect that the ingested project model is stale relative to the build system and re-ingest or warn.",
+      "satisfied_by": [
+        "DSN-ING-060"
+      ]
+    },
+    "TOOL-ING-110": {
+      "id": "TOOL-ING-110",
+      "category": "ING",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support ingestion of projects that build with more than one toolchain, retaining per-toolchain flags.",
+      "satisfied_by": [
+        "DSN-ING-070"
+      ]
+    },
+    "TOOL-ING-120": {
+      "id": "TOOL-ING-120",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall accept a set of two or more C source files as a single ingestion scope, for the purpose of integration testing, without requiring a build system.",
+      "satisfied_by": [
+        "DSN-ING-030"
+      ]
+    },
+    "TOOL-ING-130": {
+      "id": "TOOL-ING-130",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support a named **test scope** as a first-class concept: a user-defined set of translation units treated as the code under test, with all dependencies outside the set treated as external.",
+      "satisfied_by": [
+        "DSN-ING-080"
+      ]
+    },
+    "TOOL-ING-140": {
+      "id": "TOOL-ING-140",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "For a test scope containing multiple translation units, the tool shall resolve inter-file dependencies internally to the scope and classify each function call as intra-scope or external.",
+      "satisfied_by": [
+        "DSN-ING-090"
+      ]
+    },
+    "TOOL-ING-150": {
+      "id": "TOOL-ING-150",
+      "category": "ING",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support a test scope defined by explicit file list, by directory, by glob pattern, and by build-system target.",
+      "satisfied_by": [
+        "DSN-ING-080"
+      ]
+    },
+    "TOOL-ING-160": {
+      "id": "TOOL-ING-160",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall detect and report symbol conflicts within a test scope, including duplicate non-static definitions and colliding file-static identifiers.",
+      "satisfied_by": [
+        "DSN-ING-100"
+      ]
+    },
+    "TOOL-ING-170": {
+      "id": "TOOL-ING-170",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support a single translation unit belonging to more than one test scope, such that a file may be tested in isolation and again as part of an integration scope.",
+      "satisfied_by": [
+        "DSN-ING-110"
+      ]
+    },
+    "TOOL-ING-180": {
+      "id": "TOOL-ING-180",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall report, for a given test scope, the complete list of external dependencies requiring stubs, before harness generation is performed.",
+      "satisfied_by": [
+        "DSN-ING-090"
+      ]
+    },
+    "TOOL-ING-190": {
+      "id": "TOOL-ING-190",
+      "category": "ING",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Test scope definitions shall be stored in a plain-text, version-controllable file.",
+      "satisfied_by": [
+        "DSN-ING-080"
+      ]
+    },
+    "TOOL-INS-010": {
+      "id": "TOOL-INS-010",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall provide a fully offline installation path requiring no network access at install time.",
+      "satisfied_by": [
+        "DSN-PKG-010"
+      ]
+    },
+    "TOOL-INS-020": {
+      "id": "TOOL-INS-020",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall be installable without administrative privileges.",
+      "satisfied_by": [
+        "DSN-PKG-020"
+      ]
+    },
+    "TOOL-INS-030": {
+      "id": "TOOL-INS-030",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "Installation shall not require the user to install or configure a language runtime, package manager, or compiler beyond their existing C toolchain.",
+      "satisfied_by": [
+        "DSN-PKG-010"
+      ]
+    },
+    "TOOL-INS-040": {
+      "id": "TOOL-INS-040",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Each release shall be archivable as a self-contained artifact that can be retained and reinstalled years later without reference to any external service.",
+      "satisfied_by": [
+        "DSN-PKG-030"
+      ]
+    },
+    "TOOL-INS-050": {
+      "id": "TOOL-INS-050",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Multiple versions of the tool shall be installable side by side, so that a project can remain pinned to the version under which its evidence was produced.",
+      "satisfied_by": [
+        "DSN-PKG-040"
+      ]
+    },
+    "TOOL-INS-060": {
+      "id": "TOOL-INS-060",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Upgrading shall not modify or migrate existing project data without explicit user confirmation.",
+      "satisfied_by": [
+        "DSN-PKG-050"
+      ]
+    },
+    "TOOL-INS-070": {
+      "id": "TOOL-INS-070",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall provide a documented uninstallation procedure that removes all installed components and identifies any user data left in place.",
+      "satisfied_by": [
+        "DSN-PKG-060"
+      ]
+    },
+    "TOOL-INS-080": {
+      "id": "TOOL-INS-080",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "On first run the tool shall verify its environment \u2014 toolchain presence, versions, and feature availability \u2014 and report clearly what is missing or unsupported.",
+      "satisfied_by": [
+        "DSN-TCH-080"
+      ]
+    },
+    "TOOL-INS-090": {
+      "id": "TOOL-INS-090",
+      "category": "INS",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall provide a container image suitable for CI use, versioned in lockstep with releases.",
+      "satisfied_by": [
+        "DSN-PKG-070"
+      ]
+    },
+    "TOOL-INS-100": {
+      "id": "TOOL-INS-100",
+      "category": "INS",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall support a shared network or read-only installation serving multiple users, with per-user state held separately.",
+      "satisfied_by": [
+        "DSN-PKG-080"
+      ]
+    },
+    "TOOL-INS-110": {
+      "id": "TOOL-INS-110",
+      "category": "INS",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall report its version, build identifier, and the versions of its principal dependencies on request.",
+      "satisfied_by": [
+        "DSN-CORE-100"
+      ]
+    },
+    "TOOL-LIC-010": {
+      "id": "TOOL-LIC-010",
+      "category": "LIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "The tool's own source code shall be released under a permissive open-source license.",
+      "satisfied_by": [
+        "DSN-PKG-090"
+      ]
+    },
+    "TOOL-LIC-020": {
+      "id": "TOOL-LIC-020",
+      "category": "LIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "Components under strong copyleft licenses shall be invoked as separate processes and shall not be linked into the tool.",
+      "satisfied_by": [
+        "DSN-PKG-090"
+      ]
+    },
+    "TOOL-LIC-030": {
+      "id": "TOOL-LIC-030",
+      "category": "LIC",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "The project shall maintain a Software Bill of Materials listing every dependency, its version, and its license.",
+      "satisfied_by": [
+        "DSN-SEC-020"
+      ]
+    },
+    "TOOL-LIC-040": {
+      "id": "TOOL-LIC-040",
+      "category": "LIC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Code generated by the tool shall be free of licensing restriction imposed by the tool, and this shall be stated explicitly in the documentation.",
+      "satisfied_by": [
+        "DSN-PKG-100"
+      ]
+    },
+    "TOOL-LIC-050": {
+      "id": "TOOL-LIC-050",
+      "category": "LIC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The tool shall not bundle any component whose license prohibits commercial use or redistribution.",
+      "satisfied_by": [
+        "DSN-PKG-110"
+      ]
+    },
+    "TOOL-LIC-060": {
+      "id": "TOOL-LIC-060",
+      "category": "LIC",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The build shall verify dependency licenses automatically and fail on introduction of a disallowed license.",
+      "satisfied_by": [
+        "DSN-PKG-120"
+      ]
+    },
+    "TOOL-LIC-070": {
+      "id": "TOOL-LIC-070",
+      "category": "LIC",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "I",
+      "text": "Optional components with restrictive licenses shall be separable, such that a build excluding them remains fully functional for its documented feature set.",
+      "satisfied_by": [
+        "DSN-PKG-130"
+      ]
+    },
+    "TOOL-MIG-010": {
+      "id": "TOOL-MIG-010",
+      "category": "MIG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall execute existing test suites written against supported frameworks (Unity, cmocka) without requiring them to be rewritten.",
+      "satisfied_by": [
+        "DSN-MIG-010"
+      ]
+    },
+    "TOOL-MIG-020": {
+      "id": "TOOL-MIG-020",
+      "category": "MIG",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall import an existing Ceedling project, preserving test cases and configuration.",
+      "satisfied_by": [
+        "DSN-MIG-020"
+      ]
+    },
+    "TOOL-MIG-030": {
+      "id": "TOOL-MIG-030",
+      "category": "MIG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall import test case data from commercial tools where those tools provide a documented or plain-text export format, converting inputs, expected values, and stub configuration.",
+      "satisfied_by": [
+        "DSN-MIG-030"
+      ]
+    },
+    "TOOL-MIG-040": {
+      "id": "TOOL-MIG-040",
+      "category": "MIG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Import shall report, per imported artifact, what was converted, what was converted with loss of fidelity, and what could not be converted, rather than silently discarding content.",
+      "satisfied_by": [
+        "DSN-MIG-040"
+      ]
+    },
+    "TOOL-MIG-050": {
+      "id": "TOOL-MIG-050",
+      "category": "MIG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall import test cases from a documented CSV interchange format, permitting migration via spreadsheet from any source.",
+      "satisfied_by": [
+        "DSN-MIG-050"
+      ]
+    },
+    "TOOL-MIG-060": {
+      "id": "TOOL-MIG-060",
+      "category": "MIG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall export test cases and results in documented open formats sufficient to reconstruct them in another tool, so that adopting this tool does not create lock-in.",
+      "satisfied_by": [
+        "DSN-TCM-070"
+      ]
+    },
+    "TOOL-MIG-070": {
+      "id": "TOOL-MIG-070",
+      "category": "MIG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support coexistence: operating on a project that is also tested by another tool, without interfering with that tool's artifacts.",
+      "satisfied_by": [
+        "DSN-MIG-060"
+      ]
+    },
+    "TOOL-MIG-080": {
+      "id": "TOOL-MIG-080",
+      "category": "MIG",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall import and export coverage data in standard interchange formats, permitting aggregation with coverage produced by other tools.",
+      "satisfied_by": [
+        "DSN-REP-030"
+      ]
+    },
+    "TOOL-MIG-090": {
+      "id": "TOOL-MIG-090",
+      "category": "MIG",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall provide a migration assessment mode that analyses an existing project and reports the expected fidelity and manual effort of migration before migration is attempted.",
+      "satisfied_by": [
+        "DSN-MIG-070"
+      ]
+    },
+    "TOOL-MIG-100": {
+      "id": "TOOL-MIG-100",
+      "category": "MIG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "All interchange formats the tool consumes or produces shall be documented to a level permitting independent implementation.",
+      "satisfied_by": [
+        "DSN-MIG-080"
+      ]
+    },
+    "TOOL-NFR-010": {
+      "id": "TOOL-NFR-010",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall run on Linux x86-64.",
+      "satisfied_by": [
+        "DSN-CORE-070"
+      ]
+    },
+    "TOOL-NFR-020": {
+      "id": "TOOL-NFR-020",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall run on Windows and macOS.",
+      "satisfied_by": [
+        "DSN-CORE-070"
+      ]
+    },
+    "TOOL-NFR-030": {
+      "id": "TOOL-NFR-030",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "Environment creation for a single translation unit of 1000 lines shall complete in under 30 seconds on typical developer hardware.",
+      "satisfied_by": [
+        "DSN-CORE-130"
+      ]
+    },
+    "TOOL-NFR-040": {
+      "id": "TOOL-NFR-040",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "Incremental re-execution of an unchanged test suite of 100 test cases shall complete in under 10 seconds on host.",
+      "satisfied_by": [
+        "DSN-CORE-130"
+      ]
+    },
+    "TOOL-NFR-050": {
+      "id": "TOOL-NFR-050",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The tool shall scale to projects of at least 500 translation units and 10,000 test cases.",
+      "satisfied_by": [
+        "DSN-CORE-050"
+      ]
+    },
+    "TOOL-NFR-060": {
+      "id": "TOOL-NFR-060",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "A",
+      "text": "All tool outputs shall be deterministic and reproducible given identical inputs.",
+      "satisfied_by": [
+        "DSN-CORE-010"
+      ]
+    },
+    "TOOL-NFR-070": {
+      "id": "TOOL-NFR-070",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "The tool shall not modify user source files.",
+      "satisfied_by": [
+        "DSN-CORE-060"
+      ]
+    },
+    "TOOL-NFR-080": {
+      "id": "TOOL-NFR-080",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "All tool-generated files shall be written to a designated output directory, separable from user source.",
+      "satisfied_by": [
+        "DSN-CORE-060"
+      ]
+    },
+    "TOOL-NFR-090": {
+      "id": "TOOL-NFR-090",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall fail safely: on internal error it shall report the error and exit non-zero rather than emitting incomplete or misleading results.",
+      "satisfied_by": [
+        "DSN-CORE-020"
+      ]
+    },
+    "TOOL-NFR-100": {
+      "id": "TOOL-NFR-100",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The tool shall not require network access for any non-AI functionality.",
+      "satisfied_by": [
+        "DSN-CORE-090"
+      ]
+    },
+    "TOOL-NFR-110": {
+      "id": "TOOL-NFR-110",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Installation shall not require administrative privileges.",
+      "satisfied_by": [
+        "DSN-PKG-020"
+      ]
+    },
+    "TOOL-NFR-120": {
+      "id": "TOOL-NFR-120",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The tool shall provide user documentation covering installation, every supported workflow, and every configuration option.",
+      "satisfied_by": [
+        "DSN-CORE-110"
+      ]
+    },
+    "TOOL-NFR-130": {
+      "id": "TOOL-NFR-130",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall log its operations at configurable verbosity to support diagnosis of failures.",
+      "satisfied_by": [
+        "DSN-CORE-030"
+      ]
+    },
+    "TOOL-NFR-140": {
+      "id": "TOOL-NFR-140",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The tool's own test suite shall achieve and maintain a documented coverage threshold of its own source.",
+      "satisfied_by": [
+        "DSN-CORE-120"
+      ]
+    },
+    "TOOL-NFR-150": {
+      "id": "TOOL-NFR-150",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall operate within a documented memory ceiling on a project of the scale defined in TOOL-NFR-050, and shall degrade predictably rather than exhausting host memory.",
+      "satisfied_by": [
+        "DSN-CORE-050"
+      ]
+    },
+    "TOOL-NFR-160": {
+      "id": "TOOL-NFR-160",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall produce, on request, a diagnostic bundle containing version information, configuration, and logs sufficient to reproduce a reported defect, with its contents documented per TOOL-SEC-120.",
+      "satisfied_by": [
+        "DSN-CORE-030"
+      ]
+    },
+    "TOOL-NFR-170": {
+      "id": "TOOL-NFR-170",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall be used to test the C components of its own implementation, where such components exist.",
+      "satisfied_by": [
+        "DSN-CORE-120"
+      ]
+    },
+    "TOOL-NFR-180": {
+      "id": "TOOL-NFR-180",
+      "category": "NFR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Long-running operations shall be interruptible, and interruption shall leave project data in a valid state.",
+      "satisfied_by": [
+        "DSN-CORE-040"
+      ]
+    },
+    "TOOL-NFR-190": {
+      "id": "TOOL-NFR-190",
+      "category": "NFR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "I",
+      "text": "User-facing text shall be externalized from code to permit translation, without translation being delivered in v1.0.",
+      "satisfied_by": [
+        "DSN-CORE-080"
+      ]
+    },
+    "TOOL-PAR-010": {
+      "id": "TOOL-PAR-010",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall parse C source using a production C front-end (libclang) with the exact flags recorded in the compilation database.",
+      "satisfied_by": [
+        "DSN-ANA-010"
+      ]
+    },
+    "TOOL-PAR-020": {
+      "id": "TOOL-PAR-020",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support C89, C99, C11, C17, and GNU dialect extensions.",
+      "satisfied_by": [
+        "DSN-ANA-010"
+      ]
+    },
+    "TOOL-PAR-030": {
+      "id": "TOOL-PAR-030",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall extract, for every function in a translation unit: name, return type, parameter names and types, storage class, linkage, and source location.",
+      "satisfied_by": [
+        "DSN-ANA-020"
+      ]
+    },
+    "TOOL-PAR-040": {
+      "id": "TOOL-PAR-040",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall extract all user-defined types (struct, union, enum, typedef, function pointer) reachable from a function's interface, transitively.",
+      "satisfied_by": [
+        "DSN-ANA-020"
+      ]
+    },
+    "TOOL-PAR-050": {
+      "id": "TOOL-PAR-050",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall identify global and file-static variables read or written by each function.",
+      "satisfied_by": [
+        "DSN-ANA-020"
+      ]
+    },
+    "TOOL-PAR-060": {
+      "id": "TOOL-PAR-060",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall construct a call graph identifying, for each function, all functions it calls, and classify each callee as internal (defined in the unit under test) or external.",
+      "satisfied_by": [
+        "DSN-ANA-030"
+      ]
+    },
+    "TOOL-PAR-070": {
+      "id": "TOOL-PAR-070",
+      "category": "PAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall construct a control flow graph per function sufficient to support coverage analysis and test generation.",
+      "satisfied_by": [
+        "DSN-ANA-040"
+      ]
+    },
+    "TOOL-PAR-080": {
+      "id": "TOOL-PAR-080",
+      "category": "PAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall identify `static` functions and provide a mechanism to make them testable without modifying user source.",
+      "satisfied_by": [
+        "DSN-ANA-050"
+      ]
+    },
+    "TOOL-PAR-090": {
+      "id": "TOOL-PAR-090",
+      "category": "PAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall resolve function-like and object-like macros used in interfaces, and record where a macro obscures the true interface.",
+      "satisfied_by": [
+        "DSN-ANA-060"
+      ]
+    },
+    "TOOL-PAR-100": {
+      "id": "TOOL-PAR-100",
+      "category": "PAR",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall persist the analysis result as a machine-readable model (JSON) that is the sole input to downstream generation stages.",
+      "satisfied_by": [
+        "DSN-ANA-070"
+      ]
+    },
+    "TOOL-PAR-110": {
+      "id": "TOOL-PAR-110",
+      "category": "PAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The analysis model shall be versioned, with a schema version field, so downstream stages can reject incompatible models.",
+      "satisfied_by": [
+        "DSN-ANA-070"
+      ]
+    },
+    "TOOL-PAR-120": {
+      "id": "TOOL-PAR-120",
+      "category": "PAR",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall compute cyclomatic complexity per function and expose it in the model.",
+      "satisfied_by": [
+        "DSN-ANA-080"
+      ]
+    },
+    "TOOL-PAR-130": {
+      "id": "TOOL-PAR-130",
+      "category": "PAR",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall continue analysis and report partial results when a subset of translation units fails to parse.",
+      "satisfied_by": [
+        "DSN-ANA-090"
+      ]
+    },
+    "TOOL-PLG-010": {
+      "id": "TOOL-PLG-010",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The tool shall define documented extension points for, at minimum: compiler configurations, test framework back-ends, target execution methods, and report formats.",
+      "satisfied_by": [
+        "DSN-PLG-010"
+      ]
+    },
+    "TOOL-PLG-020": {
+      "id": "TOOL-PLG-020",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Adding a compiler configuration shall require only a declarative configuration file, with no modification of tool source.",
+      "satisfied_by": [
+        "DSN-TCH-010"
+      ]
+    },
+    "TOOL-PLG-030": {
+      "id": "TOOL-PLG-030",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Adding a test framework back-end shall require only new templates and a declarative descriptor, with no modification of tool source.",
+      "satisfied_by": [
+        "DSN-GEN-040"
+      ]
+    },
+    "TOOL-PLG-040": {
+      "id": "TOOL-PLG-040",
+      "category": "PLG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Adding a target execution method shall be possible through a documented interface and a user-supplied script.",
+      "satisfied_by": [
+        "DSN-EXT-010"
+      ]
+    },
+    "TOOL-PLG-050": {
+      "id": "TOOL-PLG-050",
+      "category": "PLG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Adding a report format shall be possible by consuming the documented intermediate report model, without re-executing tests.",
+      "satisfied_by": [
+        "DSN-REP-010"
+      ]
+    },
+    "TOOL-PLG-060": {
+      "id": "TOOL-PLG-060",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Extension interfaces shall be versioned, and breaking changes shall be documented with a migration path.",
+      "satisfied_by": [
+        "DSN-API-020"
+      ]
+    },
+    "TOOL-PLG-070": {
+      "id": "TOOL-PLG-070",
+      "category": "PLG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall discover and load user-supplied extensions from a documented location without requiring reinstallation.",
+      "satisfied_by": [
+        "DSN-PLG-020"
+      ]
+    },
+    "TOOL-PLG-080": {
+      "id": "TOOL-PLG-080",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall report clearly when an extension fails to load or is incompatible, and shall continue operating with the remaining functionality.",
+      "satisfied_by": [
+        "DSN-PLG-030"
+      ]
+    },
+    "TOOL-PLG-090": {
+      "id": "TOOL-PLG-090",
+      "category": "PLG",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The tool's own built-in compiler configurations, framework back-ends, and report formats shall be implemented through the same public extension points available to users, so those interfaces are proven by use.",
+      "satisfied_by": [
+        "DSN-PLG-040"
+      ]
+    },
+    "TOOL-PRJ-010": {
+      "id": "TOOL-PRJ-010",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "All project data shall be stored in documented, plain-text, human-readable formats.",
+      "satisfied_by": [
+        "DSN-PRJ-010"
+      ]
+    },
+    "TOOL-PRJ-020": {
+      "id": "TOOL-PRJ-020",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Every project data file shall carry an explicit schema version.",
+      "satisfied_by": [
+        "DSN-PRJ-010"
+      ]
+    },
+    "TOOL-PRJ-030": {
+      "id": "TOOL-PRJ-030",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall open projects created by earlier versions, or shall report precisely why it cannot and what migration is required.",
+      "satisfied_by": [
+        "DSN-PRJ-020"
+      ]
+    },
+    "TOOL-PRJ-040": {
+      "id": "TOOL-PRJ-040",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Project data migration shall be explicit, reversible where possible, and shall never occur without user confirmation.",
+      "satisfied_by": [
+        "DSN-PRJ-020"
+      ]
+    },
+    "TOOL-PRJ-050": {
+      "id": "TOOL-PRJ-050",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Project data shall be stable under version control: operations that do not change meaning shall not change file content, and file ordering shall be deterministic.",
+      "satisfied_by": [
+        "DSN-CORE-010",
+        "DSN-PRJ-030"
+      ]
+    },
+    "TOOL-PRJ-060": {
+      "id": "TOOL-PRJ-060",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Project data shall be structured such that concurrent edits by multiple users produce localized, resolvable version control conflicts rather than whole-file conflicts.",
+      "satisfied_by": [
+        "DSN-PRJ-030"
+      ]
+    },
+    "TOOL-PRJ-070": {
+      "id": "TOOL-PRJ-070",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Project data shall reference user source by relative path, so that a project remains valid when the working tree is relocated or cloned.",
+      "satisfied_by": [
+        "DSN-PRJ-040"
+      ]
+    },
+    "TOOL-PRJ-080": {
+      "id": "TOOL-PRJ-080",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Generated artifacts shall be distinguishable from user-authored artifacts by location or explicit marking, so that generated content can be excluded from version control.",
+      "satisfied_by": [
+        "DSN-CORE-060"
+      ]
+    },
+    "TOOL-PRJ-090": {
+      "id": "TOOL-PRJ-090",
+      "category": "PRJ",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall detect and report when project data references source, requirements, or configuration that no longer exists.",
+      "satisfied_by": [
+        "DSN-PRJ-050"
+      ]
+    },
+    "TOOL-PRJ-100": {
+      "id": "TOOL-PRJ-100",
+      "category": "PRJ",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support exporting a complete, self-contained record of a verification run \u2014 configuration, test cases, results, coverage, and tool version \u2014 suitable for long-term archival.",
+      "satisfied_by": [
+        "DSN-PRJ-060"
+      ]
+    },
+    "TOOL-PRJ-110": {
+      "id": "TOOL-PRJ-110",
+      "category": "PRJ",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support verifying an archived record against the tool version that produced it, reporting whether the record can be reproduced.",
+      "satisfied_by": [
+        "DSN-PRJ-070"
+      ]
+    },
+    "TOOL-QUA-010": {
+      "id": "TOOL-QUA-010",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall be accompanied by a Tool Classification analysis addressing ISO 26262-8 Tool Impact and Tool error Detection, yielding a Tool Confidence Level.",
+      "satisfied_by": [
+        "DSN-QUA-010"
+      ]
+    },
+    "TOOL-QUA-020": {
+      "id": "TOOL-QUA-020",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall be accompanied by a documented Tool Operational Requirements specification defining its intended use, operating environment, and known limitations.",
+      "satisfied_by": [
+        "DSN-QUA-020"
+      ]
+    },
+    "TOOL-QUA-030": {
+      "id": "TOOL-QUA-030",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall have a validation test suite demonstrating that it satisfies its Tool Operational Requirements, executable by the end user.",
+      "satisfied_by": [
+        "DSN-QUA-030"
+      ]
+    },
+    "TOOL-QUA-040": {
+      "id": "TOOL-QUA-040",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall publish a documented list of known errors and their workarounds, maintained per release.",
+      "satisfied_by": [
+        "DSN-QUA-040"
+      ]
+    },
+    "TOOL-QUA-050": {
+      "id": "TOOL-QUA-050",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "Each release shall be uniquely identified and archived such that a specific version can be reproduced.",
+      "satisfied_by": [
+        "DSN-PKG-030"
+      ]
+    },
+    "TOOL-QUA-060": {
+      "id": "TOOL-QUA-060",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall record, in every artifact it generates, sufficient information to reproduce that artifact.",
+      "satisfied_by": [
+        "DSN-CORE-100"
+      ]
+    },
+    "TOOL-QUA-070": {
+      "id": "TOOL-QUA-070",
+      "category": "QUA",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall document its own development process, change control, and defect management to support user assessment.",
+      "satisfied_by": [
+        "DSN-QUA-050"
+      ]
+    },
+    "TOOL-QUA-080": {
+      "id": "TOOL-QUA-080",
+      "category": "QUA",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall document the mapping between its capabilities and the verification objectives of ISO 26262, IEC 61508, IEC 62304, EN 50128, and DO-178C.",
+      "satisfied_by": [
+        "DSN-QUA-060"
+      ]
+    },
+    "TOOL-QUA-090": {
+      "id": "TOOL-QUA-090",
+      "category": "QUA",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall not claim certification or qualification it does not hold; documentation shall state clearly what qualification evidence is provided and what remains the user's responsibility.",
+      "satisfied_by": [
+        "DSN-QUA-070"
+      ]
+    },
+    "TOOL-QUA-100": {
+      "id": "TOOL-QUA-100",
+      "category": "QUA",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "I",
+      "text": "The tool shall provide templates for the user's own tool qualification artifacts.",
+      "satisfied_by": [
+        "DSN-QUA-080"
+      ]
+    },
+    "TOOL-REP-010": {
+      "id": "TOOL-REP-010",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall produce a machine-readable test result report in JUnit XML format.",
+      "satisfied_by": [
+        "DSN-REP-020"
+      ]
+    },
+    "TOOL-REP-020": {
+      "id": "TOOL-REP-020",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall produce a machine-readable coverage report in a standard format (Cobertura XML and/or LCOV).",
+      "satisfied_by": [
+        "DSN-REP-030"
+      ]
+    },
+    "TOOL-REP-030": {
+      "id": "TOOL-REP-030",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall produce a human-readable HTML report combining test results and coverage.",
+      "satisfied_by": [
+        "DSN-REP-040"
+      ]
+    },
+    "TOOL-REP-040": {
+      "id": "TOOL-REP-040",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The HTML report shall present annotated source code showing per-line coverage status.",
+      "satisfied_by": [
+        "DSN-REP-040"
+      ]
+    },
+    "TOOL-REP-050": {
+      "id": "TOOL-REP-050",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The HTML report shall present, for each decision, the MC/DC condition status detail required by TOOL-COV-070.",
+      "satisfied_by": [
+        "DSN-REP-040"
+      ]
+    },
+    "TOOL-REP-060": {
+      "id": "TOOL-REP-060",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall produce a verification report suitable for submission as certification evidence, containing: tool identification and version, configuration, test cases executed with results, coverage achieved per metric, justified exclusions, and the traceability matrix.",
+      "satisfied_by": [
+        "DSN-REP-050"
+      ]
+    },
+    "TOOL-REP-070": {
+      "id": "TOOL-REP-070",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "Every report shall record the tool version, the compiler and version used, the target executed on, and the timestamp of execution.",
+      "satisfied_by": [
+        "DSN-REP-060"
+      ]
+    },
+    "TOOL-REP-080": {
+      "id": "TOOL-REP-080",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall produce reports in a paginated, archivable format (PDF) for records retention.",
+      "satisfied_by": [
+        "DSN-REP-070"
+      ]
+    },
+    "TOOL-REP-090": {
+      "id": "TOOL-REP-090",
+      "category": "REP",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "A",
+      "text": "All report formats shall be generated from a single documented intermediate data model, so custom report formats can be added without re-running tests.",
+      "satisfied_by": [
+        "DSN-REP-010"
+      ]
+    },
+    "TOOL-REP-100": {
+      "id": "TOOL-REP-100",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Report generation shall be deterministic: identical inputs shall produce byte-identical reports, excluding timestamps.",
+      "satisfied_by": [
+        "DSN-REP-080"
+      ]
+    },
+    "TOOL-REP-110": {
+      "id": "TOOL-REP-110",
+      "category": "REP",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall produce a summary report aggregating results across multiple units, targets, and toolchains.",
+      "satisfied_by": [
+        "DSN-REP-090"
+      ]
+    },
+    "TOOL-REP-120": {
+      "id": "TOOL-REP-120",
+      "category": "REP",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall report coverage trend across successive runs.",
+      "satisfied_by": [
+        "DSN-REP-100"
+      ]
+    },
+    "TOOL-REP-130": {
+      "id": "TOOL-REP-130",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "I",
+      "text": "Report formats used as certification evidence shall be versioned, and changes to them shall be documented, so that archived reports remain interpretable.",
+      "satisfied_by": [
+        "DSN-REP-110"
+      ]
+    },
+    "TOOL-REP-140": {
+      "id": "TOOL-REP-140",
+      "category": "REP",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "Every report shall identify the test scope it covers and shall state explicitly what was excluded from that scope.",
+      "satisfied_by": [
+        "DSN-REP-120"
+      ]
+    },
+    "TOOL-REP-150": {
+      "id": "TOOL-REP-150",
+      "category": "REP",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support generating a report from previously archived result data without re-executing tests.",
+      "satisfied_by": [
+        "DSN-REP-130"
+      ]
+    },
+    "TOOL-SEC-010": {
+      "id": "TOOL-SEC-010",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Every release artifact shall be cryptographically signed, and the signature verification procedure shall be documented.",
+      "satisfied_by": [
+        "DSN-SEC-010"
+      ]
+    },
+    "TOOL-SEC-020": {
+      "id": "TOOL-SEC-020",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Every release shall publish a Software Bill of Materials with the resolved version and cryptographic hash of every dependency.",
+      "satisfied_by": [
+        "DSN-SEC-020"
+      ]
+    },
+    "TOOL-SEC-030": {
+      "id": "TOOL-SEC-030",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The build shall be reproducible: an independent party building from a given source revision shall obtain functionally identical artifacts, and the procedure shall be documented.",
+      "satisfied_by": [
+        "DSN-SEC-030"
+      ]
+    },
+    "TOOL-SEC-040": {
+      "id": "TOOL-SEC-040",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Dependencies shall be pinned to exact versions with integrity hashes; the build shall fail on hash mismatch.",
+      "satisfied_by": [
+        "DSN-SEC-020"
+      ]
+    },
+    "TOOL-SEC-050": {
+      "id": "TOOL-SEC-050",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall warn before executing user-supplied code \u2014 including test cases, stub bodies, and build scripts \u2014 from a project the user has not previously opened.",
+      "satisfied_by": [
+        "DSN-SEC-040"
+      ]
+    },
+    "TOOL-SEC-060": {
+      "id": "TOOL-SEC-060",
+      "category": "SEC",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support executing test harnesses under a restricted execution context limiting filesystem and network access, without such restriction being mandatory.",
+      "satisfied_by": [
+        "DSN-SEC-050"
+      ]
+    },
+    "TOOL-SEC-070": {
+      "id": "TOOL-SEC-070",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall not execute code embedded in project configuration files. Configuration shall be data, not script.",
+      "satisfied_by": [
+        "DSN-SEC-060"
+      ]
+    },
+    "TOOL-SEC-080": {
+      "id": "TOOL-SEC-080",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The project shall document a security disclosure process and a supported-version policy.",
+      "satisfied_by": [
+        "DSN-SEC-070"
+      ]
+    },
+    "TOOL-SEC-090": {
+      "id": "TOOL-SEC-090",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Where the tool retrieves data from a target device or external process, it shall treat that data as untrusted input and shall not execute or interpret it as code.",
+      "satisfied_by": [
+        "DSN-SEC-080"
+      ]
+    },
+    "TOOL-SEC-100": {
+      "id": "TOOL-SEC-100",
+      "category": "SEC",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The project shall perform automated dependency vulnerability scanning as part of its own CI, and shall publish the results.",
+      "satisfied_by": [
+        "DSN-SEC-090"
+      ]
+    },
+    "TOOL-SEC-110": {
+      "id": "TOOL-SEC-110",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Credentials, tokens, and API keys for optional remote services shall be stored using platform-provided secure storage and shall never be written to project files, logs, or reports.",
+      "satisfied_by": [
+        "DSN-SEC-100"
+      ]
+    },
+    "TOOL-SEC-120": {
+      "id": "TOOL-SEC-120",
+      "category": "SEC",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Diagnostic output and logs shall not contain user source code content beyond what is necessary to identify a location, and the tool shall document exactly what a diagnostic bundle contains.",
+      "satisfied_by": [
+        "DSN-SEC-110"
+      ]
+    },
+    "TOOL-STB-010": {
+      "id": "TOOL-STB-010",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall automatically generate a stub for every external function called by the UUT.",
+      "satisfied_by": [
+        "DSN-GEN-100"
+      ]
+    },
+    "TOOL-STB-020": {
+      "id": "TOOL-STB-020",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Each generated stub shall have a signature identical to the function it replaces.",
+      "satisfied_by": [
+        "DSN-GEN-100"
+      ]
+    },
+    "TOOL-STB-030": {
+      "id": "TOOL-STB-030",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall generate, per stub, the type and structure declarations required for the stub to compile independently.",
+      "satisfied_by": [
+        "DSN-GEN-100"
+      ]
+    },
+    "TOOL-STB-040": {
+      "id": "TOOL-STB-040",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Generated stubs shall support, per test case: a configured return value, a sequence of return values across successive calls, and a user-supplied callback implementation.",
+      "satisfied_by": [
+        "DSN-GEN-110"
+      ]
+    },
+    "TOOL-STB-050": {
+      "id": "TOOL-STB-050",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Generated stubs shall record call count, and the argument values of each call, retrievable from test code.",
+      "satisfied_by": [
+        "DSN-GEN-120"
+      ]
+    },
+    "TOOL-STB-060": {
+      "id": "TOOL-STB-060",
+      "category": "STB",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Generated stubs shall support verification of call order across multiple stubs.",
+      "satisfied_by": [
+        "DSN-GEN-120"
+      ]
+    },
+    "TOOL-STB-070": {
+      "id": "TOOL-STB-070",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Generated stubs shall support output parameters, writing caller-supplied values through pointer arguments.",
+      "satisfied_by": [
+        "DSN-GEN-110"
+      ]
+    },
+    "TOOL-STB-080": {
+      "id": "TOOL-STB-080",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The user shall be able to disable stubbing for any individual function, linking the real implementation instead.",
+      "satisfied_by": [
+        "DSN-GEN-130"
+      ]
+    },
+    "TOOL-STB-090": {
+      "id": "TOOL-STB-090",
+      "category": "STB",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support intercepting calls made by the UUT to functions defined within the UUT itself (call wrapping), without modifying user source.",
+      "satisfied_by": [
+        "DSN-GEN-140"
+      ]
+    },
+    "TOOL-STB-100": {
+      "id": "TOOL-STB-100",
+      "category": "STB",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support stubbing of standard library functions on explicit user request.",
+      "satisfied_by": [
+        "DSN-GEN-130"
+      ]
+    },
+    "TOOL-STB-110": {
+      "id": "TOOL-STB-110",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Generated stubs shall be user-editable, with editable regions clearly delimited from regenerated regions.",
+      "satisfied_by": [
+        "DSN-GEN-070"
+      ]
+    },
+    "TOOL-STB-120": {
+      "id": "TOOL-STB-120",
+      "category": "STB",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "When the source function signature changes, the tool shall re-synchronize the stub signature while preserving the user-authored body where the change permits, and shall report where it does not.",
+      "satisfied_by": [
+        "DSN-GEN-070"
+      ]
+    },
+    "TOOL-STB-130": {
+      "id": "TOOL-STB-130",
+      "category": "STB",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall flag, in generated output, every construct it could not fully handle (e.g. variadic functions, complex function pointers) using a consistent, greppable marker.",
+      "satisfied_by": [
+        "DSN-GEN-150"
+      ]
+    },
+    "TOOL-STB-140": {
+      "id": "TOOL-STB-140",
+      "category": "STB",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support stubbing functions reached through function pointers, including function pointer members of structures.",
+      "satisfied_by": [
+        "DSN-GEN-160"
+      ]
+    },
+    "TOOL-TCD-010": {
+      "id": "TOOL-TCD-010",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall support test cases authored directly in C source against the generated harness.",
+      "satisfied_by": [
+        "DSN-TCM-010"
+      ]
+    },
+    "TOOL-TCD-020": {
+      "id": "TOOL-TCD-020",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support data-driven test cases, in which input values, expected outputs, and stub behavior are specified as data separate from code.",
+      "satisfied_by": [
+        "DSN-TCM-020"
+      ]
+    },
+    "TOOL-TCD-030": {
+      "id": "TOOL-TCD-030",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "Data-driven test cases shall be stored in a plain-text, diffable, version-controllable format.",
+      "satisfied_by": [
+        "DSN-TCM-020"
+      ]
+    },
+    "TOOL-TCD-040": {
+      "id": "TOOL-TCD-040",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "A test case shall be able to specify: input parameter values, initial values of accessed globals, expected return value, expected final values of globals, expected output parameter values, and stub behavior and expectations.",
+      "satisfied_by": [
+        "DSN-TCM-020"
+      ]
+    },
+    "TOOL-TCD-050": {
+      "id": "TOOL-TCD-050",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support expected-value comparison for all scalar C types, enums, pointers, arrays, structs, and unions.",
+      "satisfied_by": [
+        "DSN-TCM-030"
+      ]
+    },
+    "TOOL-TCD-060": {
+      "id": "TOOL-TCD-060",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support tolerance-based comparison for floating-point expected values.",
+      "satisfied_by": [
+        "DSN-TCM-030"
+      ]
+    },
+    "TOOL-TCD-070": {
+      "id": "TOOL-TCD-070",
+      "category": "TCD",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support ranged inputs, generating one executed test per value in the range.",
+      "satisfied_by": [
+        "DSN-TCM-040"
+      ]
+    },
+    "TOOL-TCD-080": {
+      "id": "TOOL-TCD-080",
+      "category": "TCD",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support test case grouping into named suites, and selective execution by suite, unit, function, or test name.",
+      "satisfied_by": [
+        "DSN-TCM-050"
+      ]
+    },
+    "TOOL-TCD-090": {
+      "id": "TOOL-TCD-090",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "Test cases shall be independent: execution order shall not affect results, and the tool shall support randomized ordering to detect violations.",
+      "satisfied_by": [
+        "DSN-TCM-060"
+      ]
+    },
+    "TOOL-TCD-100": {
+      "id": "TOOL-TCD-100",
+      "category": "TCD",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support import and export of test cases in a documented interchange format (CSV or equivalent).",
+      "satisfied_by": [
+        "DSN-TCM-070"
+      ]
+    },
+    "TOOL-TCD-110": {
+      "id": "TOOL-TCD-110",
+      "category": "TCD",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support test case derivation via boundary value analysis and equivalence class partitioning of input parameters.",
+      "satisfied_by": [
+        "DSN-TCM-080"
+      ]
+    },
+    "TOOL-TCD-120": {
+      "id": "TOOL-TCD-120",
+      "category": "TCD",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support classification-tree-based test case design.",
+      "satisfied_by": [
+        "DSN-TCM-090"
+      ]
+    },
+    "TOOL-TCD-130": {
+      "id": "TOOL-TCD-130",
+      "category": "TCD",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The tool shall support robustness test cases supplying out-of-range and invalid input values with normal range checking disabled.",
+      "satisfied_by": [
+        "DSN-TCM-100"
+      ]
+    },
+    "TOOL-TCD-140": {
+      "id": "TOOL-TCD-140",
+      "category": "TCD",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Each test case shall carry a stable unique identifier, preserved across edits and regeneration, for traceability purposes.",
+      "satisfied_by": [
+        "DSN-TCM-110"
+      ]
+    },
+    "TOOL-TCH-010": {
+      "id": "TOOL-TCH-010",
+      "category": "TCH",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall support GCC and Clang as host compilers.",
+      "satisfied_by": [
+        "DSN-TCH-020"
+      ]
+    },
+    "TOOL-TCH-020": {
+      "id": "TOOL-TCH-020",
+      "category": "TCH",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "T",
+      "text": "The tool shall define a declarative compiler configuration format specifying: compiler invocation, flag syntax for coverage/debug/optimization, output conventions, and supported coverage kinds.",
+      "satisfied_by": [
+        "DSN-TCH-010"
+      ]
+    },
+    "TOOL-TCH-030": {
+      "id": "TOOL-TCH-030",
+      "category": "TCH",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support cross-compilation using GNU-style embedded toolchains, verified against at minimum `arm-none-eabi-gcc` and a RISC-V GNU toolchain.",
+      "satisfied_by": [
+        "DSN-TCH-030"
+      ]
+    },
+    "TOOL-TCH-040": {
+      "id": "TOOL-TCH-040",
+      "category": "TCH",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support additional cross-compilers via user-authored compiler configuration files without requiring changes to the tool's source code.",
+      "satisfied_by": [
+        "DSN-TCH-010"
+      ]
+    },
+    "TOOL-TCH-050": {
+      "id": "TOOL-TCH-050",
+      "category": "TCH",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "I",
+      "text": "The tool shall ship compiler configurations for at minimum: GCC (host), Clang (host), arm-none-eabi-gcc, riscv64-unknown-elf-gcc, avr-gcc, and SDCC.",
+      "satisfied_by": [
+        "DSN-TCH-030"
+      ]
+    },
+    "TOOL-TCH-060": {
+      "id": "TOOL-TCH-060",
+      "category": "TCH",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall declare, per compiler configuration, which coverage metrics are achievable, and shall refuse to request unsupported metrics.",
+      "satisfied_by": [
+        "DSN-TCH-040"
+      ]
+    },
+    "TOOL-TCH-070": {
+      "id": "TOOL-TCH-070",
+      "category": "TCH",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall detect the compiler version and reject or warn when the version does not support a requested feature (e.g. MC/DC requiring GCC \u2265 14 or Clang \u2265 18).",
+      "satisfied_by": [
+        "DSN-TCH-050"
+      ]
+    },
+    "TOOL-TCH-080": {
+      "id": "TOOL-TCH-080",
+      "category": "TCH",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support building the same test suite for multiple toolchains in isolated build directories within one invocation.",
+      "satisfied_by": [
+        "DSN-TCH-060"
+      ]
+    },
+    "TOOL-TCH-090": {
+      "id": "TOOL-TCH-090",
+      "category": "TCH",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall provide reproducible container images containing validated host and cross toolchains.",
+      "satisfied_by": [
+        "DSN-TCH-070"
+      ]
+    },
+    "TOOL-TCH-100": {
+      "id": "TOOL-TCH-100",
+      "category": "TCH",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support proprietary compilers (Keil armcc/armclang, IAR, TASKING, Green Hills) through the compiler configuration mechanism where their invocation is externally scriptable.",
+      "satisfied_by": [
+        "DSN-TCH-030"
+      ]
+    },
+    "TOOL-TGT-010": {
+      "id": "TOOL-TGT-010",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall build the test harness for a cross-compiled embedded target.",
+      "satisfied_by": [
+        "DSN-BLD-030"
+      ]
+    },
+    "TOOL-TGT-020": {
+      "id": "TOOL-TGT-020",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall execute the test harness on an instruction-set simulator, verified against QEMU and Renode.",
+      "satisfied_by": [
+        "DSN-EXT-020"
+      ]
+    },
+    "TOOL-TGT-030": {
+      "id": "TOOL-TGT-030",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall execute the test harness on physical target hardware via a debug probe.",
+      "satisfied_by": [
+        "DSN-EXT-030"
+      ]
+    },
+    "TOOL-TGT-040": {
+      "id": "TOOL-TGT-040",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support flashing target hardware via OpenOCD, pyOCD, and J-Link.",
+      "satisfied_by": [
+        "DSN-EXT-030"
+      ]
+    },
+    "TOOL-TGT-050": {
+      "id": "TOOL-TGT-050",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall retrieve test results from the target via at minimum: semihosting, and a serial (UART) channel.",
+      "satisfied_by": [
+        "DSN-EXT-040"
+      ]
+    },
+    "TOOL-TGT-060": {
+      "id": "TOOL-TGT-060",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The host-to-target result protocol shall be plain-text, line-oriented, and parseable without requiring a bidirectional channel.",
+      "satisfied_by": [
+        "DSN-EXT-050"
+      ]
+    },
+    "TOOL-TGT-070": {
+      "id": "TOOL-TGT-070",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "Test cases shall execute unmodified on host and target, with only configuration distinguishing the two.",
+      "satisfied_by": [
+        "DSN-EXT-060"
+      ]
+    },
+    "TOOL-TGT-080": {
+      "id": "TOOL-TGT-080",
+      "category": "TGT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "D",
+      "text": "The tool shall support a declarative hardware inventory describing connected targets: identifier, platform, probe type, serial device, and flash timeout.",
+      "satisfied_by": [
+        "DSN-EXT-010"
+      ]
+    },
+    "TOOL-TGT-090": {
+      "id": "TOOL-TGT-090",
+      "category": "TGT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall detect target execution failures \u2014 flash failure, no output, target reset, watchdog \u2014 and distinguish them from test failures.",
+      "satisfied_by": [
+        "DSN-EXT-070"
+      ]
+    },
+    "TOOL-TGT-100": {
+      "id": "TOOL-TGT-100",
+      "category": "TGT",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support splitting a test suite across multiple target executions when the full suite exceeds target memory.",
+      "satisfied_by": [
+        "DSN-EXT-080"
+      ]
+    },
+    "TOOL-TGT-110": {
+      "id": "TOOL-TGT-110",
+      "category": "TGT",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The tool shall document the RAM, flash, and stack overhead of the on-target harness, per configuration.",
+      "satisfied_by": [
+        "DSN-EXT-090"
+      ]
+    },
+    "TOOL-TGT-120": {
+      "id": "TOOL-TGT-120",
+      "category": "TGT",
+      "priority": "C",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The tool shall support execution on targets without a debug probe via a user-supplied flashing and communication script.",
+      "satisfied_by": [
+        "DSN-EXT-100"
+      ]
+    },
+    "TOOL-TRC-010": {
+      "id": "TOOL-TRC-010",
+      "category": "TRC",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall support associating one or more requirement identifiers with each test case.",
+      "satisfied_by": [
+        "DSN-TRC-010"
+      ]
+    },
+    "TOOL-TRC-020": {
+      "id": "TOOL-TRC-020",
+      "category": "TRC",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall generate a bidirectional traceability matrix linking requirements to test cases and test cases to requirements.",
+      "satisfied_by": [
+        "DSN-TRC-020"
+      ]
+    },
+    "TOOL-TRC-030": {
+      "id": "TOOL-TRC-030",
+      "category": "TRC",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The traceability matrix shall report the pass/fail status of each linked test case.",
+      "satisfied_by": [
+        "DSN-TRC-020"
+      ]
+    },
+    "TOOL-TRC-040": {
+      "id": "TOOL-TRC-040",
+      "category": "TRC",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall report requirements with no linked test case, and test cases with no linked requirement.",
+      "satisfied_by": [
+        "DSN-TRC-030"
+      ]
+    },
+    "TOOL-TRC-050": {
+      "id": "TOOL-TRC-050",
+      "category": "TRC",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall import requirements from ReqIF.",
+      "satisfied_by": [
+        "DSN-TRC-040"
+      ]
+    },
+    "TOOL-TRC-060": {
+      "id": "TOOL-TRC-060",
+      "category": "TRC",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall import requirements from CSV and from a documented plain-text format.",
+      "satisfied_by": [
+        "DSN-TRC-040"
+      ]
+    },
+    "TOOL-TRC-070": {
+      "id": "TOOL-TRC-070",
+      "category": "TRC",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall export traceability data in ReqIF for exchange with external requirements management tools.",
+      "satisfied_by": [
+        "DSN-TRC-050"
+      ]
+    },
+    "TOOL-TRC-080": {
+      "id": "TOOL-TRC-080",
+      "category": "TRC",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall link requirements to source code elements in addition to test cases.",
+      "satisfied_by": [
+        "DSN-TRC-060"
+      ]
+    },
+    "TOOL-TRC-090": {
+      "id": "TOOL-TRC-090",
+      "category": "TRC",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall detect when a requirement has changed since its linked test cases were last executed or reviewed.",
+      "satisfied_by": [
+        "DSN-TRC-070"
+      ]
+    },
+    "TOOL-TRC-100": {
+      "id": "TOOL-TRC-100",
+      "category": "TRC",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The tool shall interoperate with an established open-source traceability tool rather than requiring its own requirements database.",
+      "satisfied_by": [
+        "DSN-TRC-080"
+      ]
+    },
+    "TOOL-UIX-010": {
+      "id": "TOOL-UIX-010",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "A",
+      "text": "The tool's core shall be a command-line engine; all graphical interfaces shall be clients of that engine and shall provide no capability unavailable from it.",
+      "satisfied_by": [
+        "DSN-API-010"
+      ]
+    },
+    "TOOL-UIX-020": {
+      "id": "TOOL-UIX-020",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The engine shall expose a documented, versioned interface (JSON over stdio or local socket) for front-end clients.",
+      "satisfied_by": [
+        "DSN-API-020"
+      ]
+    },
+    "TOOL-UIX-030": {
+      "id": "TOOL-UIX-030",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The tool shall provide a standalone graphical application that supports the complete test workflow \u2014 project creation, environment build, test authoring, execution, coverage review, and reporting \u2014 without requiring the installation of any editor, IDE, or third-party host application.",
+      "satisfied_by": [
+        "DSN-GUI-010"
+      ]
+    },
+    "TOOL-UIX-040": {
+      "id": "TOOL-UIX-040",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The standalone application shall be installable and runnable by a user who has no development environment beyond a C toolchain.",
+      "satisfied_by": [
+        "DSN-GUI-010"
+      ]
+    },
+    "TOOL-UIX-050": {
+      "id": "TOOL-UIX-050",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The standalone application shall operate against a local engine instance and shall require no network access.",
+      "satisfied_by": [
+        "DSN-API-030"
+      ]
+    },
+    "TOOL-UIX-060": {
+      "id": "TOOL-UIX-060",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support creating, opening, saving, and closing a test project that references user source without copying or modifying it.",
+      "satisfied_by": [
+        "DSN-GUI-020"
+      ]
+    },
+    "TOOL-UIX-070": {
+      "id": "TOOL-UIX-070",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall provide a guided environment-creation workflow collecting: source selection or test scope, compiler configuration, target (host or embedded), coverage kind, and test framework back-end.",
+      "satisfied_by": [
+        "DSN-GUI-030"
+      ]
+    },
+    "TOOL-UIX-080": {
+      "id": "TOOL-UIX-080",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support creating an integration test environment by selecting multiple source files into a single test scope, and shall display the resulting internal/external dependency classification before the environment is built.",
+      "satisfied_by": [
+        "DSN-GUI-030"
+      ]
+    },
+    "TOOL-UIX-090": {
+      "id": "TOOL-UIX-090",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall display environment build progress and, on failure, the compiler diagnostics responsible, navigable to the offending source location.",
+      "satisfied_by": [
+        "DSN-GUI-040"
+      ]
+    },
+    "TOOL-UIX-100": {
+      "id": "TOOL-UIX-100",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support managing multiple environments within one project and executing across a selected subset.",
+      "satisfied_by": [
+        "DSN-GUI-050"
+      ]
+    },
+    "TOOL-UIX-110": {
+      "id": "TOOL-UIX-110",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall present a hierarchical navigation tree: project \u2192 environment \u2192 unit \u2192 function \u2192 test case.",
+      "satisfied_by": [
+        "DSN-GUI-060"
+      ]
+    },
+    "TOOL-UIX-120": {
+      "id": "TOOL-UIX-120",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "Each tree node shall display aggregated status: pass/fail counts, coverage percentage, and whether the node is stale relative to its source.",
+      "satisfied_by": [
+        "DSN-GUI-060"
+      ]
+    },
+    "TOOL-UIX-130": {
+      "id": "TOOL-UIX-130",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support selecting any tree node and executing, editing, or reporting on that node's scope.",
+      "satisfied_by": [
+        "DSN-GUI-060"
+      ]
+    },
+    "TOOL-UIX-140": {
+      "id": "TOOL-UIX-140",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support filtering and searching the tree by name, status, and coverage threshold.",
+      "satisfied_by": [
+        "DSN-GUI-070"
+      ]
+    },
+    "TOOL-UIX-150": {
+      "id": "TOOL-UIX-150",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall provide a tabular editor for data-driven test cases, presenting input parameters, global variables, and expected values as editable fields.",
+      "satisfied_by": [
+        "DSN-GUI-080"
+      ]
+    },
+    "TOOL-UIX-160": {
+      "id": "TOOL-UIX-160",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The test case editor shall present structured and array parameters as an expandable tree, permitting entry of values at any depth.",
+      "satisfied_by": [
+        "DSN-GUI-080"
+      ]
+    },
+    "TOOL-UIX-170": {
+      "id": "TOOL-UIX-170",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The test case editor shall be type-aware, constraining or validating entered values against the declared C type and presenting enumeration constants by name.",
+      "satisfied_by": [
+        "DSN-GUI-080"
+      ]
+    },
+    "TOOL-UIX-180": {
+      "id": "TOOL-UIX-180",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall provide a stub configuration view listing every external dependency of the environment, with per-stub controls to enable or disable stubbing and to define return values, return sequences, and output parameter values.",
+      "satisfied_by": [
+        "DSN-GUI-090"
+      ]
+    },
+    "TOOL-UIX-190": {
+      "id": "TOOL-UIX-190",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall support entering ranged and boundary-derived input values, displaying the resulting number of generated test cases before they are created.",
+      "satisfied_by": [
+        "DSN-GUI-100"
+      ]
+    },
+    "TOOL-UIX-200": {
+      "id": "TOOL-UIX-200",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall provide an editor for test cases authored directly in C, with syntax highlighting, alongside the tabular editor.",
+      "satisfied_by": [
+        "DSN-GUI-110"
+      ]
+    },
+    "TOOL-UIX-210": {
+      "id": "TOOL-UIX-210",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall support executing a selection of tests with visible progress and the ability to cancel a run in progress.",
+      "satisfied_by": [
+        "DSN-GUI-120"
+      ]
+    },
+    "TOOL-UIX-220": {
+      "id": "TOOL-UIX-220",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall present per-test results identifying, for each failure, the assertion, expected value, actual value, and source location, navigable to that location.",
+      "satisfied_by": [
+        "DSN-GUI-130"
+      ]
+    },
+    "TOOL-UIX-230": {
+      "id": "TOOL-UIX-230",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall support launching a test case under a debugger with execution stopped at entry to the function under test.",
+      "satisfied_by": [
+        "DSN-GUI-140"
+      ]
+    },
+    "TOOL-UIX-240": {
+      "id": "TOOL-UIX-240",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall present a console pane displaying the engine commands executed on the user's behalf, so that any GUI action can be reproduced from the command line.",
+      "satisfied_by": [
+        "DSN-API-040"
+      ]
+    },
+    "TOOL-UIX-250": {
+      "id": "TOOL-UIX-250",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall present annotated source with per-line coverage status distinguishing covered, uncovered, partially covered, and justified-by-analysis.",
+      "satisfied_by": [
+        "DSN-GUI-150"
+      ]
+    },
+    "TOOL-UIX-260": {
+      "id": "TOOL-UIX-260",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall present, for each partially covered decision, the per-condition detail required by TOOL-COV-070, in a form that identifies which condition outcomes remain unexercised.",
+      "satisfied_by": [
+        "DSN-GUI-160"
+      ]
+    },
+    "TOOL-UIX-270": {
+      "id": "TOOL-UIX-270",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall present a graphical control flow view of a function with coverage status overlaid.",
+      "satisfied_by": [
+        "DSN-GUI-170"
+      ]
+    },
+    "TOOL-UIX-280": {
+      "id": "TOOL-UIX-280",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The application shall present coverage summarized by project, environment, unit, and function, with drill-down between levels.",
+      "satisfied_by": [
+        "DSN-GUI-180"
+      ]
+    },
+    "TOOL-UIX-290": {
+      "id": "TOOL-UIX-290",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The application shall support recording a coverage-by-analysis justification against a specific uncovered construct, capturing author and rationale.",
+      "satisfied_by": [
+        "DSN-GUI-190"
+      ]
+    },
+    "TOOL-UIX-300": {
+      "id": "TOOL-UIX-300",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The application shall support generating and viewing all report formats defined in Section 15 without leaving the application.",
+      "satisfied_by": [
+        "DSN-GUI-200"
+      ]
+    },
+    "TOOL-UIX-310": {
+      "id": "TOOL-UIX-310",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The application shall present the requirements traceability matrix, with navigation from a requirement to its linked test cases and results.",
+      "satisfied_by": [
+        "DSN-GUI-210"
+      ]
+    },
+    "TOOL-UIX-320": {
+      "id": "TOOL-UIX-320",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P1",
+      "verification": "I",
+      "text": "All project, environment, test case, and configuration state shall be stored in plain-text, version-controllable files. The graphical application shall never be the sole source of any state.",
+      "satisfied_by": [
+        "DSN-PRJ-080"
+      ]
+    },
+    "TOOL-UIX-330": {
+      "id": "TOOL-UIX-330",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "A project created, modified, or executed through the graphical application shall be fully usable from the command line thereafter, and the reverse.",
+      "satisfied_by": [
+        "DSN-API-040"
+      ]
+    },
+    "TOOL-UIX-340": {
+      "id": "TOOL-UIX-340",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "T",
+      "text": "The standalone application shall run on Linux x86-64 and Windows x86-64.",
+      "satisfied_by": [
+        "DSN-GUI-220"
+      ]
+    },
+    "TOOL-UIX-350": {
+      "id": "TOOL-UIX-350",
+      "category": "UIX",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "I",
+      "text": "The application shall transmit no telemetry, usage data, or user content to any external service.",
+      "satisfied_by": [
+        "DSN-GUI-230"
+      ]
+    },
+    "TOOL-UIX-360": {
+      "id": "TOOL-UIX-360",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P2",
+      "verification": "D",
+      "text": "The application shall provide error messages identifying the affected file, line, and a concrete remedy.",
+      "satisfied_by": [
+        "DSN-GUI-240"
+      ]
+    },
+    "TOOL-UIX-370": {
+      "id": "TOOL-UIX-370",
+      "category": "UIX",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "T",
+      "text": "The application shall remain responsive during long-running operations, performing analysis, build, and execution without blocking the interface.",
+      "satisfied_by": [
+        "DSN-GUI-250"
+      ]
+    },
+    "TOOL-UIX-380": {
+      "id": "TOOL-UIX-380",
+      "category": "UIX",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "T",
+      "text": "The application shall support a keyboard-driven workflow for its primary operations.",
+      "satisfied_by": [
+        "DSN-GUI-260"
+      ]
+    },
+    "TOOL-UIX-390": {
+      "id": "TOOL-UIX-390",
+      "category": "UIX",
+      "priority": "F",
+      "phase": "\u2014",
+      "verification": "\u2014",
+      "text": "Editor and IDE integrations may be provided as additional thin clients of the engine interface defined in TOOL-UIX-020. Such integrations are explicitly out of scope for v1.0 and shall never be a prerequisite for any workflow.",
+      "satisfied_by": []
+    },
+    "TOOL-UIX-400": {
+      "id": "TOOL-UIX-400",
+      "category": "UIX",
+      "priority": "F",
+      "phase": "\u2014",
+      "verification": "\u2014",
+      "text": "A browser-based interface for viewing results and coverage across multiple projects may be provided for team-level and CI use. Out of scope for v1.0.",
+      "satisfied_by": []
+    }
+  },
+  "elements": {
+    "DSN-AIF-010": {
+      "title": "Optionality and default-off",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-020": {
+      "title": "Provider abstraction",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-AIF-030": {
+      "title": "Local model execution",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-020",
+        "TOOL-AIF-170",
+        "TOOL-AIF-200"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-040": {
+      "title": "Egress control and disclosure",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-030",
+        "TOOL-AIF-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-050": {
+      "title": "Test generation assist",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-060": {
+      "title": "Stub body assist",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-070": {
+      "title": "Failure explanation",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-080": {
+      "title": "Trace link suggestion",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-090": {
+      "title": "Naming and documentation assist",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-140"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-100": {
+      "title": "Validation gate and rejection accounting",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-070",
+        "TOOL-AIF-210"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-110": {
+      "title": "Provenance and review state",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-080",
+        "TOOL-AIF-090",
+        "TOOL-AIF-160",
+        "TOOL-AIF-180",
+        "TOOL-AIF-190"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-AIF-120": {
+      "title": "Evidence exclusion mode",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-AIF-130": {
+      "title": "Bounded, non-blocking operation",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-150"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-010": {
+      "title": "Front-end binding with flag fidelity",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-010",
+        "TOOL-PAR-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-020": {
+      "title": "Interface extraction",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-030",
+        "TOOL-PAR-040",
+        "TOOL-PAR-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-030": {
+      "title": "Call graph with scope classification",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-040": {
+      "title": "Control flow graph behind a provider interface",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-001"
+    },
+    "DSN-ANA-050": {
+      "title": "Static function exposure",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-060": {
+      "title": "Macro resolution and interface obscuring",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-070": {
+      "title": "The Analysis Model as an inviolable seam",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-100",
+        "TOOL-PAR-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-ANA-080": {
+      "title": "Complexity metrics",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ANA-090": {
+      "title": "Partial analysis tolerance",
+      "component": "CMP-ANA",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PAR-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-API-010": {
+      "title": "Engine and front-end separation",
+      "component": "CMP-API",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-API-020": {
+      "title": "Versioned JSON protocol",
+      "component": "CMP-API",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-PLG-060",
+        "TOOL-UIX-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-API-030": {
+      "title": "Local-only transport",
+      "component": "CMP-API",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-API-040": {
+      "title": "Command equivalence and echo",
+      "component": "CMP-API",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-240",
+        "TOOL-UIX-330"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-010": {
+      "title": "Generation orchestration against coverage targets",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-010",
+        "TOOL-ATG-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-020": {
+      "title": "Symbolic execution adapter",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-003"
+    },
+    "DSN-ATG-030": {
+      "title": "Bounded model checking adapter",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-003"
+    },
+    "DSN-ATG-040": {
+      "title": "Emission into the canonical test format",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-050": {
+      "title": "Validation gate",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-060": {
+      "title": "Generation run reporting",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-070": {
+      "title": "Machine-generation provenance",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-ATG-080": {
+      "title": "Unreviewed expected values",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-090": {
+      "title": "Bounded generation effort",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-ATG-100": {
+      "title": "Engine limitation reporting",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-ATG-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ATG-110": {
+      "title": "Validation port (inverted dependency on L3/L4)",
+      "component": "CMP-ATG",
+      "layer": "L2",
+      "satisfies": [],
+      "refines": [],
+      "derived": true,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-BLD-010": {
+      "title": "Environment build pipeline",
+      "component": "CMP-BLD",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-BLD-020": {
+      "title": "Incremental rebuild",
+      "component": "CMP-BLD",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-BLD-030": {
+      "title": "Cross build for target",
+      "component": "CMP-BLD",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-BLD-040": {
+      "title": "Sanitizer integration",
+      "component": "CMP-BLD",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-BLD-050": {
+      "title": "Structured build diagnostics",
+      "component": "CMP-BLD",
+      "layer": "L3",
+      "satisfies": [],
+      "refines": [
+        "DSN-BLD-010"
+      ],
+      "derived": true,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CBT-010": {
+      "title": "Re-execution without regeneration",
+      "component": "CMP-CBT",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-CBT-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CBT-020": {
+      "title": "Change impact analysis and subset execution",
+      "component": "CMP-CBT",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-CBT-020",
+        "TOOL-CBT-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CBT-030": {
+      "title": "Partial-run disclosure",
+      "component": "CMP-CBT",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-CBT-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-CBT-040": {
+      "title": "Run comparison",
+      "component": "CMP-CBT",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-CBT-050",
+        "TOOL-CBT-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CBT-050": {
+      "title": "Suite minimisation",
+      "component": "CMP-CBT",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-CBT-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CLI-010": {
+      "title": "Complete non-interactive surface",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-010",
+        "TOOL-CIC-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-CLI-020": {
+      "title": "Exit code contract",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CLI-030": {
+      "title": "Container execution",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-CLI-040": {
+      "title": "Reference pipelines",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-CLI-050": {
+      "title": "Sharding and report merge",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CLI-060": {
+      "title": "Cacheable artifacts",
+      "component": "CMP-CLI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-CIC-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-010": {
+      "title": "Deterministic execution discipline",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-060",
+        "TOOL-PRJ-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-CORE-020": {
+      "title": "Structured error model and fail-safe termination",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-030": {
+      "title": "Logging and diagnostic bundle assembly",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-130",
+        "TOOL-NFR-160"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-040": {
+      "title": "Cooperative cancellation and transactional state",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-180"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-050": {
+      "title": "Scale and memory governance",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-050",
+        "TOOL-NFR-150"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-CORE-060": {
+      "title": "Output isolation and source immutability",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-070",
+        "TOOL-NFR-080",
+        "TOOL-PRJ-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-CORE-070": {
+      "title": "Host platform abstraction",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-010",
+        "TOOL-NFR-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-080": {
+      "title": "Message catalogue",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-190"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-CORE-090": {
+      "title": "Offline-by-construction network policy",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-CORE-100": {
+      "title": "Provenance stamping service",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-INS-110",
+        "TOOL-QUA-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-CORE-110": {
+      "title": "Documentation set structure",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-CORE-120": {
+      "title": "Self-verification",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-140",
+        "TOOL-NFR-170"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-CORE-130": {
+      "title": "Performance budget allocation",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-030",
+        "TOOL-NFR-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-COV-010": {
+      "title": "Coverage acquisition adapters",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-010",
+        "TOOL-COV-020",
+        "TOOL-COV-030",
+        "TOOL-COV-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-004"
+    },
+    "DSN-COV-020": {
+      "title": "MC/DC acquisition and form declaration",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-050",
+        "TOOL-COV-060",
+        "TOOL-COV-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "SRS-001 open question 2"
+    },
+    "DSN-COV-030": {
+      "title": "Condition-level detail model",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-040": {
+      "title": "Non-instrumentable expression detection",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-050": {
+      "title": "Bare-metal coverage retrieval",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-060": {
+      "title": "Merge and per-test attribution",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-110",
+        "TOOL-COV-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-070": {
+      "title": "Threshold enforcement",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-080": {
+      "title": "Coverage by analysis",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-140",
+        "TOOL-COV-150"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-090": {
+      "title": "Unit-under-test scoping",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-160"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-COV-100": {
+      "title": "Control and data coupling analysis",
+      "component": "CMP-COV",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-COV-170"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-010": {
+      "title": "Result capture and normalisation",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-020": {
+      "title": "Fault isolation",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-030": {
+      "title": "Timeout enforcement",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-040": {
+      "title": "Parallel execution",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-050": {
+      "title": "Run status aggregation",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXH-060": {
+      "title": "Debugger launch",
+      "component": "CMP-EXH",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-EXE-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "SRS-001 open question 9"
+    },
+    "DSN-EXT-010": {
+      "title": "Target runner abstraction and hardware inventory",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-PLG-040",
+        "TOOL-TGT-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-EXT-020": {
+      "title": "Simulator execution",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-030": {
+      "title": "Hardware execution via debug probe",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-030",
+        "TOOL-TGT-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-040": {
+      "title": "Result transport channels",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-050": {
+      "title": "Line-oriented result protocol",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-EXT-060": {
+      "title": "Host and target test portability",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-070": {
+      "title": "Target fault classification",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-080": {
+      "title": "Suite partitioning for constrained targets",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-EXT-090": {
+      "title": "On-target harness footprint characterisation",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-EXT-100": {
+      "title": "User-supplied target adapters",
+      "component": "CMP-EXT",
+      "layer": "L3",
+      "satisfies": [
+        "TOOL-TGT-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-010": {
+      "title": "Model-driven harness generation",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-010",
+        "TOOL-HAR-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-020": {
+      "title": "Static function and global variable access",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-030",
+        "TOOL-HAR-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-030": {
+      "title": "Per-test lifecycle hooks",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-040": {
+      "title": "Framework back-end abstraction",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-060",
+        "TOOL-HAR-065",
+        "TOOL-HAR-070",
+        "TOOL-PLG-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-050": {
+      "title": "Integration harness generation",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-060": {
+      "title": "Generated code conventions",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-GEN-070": {
+      "title": "Regeneration contract for user-editable regions",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-100",
+        "TOOL-STB-110",
+        "TOOL-STB-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-080": {
+      "title": "Staleness detection against the interface",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-CBT-070",
+        "TOOL-HAR-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-090": {
+      "title": "Link closure resolution",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-HAR-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-100": {
+      "title": "Stub synthesis",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-010",
+        "TOOL-STB-020",
+        "TOOL-STB-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-110": {
+      "title": "Stub behaviour control",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-040",
+        "TOOL-STB-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-120": {
+      "title": "Interaction recording",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-050",
+        "TOOL-STB-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-130": {
+      "title": "Selective stubbing",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-080",
+        "TOOL-STB-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-140": {
+      "title": "Intra-unit call interception",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-150": {
+      "title": "Unhandled construct marking",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GEN-160": {
+      "title": "Function pointer stubbing",
+      "component": "CMP-GEN",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-STB-140"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-010": {
+      "title": "Standalone application shell",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-030",
+        "TOOL-UIX-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": "ADR-001"
+    },
+    "DSN-GUI-020": {
+      "title": "Project lifecycle",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-030": {
+      "title": "Environment creation workflow",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-070",
+        "TOOL-UIX-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-040": {
+      "title": "Build progress and diagnostics",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-050": {
+      "title": "Multi-environment management",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-060": {
+      "title": "Navigation tree with aggregated status",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-110",
+        "TOOL-UIX-120",
+        "TOOL-UIX-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-070": {
+      "title": "Tree filtering and search",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-140"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-080": {
+      "title": "Type-aware test data editor",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-150",
+        "TOOL-UIX-160",
+        "TOOL-UIX-170"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-001"
+    },
+    "DSN-GUI-090": {
+      "title": "Stub configuration view",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-180"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-100": {
+      "title": "Ranged and derived input entry",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-190"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-110": {
+      "title": "C test case editor",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-200"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-120": {
+      "title": "Execution control",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-210"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-130": {
+      "title": "Result presentation",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-220"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-140": {
+      "title": "In-application debugging",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-230"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "SRS-001 open question 9"
+    },
+    "DSN-GUI-150": {
+      "title": "Annotated source coverage view",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-250"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-160": {
+      "title": "Condition detail view",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-260"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-170": {
+      "title": "Control flow view",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-270"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-180": {
+      "title": "Coverage roll-up and drill-down",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-280"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-190": {
+      "title": "Justification capture",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-290"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-200": {
+      "title": "In-application reporting",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-300"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-210": {
+      "title": "Traceability matrix view",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-310"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-220": {
+      "title": "Desktop platform support",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-340"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-230": {
+      "title": "No telemetry",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-350"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-GUI-240": {
+      "title": "Actionable error presentation",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-360"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-GUI-250": {
+      "title": "Non-blocking long operations",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-370"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-GUI-260": {
+      "title": "Keyboard-driven workflow",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-380"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-010": {
+      "title": "Compilation database reader",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-010",
+        "TOOL-ING-020",
+        "TOOL-ING-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-020": {
+      "title": "Compilation database acquisition paths",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-040",
+        "TOOL-ING-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-ING-030": {
+      "title": "Build-system-free ingestion",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-060",
+        "TOOL-ING-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-040": {
+      "title": "IDE project importers",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-050": {
+      "title": "Ingestion diagnostics",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-060": {
+      "title": "Persisted project model with staleness detection",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-090",
+        "TOOL-ING-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-070": {
+      "title": "Per-toolchain flag retention",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-080": {
+      "title": "Test scope as a first-class, declared entity",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-130",
+        "TOOL-ING-150",
+        "TOOL-ING-190"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-090": {
+      "title": "Scope boundary classification",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-140",
+        "TOOL-ING-180"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-100": {
+      "title": "Scope symbol conflict detection",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-160"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-ING-110": {
+      "title": "Overlapping scope membership",
+      "component": "CMP-ING",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-ING-170"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-010": {
+      "title": "Existing suite execution",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-020": {
+      "title": "Ceedling project import",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-030": {
+      "title": "Commercial tool import",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-040": {
+      "title": "Import fidelity reporting",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-050": {
+      "title": "CSV migration path",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-060": {
+      "title": "Coexistence",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-070": {
+      "title": "Migration assessment",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-MIG-080": {
+      "title": "Interchange format documentation",
+      "component": "CMP-MIG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-MIG-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PKG-010": {
+      "title": "Offline installation",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-010",
+        "TOOL-INS-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": "ADR-007"
+    },
+    "DSN-PKG-020": {
+      "title": "Unprivileged installation",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-020",
+        "TOOL-NFR-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-PKG-030": {
+      "title": "Archivable, uniquely identified releases",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-040",
+        "TOOL-QUA-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PKG-040": {
+      "title": "Side-by-side versions",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PKG-050": {
+      "title": "Non-destructive upgrade",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PKG-060": {
+      "title": "Documented uninstallation",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-PKG-070": {
+      "title": "CI container image",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-PKG-080": {
+      "title": "Shared read-only installation",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-INS-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-PKG-090": {
+      "title": "Licensing structure",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-010",
+        "TOOL-LIC-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": "ADR-005"
+    },
+    "DSN-PKG-100": {
+      "title": "Generated code carries no license obligation",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PKG-110": {
+      "title": "Bundling restrictions",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PKG-120": {
+      "title": "Automated license verification",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PKG-130": {
+      "title": "Separable optional components",
+      "component": "CMP-PKG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PLG-010": {
+      "title": "Extension point catalogue",
+      "component": "CMP-PLG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-PLG-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-PLG-020": {
+      "title": "Discovery and loading",
+      "component": "CMP-PLG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-PLG-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PLG-030": {
+      "title": "Load failure isolation",
+      "component": "CMP-PLG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-PLG-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-PLG-040": {
+      "title": "Built-ins use the public interfaces",
+      "component": "CMP-PLG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-PLG-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PRJ-010": {
+      "title": "Plain-text project model with explicit schema versioning",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-010",
+        "TOOL-PRJ-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": "ADR-002"
+    },
+    "DSN-PRJ-020": {
+      "title": "Explicit, confirmed, reversible migration",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-030",
+        "TOOL-PRJ-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PRJ-030": {
+      "title": "Merge-friendly sharded serialisation",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-050",
+        "TOOL-PRJ-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PRJ-040": {
+      "title": "Relocatable references",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-PRJ-050": {
+      "title": "Broken-reference detection",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PRJ-060": {
+      "title": "Verification record export",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PRJ-070": {
+      "title": "Archive verification",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-PRJ-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-PRJ-080": {
+      "title": "Configuration lives only in files",
+      "component": "CMP-PRJ",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-CIC-080",
+        "TOOL-UIX-320"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-010": {
+      "title": "Tool classification analysis",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-020": {
+      "title": "Tool Operational Requirements",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-030": {
+      "title": "User-executable validation suite",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-040": {
+      "title": "Known error list",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-050": {
+      "title": "Development process transparency",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-060": {
+      "title": "Standards objective mapping",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-070": {
+      "title": "No overclaiming",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-QUA-080": {
+      "title": "User qualification templates",
+      "component": "CMP-QUA",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-QUA-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-REP-010": {
+      "title": "Intermediate report model",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-PLG-050",
+        "TOOL-REP-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-REP-020": {
+      "title": "JUnit XML renderer",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-030": {
+      "title": "Coverage interchange renderer and reader",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-MIG-080",
+        "TOOL-REP-020"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-040": {
+      "title": "HTML report",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-030",
+        "TOOL-REP-040",
+        "TOOL-REP-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-050": {
+      "title": "Verification report",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-060": {
+      "title": "Report provenance block",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-REP-070": {
+      "title": "Paginated archival rendering",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-080": {
+      "title": "Report determinism",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-090": {
+      "title": "Cross-cutting aggregation",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-100": {
+      "title": "Trend reporting",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-110": {
+      "title": "Report format versioning",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-REP-120": {
+      "title": "Scope and exclusion disclosure",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-140"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-REP-130": {
+      "title": "Rendering from archived data",
+      "component": "CMP-REP",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-REP-150"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-SEC-010": {
+      "title": "Release signing",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-SEC-020": {
+      "title": "SBOM and dependency integrity",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-LIC-030",
+        "TOOL-SEC-020",
+        "TOOL-SEC-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-SEC-030": {
+      "title": "Reproducible build",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-SEC-040": {
+      "title": "Untrusted project consent",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-050"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-SEC-050": {
+      "title": "Restricted harness execution",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-SEC-060": {
+      "title": "Configuration is data",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-SEC-070": {
+      "title": "Disclosure process and supported versions",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-SEC-080": {
+      "title": "Untrusted external input",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-SEC-090": {
+      "title": "Dependency vulnerability scanning",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "I",
+      "open": null
+    },
+    "DSN-SEC-100": {
+      "title": "Credential storage",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-SEC-110": {
+      "title": "Diagnostic content minimisation",
+      "component": "CMP-SEC",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-SEC-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-010": {
+      "title": "Declarative compiler configuration",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-PLG-020",
+        "TOOL-TCH-020",
+        "TOOL-TCH-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-020": {
+      "title": "Host compiler support",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-030": {
+      "title": "Cross-toolchain support",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-030",
+        "TOOL-TCH-050",
+        "TOOL-TCH-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-040": {
+      "title": "Capability declaration and metric gating",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-050": {
+      "title": "Compiler version detection and feature gating",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-060": {
+      "title": "Multi-toolchain build isolation",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCH-070": {
+      "title": "Reference toolchain container images",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-TCH-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "D",
+      "open": null
+    },
+    "DSN-TCH-080": {
+      "title": "Environment preflight",
+      "component": "CMP-TCH",
+      "layer": "L1",
+      "satisfies": [
+        "TOOL-INS-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-010": {
+      "title": "C-authored test cases",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-020": {
+      "title": "Data-driven test case model",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-020",
+        "TOOL-TCD-030",
+        "TOOL-TCD-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": "ADR-002"
+    },
+    "DSN-TCM-030": {
+      "title": "Comparison semantics",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-050",
+        "TOOL-TCD-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-040": {
+      "title": "Ranged input expansion",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-050": {
+      "title": "Suites and selection",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-060": {
+      "title": "Test independence",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "A",
+      "open": null
+    },
+    "DSN-TCM-070": {
+      "title": "Interchange import and export",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-MIG-060",
+        "TOOL-TCD-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-080": {
+      "title": "Boundary value and equivalence class derivation",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-110"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-090": {
+      "title": "Classification tree design",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-120"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-100": {
+      "title": "Robustness test cases",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-130"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TCM-110": {
+      "title": "Stable test case identity",
+      "component": "CMP-TCM",
+      "layer": "L2",
+      "satisfies": [
+        "TOOL-TCD-140"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-010": {
+      "title": "Requirement store and test linkage",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-010"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-020": {
+      "title": "Bidirectional matrix with status",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-020",
+        "TOOL-TRC-030"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-030": {
+      "title": "Gap reporting",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-040"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-040": {
+      "title": "Requirement importers",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-050",
+        "TOOL-TRC-060"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-050": {
+      "title": "ReqIF export",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-070"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-060": {
+      "title": "Requirement-to-code links",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-080"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-070": {
+      "title": "Requirement change detection",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-090"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    },
+    "DSN-TRC-080": {
+      "title": "External traceability tool interoperability",
+      "component": "CMP-TRC",
+      "layer": "L4",
+      "satisfies": [
+        "TOOL-TRC-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": "T",
+      "open": null
+    }
+  },
+  "components": {
+    "CMP-AIF": {
+      "name": "AI Assist Subsystem",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-ATG",
+        "CMP-CORE",
+        "CMP-GEN",
+        "CMP-SEC",
+        "CMP-TCM"
+      ],
+      "elements": [
+        "DSN-AIF-010",
+        "DSN-AIF-020",
+        "DSN-AIF-030",
+        "DSN-AIF-040",
+        "DSN-AIF-050",
+        "DSN-AIF-060",
+        "DSN-AIF-070",
+        "DSN-AIF-080",
+        "DSN-AIF-090",
+        "DSN-AIF-100",
+        "DSN-AIF-110",
+        "DSN-AIF-120",
+        "DSN-AIF-130"
+      ]
+    },
+    "CMP-ANA": {
+      "name": "Source Analyzer",
+      "layer": "L1",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-ING",
+        "CMP-TCH"
+      ],
+      "elements": [
+        "DSN-ANA-010",
+        "DSN-ANA-020",
+        "DSN-ANA-030",
+        "DSN-ANA-040",
+        "DSN-ANA-050",
+        "DSN-ANA-060",
+        "DSN-ANA-070",
+        "DSN-ANA-080",
+        "DSN-ANA-090"
+      ]
+    },
+    "CMP-API": {
+      "name": "Engine Service Interface",
+      "layer": "L5",
+      "depends_on": [
+        "CMP-CORE"
+      ],
+      "elements": [
+        "DSN-API-010",
+        "DSN-API-020",
+        "DSN-API-030",
+        "DSN-API-040"
+      ]
+    },
+    "CMP-ATG": {
+      "name": "Automatic Test Generation",
+      "layer": "L2",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-TCM"
+      ],
+      "elements": [
+        "DSN-ATG-010",
+        "DSN-ATG-020",
+        "DSN-ATG-030",
+        "DSN-ATG-040",
+        "DSN-ATG-050",
+        "DSN-ATG-060",
+        "DSN-ATG-070",
+        "DSN-ATG-080",
+        "DSN-ATG-090",
+        "DSN-ATG-100",
+        "DSN-ATG-110"
+      ]
+    },
+    "CMP-BLD": {
+      "name": "Build Orchestrator",
+      "layer": "L3",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-GEN",
+        "CMP-TCH"
+      ],
+      "elements": [
+        "DSN-BLD-010",
+        "DSN-BLD-020",
+        "DSN-BLD-030",
+        "DSN-BLD-040",
+        "DSN-BLD-050"
+      ]
+    },
+    "CMP-CBT": {
+      "name": "Change Impact and Regression",
+      "layer": "L4",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-COV",
+        "CMP-PRJ"
+      ],
+      "elements": [
+        "DSN-CBT-010",
+        "DSN-CBT-020",
+        "DSN-CBT-030",
+        "DSN-CBT-040",
+        "DSN-CBT-050"
+      ]
+    },
+    "CMP-CLI": {
+      "name": "Command Line Front-End",
+      "layer": "L5",
+      "depends_on": [
+        "CMP-API"
+      ],
+      "elements": [
+        "DSN-CLI-010",
+        "DSN-CLI-020",
+        "DSN-CLI-030",
+        "DSN-CLI-040",
+        "DSN-CLI-050",
+        "DSN-CLI-060"
+      ]
+    },
+    "CMP-CORE": {
+      "name": "Core Platform Services",
+      "layer": "L0",
+      "depends_on": [],
+      "elements": [
+        "DSN-CORE-010",
+        "DSN-CORE-020",
+        "DSN-CORE-030",
+        "DSN-CORE-040",
+        "DSN-CORE-050",
+        "DSN-CORE-060",
+        "DSN-CORE-070",
+        "DSN-CORE-080",
+        "DSN-CORE-090",
+        "DSN-CORE-100",
+        "DSN-CORE-110",
+        "DSN-CORE-120",
+        "DSN-CORE-130"
+      ]
+    },
+    "CMP-COV": {
+      "name": "Coverage Engine",
+      "layer": "L4",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-EXH",
+        "CMP-EXT",
+        "CMP-TCH"
+      ],
+      "elements": [
+        "DSN-COV-010",
+        "DSN-COV-020",
+        "DSN-COV-030",
+        "DSN-COV-040",
+        "DSN-COV-050",
+        "DSN-COV-060",
+        "DSN-COV-070",
+        "DSN-COV-080",
+        "DSN-COV-090",
+        "DSN-COV-100"
+      ]
+    },
+    "CMP-EXH": {
+      "name": "Host Execution Runner",
+      "layer": "L3",
+      "depends_on": [
+        "CMP-BLD",
+        "CMP-CORE",
+        "CMP-SEC"
+      ],
+      "elements": [
+        "DSN-EXH-010",
+        "DSN-EXH-020",
+        "DSN-EXH-030",
+        "DSN-EXH-040",
+        "DSN-EXH-050",
+        "DSN-EXH-060"
+      ]
+    },
+    "CMP-EXT": {
+      "name": "Target Execution Runner",
+      "layer": "L3",
+      "depends_on": [
+        "CMP-BLD",
+        "CMP-CORE",
+        "CMP-PLG",
+        "CMP-SEC"
+      ],
+      "elements": [
+        "DSN-EXT-010",
+        "DSN-EXT-020",
+        "DSN-EXT-030",
+        "DSN-EXT-040",
+        "DSN-EXT-050",
+        "DSN-EXT-060",
+        "DSN-EXT-070",
+        "DSN-EXT-080",
+        "DSN-EXT-090",
+        "DSN-EXT-100"
+      ]
+    },
+    "CMP-GEN": {
+      "name": "Generation Engine",
+      "layer": "L2",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-PLG"
+      ],
+      "elements": [
+        "DSN-GEN-010",
+        "DSN-GEN-020",
+        "DSN-GEN-030",
+        "DSN-GEN-040",
+        "DSN-GEN-050",
+        "DSN-GEN-060",
+        "DSN-GEN-070",
+        "DSN-GEN-080",
+        "DSN-GEN-090",
+        "DSN-GEN-100",
+        "DSN-GEN-110",
+        "DSN-GEN-120",
+        "DSN-GEN-130",
+        "DSN-GEN-140",
+        "DSN-GEN-150",
+        "DSN-GEN-160"
+      ]
+    },
+    "CMP-GUI": {
+      "name": "Standalone Desktop Application",
+      "layer": "L5",
+      "depends_on": [
+        "CMP-API"
+      ],
+      "elements": [
+        "DSN-GUI-010",
+        "DSN-GUI-020",
+        "DSN-GUI-030",
+        "DSN-GUI-040",
+        "DSN-GUI-050",
+        "DSN-GUI-060",
+        "DSN-GUI-070",
+        "DSN-GUI-080",
+        "DSN-GUI-090",
+        "DSN-GUI-100",
+        "DSN-GUI-110",
+        "DSN-GUI-120",
+        "DSN-GUI-130",
+        "DSN-GUI-140",
+        "DSN-GUI-150",
+        "DSN-GUI-160",
+        "DSN-GUI-170",
+        "DSN-GUI-180",
+        "DSN-GUI-190",
+        "DSN-GUI-200",
+        "DSN-GUI-210",
+        "DSN-GUI-220",
+        "DSN-GUI-230",
+        "DSN-GUI-240",
+        "DSN-GUI-250",
+        "DSN-GUI-260"
+      ]
+    },
+    "CMP-ING": {
+      "name": "Ingestion and Scope Resolver",
+      "layer": "L1",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-PRJ"
+      ],
+      "elements": [
+        "DSN-ING-010",
+        "DSN-ING-020",
+        "DSN-ING-030",
+        "DSN-ING-040",
+        "DSN-ING-050",
+        "DSN-ING-060",
+        "DSN-ING-070",
+        "DSN-ING-080",
+        "DSN-ING-090",
+        "DSN-ING-100",
+        "DSN-ING-110"
+      ]
+    },
+    "CMP-MIG": {
+      "name": "Migration and Interoperability",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-GEN",
+        "CMP-REP",
+        "CMP-TCM"
+      ],
+      "elements": [
+        "DSN-MIG-010",
+        "DSN-MIG-020",
+        "DSN-MIG-030",
+        "DSN-MIG-040",
+        "DSN-MIG-050",
+        "DSN-MIG-060",
+        "DSN-MIG-070",
+        "DSN-MIG-080"
+      ]
+    },
+    "CMP-PKG": {
+      "name": "Packaging, Installation and Release Engineering",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-SEC"
+      ],
+      "elements": [
+        "DSN-PKG-010",
+        "DSN-PKG-020",
+        "DSN-PKG-030",
+        "DSN-PKG-040",
+        "DSN-PKG-050",
+        "DSN-PKG-060",
+        "DSN-PKG-070",
+        "DSN-PKG-080",
+        "DSN-PKG-090",
+        "DSN-PKG-100",
+        "DSN-PKG-110",
+        "DSN-PKG-120",
+        "DSN-PKG-130"
+      ]
+    },
+    "CMP-PLG": {
+      "name": "Extension Framework",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-CORE"
+      ],
+      "elements": [
+        "DSN-PLG-010",
+        "DSN-PLG-020",
+        "DSN-PLG-030",
+        "DSN-PLG-040"
+      ]
+    },
+    "CMP-PRJ": {
+      "name": "Project and Workspace Store",
+      "layer": "L0",
+      "depends_on": [
+        "CMP-CORE"
+      ],
+      "elements": [
+        "DSN-PRJ-010",
+        "DSN-PRJ-020",
+        "DSN-PRJ-030",
+        "DSN-PRJ-040",
+        "DSN-PRJ-050",
+        "DSN-PRJ-060",
+        "DSN-PRJ-070",
+        "DSN-PRJ-080"
+      ]
+    },
+    "CMP-QUA": {
+      "name": "Qualification Evidence",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-PKG",
+        "CMP-REP"
+      ],
+      "elements": [
+        "DSN-QUA-010",
+        "DSN-QUA-020",
+        "DSN-QUA-030",
+        "DSN-QUA-040",
+        "DSN-QUA-050",
+        "DSN-QUA-060",
+        "DSN-QUA-070",
+        "DSN-QUA-080"
+      ]
+    },
+    "CMP-REP": {
+      "name": "Reporting Pipeline",
+      "layer": "L4",
+      "depends_on": [
+        "CMP-CBT",
+        "CMP-CORE",
+        "CMP-COV",
+        "CMP-PLG",
+        "CMP-TRC"
+      ],
+      "elements": [
+        "DSN-REP-010",
+        "DSN-REP-020",
+        "DSN-REP-030",
+        "DSN-REP-040",
+        "DSN-REP-050",
+        "DSN-REP-060",
+        "DSN-REP-070",
+        "DSN-REP-080",
+        "DSN-REP-090",
+        "DSN-REP-100",
+        "DSN-REP-110",
+        "DSN-REP-120",
+        "DSN-REP-130"
+      ]
+    },
+    "CMP-SEC": {
+      "name": "Security and Integrity Services",
+      "layer": "L6",
+      "depends_on": [
+        "CMP-CORE"
+      ],
+      "elements": [
+        "DSN-SEC-010",
+        "DSN-SEC-020",
+        "DSN-SEC-030",
+        "DSN-SEC-040",
+        "DSN-SEC-050",
+        "DSN-SEC-060",
+        "DSN-SEC-070",
+        "DSN-SEC-080",
+        "DSN-SEC-090",
+        "DSN-SEC-100",
+        "DSN-SEC-110"
+      ]
+    },
+    "CMP-TCH": {
+      "name": "Toolchain Abstraction",
+      "layer": "L1",
+      "depends_on": [
+        "CMP-CORE",
+        "CMP-PLG"
+      ],
+      "elements": [
+        "DSN-TCH-010",
+        "DSN-TCH-020",
+        "DSN-TCH-030",
+        "DSN-TCH-040",
+        "DSN-TCH-050",
+        "DSN-TCH-060",
+        "DSN-TCH-070",
+        "DSN-TCH-080"
+      ]
+    },
+    "CMP-TCM": {
+      "name": "Test Case Model and Store",
+      "layer": "L2",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-PRJ"
+      ],
+      "elements": [
+        "DSN-TCM-010",
+        "DSN-TCM-020",
+        "DSN-TCM-030",
+        "DSN-TCM-040",
+        "DSN-TCM-050",
+        "DSN-TCM-060",
+        "DSN-TCM-070",
+        "DSN-TCM-080",
+        "DSN-TCM-090",
+        "DSN-TCM-100",
+        "DSN-TCM-110"
+      ]
+    },
+    "CMP-TRC": {
+      "name": "Traceability Engine",
+      "layer": "L4",
+      "depends_on": [
+        "CMP-ANA",
+        "CMP-CORE",
+        "CMP-PRJ",
+        "CMP-TCM"
+      ],
+      "elements": [
+        "DSN-TRC-010",
+        "DSN-TRC-020",
+        "DSN-TRC-030",
+        "DSN-TRC-040",
+        "DSN-TRC-050",
+        "DSN-TRC-060",
+        "DSN-TRC-070",
+        "DSN-TRC-080"
+      ]
+    }
+  }
+}
