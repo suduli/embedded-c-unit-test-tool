@@ -1,0 +1,61 @@
+name: Traceability
+
+# The requirement-to-design allocation is only worth anything if it is checked.
+# This is the gate described in design/SDD-004-traceability-architecture.md §7.1.
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "SRS-001-requirements.md"
+      - "design/**"
+      - ".github/workflows/traceability.yml"
+  pull_request:
+    paths:
+      - "SRS-001-requirements.md"
+      - "design/**"
+      - ".github/workflows/traceability.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Requirement allocation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check "pyyaml==6.0.1"
+
+      # Fails on: an unallocated requirement, a reference to a requirement that
+      # does not exist, allocation of a Future-priority requirement, duplicate or
+      # malformed ids, an unjustified derived element, a broken refines or
+      # depends_on, an upward layer dependency, or a cycle in the component graph.
+      - name: Validate the design element register
+        run: python3 design/trace/trace_check.py
+
+      # The generated artifacts are committed so they are reviewable in a diff.
+      # That is only safe if they cannot go stale, so regenerate and require the
+      # result to be byte-identical. This also enforces the determinism the
+      # project demands of itself (TOOL-NFR-060).
+      - name: Check generated artifacts are current and deterministic
+        run: |
+          python3 design/trace/trace_check.py --quiet \
+            --emit-matrix design/trace/requirement-matrix.csv \
+            --emit-json   design/trace/trace-graph.json
+          if ! git diff --exit-code --stat -- design/trace/; then
+            echo
+            echo "::error::Generated trace artifacts are out of date."
+            echo "Run this and commit the result:"
+            echo "  python3 design/trace/trace_check.py \\"
+            echo "    --emit-matrix design/trace/requirement-matrix.csv \\"
+            echo "    --emit-json   design/trace/trace-graph.json"
+            exit 1
+          fi
