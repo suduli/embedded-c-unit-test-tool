@@ -1,0 +1,18 @@
+# Licensees
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+## License Information
+
+This software is free and open source. Under the AGPL-3.0 license:
+
+- You are free to use, modify, and distribute this software
+- If you modify and distribute this software, you must make your modifications available under the same AGPL-3.0 license
+- If you run a modified version on a server or network, users connecting to that service must be able to access the modified source code
+- The software is provided "as-is" without warranty
+
+## Full License
+
+For the complete license text and terms, please see the LICENSE file in this repository.
+
+For more information about AGPL-3.0, visit: https://www.gnu.org/licenses/agpl-3.0.html
