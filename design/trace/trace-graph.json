@@ -8,7 +8,8 @@
       {
         "id": "SRS-001",
         "version": "0.1",
-        "path": "SRS-001-requirements.md"
+        "path": "SRS-001-requirements.md",
+        "requirement_count": 323
       },
       {
         "id": "ADR-001",
@@ -19,7 +20,7 @@
   },
   "generated_from": {
     "requirements": 323,
-    "elements": 237
+    "elements": 239
   },
   "requirements": {
     "TOOL-AIF-010": {
@@ -613,6 +614,7 @@
       "verification": "I",
       "text": "The tool shall state explicitly, in the user documentation and in every report, which MC/DC form is measured (masking or unique-cause) and by which compiler mechanism.",
       "satisfied_by": [
+        "DSN-CORE-110",
         "DSN-COV-020"
       ]
     },
@@ -745,7 +747,8 @@
       "verification": "T",
       "text": "The tool shall build and execute the test harness on the development host.",
       "satisfied_by": [
-        "DSN-BLD-010"
+        "DSN-BLD-010",
+        "DSN-EXH-010"
       ]
     },
     "TOOL-EXE-020": {
@@ -1449,6 +1452,7 @@
       "verification": "T",
       "text": "The tool shall export test cases and results in documented open formats sufficient to reconstruct them in another tool, so that adopting this tool does not create lock-in.",
       "satisfied_by": [
+        "DSN-REP-020",
         "DSN-TCM-070"
       ]
     },
@@ -1658,7 +1662,7 @@
       "verification": "D",
       "text": "The tool shall operate within a documented memory ceiling on a project of the scale defined in TOOL-NFR-050, and shall degrade predictably rather than exhausting host memory.",
       "satisfied_by": [
-        "DSN-CORE-050"
+        "DSN-CORE-140"
       ]
     },
     "TOOL-NFR-160": {
@@ -3397,7 +3401,7 @@
       "verification": "T",
       "text": "The application shall present a console pane displaying the engine commands executed on the user's behalf, so that any GUI action can be reproduced from the command line.",
       "satisfied_by": [
-        "DSN-API-040"
+        "DSN-GUI-270"
       ]
     },
     "TOOL-UIX-250": {
@@ -3485,6 +3489,7 @@
       "verification": "I",
       "text": "All project, environment, test case, and configuration state shall be stored in plain-text, version-controllable files. The graphical application shall never be the sole source of any state.",
       "satisfied_by": [
+        "DSN-PRJ-010",
         "DSN-PRJ-080"
       ]
     },
@@ -3583,7 +3588,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-020": {
@@ -3595,7 +3602,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-AIF-030": {
@@ -3609,7 +3618,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-040": {
@@ -3622,7 +3634,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "D",
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-050": {
@@ -3634,7 +3649,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-060": {
@@ -3646,7 +3663,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-070": {
@@ -3658,7 +3677,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-080": {
@@ -3670,7 +3691,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-090": {
@@ -3682,7 +3705,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-100": {
@@ -3695,7 +3720,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-110": {
@@ -3711,7 +3738,11 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "A",
+        "I",
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-120": {
@@ -3723,7 +3754,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-AIF-130": {
@@ -3735,7 +3768,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-010": {
@@ -3748,7 +3783,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-020": {
@@ -3762,7 +3799,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-030": {
@@ -3774,7 +3813,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-040": {
@@ -3786,7 +3827,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "ADR-001"
     },
     "DSN-ANA-050": {
@@ -3798,7 +3841,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-060": {
@@ -3810,7 +3855,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-070": {
@@ -3823,7 +3870,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A",
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-080": {
@@ -3835,7 +3885,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ANA-090": {
@@ -3847,7 +3899,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-API-010": {
@@ -3859,7 +3913,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-API-020": {
@@ -3872,7 +3928,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "A",
+        "I"
+      ],
       "open": null
     },
     "DSN-API-030": {
@@ -3884,7 +3943,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-API-040": {
@@ -3892,12 +3953,13 @@
       "component": "CMP-API",
       "layer": "L5",
       "satisfies": [
-        "TOOL-UIX-240",
         "TOOL-UIX-330"
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-010": {
@@ -3910,7 +3972,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-020": {
@@ -3922,7 +3986,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "ADR-003"
     },
     "DSN-ATG-030": {
@@ -3934,7 +4000,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "ADR-003"
     },
     "DSN-ATG-040": {
@@ -3946,7 +4014,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-050": {
@@ -3958,7 +4028,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-060": {
@@ -3970,7 +4042,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-070": {
@@ -3982,7 +4056,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-ATG-080": {
@@ -3994,7 +4070,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-090": {
@@ -4006,7 +4084,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-ATG-100": {
@@ -4018,7 +4098,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ATG-110": {
@@ -4028,7 +4110,9 @@
       "satisfies": [],
       "refines": [],
       "derived": true,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-BLD-010": {
@@ -4040,7 +4124,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-BLD-020": {
@@ -4052,7 +4138,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-BLD-030": {
@@ -4064,7 +4152,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-BLD-040": {
@@ -4076,7 +4166,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-BLD-050": {
@@ -4088,7 +4180,9 @@
         "DSN-BLD-010"
       ],
       "derived": true,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CBT-010": {
@@ -4100,7 +4194,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CBT-020": {
@@ -4113,7 +4209,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CBT-030": {
@@ -4125,7 +4223,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-CBT-040": {
@@ -4138,7 +4238,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CBT-050": {
@@ -4150,7 +4252,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CLI-010": {
@@ -4163,7 +4267,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D",
+        "T"
+      ],
       "open": null
     },
     "DSN-CLI-020": {
@@ -4175,7 +4282,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CLI-030": {
@@ -4187,7 +4296,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-CLI-040": {
@@ -4199,7 +4310,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-CLI-050": {
@@ -4211,7 +4324,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CLI-060": {
@@ -4223,7 +4338,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-010": {
@@ -4236,7 +4353,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A",
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-020": {
@@ -4248,7 +4368,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-030": {
@@ -4261,7 +4383,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-040": {
@@ -4273,7 +4397,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-050": {
@@ -4281,12 +4407,13 @@
       "component": "CMP-CORE",
       "layer": "L0",
       "satisfies": [
-        "TOOL-NFR-050",
-        "TOOL-NFR-150"
+        "TOOL-NFR-050"
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-CORE-060": {
@@ -4300,7 +4427,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-CORE-070": {
@@ -4313,7 +4442,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-080": {
@@ -4325,7 +4456,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-CORE-090": {
@@ -4337,7 +4470,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-CORE-100": {
@@ -4350,7 +4485,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-CORE-110": {
@@ -4358,11 +4495,14 @@
       "component": "CMP-CORE",
       "layer": "L0",
       "satisfies": [
+        "TOOL-COV-060",
         "TOOL-NFR-120"
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-CORE-120": {
@@ -4375,7 +4515,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A",
+        "D"
+      ],
       "open": null
     },
     "DSN-CORE-130": {
@@ -4388,7 +4531,23 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
+      "open": null
+    },
+    "DSN-CORE-140": {
+      "title": "Documented memory ceiling",
+      "component": "CMP-CORE",
+      "layer": "L0",
+      "satisfies": [
+        "TOOL-NFR-150"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-COV-010": {
@@ -4403,7 +4562,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "ADR-004"
     },
     "DSN-COV-020": {
@@ -4417,7 +4578,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": "SRS-001 open question 2"
     },
     "DSN-COV-030": {
@@ -4429,7 +4593,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-040": {
@@ -4441,7 +4607,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-050": {
@@ -4453,7 +4621,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-060": {
@@ -4466,7 +4636,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-070": {
@@ -4478,7 +4650,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-080": {
@@ -4491,7 +4665,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-090": {
@@ -4503,7 +4680,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-COV-100": {
@@ -4515,19 +4694,24 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-010": {
-      "title": "Result capture and normalisation",
+      "title": "Host execution and result normalisation",
       "component": "CMP-EXH",
       "layer": "L3",
       "satisfies": [
+        "TOOL-EXE-010",
         "TOOL-EXE-020"
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-020": {
@@ -4539,7 +4723,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-030": {
@@ -4551,7 +4737,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-040": {
@@ -4563,7 +4751,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-050": {
@@ -4575,7 +4765,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXH-060": {
@@ -4587,7 +4779,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "SRS-001 open question 9"
     },
     "DSN-EXT-010": {
@@ -4600,7 +4794,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D",
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-020": {
@@ -4612,7 +4809,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-030": {
@@ -4625,7 +4824,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-040": {
@@ -4637,7 +4838,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-050": {
@@ -4649,7 +4852,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-EXT-060": {
@@ -4661,7 +4866,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-070": {
@@ -4673,7 +4880,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-080": {
@@ -4685,7 +4894,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-EXT-090": {
@@ -4697,7 +4908,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-EXT-100": {
@@ -4709,7 +4922,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-010": {
@@ -4722,7 +4937,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-020": {
@@ -4735,7 +4952,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-030": {
@@ -4747,7 +4966,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-040": {
@@ -4762,7 +4983,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "A",
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-050": {
@@ -4774,7 +4998,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-060": {
@@ -4786,7 +5012,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-GEN-070": {
@@ -4800,7 +5028,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-080": {
@@ -4813,7 +5043,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-090": {
@@ -4825,7 +5057,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-100": {
@@ -4839,7 +5073,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-110": {
@@ -4852,7 +5088,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-120": {
@@ -4865,7 +5103,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-130": {
@@ -4878,7 +5118,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-140": {
@@ -4890,7 +5132,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-150": {
@@ -4902,7 +5146,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GEN-160": {
@@ -4914,7 +5160,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-010": {
@@ -4927,7 +5175,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D",
+        "I"
+      ],
       "open": "ADR-001"
     },
     "DSN-GUI-020": {
@@ -4939,7 +5190,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-030": {
@@ -4952,7 +5205,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-040": {
@@ -4964,7 +5219,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-050": {
@@ -4976,7 +5233,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-060": {
@@ -4990,7 +5249,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-070": {
@@ -5002,7 +5263,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-080": {
@@ -5016,7 +5279,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "ADR-001"
     },
     "DSN-GUI-090": {
@@ -5028,7 +5293,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-100": {
@@ -5040,7 +5307,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-110": {
@@ -5052,7 +5321,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-120": {
@@ -5064,7 +5335,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-130": {
@@ -5076,7 +5349,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-140": {
@@ -5088,7 +5363,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": "SRS-001 open question 9"
     },
     "DSN-GUI-150": {
@@ -5100,7 +5377,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-160": {
@@ -5112,7 +5391,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-170": {
@@ -5124,7 +5405,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-180": {
@@ -5136,7 +5419,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-190": {
@@ -5148,7 +5433,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-200": {
@@ -5160,7 +5447,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-210": {
@@ -5172,7 +5461,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-220": {
@@ -5184,7 +5475,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-230": {
@@ -5196,7 +5489,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-GUI-240": {
@@ -5208,7 +5503,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-GUI-250": {
@@ -5220,7 +5517,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-GUI-260": {
@@ -5232,7 +5531,23 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
+      "open": null
+    },
+    "DSN-GUI-270": {
+      "title": "Engine command console",
+      "component": "CMP-GUI",
+      "layer": "L5",
+      "satisfies": [
+        "TOOL-UIX-240"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-010": {
@@ -5246,7 +5561,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-020": {
@@ -5259,7 +5576,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-ING-030": {
@@ -5272,7 +5591,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-040": {
@@ -5284,7 +5605,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-050": {
@@ -5296,7 +5619,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-060": {
@@ -5309,7 +5634,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-070": {
@@ -5321,7 +5648,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-080": {
@@ -5335,7 +5664,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-090": {
@@ -5348,7 +5680,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-100": {
@@ -5360,7 +5694,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-ING-110": {
@@ -5372,7 +5708,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-010": {
@@ -5384,7 +5722,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-020": {
@@ -5396,7 +5736,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-030": {
@@ -5408,7 +5750,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-040": {
@@ -5420,7 +5764,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-050": {
@@ -5432,7 +5778,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-060": {
@@ -5444,7 +5792,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-070": {
@@ -5456,7 +5806,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-MIG-080": {
@@ -5468,7 +5820,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-010": {
@@ -5481,7 +5835,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": "ADR-007"
     },
     "DSN-PKG-020": {
@@ -5494,7 +5850,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D",
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-030": {
@@ -5507,7 +5866,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-040": {
@@ -5519,7 +5880,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PKG-050": {
@@ -5531,7 +5894,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PKG-060": {
@@ -5543,7 +5908,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-PKG-070": {
@@ -5555,7 +5922,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-PKG-080": {
@@ -5567,7 +5936,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-PKG-090": {
@@ -5580,7 +5951,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": "ADR-005"
     },
     "DSN-PKG-100": {
@@ -5592,7 +5965,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-110": {
@@ -5604,7 +5979,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-120": {
@@ -5616,7 +5993,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PKG-130": {
@@ -5628,7 +6007,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PLG-010": {
@@ -5640,7 +6021,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-PLG-020": {
@@ -5652,7 +6035,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PLG-030": {
@@ -5664,7 +6049,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-PLG-040": {
@@ -5676,7 +6063,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PRJ-010": {
@@ -5685,11 +6074,14 @@
       "layer": "L0",
       "satisfies": [
         "TOOL-PRJ-010",
-        "TOOL-PRJ-020"
+        "TOOL-PRJ-020",
+        "TOOL-UIX-320"
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": "ADR-002"
     },
     "DSN-PRJ-020": {
@@ -5702,7 +6094,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PRJ-030": {
@@ -5715,7 +6109,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PRJ-040": {
@@ -5727,7 +6123,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-PRJ-050": {
@@ -5739,7 +6137,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PRJ-060": {
@@ -5751,7 +6151,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PRJ-070": {
@@ -5763,7 +6165,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-PRJ-080": {
@@ -5776,7 +6180,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-010": {
@@ -5788,7 +6194,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-020": {
@@ -5800,7 +6208,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-030": {
@@ -5812,7 +6222,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-040": {
@@ -5824,7 +6236,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-050": {
@@ -5836,7 +6250,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-060": {
@@ -5848,7 +6264,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-070": {
@@ -5860,7 +6278,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-QUA-080": {
@@ -5872,7 +6292,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-REP-010": {
@@ -5885,7 +6307,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A",
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-020": {
@@ -5893,11 +6318,14 @@
       "component": "CMP-REP",
       "layer": "L4",
       "satisfies": [
+        "TOOL-MIG-060",
         "TOOL-REP-010"
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-030": {
@@ -5910,7 +6338,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-040": {
@@ -5924,7 +6354,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-050": {
@@ -5936,7 +6368,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-060": {
@@ -5948,7 +6382,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-REP-070": {
@@ -5960,7 +6396,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-080": {
@@ -5972,7 +6410,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-090": {
@@ -5984,7 +6424,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-100": {
@@ -5996,7 +6438,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-110": {
@@ -6008,7 +6452,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-REP-120": {
@@ -6020,7 +6466,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-REP-130": {
@@ -6032,7 +6480,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-SEC-010": {
@@ -6044,7 +6494,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-SEC-020": {
@@ -6058,7 +6510,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-SEC-030": {
@@ -6070,7 +6524,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-SEC-040": {
@@ -6082,7 +6538,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-SEC-050": {
@@ -6094,7 +6552,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-SEC-060": {
@@ -6106,7 +6566,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-SEC-070": {
@@ -6118,7 +6580,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-SEC-080": {
@@ -6130,7 +6594,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-SEC-090": {
@@ -6142,7 +6608,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "I",
+      "verification": [
+        "I"
+      ],
       "open": null
     },
     "DSN-SEC-100": {
@@ -6154,7 +6622,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-SEC-110": {
@@ -6166,7 +6636,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-010": {
@@ -6180,7 +6652,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-020": {
@@ -6192,7 +6666,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-030": {
@@ -6206,7 +6682,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-040": {
@@ -6218,7 +6697,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-050": {
@@ -6230,7 +6711,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-060": {
@@ -6242,7 +6725,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCH-070": {
@@ -6254,7 +6739,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "D",
+      "verification": [
+        "D"
+      ],
       "open": null
     },
     "DSN-TCH-080": {
@@ -6266,7 +6753,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-010": {
@@ -6278,7 +6767,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-020": {
@@ -6292,7 +6783,10 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "I",
+        "T"
+      ],
       "open": "ADR-002"
     },
     "DSN-TCM-030": {
@@ -6305,7 +6799,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-040": {
@@ -6317,7 +6813,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-050": {
@@ -6329,7 +6827,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-060": {
@@ -6341,7 +6841,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "A",
+      "verification": [
+        "A"
+      ],
       "open": null
     },
     "DSN-TCM-070": {
@@ -6354,7 +6856,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-080": {
@@ -6366,7 +6870,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-090": {
@@ -6378,7 +6884,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-100": {
@@ -6390,7 +6898,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TCM-110": {
@@ -6402,7 +6912,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-010": {
@@ -6414,7 +6926,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-020": {
@@ -6427,7 +6941,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-030": {
@@ -6439,7 +6955,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-040": {
@@ -6452,7 +6970,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-050": {
@@ -6464,7 +6984,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-060": {
@@ -6476,7 +6998,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-070": {
@@ -6488,7 +7012,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     },
     "DSN-TRC-080": {
@@ -6500,7 +7026,9 @@
       ],
       "refines": [],
       "derived": false,
-      "verification": "T",
+      "verification": [
+        "T"
+      ],
       "open": null
     }
   },
@@ -6508,6 +7036,7 @@
     "CMP-AIF": {
       "name": "AI Assist Subsystem",
       "layer": "L6",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ATG",
         "CMP-CORE",
@@ -6534,6 +7063,7 @@
     "CMP-ANA": {
       "name": "Source Analyzer",
       "layer": "L1",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-ING",
@@ -6554,6 +7084,7 @@
     "CMP-API": {
       "name": "Engine Service Interface",
       "layer": "L5",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE"
       ],
@@ -6567,6 +7098,7 @@
     "CMP-ATG": {
       "name": "Automatic Test Generation",
       "layer": "L2",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",
@@ -6589,6 +7121,7 @@
     "CMP-BLD": {
       "name": "Build Orchestrator",
       "layer": "L3",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-GEN",
@@ -6605,6 +7138,7 @@
     "CMP-CBT": {
       "name": "Change Impact and Regression",
       "layer": "L4",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",
@@ -6622,6 +7156,7 @@
     "CMP-CLI": {
       "name": "Command Line Front-End",
       "layer": "L5",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-API"
       ],
@@ -6637,6 +7172,7 @@
     "CMP-CORE": {
       "name": "Core Platform Services",
       "layer": "L0",
+      "cross_cutting": false,
       "depends_on": [],
       "elements": [
         "DSN-CORE-010",
@@ -6651,12 +7187,14 @@
         "DSN-CORE-100",
         "DSN-CORE-110",
         "DSN-CORE-120",
-        "DSN-CORE-130"
+        "DSN-CORE-130",
+        "DSN-CORE-140"
       ]
     },
     "CMP-COV": {
       "name": "Coverage Engine",
       "layer": "L4",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",
@@ -6680,10 +7218,12 @@
     "CMP-EXH": {
       "name": "Host Execution Runner",
       "layer": "L3",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-BLD",
         "CMP-CORE",
-        "CMP-SEC"
+        "CMP-SEC",
+        "CMP-TCM"
       ],
       "elements": [
         "DSN-EXH-010",
@@ -6697,11 +7237,13 @@
     "CMP-EXT": {
       "name": "Target Execution Runner",
       "layer": "L3",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-BLD",
         "CMP-CORE",
         "CMP-PLG",
-        "CMP-SEC"
+        "CMP-SEC",
+        "CMP-TCM"
       ],
       "elements": [
         "DSN-EXT-010",
@@ -6719,10 +7261,12 @@
     "CMP-GEN": {
       "name": "Generation Engine",
       "layer": "L2",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",
-        "CMP-PLG"
+        "CMP-PLG",
+        "CMP-TCM"
       ],
       "elements": [
         "DSN-GEN-010",
@@ -6746,6 +7290,7 @@
     "CMP-GUI": {
       "name": "Standalone Desktop Application",
       "layer": "L5",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-API"
       ],
@@ -6775,12 +7320,14 @@
         "DSN-GUI-230",
         "DSN-GUI-240",
         "DSN-GUI-250",
-        "DSN-GUI-260"
+        "DSN-GUI-260",
+        "DSN-GUI-270"
       ]
     },
     "CMP-ING": {
       "name": "Ingestion and Scope Resolver",
       "layer": "L1",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-PRJ"
@@ -6802,6 +7349,7 @@
     "CMP-MIG": {
       "name": "Migration and Interoperability",
       "layer": "L6",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-GEN",
@@ -6822,6 +7370,7 @@
     "CMP-PKG": {
       "name": "Packaging, Installation and Release Engineering",
       "layer": "L6",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-SEC"
@@ -6845,6 +7394,7 @@
     "CMP-PLG": {
       "name": "Extension Framework",
       "layer": "L6",
+      "cross_cutting": true,
       "depends_on": [
         "CMP-CORE"
       ],
@@ -6858,6 +7408,7 @@
     "CMP-PRJ": {
       "name": "Project and Workspace Store",
       "layer": "L0",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE"
       ],
@@ -6875,6 +7426,7 @@
     "CMP-QUA": {
       "name": "Qualification Evidence",
       "layer": "L6",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-PKG",
@@ -6894,10 +7446,13 @@
     "CMP-REP": {
       "name": "Reporting Pipeline",
       "layer": "L4",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CBT",
         "CMP-CORE",
         "CMP-COV",
+        "CMP-EXH",
+        "CMP-EXT",
         "CMP-PLG",
         "CMP-TRC"
       ],
@@ -6920,6 +7475,7 @@
     "CMP-SEC": {
       "name": "Security and Integrity Services",
       "layer": "L6",
+      "cross_cutting": true,
       "depends_on": [
         "CMP-CORE"
       ],
@@ -6940,6 +7496,7 @@
     "CMP-TCH": {
       "name": "Toolchain Abstraction",
       "layer": "L1",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-CORE",
         "CMP-PLG"
@@ -6958,6 +7515,7 @@
     "CMP-TCM": {
       "name": "Test Case Model and Store",
       "layer": "L2",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",
@@ -6980,6 +7538,7 @@
     "CMP-TRC": {
       "name": "Traceability Engine",
       "layer": "L4",
+      "cross_cutting": false,
       "depends_on": [
         "CMP-ANA",
         "CMP-CORE",

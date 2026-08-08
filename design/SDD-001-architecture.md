@@ -33,8 +33,8 @@ element whose shape depends on an open decision names it (§8).
 
 ## 2. Architectural drivers
 
-Five requirements in SRS-001 determine the shape of the system more than the
-other 318 do. Each is called out here because most of the structural choices
+Five drivers in SRS-001 determine the shape of the system more than anything
+else in it. Each is called out here because most of the structural choices
 below are consequences of one of them.
 
 | Driver | Requirement | Structural consequence |
@@ -107,10 +107,13 @@ Two boundaries in that picture are load-bearing:
 
 ## 4. Layering
 
-Seven layers. The rule is one line: **a component may depend on its own layer
-or a lower one, plus L6.** L6 is cross-cutting and may be depended on from
-anywhere; it may not depend upward. `trace_check.py` enforces this and detects
-cycles, so the rule cannot decay silently.
+Seven layers. The rule is one line: **a component may depend on its own layer,
+a lower one, or a component explicitly marked cross-cutting.** Only two are so
+marked — `CMP-PLG` and `CMP-SEC` — and being in L6 confers nothing by itself:
+`CMP-PKG`, `CMP-QUA`, `CMP-MIG` and `CMP-AIF` are ordinary application code
+that happens to be cross-cutting in *subject*, not in dependency direction.
+`trace_check.py` enforces this and detects cycles, so the rule cannot decay
+silently.
 
 ```mermaid
 flowchart TD
@@ -124,11 +127,16 @@ flowchart TD
 
   L5 --> L4 --> L3 --> L2 --> L1 --> L0
   L6 -.-> L0
-  L5 -.-> L6
+  L4 -.-> L6
   L3 -.-> L6
   L2 -.-> L6
   L1 -.-> L6
 ```
+
+The dotted edges are the ones that actually exist in the register: `CMP-TCH`,
+`CMP-GEN`, `CMP-EXT` and `CMP-REP` depend on `CMP-PLG`, and `CMP-EXH` and
+`CMP-EXT` on `CMP-SEC`. No L5 component depends on L6 at all — the front-ends
+reach everything through the engine API.
 
 | Layer | Name | Rule |
 |---|---|---|
@@ -138,7 +146,7 @@ flowchart TD
 | L3 | Realization | Compiles and runs. Owns every subprocess that executes user-derived code. |
 | L4 | Evidence | Consumes execution results. Produces what an auditor reads. |
 | L5 | Interfaces | Front-ends. Hold no capability of their own. |
-| L6 | Assurance and Ecosystem | Cross-cutting. May be depended on by any layer. |
+| L6 | Assurance and Ecosystem | Assurance concerns and extension surfaces. Only components marked `cross_cutting: true` may be depended on from below. |
 
 ### 4.1 L0 — Platform and Persistence
 
@@ -147,7 +155,9 @@ unenforceable if left to individual authors: determinism (DSN-CORE-010),
 the structured error model and fail-safe termination (DSN-CORE-020),
 cancellation with transactional state commits (DSN-CORE-040), output-root
 confinement and source immutability (DSN-CORE-060), and the provenance record
-every artifact embeds (DSN-CORE-100).
+every *generated* artifact embeds (DSN-CORE-100). The qualifier matters: project
+files carry no timestamps or machine identity, which is what lets them stay
+byte-stable under version control (SDD-003 §4).
 
 `CMP-PRJ` is the on-disk project: schema-versioned plain text, sharded so that
 the unit of a file is the unit of concurrent edit (DSN-PRJ-030), referenced by
@@ -233,13 +243,13 @@ mechanism that reliably keeps an extension interface sufficient.
 
 ## 5. Component register
 
-24 components, 237 design elements. Requirement counts are per component; one
-requirement (TOOL-PRJ-050) is legitimately discharged by two elements, so the
-column sums to 322 rather than 321.
+24 components, 239 design elements. Requirement counts are per component.
+Five requirements are legitimately discharged by more than one element — `TOOL-COV-060`, `TOOL-EXE-010`, `TOOL-MIG-060`, `TOOL-PRJ-050`, `TOOL-UIX-320` —
+and four of those span two components, so the column sums to 325 rather than 321.
 
 | Layer | Component | Name | Elements | Reqs |
 |---|---|---|---:|---:|
-| L0 | `CMP-CORE` | Core Platform Services | 13 | 22 |
+| L0 | `CMP-CORE` | Core Platform Services | 14 | 23 |
 | L0 | `CMP-PRJ` | Project and Workspace Store | 8 | 12 |
 | L1 | `CMP-ING` | Ingestion and Scope Resolver | 11 | 19 |
 | L1 | `CMP-ANA` | Source Analyzer | 9 | 13 |
@@ -248,15 +258,15 @@ column sums to 322 rather than 321.
 | L2 | `CMP-TCM` | Test Case Model and Store | 11 | 15 |
 | L2 | `CMP-ATG` | Automatic Test Generation | 11 | 11 |
 | L3 | `CMP-BLD` | Build Orchestrator | 5 | 4 |
-| L3 | `CMP-EXH` | Host Execution Runner | 6 | 6 |
+| L3 | `CMP-EXH` | Host Execution Runner | 6 | 7 |
 | L3 | `CMP-EXT` | Target Execution Runner | 10 | 12 |
 | L4 | `CMP-COV` | Coverage Engine | 10 | 17 |
 | L4 | `CMP-CBT` | Change Impact and Regression | 5 | 7 |
 | L4 | `CMP-TRC` | Traceability Engine | 8 | 10 |
-| L4 | `CMP-REP` | Reporting Pipeline | 13 | 17 |
-| L5 | `CMP-API` | Engine Service Interface | 4 | 6 |
+| L4 | `CMP-REP` | Reporting Pipeline | 13 | 18 |
+| L5 | `CMP-API` | Engine Service Interface | 4 | 5 |
 | L5 | `CMP-CLI` | Command Line Front-End | 6 | 7 |
-| L5 | `CMP-GUI` | Standalone Desktop Application | 26 | 32 |
+| L5 | `CMP-GUI` | Standalone Desktop Application | 27 | 33 |
 | L6 | `CMP-SEC` | Security and Integrity Services | 11 | 13 |
 | L6 | `CMP-PLG` | Extension Framework | 4 | 4 |
 | L6 | `CMP-PKG` | Packaging, Installation and Release Engineering | 13 | 17 |
@@ -288,7 +298,7 @@ sequenceDiagram
   ING->>ANA: translation units + exact flags
   ANA->>ANA: parse, extract interfaces, types, globals, call graph
   ANA-->>GEN: analysis model (JSON, versioned)
-  GEN->>GEN: harness + stubs; preserve user regions
+  GEN->>GEN: harness + stubs, preserving user regions
   GEN->>BLD: sources + toolchain configuration
   BLD-->>U: built environment, or structured diagnostics
 ```
@@ -334,10 +344,10 @@ somewhere and enforced from there.
 
 | Rule | Where enforced | Requirements |
 |---|---|---|
-| Determinism | `DSN-CORE-010` — sorted iteration, content-derived identifiers, injected clock | TOOL-NFR-060, TOOL-PRJ-050, TOOL-REP-100 |
-| Source immutability | `DSN-CORE-060` — read-only path guard, output-root confinement | TOOL-NFR-070, TOOL-NFR-080 |
-| Offline operation | `DSN-CORE-090` — the core carries no network client at all | TOOL-NFR-100, TOOL-UIX-050 |
-| Provenance | `DSN-CORE-100` — one record embedded by every artifact | TOOL-QUA-060, TOOL-REP-070 |
+| Determinism | `DSN-CORE-010` — sorted iteration, content-derived identifiers *for generated artifacts*, injected clock; `DSN-PRJ-030` and `DSN-REP-080` apply it to project files and reports | TOOL-NFR-060, TOOL-PRJ-050, TOOL-REP-100 |
+| Source immutability | `DSN-CORE-060` — read-only path guard, output-root confinement | TOOL-NFR-070, TOOL-NFR-080, TOOL-PRJ-080 |
+| Offline operation | `DSN-CORE-090` — the core carries no network client at all; `DSN-API-030` offers no TCP transport | TOOL-NFR-100, TOOL-UIX-050 |
+| Provenance | `DSN-CORE-100` — one record embedded by every generated artifact and reportable on request; `DSN-REP-060` renders it | TOOL-QUA-060, TOOL-INS-110, TOOL-REP-070 |
 | Schema versioning | `DSN-PRJ-010`, `DSN-ANA-070`, `DSN-API-020`, `DSN-REP-110` | TOOL-PRJ-020, TOOL-PAR-110, TOOL-PLG-060, TOOL-REP-130 |
 | Configuration is data | `DSN-SEC-060` — no format supports expressions, includes, or hooks | TOOL-SEC-070 |
 | Nothing overclaimed | `DSN-COV-040`, `DSN-COV-080`, `DSN-CBT-030`, `DSN-ATG-080`, `DSN-AIF-110`, `DSN-QUA-070` | TOOL-COV-080, TOOL-CBT-040, TOOL-ATG-080, TOOL-AIF-090, TOOL-QUA-090 |
@@ -355,8 +365,13 @@ preventable by review alone.
 
 ## 8. Decisions this design leaves open
 
-Every element below is written to survive the decision going either way. The
-`open:` field in the register marks them machine-readably.
+All but one of the decisions below can go either way without rework; ADR-006 is
+the exception and is called out as such. Elements whose *shape* waits on a
+decision carry an `open:` field naming it, and are machine-queryable through it.
+The "elements affected" column is broader than that set — it also names elements
+that merely *bear* the consequence of a decision without being blocked by it
+(`DSN-ANA-070` is the seam that absorbs the language choice, not a victim of
+it), and those carry no marker.
 
 | Open decision | Elements affected | How the design absorbs the outcome |
 |---|---|---|
@@ -366,7 +381,7 @@ Every element below is written to survive the decision going either way. The
 | ADR-003 — symbolic execution engine | `DSN-ATG-020`, `DSN-ATG-030` | Both engines implement one adapter interface, and the component is optional and never on a default install path. |
 | ADR-004 — coverage backend strategy | `DSN-COV-010` | Per-toolchain adapters. Designating one primary reduces adapter count; it does not change the interface. |
 | ADR-005 — license | `DSN-PKG-090` | Structural rule (copyleft at process boundaries) is independent of which permissive license is chosen. |
-| ADR-006 — fork UTBotCpp | `CMP-ANA`, `CMP-ATG`, `CMP-GEN` | **Not absorbed.** A fork resets the language decision and the framework back-end. This must be resolved before SDD-001 is baselined. |
+| ADR-006 — fork UTBotCpp | Components, not elements: `CMP-ANA`, `CMP-ATG`, `CMP-GEN` | **Not absorbed**, and carries no `open:` marker because no single element can. A fork resets the language decision and the framework back-end together. This must be resolved before SDD-001 is baselined. |
 | ADR-007 — packaging | `DSN-PKG-010` | Confined to `CMP-PKG`; no other component observes the packaging mechanism. |
 | SRS open question 2 — MC/DC form | `DSN-COV-020` | The form obtained is a data field on the coverage model, rendered by every report — not a documentation claim. |
 | SRS open question 9 — debugger | `DSN-EXH-060`, `DSN-GUI-140` | The engine prepares and reports the invocation; the front-end choice is confined to L5. |

@@ -230,7 +230,10 @@ reports/            # the formats rendered at the time
 Two properties make this an archive rather than a copy:
 
 - **No outward references.** Nothing in it points into the working tree, the
-  installation, or a network location. It is readable from a tape (TOOL-INS-040).
+  installation, or a network location — it is readable from a tape. That is the
+  self-contained half of TOOL-PRJ-100; its counterpart is TOOL-INS-040, which
+  makes the *release* that produced it equally archivable, since a record you
+  can read but not re-execute is only half an answer to an auditor.
 - **Self-describing.** It carries its own schema and format versions, so a
   future tool can interpret it against a published definition rather than
   guessing (TOOL-REP-130).

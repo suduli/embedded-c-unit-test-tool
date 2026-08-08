@@ -25,6 +25,10 @@ document:
     - id: SRS-001
       version: "0.1"
       path: SRS-001-requirements.md
+      # Independently counted; the checker errors if it parses a different
+      # number, so a requirement lost to a formatting change cannot pass
+      # unnoticed.
+      requirement_count: 323
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -83,7 +87,13 @@ layers:
     rule: Front-ends. Hold no capability of their own; drive L0-L4 through the engine API.
   - id: L6
     name: Assurance and Ecosystem
-    rule: Cross-cutting concerns and extension surfaces. May be depended on by any layer.
+    rule: >
+      Assurance concerns and extension surfaces. Membership of L6 does not by
+      itself license a dependency from below — only components explicitly
+      marked `cross_cutting: true` may be depended on by a lower layer. The
+      rest of L6 (packaging, qualification, migration, AI) is ordinary
+      application code that happens to be cross-cutting in subject, not in
+      dependency direction.
 
 components:
 
@@ -108,7 +118,7 @@ components:
           environment variance is neutralised at entry. Determinism is a
           property of the platform, not a habit expected of each author.
         satisfies: [TOOL-NFR-060, TOOL-PRJ-050]
-        verification: A
+        verification: [A, T]
       - id: DSN-CORE-020
         title: Structured error model and fail-safe termination
         statement: >
@@ -146,7 +156,7 @@ components:
           held on disk and indexed rather than materialised. A configurable
           worker count and memory ceiling cause graceful degradation to lower
           parallelism rather than host exhaustion.
-        satisfies: [TOOL-NFR-050, TOOL-NFR-150]
+        satisfies: [TOOL-NFR-050]
         verification: A
       - id: DSN-CORE-060
         title: Output isolation and source immutability
@@ -189,9 +199,12 @@ components:
         statement: >
           A single service produces the provenance record — tool version, build
           identifier, resolved configuration digest, toolchain identification,
-          input model digests — that every generated artifact embeds. Artifacts
-          are reproducible because the record names everything needed to
-          re-derive them.
+          resolved versions of the tool's own principal dependencies, and input
+          model digests — that every generated artifact embeds. Artifacts are
+          reproducible because the record names everything needed to re-derive
+          them. The same record is reportable on request through a dedicated
+          engine operation and its CLI equivalent, so version and dependency
+          identification does not require producing an artifact first.
         satisfies: [TOOL-QUA-060, TOOL-INS-110]
         verification: T
       - id: DSN-CORE-110
@@ -200,8 +213,12 @@ components:
           Installation, one page per supported workflow, and a generated
           configuration reference derived from the same schema definitions the
           code validates against, so documented options and accepted options
-          cannot drift apart.
-        satisfies: [TOOL-NFR-120]
+          cannot drift apart. The documentation set additionally carries the
+          MC/DC statement required alongside its per-report counterpart: which
+          form is measured and by which compiler mechanism, rendered from the
+          same toolchain capability data the coverage engine reads, so the
+          documented claim and the measured behaviour cannot diverge.
+        satisfies: [TOOL-NFR-120, TOOL-COV-060]
         verification: I
       - id: DSN-CORE-120
         title: Self-verification
@@ -210,7 +227,7 @@ components:
           own CI, and the tool is applied to its own C components (harness
           runtime, target-side reporting) where they exist.
         satisfies: [TOOL-NFR-140, TOOL-NFR-170]
-        verification: A
+        verification: [A, D]
       - id: DSN-CORE-130
         title: Performance budget allocation
         statement: >
@@ -220,6 +237,20 @@ components:
           re-execution is served from the incremental build cache and the
           persisted analysis model rather than re-derivation.
         satisfies: [TOOL-NFR-030, TOOL-NFR-040]
+        verification: D
+      - id: DSN-CORE-140
+        title: Documented memory ceiling
+        statement: >
+          A published memory ceiling for the reference project scale of
+          TOOL-NFR-050 (500 translation units, 10,000 test cases), demonstrated
+          by a benchmark run in the project's own CI against a generated
+          project of that size. On approaching the ceiling the worker pool of
+          DSN-CORE-050 sheds concurrency and, past that, analysis degrades to
+          single-unit streaming — so the failure mode is a slower run with a
+          reported reason, never host memory exhaustion. The published figure
+          is a release artifact and is re-measured per release rather than
+          asserted once.
+        satisfies: [TOOL-NFR-150]
         verification: D
 
   - id: CMP-PRJ
@@ -238,8 +269,12 @@ components:
           field as its first key. Readers dispatch on that field; a reader that
           does not recognise a version refuses the file rather than guessing.
           The concrete surface syntax is deferred to ADR-002 and is confined to
-          a serialisation adapter so the decision remains reversible.
-        satisfies: [TOOL-PRJ-010, TOOL-PRJ-020]
+          a serialisation adapter so the decision remains reversible. This
+          covers project, environment, test case, and configuration state
+          alike — there is no category of state held anywhere else, which is
+          what makes the graphical application incapable of being the sole
+          source of any of it.
+        satisfies: [TOOL-PRJ-010, TOOL-PRJ-020, TOOL-UIX-320]
         verification: I
         open: ADR-002
       - id: DSN-PRJ-020
@@ -390,7 +425,7 @@ components:
           resolve to the same explicit unit list, and the resolved list is
           recorded so a later glob expansion change is visible as a diff.
         satisfies: [TOOL-ING-130, TOOL-ING-150, TOOL-ING-190]
-        verification: T
+        verification: [I, T]
       - id: DSN-ING-090
         title: Scope boundary classification
         statement: >
@@ -462,9 +497,16 @@ components:
         statement: >
           CFG construction sits behind a provider interface with a declared
           capability flag, because libclang's AST-only API cannot supply it
-          (ADR-001 §2.1). Consumers ask for the capability and degrade when it
-          is absent; a future LibTooling helper emitting the same model
-          satisfies the interface without changes upstream or downstream.
+          (ADR-001 §2.1). A provider must exist for v1.0 — TOOL-PAR-070 is not
+          optional — and its scope is fixed as: basic blocks, edges, and the
+          decision-to-block mapping needed by structural coverage attribution
+          and by targeted generation. Which provider supplies it is the ADR-001
+          §2 decision, and the two candidates (a LibTooling helper emitting the
+          same JSON, or an AST-derived approximation sufficient for structured
+          C) are interchangeable behind this interface. Consumers declare their
+          dependence: DSN-COV-030 and DSN-ATG-010 require the capability and
+          report the CFG provider as unavailable rather than silently reporting
+          less; DSN-GUI-170 is absent from the interface when it is missing.
         satisfies: [TOOL-PAR-070]
         verification: T
         open: ADR-001
@@ -496,7 +538,7 @@ components:
           incompatible versions rather than degrading. This seam is what makes
           the ADR-001 language decision reversible.
         satisfies: [TOOL-PAR-100, TOOL-PAR-110]
-        verification: A
+        verification: [A, T]
       - id: DSN-ANA-080
         title: Complexity metrics
         statement: >
@@ -550,7 +592,7 @@ components:
           alongside. Proprietary compilers are supported wherever their
           invocation is externally scriptable — no special-case code path.
         satisfies: [TOOL-TCH-030, TOOL-TCH-050, TOOL-TCH-100]
-        verification: T
+        verification: [I, T]
       - id: DSN-TCH-040
         title: Capability declaration and metric gating
         statement: >
@@ -601,7 +643,7 @@ components:
     responsibility: >
       Produce harness and stub source from the Analysis Model via templates.
       Owns the regeneration contract that protects user edits.
-    depends_on: [CMP-CORE, CMP-ANA, CMP-PLG]
+    depends_on: [CMP-CORE, CMP-ANA, CMP-TCM, CMP-PLG]
     elements:
       - id: DSN-GEN-010
         title: Model-driven harness generation
@@ -638,7 +680,7 @@ components:
           optional host-only back-end that no documented workflow depends on.
           Adding a framework is templates and a descriptor, not tool source.
         satisfies: [TOOL-HAR-060, TOOL-HAR-065, TOOL-HAR-070, TOOL-PLG-030]
-        verification: T
+        verification: [A, T]
       - id: DSN-GEN-050
         title: Integration harness generation
         statement: >
@@ -671,10 +713,17 @@ components:
       - id: DSN-GEN-080
         title: Staleness detection against the interface
         statement: >
-          The digest of the interface a harness or test case was generated
-          against is stored with it. A change to that interface marks the
-          artifact stale and names what changed, which is the same mechanism
-          that identifies stale test cases after a refactor.
+          Every generated artifact stores the digest of the interface it was
+          generated against; a change marks it stale and names what changed.
+          Test cases are bound more narrowly than harnesses: a case records the
+          digest of only the signatures and global declarations it actually
+          references, so an unrelated change elsewhere in the unit does not mark
+          it stale. C-authored cases (DSN-TCM-010) are never regenerated and so
+          have no generation-time digest; their referenced-symbol set is instead
+          recovered by resolving the harness accessors they call, and a case
+          whose references cannot be resolved is reported as unanalysable rather
+          than assumed current — an unresolvable case is the one most likely to
+          be stale.
         satisfies: [TOOL-HAR-110, TOOL-CBT-070]
         verification: T
       - id: DSN-GEN-090
@@ -722,7 +771,13 @@ components:
           Stubbing is per-function opt-out: any external function can be linked
           real instead. Standard library functions are never stubbed by default
           and only on explicit request, since stubbing them silently is a
-          common source of inexplicable behaviour.
+          common source of inexplicable behaviour. Stubbing them is also the
+          technically harder case, because libc already defines the symbol: it
+          is performed by the same linker-level interposition as DSN-GEN-140
+          (`--wrap` or equivalent), declared per toolchain configuration, and
+          refused with the reason where a configuration does not declare the
+          capability. The tool does not attempt `-nostdlib` or link-order
+          tricks, which work on one toolchain and fail silently on the next.
         satisfies: [TOOL-STB-080, TOOL-STB-100]
         verification: T
       - id: DSN-GEN-140
@@ -781,7 +836,7 @@ components:
           build time, so the data is the artifact under version control and the
           C is derived.
         satisfies: [TOOL-TCD-020, TOOL-TCD-030, TOOL-TCD-040]
-        verification: T
+        verification: [I, T]
         open: ADR-002
       - id: DSN-TCM-030
         title: Comparison semantics
@@ -826,7 +881,10 @@ components:
           Test cases round-trip through a documented CSV-class interchange
           format sufficient to reconstruct them in another tool, which is both
           the export path against lock-in and the spreadsheet-based migration
-          path in.
+          path in. Test cases are only half of the anti-lock-in obligation; the
+          results half is discharged by the open result and coverage formats of
+          DSN-REP-020 and DSN-REP-030, and the two together are what make
+          leaving the tool possible.
         satisfies: [TOOL-TCD-100, TOOL-MIG-060]
         verification: T
       - id: DSN-TCM-080
@@ -1036,24 +1094,30 @@ components:
     responsibility: >
       Run built environments on the development host, contain their faults, and
       produce a normalised result set.
-    depends_on: [CMP-CORE, CMP-BLD, CMP-SEC]
+    depends_on: [CMP-CORE, CMP-BLD, CMP-TCM, CMP-SEC]
     elements:
       - id: DSN-EXH-010
-        title: Result capture and normalisation
+        title: Host execution and result normalisation
         statement: >
-          Per test case: pass, fail, or error; and for a failure, the assertion,
-          expected value, actual value, and source location. Framework-specific
-          output is normalised at the runner boundary into one result record,
-          so nothing downstream knows which framework ran.
-        satisfies: [TOOL-EXE-020]
+          Invokes the executable produced by DSN-BLD-010 under the supervisor
+          of DSN-EXH-020 — the execute half of TOOL-EXE-010, whose build half
+          is DSN-BLD-010 — and captures, per test case: pass, fail, or error;
+          and for a failure, the assertion, expected value, actual value, and
+          source location. Framework-specific output is normalised at the
+          runner boundary into one result record, so nothing downstream knows
+          which framework ran.
+        satisfies: [TOOL-EXE-010, TOOL-EXE-020]
         verification: T
       - id: DSN-EXH-020
         title: Fault isolation
         statement: >
           Test execution is isolated at process granularity with a supervisor
           that detects abnormal termination, attributes it to the test case in
-          flight, and continues with the remainder. A segfault in one case
-          costs one result, not the run.
+          flight, and continues with the remainder. A hang is not a
+          termination, so the timeout of DSN-EXH-030 is a fault mode of this
+          supervisor rather than a separate mechanism: on expiry the child is
+          killed, the case is attributed, and the run resumes. A segfault or a
+          hang in one case costs one result, not the run.
         satisfies: [TOOL-EXE-030]
         verification: T
       - id: DSN-EXH-030
@@ -1097,7 +1161,7 @@ components:
     responsibility: >
       Run the same environments on simulators and physical hardware, and tell
       target infrastructure failures apart from test failures.
-    depends_on: [CMP-CORE, CMP-BLD, CMP-PLG, CMP-SEC]
+    depends_on: [CMP-CORE, CMP-BLD, CMP-TCM, CMP-PLG, CMP-SEC]
     elements:
       - id: DSN-EXT-010
         title: Target runner abstraction and hardware inventory
@@ -1108,7 +1172,7 @@ components:
           methods are added through that documented interface with a
           user-supplied script, not by extending the tool.
         satisfies: [TOOL-TGT-080, TOOL-PLG-040]
-        verification: D
+        verification: [D, T]
       - id: DSN-EXT-020
         title: Simulator execution
         statement: >
@@ -1171,8 +1235,14 @@ components:
       - id: DSN-EXT-090
         title: On-target harness footprint characterisation
         statement: >
-          RAM, flash, and stack overhead of the on-target harness are measured
-          per configuration from the build's map output and published, since a
+          RAM and flash overhead of the on-target harness are measured per
+          configuration from the build's map output. Stack is not derivable
+          from a map file, so it is obtained separately: `-fstack-usage` per
+          frame combined with the call graph of DSN-ANA-030 gives a static
+          worst-case depth, corroborated by stack painting on a reference
+          target. Both figures are published with the caveat that the static
+          bound excludes recursion and indirect calls the call graph cannot
+          resolve, since an unqualified stack number is worse than none. A
           harness that does not fit is the first thing an embedded user needs
           to know.
         satisfies: [TOOL-TGT-110]
@@ -1208,13 +1278,19 @@ components:
         title: MC/DC acquisition and form declaration
         statement: >
           MC/DC is read from the compiler mechanism declared by the toolchain
-          configuration, and the form obtained — masking or unique-cause — is
-          carried as a field on the coverage model, not as documentation prose.
-          Every report renders it, and where the supported form differs from
-          unique-cause, the gap is stated in the same place rather than in a
-          separate document.
+          configuration. Both the form obtained — masking or unique-cause — and
+          the mechanism identifier that produced it (`-fcondition-coverage`,
+          `-fcoverage-mcdc`) are carried as fields on the coverage model, not
+          as documentation prose, and every report renders both. Where the
+          supported form differs from unique-cause, the gap is stated in the
+          same place, and its content is fixed rather than left to the author:
+          masking MC/DC accepts a condition pair that short-circuit evaluation
+          masks, which unique-cause rejects, so a decision can show full MC/DC
+          under masking with condition pairs a unique-cause assessor would not
+          accept. The statement is authored once against the toolchain
+          capability data and reused by every renderer and by DSN-CORE-110.
         satisfies: [TOOL-COV-050, TOOL-COV-060, TOOL-COV-090]
-        verification: T
+        verification: [I, T]
         open: SRS-001 open question 2
       - id: DSN-COV-030
         title: Condition-level detail model
@@ -1269,7 +1345,7 @@ components:
           expired rather than continuing to excuse code it no longer describes.
           Reports render justified as a third state, never as covered.
         satisfies: [TOOL-COV-140, TOOL-COV-150]
-        verification: T
+        verification: [I, T]
       - id: DSN-COV-090
         title: Unit-under-test scoping
         statement: >
@@ -1421,7 +1497,7 @@ components:
     responsibility: >
       Turn results, coverage, and links into the artifacts people and machines
       read. One model in, many renderers out.
-    depends_on: [CMP-CORE, CMP-COV, CMP-CBT, CMP-TRC, CMP-PLG]
+    depends_on: [CMP-CORE, CMP-EXH, CMP-EXT, CMP-COV, CMP-CBT, CMP-TRC, CMP-PLG]
     elements:
       - id: DSN-REP-010
         title: Intermediate report model
@@ -1432,13 +1508,15 @@ components:
           rather than re-running, and adding a format needs no tool source
           change.
         satisfies: [TOOL-REP-090, TOOL-PLG-050]
-        verification: A
+        verification: [A, T]
       - id: DSN-REP-020
         title: JUnit XML renderer
         statement: >
           Machine-readable test results in JUnit XML, the format CI systems
-          consume without configuration.
-        satisfies: [TOOL-REP-010]
+          consume without configuration. With DSN-REP-030 this is also the
+          results half of the anti-lock-in export obligation, whose test-case
+          half is DSN-TCM-070.
+        satisfies: [TOOL-REP-010, TOOL-MIG-060]
         verification: T
       - id: DSN-REP-030
         title: Coverage interchange renderer and reader
@@ -1554,7 +1632,7 @@ components:
           bump minor, breaking changes bump major and ship a documented
           migration path.
         satisfies: [TOOL-UIX-020, TOOL-PLG-060]
-        verification: T
+        verification: [A, I]
       - id: DSN-API-030
         title: Local-only transport
         statement: >
@@ -1568,10 +1646,11 @@ components:
         title: Command equivalence and echo
         statement: >
           Every engine operation has an exact CLI equivalent, and the protocol
-          returns that equivalent with each request so a front-end can display
-          what it just did. This is what makes a GUI-created project fully
-          usable from the command line and the reverse.
-        satisfies: [TOOL-UIX-240, TOOL-UIX-330]
+          returns that equivalent with each request, which is the data the
+          console pane of DSN-GUI-270 displays. This is what makes a
+          GUI-created project fully usable from the command line and the
+          reverse.
+        satisfies: [TOOL-UIX-330]
         verification: T
 
   - id: CMP-CLI
@@ -1590,7 +1669,7 @@ components:
           CLI is generated from the same operation catalogue the engine API
           publishes, so a new operation cannot be GUI-only by omission.
         satisfies: [TOOL-CIC-010, TOOL-CIC-020]
-        verification: D
+        verification: [D, T]
       - id: DSN-CLI-020
         title: Exit code contract
         statement: >
@@ -1652,7 +1731,7 @@ components:
           no editor, IDE, or third-party host application required — installable
           by a user whose only development tool is a C toolchain.
         satisfies: [TOOL-UIX-030, TOOL-UIX-040]
-        verification: D
+        verification: [D, I]
         open: ADR-001
       - id: DSN-GUI-020
         title: Project lifecycle
@@ -1859,6 +1938,17 @@ components:
           results — are reachable without the mouse.
         satisfies: [TOOL-UIX-380]
         verification: T
+      - id: DSN-GUI-270
+        title: Engine command console
+        statement: >
+          A console pane displaying, in order, the engine commands executed on
+          the user's behalf, rendered from the `cli_equivalent` that
+          DSN-API-040 returns with every response. Entries are selectable and
+          copyable as a runnable command line, so any action taken in the
+          application can be reproduced, scripted, and put into CI without the
+          user reverse-engineering which invocation the button corresponded to.
+        satisfies: [TOOL-UIX-240]
+        verification: T
 
   # ---------------------------------------------------------------- L6 --------
   - id: CMP-AIF
@@ -1893,7 +1983,7 @@ components:
           verification of the installed model against a published hash before
           first use.
         satisfies: [TOOL-AIF-020, TOOL-AIF-170, TOOL-AIF-200]
-        verification: T
+        verification: [I, T]
       - id: DSN-AIF-040
         title: Egress control and disclosure
         statement: >
@@ -1903,7 +1993,7 @@ components:
           transmitted and to whom, generated from the request builder itself
           rather than written as prose that can drift from behaviour.
         satisfies: [TOOL-AIF-030, TOOL-AIF-040]
-        verification: T
+        verification: [D, T]
       - id: DSN-AIF-050
         title: Test generation assist
         statement: >
@@ -1958,10 +2048,16 @@ components:
           model identity and version in a form that survives the model's
           supersession, generation timestamp, prompt, sampling parameters
           including temperature and seed — and a review state that starts
-          unreviewed and can only be advanced by an identified user. Every
-          report distinguishes reviewed from unreviewed.
+          unreviewed and can only be advanced by an identified user. The
+          parameters affecting output variability are not merely recorded: they
+          are user configuration, settable per operation, and the resolved
+          values are what the record captures. Reporting obligations are two,
+          not one: every renderer surfaces the AI-generated marking with model
+          identifier and generation timestamp, and separately distinguishes
+          reviewed from unreviewed. A renderer that shows one and not the other
+          fails the conformance test of DSN-PLG-010.
         satisfies: [TOOL-AIF-080, TOOL-AIF-090, TOOL-AIF-160, TOOL-AIF-180, TOOL-AIF-190]
-        verification: I
+        verification: [A, I, T]
       - id: DSN-AIF-120
         title: Evidence exclusion mode
         statement: >
@@ -1981,6 +2077,7 @@ components:
   - id: CMP-PLG
     name: Extension Framework
     layer: L6
+    cross_cutting: true
     responsibility: >
       The published extension points and the loader that serves them.
     depends_on: [CMP-CORE]
@@ -2024,6 +2121,7 @@ components:
   - id: CMP-SEC
     name: Security and Integrity Services
     layer: L6
+    cross_cutting: true
     responsibility: >
       The tool compiles and runs code supplied by its user and produces evidence
       others rely on. This component holds the controls that follow from both.
@@ -2144,7 +2242,7 @@ components:
           Installation into a user-writable location with no administrative
           privileges and no system-wide registration.
         satisfies: [TOOL-INS-020, TOOL-NFR-110]
-        verification: D
+        verification: [D, I]
       - id: DSN-PKG-030
         title: Archivable, uniquely identified releases
         statement: >

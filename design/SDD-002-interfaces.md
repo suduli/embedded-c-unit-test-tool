@@ -67,7 +67,7 @@ with a migration path (TOOL-PLG-060, DSN-API-020).
 ## 4. S1 — Analysis Model
 
 **Producer:** `CMP-ANA` only. **Consumers:** `CMP-GEN`, `CMP-TCM`, `CMP-ATG`,
-`CMP-COV`, `CMP-TRC`.
+`CMP-COV`, `CMP-CBT`, `CMP-TRC`.
 **Requirements:** TOOL-PAR-100, TOOL-PAR-110. **Elements:** DSN-ANA-070.
 
 This is the most important interface in the system. It is the reason a language
@@ -133,7 +133,7 @@ instrument is indistinguishable from one that was fully covered.
 ## 5. S2 — Test Case Model
 
 **Owner:** `CMP-TCM`. **Consumers:** `CMP-GEN`, `CMP-ATG`, `CMP-EXH`,
-`CMP-EXT`, `CMP-TRC`, `CMP-GUI`, `CMP-MIG`.
+`CMP-EXT`, `CMP-TRC`, `CMP-MIG`, `CMP-AIF`; and `CMP-GUI` across the engine API.
 **Requirements:** TOOL-TCD-020..060, TOOL-TCD-140. **Elements:** DSN-TCM-020,
 DSN-TCM-030, DSN-TCM-110.
 
@@ -178,14 +178,19 @@ ADR-002 chooses.
   and how unreviewed expectations stay distinguishable from specified ones
   (TOOL-ATG-080).
 - **Round-trip.** The CSV interchange of DSN-TCM-070 is defined as a lossless
-  projection of this model, or it reports the loss (TOOL-MIG-040).
+  projection of this model, or it reports the loss. It is half of the
+  anti-lock-in obligation (TOOL-MIG-060); the results half is S5's open output
+  formats. Import loss reporting is a separate obligation (TOOL-MIG-040,
+  DSN-MIG-040).
 
 ---
 
 ## 6. S3 — Result Set
 
-**Producers:** `CMP-EXH`, `CMP-EXT`. **Consumers:** `CMP-COV`, `CMP-CBT`,
-`CMP-REP`.
+**Producers:** `CMP-EXH`, `CMP-EXT`. **Consumers:** `CMP-COV` and `CMP-REP`
+directly; `CMP-CBT` reads *persisted* result sets from the store rather than
+the runners, which is what lets it compare a run against one recorded months
+earlier.
 **Requirements:** TOOL-EXE-020, TOOL-TGT-070, TOOL-CBT-040.
 
 Normalisation happens at the runner boundary. Nothing downstream knows which
@@ -270,8 +275,10 @@ that information is present as metadata, but no logic branches on it.
 
 **Producer:** `CMP-REP`. **Consumers:** every renderer, including user-supplied
 ones.
-**Requirements:** TOOL-REP-090, TOOL-REP-130, TOOL-REP-150, TOOL-PLG-050.
-**Elements:** DSN-REP-010.
+**Requirements:** TOOL-REP-090, TOOL-PLG-050 (the model itself); TOOL-REP-130,
+TOOL-REP-150 (its versioning and offline re-rendering).
+**Elements:** DSN-REP-010, with DSN-REP-110 and DSN-REP-130 discharging the
+latter two.
 
 The report model is the merge of S3, S4, the traceability matrix, the run
 delta, and the provenance record — **persisted**, so that:
@@ -315,10 +322,16 @@ TOOL-UIX-020, TOOL-UIX-050, TOOL-UIX-240, TOOL-UIX-330.
 ### 9.1 Transport
 
 JSON request/response over **stdio** or a **filesystem-permissioned local
-socket** (Unix domain socket / named pipe). There is no TCP listener and no
-option to enable one — an open localhost port is a host-firewall and
-endpoint-monitoring problem in precisely the defence, aerospace, and automotive
-environments this tool targets (ADR-001 §3.3, DSN-API-030).
+socket** (Unix domain socket / named pipe). The engine API offers no TCP
+transport — an open localhost port is a host-firewall and endpoint-monitoring
+problem in precisely the defence, aerospace, and automotive environments this
+tool targets (ADR-001 §3.3, DSN-API-030).
+
+This constrains *this* interface, not the product forever. ADR-001 §3.3 rejects
+a localhost server as the **primary** interface and explicitly allows a browser
+UI as an *additional* one, which is where TOOL-UIX-400 (deferred, not rejected)
+would live. Should that be built, it gets its own transport and its own
+security analysis rather than widening S6.
 
 ### 9.2 Message shape
 
@@ -357,7 +370,12 @@ environments this tool targets (ADR-001 §3.3, DSN-API-030).
 
 ## 10. S7 — Extension points
 
-**Requirements:** TOOL-PLG-010..090. **Elements:** DSN-PLG-010..040.
+**Requirements:** TOOL-PLG-010..090, but only four of those live in `CMP-PLG`
+(TOOL-PLG-010/070/080/090 → DSN-PLG-010..040). The rest are discharged at the
+extension point itself, which is the design: TOOL-PLG-020 → DSN-TCH-010,
+TOOL-PLG-030 → DSN-GEN-040, TOOL-PLG-040 → DSN-EXT-010, TOOL-PLG-050 →
+DSN-REP-010, TOOL-PLG-060 → DSN-API-020. `CMP-PLG` publishes and loads; it does
+not implement the points.
 
 | Extension point | Contribution | Declarative only | Requirements |
 |---|---|---|---|
@@ -383,6 +401,13 @@ publishing. For compiler configurations this includes building and running a
 reference suite and confirming the declared coverage capabilities are actually
 produced — a configuration that claims MC/DC it cannot deliver is worse than
 one that claims nothing (TOOL-TCH-060).
+
+For report formats the conformance test asserts the disclosure obligations: for
+every entry in the model's `advisories` array (§8), and for every AI-generated
+artifact's model identifier and review state (DSN-AIF-110), the corresponding
+marking must appear in the rendered output. A renderer that silently drops an
+advisory produces a report that overclaims, which is the one defect class this
+design spends the most structure preventing.
 
 ---
 
@@ -416,8 +441,12 @@ implementations that can drift apart.
 While SRS-001 is unbaselined, these interfaces are drafts. Once SDD-001 is
 baselined:
 
-1. A change to S1, S5, S6, or S7 — the published seams — requires a version
-   increment per §3 and an entry in the interface changelog.
+1. A change to S1, S2, S5, S6, or S7 — everything users or extension authors
+   can see — requires a version increment per §3 and an entry in the interface
+   changelog. S2 is on this list despite being a data format rather than an API:
+   it is the most exposed surface of all, since users hand-edit it.
+   S3 and S4 are internal and may change with their producers, provided S5 —
+   which embeds both — is versioned accordingly.
 2. A major increment on S6 or S7 requires a documented migration path
    (TOOL-PLG-060) shipped in the release that introduces it.
 3. A change to S5's `format_version` requires the superseded format definition

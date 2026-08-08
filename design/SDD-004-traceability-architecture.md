@@ -36,7 +36,7 @@ ADR-001 §1.3 puts "unique release identification, reproducible builds, a known
 error list, Tool Operational Requirements, and a user-executable validation
 suite" in Tier 1 — do it in v1.0, because retrofitting is far more expensive.
 Requirement-to-design traceability is the same case: it is cheap while there are
-237 design elements and no code, and it is close to impossible to reconstruct
+239 design elements and no code, and it is close to impossible to reconstruct
 honestly after the fact.
 
 ---
@@ -151,35 +151,75 @@ validation suite (TOOL-QUA-030) knows what kind of evidence each element needs.
 $ python3 design/trace/trace_check.py
 ```
 
-Nine classes of error, all fatal:
+All findings are fatal. They fall into four groups:
+
+**The gate proper — is every requirement covered?**
 
 | # | Error |
 |---|---|
 | 1 | An in-scope requirement is allocated to no design element |
 | 2 | A design element `satisfies` a requirement id that does not exist in SRS-001 |
 | 3 | A design element allocates a Future-priority requirement (out of v1.0 scope) |
-| 4 | A duplicate design element or component id |
-| 5 | An element id whose code does not match its component |
-| 6 | An element with neither `satisfies` nor `derived: true` |
-| 7 | A `derived` element with no `rationale`, or one that also allocates |
-| 8 | `refines` or `depends_on` pointing at something that does not exist |
-| 9 | An upward layer dependency, or a cycle in the component graph |
 
-Errors 1 and 2 are the traceability gate proper. Error 2 is the one that catches
-SRS drift: a requirement renumbered or deleted upstream surfaces immediately as
-a dangling reference rather than as a design element quietly pointing at
-nothing.
+**Can the checker even see the requirements?** This group exists because the
+worst outcome available to this script is not a false alarm but a false *pass*.
+
+| # | Error |
+|---|---|
+| 4 | A line that looks like a requirement definition but does not match the strict form — an unparsed requirement would be a silently unchecked one |
+| 5 | The number of requirements parsed differs from the count the register declares (`document.upstream[SRS-001].requirement_count`) |
+| 6 | A duplicate requirement id in the SRS |
+
+**Is the register well formed?**
+
+| # | Error |
+|---|---|
+| 7 | A duplicate design element or component id, or an element id whose code does not match its component |
+| 8 | An element with neither `satisfies` nor `derived: true`; a `derived` element with no `rationale` or one that also allocates |
+| 9 | A field of the wrong shape — `satisfies: "X"` where a list is meant, a non-boolean `derived`, a non-string `open` |
+| 10 | A requirement listed twice in one element's `satisfies` |
+| 11 | An element whose declared `verification` does not cover the SRS methods of every requirement it allocates |
+
+**Is the architecture intact?**
+
+| # | Error |
+|---|---|
+| 12 | `refines` or `depends_on` pointing at something that does not exist |
+| 13 | An element that `refines` itself, or a cycle in the refines graph |
+| 14 | A dependency on a higher layer that is not marked `cross_cutting: true`, or a cycle in the component graph |
+
+Errors 1 and 2 are the original gate. Error 2 catches SRS drift: a requirement
+renumbered or deleted upstream surfaces immediately as a dangling reference
+rather than as a design element quietly pointing at nothing.
+
+Errors 4 and 5 exist because error 1 alone is not enough. A requirement whose
+formatting drifts — an ASCII hyphen instead of an em dash, a stray bullet — was
+previously skipped in silence, so *deleting* a requirement from the design and
+mangling its SRS line in the same commit passed cleanly. Both are now caught
+independently: the sentinel flags the malformed line, and the declared count
+catches any wholesale loss that a future id scheme might slip past the sentinel.
+
+Error 11 was added after it found 18 real cases in this register. An element
+bundling requirements verified by test, analysis *and* inspection could declare
+only one method, which would scope the eventual validation suite (§6) from the
+wrong evidence type.
 
 Current state:
 
 ```
-SRS requirements            323
-out of v1.0 scope (F)         2
-in scope                    321
-allocated                   321
-design elements             237
-components                   24
+Requirement allocation
+  SRS requirements            323
+  out of v1.0 scope (F)       2
+  in scope                    321
+  allocated                   321
+  UNALLOCATED                 0
+  design elements             239
+  derived (no requirement)    2
+  components                  24
 ```
+
+(followed by per-priority, per-phase and per-category tables, each row marked
+`ok` or `GAP`)
 
 Every priority (M/S/C), every phase (P1–P4), and all 24 categories are fully
 allocated. Two requirements are unallocated by design: `TOOL-UIX-390` and
@@ -249,9 +289,12 @@ happens to ship. A `verifies` link permits a requirement id, a design element
 id, or both — some requirements (`TOOL-NFR-060`, determinism) are verified
 system-wide rather than per element.
 
-Verification-method coverage becomes checkable at that point: an element marked
-`verification: T` with no inbound `verifies` is a gap; one marked `I` or `A` is
-discharged by a review or analysis record, not by a test.
+Verification-method coverage becomes checkable at that point. An element's
+`verification` field is a *set* of methods — already validated against the SRS
+methods of everything it allocates (error 11) — so the obligation is per method:
+a `T` needs an inbound `verifies` from a test, while `I` and `A` are discharged
+by a review or analysis record. An element declaring `[A, I, T]` needs all
+three, which is precisely why under-declaring it mattered.
 
 ---
 
@@ -299,8 +342,8 @@ that a migration rather than a rewrite:
 - The register is already machine-readable with a stable schema.
 - `trace-graph.json` is a direct source for a generated import.
 
-Recommendation: **do not adopt one yet.** The current tooling is 400 lines with
-one dependency, and while SRS-001 is unbaselined and the design is moving, the
+Recommendation: **do not adopt one yet.** The current tooling is under 700 lines
+with one dependency, and while SRS-001 is unbaselined and the design is moving, the
 cost of a format migration exceeds the benefit. Revisit when the SRS is
 baselined or when `implements` links start accumulating — whichever comes first.
 The one thing to preserve until then is id stability, because it is the only

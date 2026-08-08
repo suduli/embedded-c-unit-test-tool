@@ -9,7 +9,7 @@ machine-checked rather than asserted in prose.
 | Document | Content |
 |---|---|
 | [`SDD-001-architecture.md`](SDD-001-architecture.md) | Architectural drivers, seven-layer structure, 24 components, principal flows, cross-cutting rules, open decisions |
-| [`SDD-002-interfaces.md`](SDD-002-interfaces.md) | The seven published seams and the one internal port: analysis model, test case model, result set, coverage model, report model, engine API, extension points |
+| [`SDD-002-interfaces.md`](SDD-002-interfaces.md) | The seven load-bearing seams (five of them published) and the one internal port: analysis model, test case model, result set, coverage model, report model, engine API, extension points |
 | [`SDD-003-data-model.md`](SDD-003-data-model.md) | What is written to disk: the project/output tree split, file granularity, diff stability, schema migration, archival records |
 | [`SDD-004-traceability-architecture.md`](SDD-004-traceability-architecture.md) | The trace meta-model, id rules, link types, checker, CI gate, and extension to code and tests |
 
@@ -17,7 +17,7 @@ machine-checked rather than asserted in prose.
 
 | File | Form | Edit? |
 |---|---|---|
-| [`trace/design-elements.yaml`](trace/design-elements.yaml) | **Authoritative** register: 24 components, 237 design elements, requirement allocation | Yes — this is the source |
+| [`trace/design-elements.yaml`](trace/design-elements.yaml) | **Authoritative** register: 24 components, 239 design elements, requirement allocation | Yes — this is the source |
 | [`trace/trace_check.py`](trace/trace_check.py) | Validator and matrix generator | Yes |
 | [`trace/requirement-matrix.csv`](trace/requirement-matrix.csv) | Per-requirement view: priority, phase, verification, components, elements | No — generated |
 | [`trace/trace-graph.json`](trace/trace-graph.json) | Full graph, both directions | No — generated |
@@ -32,20 +32,35 @@ python3 design/trace/trace_check.py
 ```
 
 ```
-SRS requirements            323
-out of v1.0 scope (F)         2
-in scope                    321
-allocated                   321
-design elements             237
-components                   24
+Requirement allocation
+  SRS requirements            323
+  out of v1.0 scope (F)       2
+  in scope                    321
+  allocated                   321
+  UNALLOCATED                 0
+  design elements             239
+  derived (no requirement)    2
+  components                  24
+```
 
+followed by per-priority, per-phase and per-category tables, then:
+
+```
 OK: every in-scope requirement is allocated and the design graph is well formed
 ```
 
-Fails on an unallocated requirement, a reference to a requirement that does not
-exist, a duplicate or malformed id, an unjustified derived element, an upward
-layer dependency, or a cycle in the component graph. Exit `0` clean, `1`
-findings, `2` could not run. Requires PyYAML.
+Fourteen classes of error, all fatal — see SDD-004 §4. In summary: an
+unallocated requirement, a reference to a requirement that does not exist, a
+requirement line the parser could not read (an unparsed requirement would be an
+unchecked one), a parsed count that disagrees with the register's declared
+count, a duplicate or malformed id, a field of the wrong shape, an unjustified
+derived element, a verification method that does not cover what the element
+allocates, a `refines` cycle, an unpermitted upward layer dependency, or a cycle
+in the component graph.
+
+Exit `0` clean, `1` findings, `2` could not run. Findings go to stderr, the
+summary to stdout. **A run that finds errors writes no artifacts** — the script
+does not get to break the fail-safe rule it exists to enforce. Requires PyYAML.
 
 Regenerate the derived artifacts after changing the register:
 
