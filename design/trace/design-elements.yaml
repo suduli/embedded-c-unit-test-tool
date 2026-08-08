@@ -1,0 +1,2481 @@
+---
+# Design element register — the machine-readable half of the trace architecture.
+#
+# This file is the authoritative allocation of SRS-001 requirements to design
+# elements. The SDD documents in design/ are the human-readable rendering of it;
+# where the two disagree, this file wins and the SDD is defective.
+#
+# Validate with:  python3 design/trace/trace_check.py
+#
+# Rules enforced by the checker:
+#   - every design element id is unique and matches DSN-<COMP>-<NNN>
+#   - every id in `satisfies` exists in SRS-001
+#   - every non-Future SRS requirement is satisfied by at least one element
+#   - Future-priority requirements are not allocated
+#   - every element declares either `satisfies` (allocated) or `derived: true`
+
+schema_version: 1
+
+document:
+  id: TRACE-001
+  title: Design Element Register and Requirement Allocation
+  version: "0.1"
+  status: Draft — tracks SRS-001 v0.1 (not baselined)
+  upstream:
+    - id: SRS-001
+      version: "0.1"
+      path: SRS-001-requirements.md
+      # Independently counted; the checker errors if it parses a different
+      # number, so a requirement lost to a formatting change cannot pass
+      # unnoticed.
+      requirement_count: 323
+    - id: ADR-001
+      version: "analysis, no decision recorded"
+      path: ADR-001-architecture-decisions.md
+
+# Link semantics, per SRS-001 §28.
+link_types:
+  satisfies:
+    from: design element
+    to: SRS requirement
+    meaning: >
+      This design element is the place in the architecture where the
+      requirement is discharged. A requirement with no `satisfies` edge is
+      unallocated and the design is incomplete.
+  refines:
+    from: design element
+    to: design element
+    meaning: >
+      A lower-level element derived from a higher-level one. Carries no
+      requirement of its own; inherits the parent's allocation.
+  depends_on:
+    from: component
+    to: component
+    meaning: >
+      Compile-time or call-time dependency. The graph must stay acyclic across
+      layers; see design/SDD-001-architecture.md §4.
+  implements:
+    from: source artifact
+    to: design element
+    meaning: >
+      Reserved for the implementation phase. Source files declare it in a
+      header comment; see design/SDD-004-traceability-architecture.md §5.
+  verifies:
+    from: tool's own test case
+    to: SRS requirement or design element
+    meaning: >
+      Reserved for the tool's own validation suite (TOOL-QUA-030).
+
+layers:
+  - id: L0
+    name: Platform and Persistence
+    rule: Depends on nothing above it. Every other layer may depend on it.
+  - id: L1
+    name: Comprehension
+    rule: Reads user code and build configuration. Produces models. Writes no generated code.
+  - id: L2
+    name: Synthesis
+    rule: Consumes models only. Never invokes a C front-end directly.
+  - id: L3
+    name: Realization
+    rule: Compiles and runs. Owns every subprocess that executes user-derived code.
+  - id: L4
+    name: Evidence
+    rule: Consumes execution results. Produces the artifacts an auditor reads.
+  - id: L5
+    name: Interfaces
+    rule: Front-ends. Hold no capability of their own; drive L0-L4 through the engine API.
+  - id: L6
+    name: Assurance and Ecosystem
+    rule: >
+      Assurance concerns and extension surfaces. Membership of L6 does not by
+      itself license a dependency from below — only components explicitly
+      marked `cross_cutting: true` may be depended on by a lower layer. The
+      rest of L6 (packaging, qualification, migration, AI) is ordinary
+      application code that happens to be cross-cutting in subject, not in
+      dependency direction.
+
+components:
+
+  # ---------------------------------------------------------------- L0 --------
+  - id: CMP-CORE
+    name: Core Platform Services
+    layer: L0
+    responsibility: >
+      Determinism, error handling, logging, cancellation, resource governance,
+      filesystem discipline, and provenance stamping. Every other component is
+      built on these; none of them re-implements them.
+    depends_on: []
+    elements:
+      - id: DSN-CORE-010
+        title: Deterministic execution discipline
+        statement: >
+          A single `Determinism` policy module fixes the sources of run-to-run
+          variance: all collection iteration is over explicitly sorted keys, all
+          generated identifiers derive from stable content hashes rather than
+          object identity or insertion order, all timestamps enter artifacts
+          only through a single injectable clock, and PYTHONHASHSEED-style
+          environment variance is neutralised at entry. Determinism is a
+          property of the platform, not a habit expected of each author.
+        satisfies: [TOOL-NFR-060, TOOL-PRJ-050]
+        verification: [A, T]
+      - id: DSN-CORE-020
+        title: Structured error model and fail-safe termination
+        statement: >
+          One exception hierarchy separates user-input faults, environment
+          faults, and internal faults. Any internal fault aborts the operation,
+          emits a diagnostic identifying the operation and inputs, and discards
+          partial outputs rather than publishing them; no code path emits a
+          result artifact from a failed operation.
+        satisfies: [TOOL-NFR-090]
+        verification: T
+      - id: DSN-CORE-030
+        title: Logging and diagnostic bundle assembly
+        statement: >
+          Structured (key-value) logging at five configurable verbosities, with
+          a bundle assembler that collects version, resolved configuration,
+          toolchain identification, and logs into a single archive. The bundle
+          manifest enumerates its own contents so the user can read what they
+          are about to send.
+        satisfies: [TOOL-NFR-130, TOOL-NFR-160]
+        verification: T
+      - id: DSN-CORE-040
+        title: Cooperative cancellation and transactional state
+        statement: >
+          Long operations accept a cancellation token checked at defined
+          yield points. All project-state writes go through a write-temp-then-
+          rename commit, so an interrupted operation leaves either the prior
+          state or the new one, never a torn file.
+        satisfies: [TOOL-NFR-180]
+        verification: T
+      - id: DSN-CORE-050
+        title: Scale and memory governance
+        statement: >
+          Analysis and execution operate on a streamed, per-translation-unit
+          basis with bounded in-memory working set; whole-project models are
+          held on disk and indexed rather than materialised. A configurable
+          worker count and memory ceiling cause graceful degradation to lower
+          parallelism rather than host exhaustion.
+        satisfies: [TOOL-NFR-050]
+        verification: A
+      - id: DSN-CORE-060
+        title: Output isolation and source immutability
+        statement: >
+          All writes are confined to a designated output root resolved once at
+          startup. User source paths are opened read-only through a path
+          guard that raises on any write attempt, making source modification a
+          detectable programming error rather than a review obligation.
+        satisfies: [TOOL-NFR-070, TOOL-NFR-080, TOOL-PRJ-080]
+        verification: I
+      - id: DSN-CORE-070
+        title: Host platform abstraction
+        statement: >
+          Path handling, process spawning, and terminal interaction go through
+          a platform layer with Linux x86-64 as the reference implementation and
+          Windows and macOS as conformant ports. No component branches on
+          platform directly.
+        satisfies: [TOOL-NFR-010, TOOL-NFR-020]
+        verification: T
+      - id: DSN-CORE-080
+        title: Message catalogue
+        statement: >
+          User-facing strings are looked up by stable message key from a
+          catalogue, with the default locale compiled in. No translation is
+          delivered in v1.0; the indirection exists so that adding one later is
+          not a rewrite.
+        satisfies: [TOOL-NFR-190]
+        verification: I
+      - id: DSN-CORE-090
+        title: Offline-by-construction network policy
+        statement: >
+          The core carries no network client. Outbound capability exists only
+          inside CMP-AIF and is inert unless a remote provider is explicitly
+          configured, so "works offline" is a structural property rather than a
+          tested behaviour.
+        satisfies: [TOOL-NFR-100]
+        verification: I
+      - id: DSN-CORE-100
+        title: Provenance stamping service
+        statement: >
+          A single service produces the provenance record — tool version, build
+          identifier, resolved configuration digest, toolchain identification,
+          resolved versions of the tool's own principal dependencies, and input
+          model digests — that every generated artifact embeds. Artifacts are
+          reproducible because the record names everything needed to re-derive
+          them. The same record is reportable on request through a dedicated
+          engine operation and its CLI equivalent, so version and dependency
+          identification does not require producing an artifact first.
+        satisfies: [TOOL-QUA-060, TOOL-INS-110]
+        verification: T
+      - id: DSN-CORE-110
+        title: Documentation set structure
+        statement: >
+          Installation, one page per supported workflow, and a generated
+          configuration reference derived from the same schema definitions the
+          code validates against, so documented options and accepted options
+          cannot drift apart. The documentation set additionally carries the
+          MC/DC statement required alongside its per-report counterpart: which
+          form is measured and by which compiler mechanism, rendered from the
+          same toolchain capability data the coverage engine reads, so the
+          documented claim and the measured behaviour cannot diverge.
+        satisfies: [TOOL-NFR-120, TOOL-COV-060]
+        verification: I
+      - id: DSN-CORE-120
+        title: Self-verification
+        statement: >
+          The tool's own test suite enforces a documented coverage floor in its
+          own CI, and the tool is applied to its own C components (harness
+          runtime, target-side reporting) where they exist.
+        satisfies: [TOOL-NFR-140, TOOL-NFR-170]
+        verification: [A, D]
+      - id: DSN-CORE-130
+        title: Performance budget allocation
+        statement: >
+          The end-to-end budgets are apportioned per stage and asserted by
+          benchmark tests: environment creation for a 1000-line unit is split
+          across ingest, parse, generate, and build; unchanged-suite
+          re-execution is served from the incremental build cache and the
+          persisted analysis model rather than re-derivation.
+        satisfies: [TOOL-NFR-030, TOOL-NFR-040]
+        verification: D
+      - id: DSN-CORE-140
+        title: Documented memory ceiling
+        statement: >
+          A published memory ceiling for the reference project scale of
+          TOOL-NFR-050 (500 translation units, 10,000 test cases), demonstrated
+          by a benchmark run in the project's own CI against a generated
+          project of that size. On approaching the ceiling the worker pool of
+          DSN-CORE-050 sheds concurrency and, past that, analysis degrades to
+          single-unit streaming — so the failure mode is a slower run with a
+          reported reason, never host memory exhaustion. The published figure
+          is a release artifact and is re-measured per release rather than
+          asserted once.
+        satisfies: [TOOL-NFR-150]
+        verification: D
+
+  - id: CMP-PRJ
+    name: Project and Workspace Store
+    layer: L0
+    responsibility: >
+      The on-disk representation of a project: its scopes, environments, test
+      cases, configuration, and archived records. Owns schema versioning,
+      migration, and version-control behaviour.
+    depends_on: [CMP-CORE]
+    elements:
+      - id: DSN-PRJ-010
+        title: Plain-text project model with explicit schema versioning
+        statement: >
+          Every project file is human-readable text carrying a `schema_version`
+          field as its first key. Readers dispatch on that field; a reader that
+          does not recognise a version refuses the file rather than guessing.
+          The concrete surface syntax is deferred to ADR-002 and is confined to
+          a serialisation adapter so the decision remains reversible. This
+          covers project, environment, test case, and configuration state
+          alike — there is no category of state held anywhere else, which is
+          what makes the graphical application incapable of being the sole
+          source of any of it.
+        satisfies: [TOOL-PRJ-010, TOOL-PRJ-020, TOOL-UIX-320]
+        verification: I
+        open: ADR-002
+      - id: DSN-PRJ-020
+        title: Explicit, confirmed, reversible migration
+        statement: >
+          Opening an older project reports the migration required and performs
+          nothing without confirmation. Migrations are pure
+          old-model-to-new-model functions with a recorded inverse where one
+          exists; where none exists the migration declares itself irreversible
+          before running and writes a backup of the pre-migration tree.
+        satisfies: [TOOL-PRJ-030, TOOL-PRJ-040]
+        verification: T
+      - id: DSN-PRJ-030
+        title: Merge-friendly sharded serialisation
+        statement: >
+          Project state is split so that the unit of a file is the unit of
+          concurrent edit: one file per test scope, one per environment, and
+          test cases grouped per unit rather than per project. Within a file,
+          keys and collections are emitted in a defined canonical order, so a
+          semantically null operation produces a byte-identical file and a real
+          edit produces a diff localised to what changed.
+        satisfies: [TOOL-PRJ-050, TOOL-PRJ-060]
+        verification: T
+      - id: DSN-PRJ-040
+        title: Relocatable references
+        statement: >
+          All references to user source, requirements files, and configuration
+          are stored relative to a declared project root. Absolute paths are
+          rejected on write, so a cloned or relocated working tree stays valid
+          without rewriting.
+        satisfies: [TOOL-PRJ-070]
+        verification: I
+      - id: DSN-PRJ-050
+        title: Broken-reference detection
+        statement: >
+          A validation pass resolves every stored reference and reports the
+          referencing file, the missing target, and whether the reference is
+          required or optional, rather than failing at first use deep in a
+          later stage.
+        satisfies: [TOOL-PRJ-090]
+        verification: T
+      - id: DSN-PRJ-060
+        title: Verification record export
+        statement: >
+          A run can be exported as a self-contained record: configuration, test
+          cases, results, coverage, requirement links, tool and toolchain
+          identification. The record embeds its own schema and needs no
+          reference to the originating working tree.
+        satisfies: [TOOL-PRJ-100]
+        verification: T
+      - id: DSN-PRJ-070
+        title: Archive verification
+        statement: >
+          An archived record can be checked against the tool version that
+          produced it, reporting whether the current installation can reproduce
+          it, and if not, which of version, toolchain, or configuration
+          differs.
+        satisfies: [TOOL-PRJ-110]
+        verification: T
+      - id: DSN-PRJ-080
+        title: Configuration lives only in files
+        statement: >
+          There is no hidden application state directory holding semantic
+          configuration. Front-ends persist window geometry and similar
+          ephemera separately from project state, and nothing that affects a
+          result may be stored there.
+        satisfies: [TOOL-CIC-080, TOOL-UIX-320]
+        verification: I
+
+  # ---------------------------------------------------------------- L1 --------
+  - id: CMP-ING
+    name: Ingestion and Scope Resolver
+    layer: L1
+    responsibility: >
+      Turn a user's build reality into a Project Model: translation units with
+      their exact compilation flags, grouped into named test scopes with
+      internal/external dependency classification.
+    depends_on: [CMP-CORE, CMP-PRJ]
+    elements:
+      - id: DSN-ING-010
+        title: Compilation database reader
+        statement: >
+          A reader normalising both the `command` string form and the
+          `arguments` array form into one internal invocation record, then
+          extracting source path, working directory, include paths, macro
+          definitions, language standard, and the residual compiler flags.
+          Shell-quoting rules for the string form are applied per platform.
+        satisfies: [TOOL-ING-010, TOOL-ING-020, TOOL-ING-030]
+        verification: T
+      - id: DSN-ING-020
+        title: Compilation database acquisition paths
+        statement: >
+          CMake's `CMAKE_EXPORT_COMPILE_COMMANDS` is the documented primary
+          path; build interception (Bear and equivalents) is the documented
+          fallback for build systems with no native export. The tool consumes
+          the database; it does not implement interception itself.
+        satisfies: [TOOL-ING-040, TOOL-ING-050]
+        verification: D
+      - id: DSN-ING-030
+        title: Build-system-free ingestion
+        statement: >
+          A source set plus user-supplied include paths and defines produces the
+          same internal invocation record the database reader produces, so every
+          downstream stage is indifferent to how the project was ingested. Accepts
+          one file or many, the latter forming an integration scope directly.
+        satisfies: [TOOL-ING-060, TOOL-ING-120]
+        verification: T
+      - id: DSN-ING-040
+        title: IDE project importers
+        statement: >
+          Adapters for Keil uVision, IAR EW, and Eclipse/STM32CubeIDE project
+          files that emit a compilation database, keeping the vendor-specific
+          XML handling at the edge of the system.
+        satisfies: [TOOL-ING-080]
+        verification: T
+      - id: DSN-ING-050
+        title: Ingestion diagnostics
+        statement: >
+          Missing headers, unresolvable include paths, and unrecognised
+          compiler flags are collected per translation unit and reported
+          together with the offending file and flag, rather than aborting on
+          the first one.
+        satisfies: [TOOL-ING-070]
+        verification: T
+      - id: DSN-ING-060
+        title: Persisted project model with staleness detection
+        statement: >
+          The ingested model is written to the project store with the digest
+          and mtime of every input it was derived from. A cheap staleness check
+          compares those on each invocation and either re-ingests or warns,
+          so ingestion is not repeated needlessly and is never silently stale.
+        satisfies: [TOOL-ING-090, TOOL-ING-100]
+        verification: T
+      - id: DSN-ING-070
+        title: Per-toolchain flag retention
+        statement: >
+          A translation unit may carry more than one invocation record, keyed
+          by toolchain identifier, so a project built for several targets keeps
+          each set of flags intact rather than collapsing to one.
+        satisfies: [TOOL-ING-110]
+        verification: T
+      - id: DSN-ING-080
+        title: Test scope as a first-class, declared entity
+        statement: >
+          A test scope is a named, version-controlled declaration of the
+          translation units under test. Membership may be given as an explicit
+          file list, a directory, a glob, or a build-system target; all four
+          resolve to the same explicit unit list, and the resolved list is
+          recorded so a later glob expansion change is visible as a diff.
+        satisfies: [TOOL-ING-130, TOOL-ING-150, TOOL-ING-190]
+        verification: [I, T]
+      - id: DSN-ING-090
+        title: Scope boundary classification
+        statement: >
+          For a resolved scope, every call target is classified intra-scope
+          (linked real) or external (stub candidate). The external set is
+          reportable before any harness is generated, so the user sees the
+          stubbing obligation while the scope can still be changed cheaply.
+        satisfies: [TOOL-ING-140, TOOL-ING-180]
+        verification: T
+      - id: DSN-ING-100
+        title: Scope symbol conflict detection
+        statement: >
+          Duplicate non-static definitions and colliding file-static
+          identifiers within a scope are detected at scope resolution and
+          reported with both source locations, since these otherwise surface as
+          opaque link errors after generation.
+        satisfies: [TOOL-ING-160]
+        verification: T
+      - id: DSN-ING-110
+        title: Overlapping scope membership
+        statement: >
+          Scopes are independent views over the project model, so one
+          translation unit may belong to several — tested alone in one scope and
+          as part of an integration set in another — with per-scope generated
+          artifacts kept in per-scope output directories.
+        satisfies: [TOOL-ING-170]
+        verification: T
+
+  - id: CMP-ANA
+    name: Source Analyzer
+    layer: L1
+    responsibility: >
+      Parse C with a production front-end and emit the Analysis Model. This is
+      the only component permitted to hold a C front-end dependency.
+    depends_on: [CMP-CORE, CMP-ING, CMP-TCH]
+    elements:
+      - id: DSN-ANA-010
+        title: Front-end binding with flag fidelity
+        statement: >
+          Parsing uses libclang, invoked with the exact flags recorded for the
+          translation unit, so the parsed program is the compiled program.
+          Dialect coverage spans C89 through C17 plus GNU extensions by passing
+          the recorded `-std` and target flags through unmodified rather than
+          normalising them.
+        satisfies: [TOOL-PAR-010, TOOL-PAR-020]
+        verification: T
+      - id: DSN-ANA-020
+        title: Interface extraction
+        statement: >
+          Per function: name, return type, parameters, storage class, linkage,
+          and source location. Per interface: the transitive closure of
+          user-defined types reachable from it (struct, union, enum, typedef,
+          function pointer). Per function: the global and file-static variables
+          it reads or writes. These three together are what makes a harness
+          generable without human input.
+        satisfies: [TOOL-PAR-030, TOOL-PAR-040, TOOL-PAR-050]
+        verification: T
+      - id: DSN-ANA-030
+        title: Call graph with scope classification
+        statement: >
+          Callees per function, each marked internal or external relative to
+          the scope being analysed. The classification is a function of the
+          scope, so the same unit analysed in two scopes yields two
+          classifications over one shared parse.
+        satisfies: [TOOL-PAR-060]
+        verification: T
+      - id: DSN-ANA-040
+        title: Control flow graph behind a provider interface
+        statement: >
+          CFG construction sits behind a provider interface with a declared
+          capability flag, because libclang's AST-only API cannot supply it
+          (ADR-001 §2.1). A provider must exist for v1.0 — TOOL-PAR-070 is not
+          optional — and its scope is fixed as: basic blocks, edges, and the
+          decision-to-block mapping needed by structural coverage attribution
+          and by targeted generation. Which provider supplies it is the ADR-001
+          §2 decision, and the two candidates (a LibTooling helper emitting the
+          same JSON, or an AST-derived approximation sufficient for structured
+          C) are interchangeable behind this interface. Consumers declare their
+          dependence: DSN-COV-030 and DSN-ATG-010 require the capability and
+          report the CFG provider as unavailable rather than silently reporting
+          less; DSN-GUI-170 is absent from the interface when it is missing.
+        satisfies: [TOOL-PAR-070]
+        verification: T
+        open: ADR-001
+      - id: DSN-ANA-050
+        title: Static function exposure
+        statement: >
+          Static functions are made testable by compiling the unit into the
+          harness translation unit via generated inclusion, not by editing user
+          source. The mechanism is recorded in the model so the harness
+          generator and the coverage attributor agree on what was included.
+        satisfies: [TOOL-PAR-080]
+        verification: T
+      - id: DSN-ANA-060
+        title: Macro resolution and interface obscuring
+        statement: >
+          Object-like and function-like macros appearing in interfaces are
+          resolved to their expansion, and every place where a macro hides the
+          true interface is recorded as a model annotation, so the generator can
+          emit an explicit marker rather than silently producing a wrong
+          signature.
+        satisfies: [TOOL-PAR-090]
+        verification: T
+      - id: DSN-ANA-070
+        title: The Analysis Model as an inviolable seam
+        statement: >
+          A versioned JSON model is the sole input to every downstream stage.
+          No component outside CMP-ANA links, imports, or invokes a C front-end.
+          The model carries a schema version and downstream readers reject
+          incompatible versions rather than degrading. This seam is what makes
+          the ADR-001 language decision reversible.
+        satisfies: [TOOL-PAR-100, TOOL-PAR-110]
+        verification: [A, T]
+      - id: DSN-ANA-080
+        title: Complexity metrics
+        statement: >
+          Cyclomatic complexity per function, computed from the decision count
+          available in the AST so it does not depend on the CFG provider being
+          present, and exposed as a model field.
+        satisfies: [TOOL-PAR-120]
+        verification: T
+      - id: DSN-ANA-090
+        title: Partial analysis tolerance
+        statement: >
+          A translation unit that fails to parse is recorded as a failure entry
+          in the model with its diagnostics; the remaining units are analysed
+          and reported. Downstream stages see an explicitly incomplete model
+          rather than a silently smaller one.
+        satisfies: [TOOL-PAR-130]
+        verification: T
+
+  - id: CMP-TCH
+    name: Toolchain Abstraction
+    layer: L1
+    responsibility: >
+      Describe compilers declaratively — invocation, flag syntax, output
+      conventions, achievable coverage metrics — so that adding a compiler is a
+      data change.
+    depends_on: [CMP-CORE, CMP-PLG]
+    elements:
+      - id: DSN-TCH-010
+        title: Declarative compiler configuration
+        statement: >
+          A compiler is a data file: invocation template, flag syntax for
+          coverage/debug/optimisation, output file conventions, and declared
+          capabilities. Adding one requires no tool source change, which is the
+          same mechanism the shipped configurations use.
+        satisfies: [TOOL-TCH-020, TOOL-TCH-040, TOOL-PLG-020]
+        verification: T
+      - id: DSN-TCH-020
+        title: Host compiler support
+        statement: >
+          GCC and Clang host configurations are the reference implementations
+          of the configuration format and the baseline for the coverage
+          adapters.
+        satisfies: [TOOL-TCH-010]
+        verification: T
+      - id: DSN-TCH-030
+        title: Cross-toolchain support
+        statement: >
+          GNU-style embedded toolchains are supported through the same
+          configuration mechanism, with arm-none-eabi-gcc and a RISC-V GNU
+          toolchain as the verified references, and avr-gcc and SDCC shipped
+          alongside. Proprietary compilers are supported wherever their
+          invocation is externally scriptable — no special-case code path.
+        satisfies: [TOOL-TCH-030, TOOL-TCH-050, TOOL-TCH-100]
+        verification: [I, T]
+      - id: DSN-TCH-040
+        title: Capability declaration and metric gating
+        statement: >
+          Each configuration declares the coverage metrics it can produce. A
+          request for an undeclared metric is refused at configuration time
+          with the reason, rather than producing an empty or misleading
+          coverage result later.
+        satisfies: [TOOL-TCH-060]
+        verification: T
+      - id: DSN-TCH-050
+        title: Compiler version detection and feature gating
+        statement: >
+          The compiler is probed for its version at environment creation and
+          the result is cached with the configuration. Version-gated features
+          (MC/DC needing GCC >= 14 or Clang >= 18) are checked against it and
+          refused or warned with the detected version named.
+        satisfies: [TOOL-TCH-070]
+        verification: T
+      - id: DSN-TCH-060
+        title: Multi-toolchain build isolation
+        statement: >
+          Each toolchain gets its own build directory under the output root,
+          keyed by toolchain identifier, so one invocation can build the same
+          suite for several toolchains without artifact collision.
+        satisfies: [TOOL-TCH-080]
+        verification: T
+      - id: DSN-TCH-070
+        title: Reference toolchain container images
+        statement: >
+          Container images pinning validated host and cross toolchains, built
+          reproducibly and versioned with the tool, so a result can be
+          reproduced against the toolchain that produced it.
+        satisfies: [TOOL-TCH-090]
+        verification: D
+      - id: DSN-TCH-080
+        title: Environment preflight
+        statement: >
+          On first run and on demand, the declared toolchains are located,
+          version-probed, and capability-checked, producing one report of what
+          is present, what is missing, and what is present but unsupported.
+        satisfies: [TOOL-INS-080]
+        verification: T
+
+  # ---------------------------------------------------------------- L2 --------
+  - id: CMP-GEN
+    name: Generation Engine
+    layer: L2
+    responsibility: >
+      Produce harness and stub source from the Analysis Model via templates.
+      Owns the regeneration contract that protects user edits.
+    depends_on: [CMP-CORE, CMP-ANA, CMP-TCM, CMP-PLG]
+    elements:
+      - id: DSN-GEN-010
+        title: Model-driven harness generation
+        statement: >
+          A harness is generated from the Analysis Model with no manual step,
+          exposing every non-static function of the unit under test as directly
+          callable from test code.
+        satisfies: [TOOL-HAR-010, TOOL-HAR-020]
+        verification: T
+      - id: DSN-GEN-020
+        title: Static function and global variable access
+        statement: >
+          Optionally exposes static functions (via the inclusion mechanism of
+          DSN-ANA-050) and emits typed accessors for every global and
+          file-static variable the model records as read or written, giving
+          tests the observability the C language otherwise denies them.
+        satisfies: [TOOL-HAR-030, TOOL-HAR-040]
+        verification: T
+      - id: DSN-GEN-030
+        title: Per-test lifecycle hooks
+        statement: >
+          Setup and teardown hooks around each test case, generated into a
+          user-editable region so per-environment fixtures survive
+          regeneration.
+        satisfies: [TOOL-HAR-050]
+        verification: T
+      - id: DSN-GEN-040
+        title: Framework back-end abstraction
+        statement: >
+          The test framework is a template set plus a declarative descriptor
+          naming its assertion macros, runner entry point, and result output
+          form. Unity and cmocka are the required back-ends and neither may
+          introduce a C++ compilation or runtime dependency; GoogleTest is an
+          optional host-only back-end that no documented workflow depends on.
+          Adding a framework is templates and a descriptor, not tool source.
+        satisfies: [TOOL-HAR-060, TOOL-HAR-065, TOOL-HAR-070, TOOL-PLG-030]
+        verification: [A, T]
+      - id: DSN-GEN-050
+        title: Integration harness generation
+        statement: >
+          For a multi-unit scope, the harness links all intra-scope units real
+          and stubs only the external set produced by DSN-ING-090, so the
+          integration boundary is derived rather than hand-declared.
+        satisfies: [TOOL-HAR-080]
+        verification: T
+      - id: DSN-GEN-060
+        title: Generated code conventions
+        statement: >
+          Generated source is formatted deterministically by a pinned formatter
+          and carries a header naming it as generated, the generating tool
+          version, and the digest of the source model — so a reviewer can tell
+          at a glance what produced the file and whether it is current.
+        satisfies: [TOOL-HAR-090]
+        verification: I
+      - id: DSN-GEN-070
+        title: Regeneration contract for user-editable regions
+        statement: >
+          Generated files are partitioned into generated regions and delimited
+          user regions. Regeneration rewrites generated regions and carries user
+          regions forward verbatim. Where a signature change makes a user region
+          untenable — a parameter it references is gone — the tool reports a
+          conflict with both versions rather than resolving it silently. Stub
+          bodies obey the same contract, with the signature re-synchronised and
+          the body preserved wherever the change permits.
+        satisfies: [TOOL-HAR-100, TOOL-STB-110, TOOL-STB-120]
+        verification: T
+      - id: DSN-GEN-080
+        title: Staleness detection against the interface
+        statement: >
+          Every generated artifact stores the digest of the interface it was
+          generated against; a change marks it stale and names what changed.
+          Test cases are bound more narrowly than harnesses: a case records the
+          digest of only the signatures and global declarations it actually
+          references, so an unrelated change elsewhere in the unit does not mark
+          it stale. C-authored cases (DSN-TCM-010) are never regenerated and so
+          have no generation-time digest; their referenced-symbol set is instead
+          recovered by resolving the harness accessors they call, and a case
+          whose references cannot be resolved is reported as unanalysable rather
+          than assumed current — an unresolvable case is the one most likely to
+          be stale.
+        satisfies: [TOOL-HAR-110, TOOL-CBT-070]
+        verification: T
+      - id: DSN-GEN-090
+        title: Link closure resolution
+        statement: >
+          Before building, the undefined-symbol set of the harness is computed
+          and resolved from three sources — intra-scope definitions, generated
+          stubs, and explicit user-supplied linkage. Anything left over is
+          reported by name with the referencing site, rather than emerging as a
+          linker error.
+        satisfies: [TOOL-HAR-120]
+        verification: T
+      - id: DSN-GEN-100
+        title: Stub synthesis
+        statement: >
+          Every external function reachable from the unit under test gets a
+          stub with a signature identical to the original, accompanied by the
+          type and structure declarations required for it to compile standalone,
+          derived from the model's transitive type closure.
+        satisfies: [TOOL-STB-010, TOOL-STB-020, TOOL-STB-030]
+        verification: T
+      - id: DSN-GEN-110
+        title: Stub behaviour control
+        statement: >
+          Per test case, a stub can be given a fixed return value, a sequence
+          of values consumed across successive calls, or a user callback; and
+          can write caller-supplied values through pointer parameters for
+          output-parameter semantics. Behaviour is data attached to the test
+          case, not code in the stub.
+        satisfies: [TOOL-STB-040, TOOL-STB-070]
+        verification: T
+      - id: DSN-GEN-120
+        title: Interaction recording
+        statement: >
+          Stubs record call count and per-call argument values in a
+          fixed-capacity, statically allocated journal (no dynamic allocation,
+          so the same code runs on a bare-metal target), retrievable from test
+          code. A shared monotonic sequence counter across stubs supports call
+          order verification.
+        satisfies: [TOOL-STB-050, TOOL-STB-060]
+        verification: T
+      - id: DSN-GEN-130
+        title: Selective stubbing
+        statement: >
+          Stubbing is per-function opt-out: any external function can be linked
+          real instead. Standard library functions are never stubbed by default
+          and only on explicit request, since stubbing them silently is a
+          common source of inexplicable behaviour. Stubbing them is also the
+          technically harder case, because libc already defines the symbol: it
+          is performed by the same linker-level interposition as DSN-GEN-140
+          (`--wrap` or equivalent), declared per toolchain configuration, and
+          refused with the reason where a configuration does not declare the
+          capability. The tool does not attempt `-nostdlib` or link-order
+          tricks, which work on one toolchain and fail silently on the next.
+        satisfies: [TOOL-STB-080, TOOL-STB-100]
+        verification: T
+      - id: DSN-GEN-140
+        title: Intra-unit call interception
+        statement: >
+          Calls from the unit under test to functions defined within it are
+          interceptable via linker-level symbol wrapping (`--wrap` or
+          equivalent declared per toolchain configuration), leaving user source
+          untouched. Toolchains without the capability declare so and the
+          feature is refused rather than approximated.
+        satisfies: [TOOL-STB-090]
+        verification: T
+      - id: DSN-GEN-150
+        title: Unhandled construct marking
+        statement: >
+          Constructs the generator cannot fully handle — variadic functions,
+          complex function pointer types, incomplete types — emit a single
+          consistent greppable marker in the generated source and a
+          corresponding model annotation, so the manual work is enumerable
+          rather than discovered at compile time.
+        satisfies: [TOOL-STB-130]
+        verification: T
+      - id: DSN-GEN-160
+        title: Function pointer stubbing
+        statement: >
+          Functions reached through function pointers, including function
+          pointer members of structures, are stubbable by generating a
+          conforming function and an assignment helper the test can invoke.
+        satisfies: [TOOL-STB-140]
+        verification: T
+
+  - id: CMP-TCM
+    name: Test Case Model and Store
+    layer: L2
+    responsibility: >
+      The representation of a test case — data-driven or C-authored — its
+      identity, its comparison semantics, and its interchange formats.
+    depends_on: [CMP-CORE, CMP-PRJ, CMP-ANA]
+    elements:
+      - id: DSN-TCM-010
+        title: C-authored test cases
+        statement: >
+          Test cases may be written directly in C against the generated
+          harness, held in user-region files the generator never rewrites, and
+          are first-class alongside data-driven cases in selection, execution,
+          and reporting.
+        satisfies: [TOOL-TCD-010]
+        verification: T
+      - id: DSN-TCM-020
+        title: Data-driven test case model
+        statement: >
+          A test case is data: input parameter values, initial values of
+          accessed globals, expected return value, expected final global values,
+          expected output parameter values, and stub behaviour and expectations.
+          It is stored in plain diffable text and compiled into harness code at
+          build time, so the data is the artifact under version control and the
+          C is derived.
+        satisfies: [TOOL-TCD-020, TOOL-TCD-030, TOOL-TCD-040]
+        verification: [I, T]
+        open: ADR-002
+      - id: DSN-TCM-030
+        title: Comparison semantics
+        statement: >
+          Expected-value comparison is generated from the declared C type:
+          scalars and enums by value, pointers by policy (null, address, or
+          pointee comparison stated per field), arrays and structs
+          member-wise with padding excluded, unions by the active member the
+          test names. Floating-point comparison takes an absolute or relative
+          tolerance, defaulting to exact only where the user asks for it.
+        satisfies: [TOOL-TCD-050, TOOL-TCD-060]
+        verification: T
+      - id: DSN-TCM-040
+        title: Ranged input expansion
+        statement: >
+          A ranged input expands to one executed test per value at build time,
+          with each generated case carrying a derived identifier stable under
+          re-expansion so results remain comparable across runs.
+        satisfies: [TOOL-TCD-070]
+        verification: T
+      - id: DSN-TCM-050
+        title: Suites and selection
+        statement: >
+          Test cases carry suite membership, and one selection expression —
+          by suite, unit, function, or test name — is shared by the CLI, the
+          engine API, and the GUI, so a selection made in one is expressible in
+          the others.
+        satisfies: [TOOL-TCD-080]
+        verification: T
+      - id: DSN-TCM-060
+        title: Test independence
+        statement: >
+          Each test case runs against harness state reset by the generated
+          setup hook, and the runner supports seeded random ordering so
+          order dependence is detectable rather than latent. The seed is
+          recorded with the run.
+        satisfies: [TOOL-TCD-090]
+        verification: A
+      - id: DSN-TCM-070
+        title: Interchange import and export
+        statement: >
+          Test cases round-trip through a documented CSV-class interchange
+          format sufficient to reconstruct them in another tool, which is both
+          the export path against lock-in and the spreadsheet-based migration
+          path in. Test cases are only half of the anti-lock-in obligation; the
+          results half is discharged by the open result and coverage formats of
+          DSN-REP-020 and DSN-REP-030, and the two together are what make
+          leaving the tool possible.
+        satisfies: [TOOL-TCD-100, TOOL-MIG-060]
+        verification: T
+      - id: DSN-TCM-080
+        title: Boundary value and equivalence class derivation
+        statement: >
+          Given a parameter's declared type and an optional user-declared valid
+          range, the tool derives boundary and equivalence-class values and
+          emits ordinary test cases from them — editable thereafter like any
+          other.
+        satisfies: [TOOL-TCD-110]
+        verification: T
+      - id: DSN-TCM-090
+        title: Classification tree design
+        statement: >
+          A classification tree over the input space, from which combinations
+          are selected and materialised as ordinary test cases.
+        satisfies: [TOOL-TCD-120]
+        verification: T
+      - id: DSN-TCM-100
+        title: Robustness test cases
+        statement: >
+          A test case may be marked robustness, which supplies out-of-range or
+          invalid inputs with the tool's own range checking disabled, so the
+          tool does not refuse to express exactly the case the user needs.
+        satisfies: [TOOL-TCD-130]
+        verification: T
+      - id: DSN-TCM-110
+        title: Stable test case identity
+        statement: >
+          Every test case carries an identifier assigned at creation and
+          preserved across edits, renames, and regeneration. All traceability,
+          per-test coverage attribution, and run comparison key on it — which
+          is why it is assigned rather than derived from the test's content.
+        satisfies: [TOOL-TCD-140]
+        verification: T
+
+  - id: CMP-ATG
+    name: Automatic Test Generation
+    layer: L2
+    responsibility: >
+      Derive test cases from the code by analysis engines, and — as importantly
+      — refuse to present anything the tool has not itself compiled and run.
+    depends_on: [CMP-CORE, CMP-ANA, CMP-TCM]
+    elements:
+      - id: DSN-ATG-110
+        title: Validation port (inverted dependency on L3/L4)
+        statement: >
+          Generation must build, run, and measure the cases it produces, which
+          are L3 and L4 capabilities. Rather than depend upward, CMP-ATG
+          declares a `TestValidationPort` — build, execute, measure coverage
+          delta — implemented by CMP-BLD, CMP-EXH, and CMP-COV and bound at
+          composition time. The layer graph stays acyclic and generation stays
+          testable against a stub port.
+        derived: true
+        rationale: >
+          Structural consequence of TOOL-ATG-050 and TOOL-ATG-060 requiring
+          execution and coverage feedback inside a synthesis-layer component.
+        verification: A
+      - id: DSN-ATG-010
+        title: Generation orchestration against coverage targets
+        statement: >
+          Generation is driven by a coverage goal over a designated function,
+          and can be aimed at a specific uncovered line, branch, or condition
+          rather than the whole function, so it is usable for closing a
+          remaining gap and not only for bulk seeding.
+        satisfies: [TOOL-ATG-010, TOOL-ATG-090]
+        verification: T
+      - id: DSN-ATG-020
+        title: Symbolic execution adapter
+        statement: >
+          A symbolic execution engine sits behind an adapter that takes a
+          function and a goal and returns input vectors. The engine is an
+          optional, separately installed component, never on the critical path
+          of a default install, because its toolchain version sensitivity would
+          otherwise destabilise every user's build (ADR-001 R-09).
+        satisfies: [TOOL-ATG-020]
+        verification: T
+        open: ADR-003
+      - id: DSN-ATG-030
+        title: Bounded model checking adapter
+        statement: >
+          A second engine implementing the same adapter interface, selectable
+          per run, so the two are complementary rather than alternatives baked
+          into the architecture.
+        satisfies: [TOOL-ATG-030]
+        verification: T
+        open: ADR-003
+      - id: DSN-ATG-040
+        title: Emission into the canonical test format
+        statement: >
+          Vectors are emitted as ordinary CMP-TCM test cases. There is no
+          separate generated-test representation, so generated cases are
+          editable, diffable, and executable by exactly the same path as
+          authored ones.
+        satisfies: [TOOL-ATG-040]
+        verification: T
+      - id: DSN-ATG-050
+        title: Validation gate
+        statement: >
+          Every generated case is compiled and executed before it is shown.
+          Cases that fail to compile or crash the harness are discarded and
+          counted, never presented as valid output.
+        satisfies: [TOOL-ATG-050]
+        verification: T
+      - id: DSN-ATG-060
+        title: Generation run reporting
+        statement: >
+          Per run: cases generated, coverage achieved, and the specific
+          constructs left uncovered — the last being the part a user acts on.
+        satisfies: [TOOL-ATG-060]
+        verification: T
+      - id: DSN-ATG-070
+        title: Machine-generation provenance
+        statement: >
+          Generated cases carry a provenance field marking them
+          machine-generated with the engine and its version, surfaced in the
+          artifact and in every report that includes the case.
+        satisfies: [TOOL-ATG-070]
+        verification: I
+      - id: DSN-ATG-080
+        title: Unreviewed expected values
+        statement: >
+          A generated case records observed behaviour as its expected value and
+          flags that value unreviewed. An unreviewed expectation is a
+          regression detector, not a specification, and reports must be able to
+          say which is which.
+        satisfies: [TOOL-ATG-080]
+        verification: T
+      - id: DSN-ATG-090
+        title: Bounded generation effort
+        statement: >
+          Time and memory limits per generation run, enforced by the adapter,
+          terminating gracefully and returning whatever was produced rather
+          than discarding partial work.
+        satisfies: [TOOL-ATG-100]
+        verification: D
+      - id: DSN-ATG-100
+        title: Engine limitation reporting
+        statement: >
+          Constructs the engine cannot handle — dynamic memory, floating point,
+          concurrency, inline assembly — are reported per function as explicit
+          limitations, so an absent test is distinguishable from an impossible
+          one.
+        satisfies: [TOOL-ATG-110]
+        verification: T
+
+  # ---------------------------------------------------------------- L3 --------
+  - id: CMP-BLD
+    name: Build Orchestrator
+    layer: L3
+    responsibility: >
+      Compile and link environments for host and cross targets, incrementally,
+      without touching the user's own build system.
+    depends_on: [CMP-CORE, CMP-TCH, CMP-GEN]
+    elements:
+      - id: DSN-BLD-010
+        title: Environment build pipeline
+        statement: >
+          A build graph over generated harness, stubs, unit sources, and
+          framework runtime, executed through the toolchain configuration into
+          a per-environment output directory. The user's build system is read
+          for flags and never invoked or modified.
+        satisfies: [TOOL-EXE-010]
+        verification: T
+      - id: DSN-BLD-020
+        title: Incremental rebuild
+        statement: >
+          Build nodes are keyed by content digest of inputs and flags, so an
+          unchanged environment rebuilds nothing and a changed test case
+          rebuilds only what depends on it. This is the mechanism the
+          re-execution budget in DSN-CORE-130 relies on.
+        satisfies: [TOOL-EXE-080]
+        verification: T
+      - id: DSN-BLD-030
+        title: Cross build for target
+        statement: >
+          The same build graph parameterised by a cross toolchain
+          configuration, producing a target image plus the map information the
+          footprint report needs.
+        satisfies: [TOOL-TGT-010]
+        verification: T
+      - id: DSN-BLD-040
+        title: Sanitizer integration
+        statement: >
+          Address and undefined-behaviour sanitizers are opt-in build variants
+          whose findings are reported as distinct from test failures, since
+          they are not always available and enabling them changes runtime
+          behaviour.
+        satisfies: [TOOL-EXE-090]
+        verification: T
+      - id: DSN-BLD-050
+        title: Structured build diagnostics
+        statement: >
+          Compiler and linker output is parsed into structured diagnostics
+          carrying file, line, column, severity, and message, so any front-end
+          can navigate to the offending location without re-parsing text.
+        derived: true
+        rationale: >
+          Required to serve TOOL-UIX-090 and TOOL-ING-070 from the engine
+          rather than duplicating diagnostic parsing in each front-end.
+        refines: [DSN-BLD-010]
+        verification: T
+
+  - id: CMP-EXH
+    name: Host Execution Runner
+    layer: L3
+    responsibility: >
+      Run built environments on the development host, contain their faults, and
+      produce a normalised result set.
+    depends_on: [CMP-CORE, CMP-BLD, CMP-TCM, CMP-SEC]
+    elements:
+      - id: DSN-EXH-010
+        title: Host execution and result normalisation
+        statement: >
+          Invokes the executable produced by DSN-BLD-010 under the supervisor
+          of DSN-EXH-020 — the execute half of TOOL-EXE-010, whose build half
+          is DSN-BLD-010 — and captures, per test case: pass, fail, or error;
+          and for a failure, the assertion, expected value, actual value, and
+          source location. Framework-specific output is normalised at the
+          runner boundary into one result record, so nothing downstream knows
+          which framework ran.
+        satisfies: [TOOL-EXE-010, TOOL-EXE-020]
+        verification: T
+      - id: DSN-EXH-020
+        title: Fault isolation
+        statement: >
+          Test execution is isolated at process granularity with a supervisor
+          that detects abnormal termination, attributes it to the test case in
+          flight, and continues with the remainder. A hang is not a
+          termination, so the timeout of DSN-EXH-030 is a fault mode of this
+          supervisor rather than a separate mechanism: on expiry the child is
+          killed, the case is attributed, and the run resumes. A segfault or a
+          hang in one case costs one result, not the run.
+        satisfies: [TOOL-EXE-030]
+        verification: T
+      - id: DSN-EXH-030
+        title: Timeout enforcement
+        statement: >
+          A configurable per-test timeout, enforced by the supervisor, with a
+          timed-out test reported as a failure distinguishable from an
+          assertion failure.
+        satisfies: [TOOL-EXE-040]
+        verification: T
+      - id: DSN-EXH-040
+        title: Parallel execution
+        statement: >
+          Independent test executables run concurrently at a configurable
+          degree, with per-worker output directories so coverage data files do
+          not collide.
+        satisfies: [TOOL-EXE-050]
+        verification: T
+      - id: DSN-EXH-050
+        title: Run status aggregation
+        statement: >
+          The runner returns an aggregate outcome that the front-ends map to
+          the documented exit code contract; any test failure yields a non-zero
+          status.
+        satisfies: [TOOL-EXE-060]
+        verification: T
+      - id: DSN-EXH-060
+        title: Debugger launch
+        statement: >
+          A test case can be launched under a debugger with the harness built
+          with debug information and execution stopped at entry to the function
+          under test. The engine prepares and reports the invocation; the
+          debugger front-end choice is deferred.
+        satisfies: [TOOL-EXE-070]
+        verification: T
+        open: SRS-001 open question 9
+
+  - id: CMP-EXT
+    name: Target Execution Runner
+    layer: L3
+    responsibility: >
+      Run the same environments on simulators and physical hardware, and tell
+      target infrastructure failures apart from test failures.
+    depends_on: [CMP-CORE, CMP-BLD, CMP-TCM, CMP-PLG, CMP-SEC]
+    elements:
+      - id: DSN-EXT-010
+        title: Target runner abstraction and hardware inventory
+        statement: >
+          A target is a declarative inventory entry — identifier, platform,
+          probe type, serial device, flash timeout — resolved to a runner
+          implementing one interface: flash, run, collect. Additional target
+          methods are added through that documented interface with a
+          user-supplied script, not by extending the tool.
+        satisfies: [TOOL-TGT-080, TOOL-PLG-040]
+        verification: [D, T]
+      - id: DSN-EXT-020
+        title: Simulator execution
+        statement: >
+          Instruction-set simulator runners, with QEMU and Renode as the
+          verified references, giving a CI-viable target path that needs no
+          hardware.
+        satisfies: [TOOL-TGT-020]
+        verification: T
+      - id: DSN-EXT-030
+        title: Hardware execution via debug probe
+        statement: >
+          Physical target execution with flashing through OpenOCD, pyOCD, and
+          J-Link, each an inventory-selectable probe backend behind the same
+          runner interface.
+        satisfies: [TOOL-TGT-030, TOOL-TGT-040]
+        verification: T
+      - id: DSN-EXT-040
+        title: Result transport channels
+        statement: >
+          Results are retrieved over semihosting and over a serial channel at
+          minimum, both implemented as transports feeding the same protocol
+          parser.
+        satisfies: [TOOL-TGT-050]
+        verification: T
+      - id: DSN-EXT-050
+        title: Line-oriented result protocol
+        statement: >
+          The target emits plain-text, line-oriented records that parse without
+          a return channel, so the protocol works over a one-way UART and
+          survives partial capture — a truncated run yields the results
+          received up to the truncation.
+        satisfies: [TOOL-TGT-060]
+        verification: A
+      - id: DSN-EXT-060
+        title: Host and target test portability
+        statement: >
+          Test case data and generated test code are identical for host and
+          target; only the toolchain configuration, runner, and result
+          transport differ. Nothing in a test case may be host- or
+          target-specific.
+        satisfies: [TOOL-TGT-070]
+        verification: T
+      - id: DSN-EXT-070
+        title: Target fault classification
+        statement: >
+          Flash failure, absent output, unexpected reset, and watchdog expiry
+          are detected and reported as infrastructure faults, explicitly not as
+          test failures, because conflating the two makes a flaky rig look like
+          failing software.
+        satisfies: [TOOL-TGT-090]
+        verification: T
+      - id: DSN-EXT-080
+        title: Suite partitioning for constrained targets
+        statement: >
+          When a suite exceeds target memory, it is split into several target
+          executions whose results merge into one result set, with the split
+          recorded so the report shows one logical run.
+        satisfies: [TOOL-TGT-100]
+        verification: T
+      - id: DSN-EXT-090
+        title: On-target harness footprint characterisation
+        statement: >
+          RAM and flash overhead of the on-target harness are measured per
+          configuration from the build's map output. Stack is not derivable
+          from a map file, so it is obtained separately: `-fstack-usage` per
+          frame combined with the call graph of DSN-ANA-030 gives a static
+          worst-case depth, corroborated by stack painting on a reference
+          target. Both figures are published with the caveat that the static
+          bound excludes recursion and indirect calls the call graph cannot
+          resolve, since an unqualified stack number is worse than none. A
+          harness that does not fit is the first thing an embedded user needs
+          to know.
+        satisfies: [TOOL-TGT-110]
+        verification: A
+      - id: DSN-EXT-100
+        title: User-supplied target adapters
+        statement: >
+          Targets without a supported probe are driven by a user-supplied
+          flashing and communication script conforming to the runner interface.
+        satisfies: [TOOL-TGT-120]
+        verification: T
+
+  # ---------------------------------------------------------------- L4 --------
+  - id: CMP-COV
+    name: Coverage Engine
+    layer: L4
+    responsibility: >
+      Acquire coverage from the compiler's instrumentation, attribute it,
+      merge it, and enforce it. Implements no instrumentation of its own.
+    depends_on: [CMP-CORE, CMP-TCH, CMP-EXH, CMP-EXT, CMP-ANA]
+    elements:
+      - id: DSN-COV-010
+        title: Coverage acquisition adapters
+        statement: >
+          Per-toolchain adapters consume the compiler's own coverage output
+          (gcov JSON, llvm-cov export) and normalise statement, branch/decision,
+          function, and function-call coverage into one internal coverage
+          model. The tool measures and reports; the compiler instruments.
+        satisfies: [TOOL-COV-010, TOOL-COV-020, TOOL-COV-030, TOOL-COV-040]
+        verification: T
+        open: ADR-004
+      - id: DSN-COV-020
+        title: MC/DC acquisition and form declaration
+        statement: >
+          MC/DC is read from the compiler mechanism declared by the toolchain
+          configuration. Both the form obtained — masking or unique-cause — and
+          the mechanism identifier that produced it (`-fcondition-coverage`,
+          `-fcoverage-mcdc`) are carried as fields on the coverage model, not
+          as documentation prose, and every report renders both. Where the
+          supported form differs from unique-cause, the gap is stated in the
+          same place, and its content is fixed rather than left to the author:
+          masking MC/DC accepts a condition pair that short-circuit evaluation
+          masks, which unique-cause rejects, so a decision can show full MC/DC
+          under masking with condition pairs a unique-cause assessor would not
+          accept. The statement is authored once against the toolchain
+          capability data and reused by every renderer and by DSN-CORE-110.
+        satisfies: [TOOL-COV-050, TOOL-COV-060, TOOL-COV-090]
+        verification: [I, T]
+        open: SRS-001 open question 2
+      - id: DSN-COV-030
+        title: Condition-level detail model
+        statement: >
+          For a partially covered decision, the model holds per-condition
+          true/false exercise status, so a report can say which condition was
+          never taken false rather than only that the decision is incomplete.
+        satisfies: [TOOL-COV-070]
+        verification: T
+      - id: DSN-COV-040
+        title: Non-instrumentable expression detection
+        statement: >
+          Boolean expressions the compiler declined to instrument — including
+          those exceeding its condition-count limit — are detected by
+          reconciling the analysis model's decision inventory against the
+          coverage output, and reported as unmeasured. Otherwise they read as
+          fully covered, which is the dangerous failure mode.
+        satisfies: [TOOL-COV-080]
+        verification: T
+      - id: DSN-COV-050
+        title: Bare-metal coverage retrieval
+        statement: >
+          On targets with no filesystem and no OS, coverage counters are
+          extracted from memory over the existing result transport or debug
+          probe and reconstructed into the compiler's expected data file
+          format, so the standard adapters process them unchanged.
+        satisfies: [TOOL-COV-100]
+        verification: T
+      - id: DSN-COV-060
+        title: Merge and per-test attribution
+        statement: >
+          Coverage from multiple executions merges into one result set, and
+          each execution's data is captured per test case so coverage can be
+          attributed to individual tests. Per-test attribution is what makes
+          change impact analysis and suite minimisation possible.
+        satisfies: [TOOL-COV-110, TOOL-COV-120]
+        verification: T
+      - id: DSN-COV-070
+        title: Threshold enforcement
+        statement: >
+          Configurable minimum thresholds per metric, evaluated after merge,
+          failing the run with a distinct exit code from a test failure so CI
+          can tell the two apart.
+        satisfies: [TOOL-COV-130]
+        verification: T
+      - id: DSN-COV-080
+        title: Coverage by analysis
+        statement: >
+          A justification records the construct, author, date, and rationale,
+          and is bound to the digest of the source region it justifies. A change
+          to that region invalidates the justification, which then reports as
+          expired rather than continuing to excuse code it no longer describes.
+          Reports render justified as a third state, never as covered.
+        satisfies: [TOOL-COV-140, TOOL-COV-150]
+        verification: [I, T]
+      - id: DSN-COV-090
+        title: Unit-under-test scoping
+        statement: >
+          Coverage of the unit under test is reported separately from harness,
+          stub, and framework code, using the scope membership from
+          DSN-ING-090 rather than path heuristics.
+        satisfies: [TOOL-COV-160]
+        verification: T
+      - id: DSN-COV-100
+        title: Control and data coupling analysis
+        statement: >
+          Between integrated units in one scope, call-pair exercise (control
+          coupling) and shared-data read/write pairing (data coupling) are
+          derived from the call graph and the global access model and reported
+          as coverage of the coupling set.
+        satisfies: [TOOL-COV-170]
+        verification: T
+
+  - id: CMP-CBT
+    name: Change Impact and Regression
+    layer: L4
+    responsibility: >
+      Relate a source change to the tests that cover it, and relate one run to
+      another.
+    depends_on: [CMP-CORE, CMP-COV, CMP-ANA, CMP-PRJ]
+    elements:
+      - id: DSN-CBT-010
+        title: Re-execution without regeneration
+        statement: >
+          A built environment plus its stored test cases is re-executable
+          directly; regeneration is triggered only by staleness detected in
+          DSN-GEN-080, never as a precondition of running.
+        satisfies: [TOOL-CBT-010]
+        verification: T
+      - id: DSN-CBT-020
+        title: Change impact analysis and subset execution
+        statement: >
+          A source diff is mapped to changed line ranges, intersected with the
+          per-test coverage attribution of DSN-COV-060, yielding the affected
+          test set — which can then be executed alone. Tests whose attribution
+          is missing are treated as affected, so the conservative direction is
+          the default.
+        satisfies: [TOOL-CBT-020, TOOL-CBT-030]
+        verification: T
+      - id: DSN-CBT-030
+        title: Partial-run disclosure
+        statement: >
+          A result set produced by a subset run is flagged partial at the model
+          level, and every report renders that flag together with the list of
+          tests not executed. A partial run cannot be presented as a full one
+          because the flag travels with the data.
+        satisfies: [TOOL-CBT-040]
+        verification: I
+      - id: DSN-CBT-040
+        title: Run comparison
+        statement: >
+          Two result sets are compared by stable test identity, reporting newly
+          failing, newly passing, and newly added tests, and coverage delta
+          against a designated baseline.
+        satisfies: [TOOL-CBT-050, TOOL-CBT-060]
+        verification: T
+      - id: DSN-CBT-050
+        title: Suite minimisation
+        statement: >
+          Tests contributing no coverage beyond that of the retained set are
+          identified as redundant candidates. The tool reports them; it does not
+          delete them, because coverage redundancy is not the only reason a test
+          exists.
+        satisfies: [TOOL-CBT-080]
+        verification: T
+
+  - id: CMP-TRC
+    name: Traceability Engine
+    layer: L4
+    responsibility: >
+      Hold requirements, link them to test cases and code, and report the gaps
+      in both directions.
+    depends_on: [CMP-CORE, CMP-PRJ, CMP-TCM, CMP-ANA]
+    elements:
+      - id: DSN-TRC-010
+        title: Requirement store and test linkage
+        statement: >
+          Requirements are held as identified nodes with text and version, and
+          a test case may declare links to any number of them. Links are stored
+          on the test case, so moving a test moves its links.
+        satisfies: [TOOL-TRC-010]
+        verification: T
+      - id: DSN-TRC-020
+        title: Bidirectional matrix with status
+        statement: >
+          The matrix is generated in both directions — requirement to tests and
+          test to requirements — with each linked test's pass/fail status from
+          the result set, so the matrix answers "is this requirement verified"
+          and not merely "is it linked".
+        satisfies: [TOOL-TRC-020, TOOL-TRC-030]
+        verification: T
+      - id: DSN-TRC-030
+        title: Gap reporting
+        statement: >
+          Requirements with no linked test and tests with no linked requirement
+          are reported as first-class results of matrix generation, not as an
+          optional extra view.
+        satisfies: [TOOL-TRC-040]
+        verification: T
+      - id: DSN-TRC-040
+        title: Requirement importers
+        statement: >
+          ReqIF, CSV, and a documented plain-text format import into the same
+          requirement node model, with the source format and import timestamp
+          recorded on each node.
+        satisfies: [TOOL-TRC-050, TOOL-TRC-060]
+        verification: T
+      - id: DSN-TRC-050
+        title: ReqIF export
+        statement: >
+          Traceability data exports to ReqIF for round-trip with external
+          requirements management tools.
+        satisfies: [TOOL-TRC-070]
+        verification: T
+      - id: DSN-TRC-060
+        title: Requirement-to-code links
+        statement: >
+          Requirements link to source elements — function or line range —
+          resolved through the analysis model so links survive line movement
+          better than raw line numbers would.
+        satisfies: [TOOL-TRC-080]
+        verification: T
+      - id: DSN-TRC-070
+        title: Requirement change detection
+        statement: >
+          Each requirement node stores a digest of its text at the time its
+          links were last reviewed or executed. A changed digest marks the
+          linked tests as needing re-review, which is how a silently edited
+          requirement stops silently invalidating evidence.
+        satisfies: [TOOL-TRC-090]
+        verification: T
+      - id: DSN-TRC-080
+        title: External traceability tool interoperability
+        statement: >
+          The requirement store is an adapter over an external traceability
+          tool where the user has one (StrictDoc, OpenFastTrace), rather than
+          insisting on being the system of record.
+        satisfies: [TOOL-TRC-100]
+        verification: T
+
+  - id: CMP-REP
+    name: Reporting Pipeline
+    layer: L4
+    responsibility: >
+      Turn results, coverage, and links into the artifacts people and machines
+      read. One model in, many renderers out.
+    depends_on: [CMP-CORE, CMP-EXH, CMP-EXT, CMP-COV, CMP-CBT, CMP-TRC, CMP-PLG]
+    elements:
+      - id: DSN-REP-010
+        title: Intermediate report model
+        statement: >
+          Every renderer consumes one documented, versioned report model
+          assembled from results, coverage, justifications, and links. The model
+          is persisted, so a new report format is produced by re-rendering
+          rather than re-running, and adding a format needs no tool source
+          change.
+        satisfies: [TOOL-REP-090, TOOL-PLG-050]
+        verification: [A, T]
+      - id: DSN-REP-020
+        title: JUnit XML renderer
+        statement: >
+          Machine-readable test results in JUnit XML, the format CI systems
+          consume without configuration. With DSN-REP-030 this is also the
+          results half of the anti-lock-in export obligation, whose test-case
+          half is DSN-TCM-070.
+        satisfies: [TOOL-REP-010, TOOL-MIG-060]
+        verification: T
+      - id: DSN-REP-030
+        title: Coverage interchange renderer and reader
+        statement: >
+          Cobertura XML and LCOV output, and the corresponding reader, so
+          coverage produced elsewhere can be aggregated with the tool's own
+          rather than kept in a separate silo.
+        satisfies: [TOOL-REP-020, TOOL-MIG-080]
+        verification: T
+      - id: DSN-REP-040
+        title: HTML report
+        statement: >
+          A self-contained HTML report combining results and coverage, with
+          annotated source showing per-line status and, per decision, the
+          per-condition MC/DC detail from DSN-COV-030. Self-contained because
+          the report is frequently read on a machine that is not the one that
+          produced it.
+        satisfies: [TOOL-REP-030, TOOL-REP-040, TOOL-REP-050]
+        verification: T
+      - id: DSN-REP-050
+        title: Verification report
+        statement: >
+          A single report containing tool identification and version,
+          configuration, test cases executed with results, coverage per metric,
+          justified exclusions, and the traceability matrix — assembled from the
+          report model so it cannot disagree with the other renderings.
+        satisfies: [TOOL-REP-060]
+        verification: T
+      - id: DSN-REP-060
+        title: Report provenance block
+        statement: >
+          Every report carries tool version, compiler and version, target
+          executed on, and execution timestamp, sourced from the provenance
+          record of DSN-CORE-100 rather than re-derived per renderer.
+        satisfies: [TOOL-REP-070]
+        verification: I
+      - id: DSN-REP-070
+        title: Paginated archival rendering
+        statement: >
+          A PDF renderer for records retention, generated from the same model,
+          with pagination and content independent of the viewing environment.
+        satisfies: [TOOL-REP-080]
+        verification: T
+      - id: DSN-REP-080
+        title: Report determinism
+        statement: >
+          Identical inputs produce byte-identical reports apart from an
+          explicitly delimited timestamp block, which makes reports diffable
+          and archived evidence checkable.
+        satisfies: [TOOL-REP-100]
+        verification: T
+      - id: DSN-REP-090
+        title: Cross-cutting aggregation
+        statement: >
+          A summary rendering across units, targets, and toolchains, built by
+          merging report models rather than by scraping individual reports.
+        satisfies: [TOOL-REP-110]
+        verification: T
+      - id: DSN-REP-100
+        title: Trend reporting
+        statement: >
+          Coverage across successive runs, read from archived report models, so
+          trend needs no separate database.
+        satisfies: [TOOL-REP-120]
+        verification: T
+      - id: DSN-REP-110
+        title: Report format versioning
+        statement: >
+          Formats used as certification evidence carry a format version, and
+          format changes are documented per release, so a report archived
+          years ago remains interpretable against a published definition.
+        satisfies: [TOOL-REP-130]
+        verification: I
+      - id: DSN-REP-120
+        title: Scope and exclusion disclosure
+        statement: >
+          Every report names the test scope it covers and states what was
+          excluded from it — units, tests, and justified constructs — because a
+          coverage figure without its denominator is not evidence.
+        satisfies: [TOOL-REP-140]
+        verification: T
+      - id: DSN-REP-130
+        title: Rendering from archived data
+        statement: >
+          Reports regenerate from an archived report model with no execution,
+          which is also the mechanism by which an old record is re-rendered in
+          a newer format.
+        satisfies: [TOOL-REP-150]
+        verification: T
+
+  # ---------------------------------------------------------------- L5 --------
+  - id: CMP-API
+    name: Engine Service Interface
+    layer: L5
+    responsibility: >
+      The one boundary every front-end crosses. Versioned, documented, local.
+    depends_on: [CMP-CORE]
+    elements:
+      - id: DSN-API-010
+        title: Engine and front-end separation
+        statement: >
+          All capability lives in the engine. A front-end holds presentation
+          state only and can do nothing the engine cannot be asked to do
+          directly, which is what keeps the CLI complete rather than a subset.
+        satisfies: [TOOL-UIX-010]
+        verification: A
+      - id: DSN-API-020
+        title: Versioned JSON protocol
+        statement: >
+          A documented JSON request/response protocol over stdio or a local
+          socket, carrying an explicit interface version. The same versioning
+          rule governs every published extension interface: additive changes
+          bump minor, breaking changes bump major and ship a documented
+          migration path.
+        satisfies: [TOOL-UIX-020, TOOL-PLG-060]
+        verification: [A, I]
+      - id: DSN-API-030
+        title: Local-only transport
+        statement: >
+          Transports are stdio and a filesystem-permissioned local socket. No
+          TCP listener is offered, which keeps the GUI clear of the host
+          firewall and endpoint-monitoring problems that a localhost port
+          creates in the target market (ADR-001 §3.3).
+        satisfies: [TOOL-UIX-050]
+        verification: T
+      - id: DSN-API-040
+        title: Command equivalence and echo
+        statement: >
+          Every engine operation has an exact CLI equivalent, and the protocol
+          returns that equivalent with each request, which is the data the
+          console pane of DSN-GUI-270 displays. This is what makes a
+          GUI-created project fully usable from the command line and the
+          reverse.
+        satisfies: [TOOL-UIX-330]
+        verification: T
+
+  - id: CMP-CLI
+    name: Command Line Front-End
+    layer: L5
+    responsibility: >
+      The complete, non-interactive, scriptable surface. The reference client
+      of the engine API.
+    depends_on: [CMP-API]
+    elements:
+      - id: DSN-CLI-010
+        title: Complete non-interactive surface
+        statement: >
+          Every capability required for automated verification is reachable
+          from the CLI with no interactive prompt and no display server. The
+          CLI is generated from the same operation catalogue the engine API
+          publishes, so a new operation cannot be GUI-only by omission.
+        satisfies: [TOOL-CIC-010, TOOL-CIC-020]
+        verification: [D, T]
+      - id: DSN-CLI-020
+        title: Exit code contract
+        statement: >
+          Documented, stable exit codes distinguishing success, test failure,
+          coverage threshold failure, and tool error. These are part of the
+          public interface and change only with a major version.
+        satisfies: [TOOL-CIC-030]
+        verification: T
+      - id: DSN-CLI-030
+        title: Container execution
+        statement: >
+          The tool installs and runs inside a container image with no
+          interactive or graphical dependency, which is the supported CI
+          execution mode.
+        satisfies: [TOOL-CIC-040]
+        verification: D
+      - id: DSN-CLI-040
+        title: Reference pipelines
+        statement: >
+          Maintained GitHub Actions and GitLab CI configurations that are
+          themselves exercised in the project's own CI, so they cannot rot
+          into examples that no longer work.
+        satisfies: [TOOL-CIC-050]
+        verification: D
+      - id: DSN-CLI-050
+        title: Sharding and report merge
+        statement: >
+          A suite splits across runners by a deterministic partition of stable
+          test identities, and the resulting report models merge into one, with
+          the shard set recorded so a missing shard is detectable.
+        satisfies: [TOOL-CIC-060]
+        verification: T
+      - id: DSN-CLI-060
+        title: Cacheable artifacts
+        statement: >
+          Ingestion and analysis artifacts are content-addressed and
+          relocatable, so a CI cache keyed on the compilation database digest
+          restores them across runs.
+        satisfies: [TOOL-CIC-070]
+        verification: T
+
+  - id: CMP-GUI
+    name: Standalone Desktop Application
+    layer: L5
+    responsibility: >
+      The complete workflow in one application, for a user with no IDE. A thin
+      client of the engine API, holding no capability of its own.
+    depends_on: [CMP-API]
+    notes: >
+      Technology binding (Qt/PySide6 vs. web-based) is ADR-001 §3 and is not
+      decided. Every element below is expressed so that it constrains the
+      choice rather than presuming it.
+    elements:
+      - id: DSN-GUI-010
+        title: Standalone application shell
+        statement: >
+          One installable application covering project creation, environment
+          build, test authoring, execution, coverage review, and reporting, with
+          no editor, IDE, or third-party host application required — installable
+          by a user whose only development tool is a C toolchain.
+        satisfies: [TOOL-UIX-030, TOOL-UIX-040]
+        verification: [D, I]
+        open: ADR-001
+      - id: DSN-GUI-020
+        title: Project lifecycle
+        statement: >
+          Create, open, save, and close a project that references user source
+          in place. The application never copies or writes user source; it
+          operates on the same project files the CLI does.
+        satisfies: [TOOL-UIX-060]
+        verification: T
+      - id: DSN-GUI-030
+        title: Environment creation workflow
+        statement: >
+          A guided flow collecting source selection or test scope, compiler
+          configuration, target, coverage kind, and framework back-end. For a
+          multi-file scope it shows the internal/external dependency
+          classification from DSN-ING-090 before the environment is built, so
+          the stubbing consequence of the scope choice is visible while the
+          choice is still cheap.
+        satisfies: [TOOL-UIX-070, TOOL-UIX-080]
+        verification: T
+      - id: DSN-GUI-040
+        title: Build progress and diagnostics
+        statement: >
+          Live build progress, and on failure the structured diagnostics from
+          DSN-BLD-050 rendered as a navigable list that opens the offending
+          source location.
+        satisfies: [TOOL-UIX-090]
+        verification: T
+      - id: DSN-GUI-050
+        title: Multi-environment management
+        statement: >
+          Several environments per project, with execution across a selected
+          subset.
+        satisfies: [TOOL-UIX-100]
+        verification: T
+      - id: DSN-GUI-060
+        title: Navigation tree with aggregated status
+        statement: >
+          Project to environment to unit to function to test case, each node
+          showing rolled-up pass/fail counts, coverage percentage, and
+          staleness, and each node selectable as the scope of an execute, edit,
+          or report action. Status aggregates are computed engine-side and
+          delivered as deltas; the tree renders virtualised with lazy expansion,
+          because it must stay responsive at the 10,000-test-case scale of
+          TOOL-NFR-050.
+        satisfies: [TOOL-UIX-110, TOOL-UIX-120, TOOL-UIX-130]
+        verification: T
+      - id: DSN-GUI-070
+        title: Tree filtering and search
+        statement: >
+          Filter and search by name, status, and coverage threshold, evaluated
+          engine-side against the same selection expression the CLI uses.
+        satisfies: [TOOL-UIX-140]
+        verification: T
+      - id: DSN-GUI-080
+        title: Type-aware test data editor
+        statement: >
+          A tabular editor over inputs, globals, and expected values, in which
+          struct and array parameters expand as a nested tree within the table
+          and values are validated against the declared C type, with
+          enumeration constants presented by name. This is the highest-risk
+          component in the product and the one users spend their day in
+          (ADR-001 R-02); it is prototyped before the UI technology is frozen,
+          and its data contract is the test case model of DSN-TCM-020, not a
+          GUI-private structure.
+        satisfies: [TOOL-UIX-150, TOOL-UIX-160, TOOL-UIX-170]
+        verification: T
+        open: ADR-001
+      - id: DSN-GUI-090
+        title: Stub configuration view
+        statement: >
+          Every external dependency of the environment listed, with per-stub
+          enable/disable and entry of return values, return sequences, and
+          output parameter values — the same data DSN-GEN-110 consumes.
+        satisfies: [TOOL-UIX-180]
+        verification: T
+      - id: DSN-GUI-100
+        title: Ranged and derived input entry
+        statement: >
+          Entry of ranged and boundary-derived values, showing the resulting
+          test case count before the cases are created, since the expansion is
+          easy to make accidentally enormous.
+        satisfies: [TOOL-UIX-190]
+        verification: T
+      - id: DSN-GUI-110
+        title: C test case editor
+        statement: >
+          A syntax-highlighting editor for C-authored test cases alongside the
+          tabular editor, both operating on the same test case set.
+        satisfies: [TOOL-UIX-200]
+        verification: T
+      - id: DSN-GUI-120
+        title: Execution control
+        statement: >
+          Execute a selection with visible progress and working cancellation,
+          driven by the cancellation tokens of DSN-CORE-040.
+        satisfies: [TOOL-UIX-210]
+        verification: T
+      - id: DSN-GUI-130
+        title: Result presentation
+        statement: >
+          Per-test results identifying assertion, expected value, actual value,
+          and source location for each failure, navigable to that location.
+        satisfies: [TOOL-UIX-220]
+        verification: T
+      - id: DSN-GUI-140
+        title: In-application debugging
+        statement: >
+          Launch a test case under a debugger with execution stopped at entry
+          to the function under test, from the application, with no IDE
+          present.
+        satisfies: [TOOL-UIX-230]
+        verification: T
+        open: SRS-001 open question 9
+      - id: DSN-GUI-150
+        title: Annotated source coverage view
+        statement: >
+          Per-line status distinguishing covered, uncovered, partially covered,
+          and justified-by-analysis — four states, because collapsing justified
+          into covered is exactly the misrepresentation DSN-COV-080 exists to
+          prevent.
+        satisfies: [TOOL-UIX-250]
+        verification: T
+      - id: DSN-GUI-160
+        title: Condition detail view
+        statement: >
+          Per partially covered decision, the per-condition exercise status
+          from DSN-COV-030, identifying which outcomes remain unexercised.
+        satisfies: [TOOL-UIX-260]
+        verification: T
+      - id: DSN-GUI-170
+        title: Control flow view
+        statement: >
+          A graphical control flow view with coverage overlaid, available only
+          where the CFG provider of DSN-ANA-040 reports the capability, and
+          absent rather than degraded where it does not.
+        satisfies: [TOOL-UIX-270]
+        verification: T
+      - id: DSN-GUI-180
+        title: Coverage roll-up and drill-down
+        statement: >
+          Coverage summarised by project, environment, unit, and function with
+          navigation between levels, over the same aggregation the reports use.
+        satisfies: [TOOL-UIX-280]
+        verification: T
+      - id: DSN-GUI-190
+        title: Justification capture
+        statement: >
+          Record a coverage-by-analysis justification against a specific
+          uncovered construct, capturing author and rationale, written into the
+          project store as data.
+        satisfies: [TOOL-UIX-290]
+        verification: T
+      - id: DSN-GUI-200
+        title: In-application reporting
+        statement: >
+          Generate and view every report format without leaving the
+          application, by invoking the same renderers the CLI invokes.
+        satisfies: [TOOL-UIX-300]
+        verification: T
+      - id: DSN-GUI-210
+        title: Traceability matrix view
+        statement: >
+          The matrix presented with navigation from a requirement to its linked
+          test cases and their results.
+        satisfies: [TOOL-UIX-310]
+        verification: T
+      - id: DSN-GUI-220
+        title: Desktop platform support
+        statement: >
+          Linux x86-64 and Windows x86-64 as supported platforms for the
+          application, which is a stronger constraint than the engine's and is
+          a primary input to the ADR-001 §3 technology choice.
+        satisfies: [TOOL-UIX-340]
+        verification: T
+      - id: DSN-GUI-230
+        title: No telemetry
+        statement: >
+          The application contains no analytics, update check, or crash
+          reporting client. There is no setting to disable because there is
+          nothing to disable.
+        satisfies: [TOOL-UIX-350]
+        verification: I
+      - id: DSN-GUI-240
+        title: Actionable error presentation
+        statement: >
+          Errors identify the affected file, line, and a concrete remedy,
+          rendered from the structured error model of DSN-CORE-020 rather than
+          from formatted strings.
+        satisfies: [TOOL-UIX-360]
+        verification: D
+      - id: DSN-GUI-250
+        title: Non-blocking long operations
+        statement: >
+          Analysis, build, and execution run in the engine process; the
+          application never blocks on them and reflects progress and
+          cancellation from the API.
+        satisfies: [TOOL-UIX-370]
+        verification: T
+      - id: DSN-GUI-260
+        title: Keyboard-driven workflow
+        statement: >
+          The primary operations — navigate, edit a test value, execute, view
+          results — are reachable without the mouse.
+        satisfies: [TOOL-UIX-380]
+        verification: T
+      - id: DSN-GUI-270
+        title: Engine command console
+        statement: >
+          A console pane displaying, in order, the engine commands executed on
+          the user's behalf, rendered from the `cli_equivalent` that
+          DSN-API-040 returns with every response. Entries are selectable and
+          copyable as a runnable command line, so any action taken in the
+          application can be reproduced, scripted, and put into CI without the
+          user reverse-engineering which invocation the button corresponded to.
+        satisfies: [TOOL-UIX-240]
+        verification: T
+
+  # ---------------------------------------------------------------- L6 --------
+  - id: CMP-AIF
+    name: AI Assist Subsystem
+    layer: L6
+    responsibility: >
+      Optional assistance, structurally quarantined: off by default, offline
+      capable, validated before presentation, and permanently marked.
+    depends_on: [CMP-CORE, CMP-TCM, CMP-GEN, CMP-ATG, CMP-SEC]
+    elements:
+      - id: DSN-AIF-010
+        title: Optionality and default-off
+        statement: >
+          The subsystem is a separable component. With it absent or disabled —
+          which is the default — every other capability is unaffected, so
+          "full functionality without AI" is structural rather than promised.
+        satisfies: [TOOL-AIF-010]
+        verification: T
+      - id: DSN-AIF-020
+        title: Provider abstraction
+        statement: >
+          One provider interface serving local runtimes and remote APIs
+          interchangeably, so no calling site knows which is in use and a
+          policy that forbids remote providers is enforceable in one place.
+        satisfies: [TOOL-AIF-050]
+        verification: A
+      - id: DSN-AIF-030
+        title: Local model execution
+        statement: >
+          A local runtime provider requiring no network, with documented
+          minimum hardware per supported configuration and integrity
+          verification of the installed model against a published hash before
+          first use.
+        satisfies: [TOOL-AIF-020, TOOL-AIF-170, TOOL-AIF-200]
+        verification: [I, T]
+      - id: DSN-AIF-040
+        title: Egress control and disclosure
+        statement: >
+          No source, test data, or project metadata leaves the machine unless a
+          remote provider is explicitly enabled for the session. Before first
+          use of a remote provider the tool displays exactly what will be
+          transmitted and to whom, generated from the request builder itself
+          rather than written as prose that can drift from behaviour.
+        satisfies: [TOOL-AIF-030, TOOL-AIF-040]
+        verification: [D, T]
+      - id: DSN-AIF-050
+        title: Test generation assist
+        statement: >
+          Assisted generation of test cases targeting specified uncovered code,
+          emitting ordinary test cases through DSN-ATG-040 and subject to the
+          same validation gate.
+        satisfies: [TOOL-AIF-060]
+        verification: T
+      - id: DSN-AIF-060
+        title: Stub body assist
+        statement: >
+          Assisted generation of stub bodies from calling context, written into
+          the user-editable region of the stub and marked.
+        satisfies: [TOOL-AIF-110]
+        verification: T
+      - id: DSN-AIF-070
+        title: Failure explanation
+        statement: >
+          Natural-language explanation of a test failure, presented as
+          commentary attached to a result and never as a change to the result.
+        satisfies: [TOOL-AIF-120]
+        verification: T
+      - id: DSN-AIF-080
+        title: Trace link suggestion
+        statement: >
+          Proposed links between requirement text and test cases, presented as
+          suggestions that do nothing until confirmed by a user.
+        satisfies: [TOOL-AIF-130]
+        verification: T
+      - id: DSN-AIF-090
+        title: Naming and documentation assist
+        statement: >
+          Assisted naming and documentation of generated test cases, affecting
+          only descriptive fields and never identity, since identity is the
+          traceability key.
+        satisfies: [TOOL-AIF-140]
+        verification: T
+      - id: DSN-AIF-100
+        title: Validation gate and rejection accounting
+        statement: >
+          Every AI-produced artifact is compiled and executed before
+          presentation; artifacts that fail to compile, crash, or fail to
+          increase coverage are discarded or shown as rejected. Rejections are
+          counted and reported, so the acceptance rate is visible rather than
+          hidden behind the successes.
+        satisfies: [TOOL-AIF-070, TOOL-AIF-210]
+        verification: T
+      - id: DSN-AIF-110
+        title: Provenance and review state
+        statement: >
+          Each AI-produced artifact carries an immutable provenance record —
+          model identity and version in a form that survives the model's
+          supersession, generation timestamp, prompt, sampling parameters
+          including temperature and seed — and a review state that starts
+          unreviewed and can only be advanced by an identified user. The
+          parameters affecting output variability are not merely recorded: they
+          are user configuration, settable per operation, and the resolved
+          values are what the record captures. Reporting obligations are two,
+          not one: every renderer surfaces the AI-generated marking with model
+          identifier and generation timestamp, and separately distinguishes
+          reviewed from unreviewed. A renderer that shows one and not the other
+          fails the conformance test of DSN-PLG-010.
+        satisfies: [TOOL-AIF-080, TOOL-AIF-090, TOOL-AIF-160, TOOL-AIF-180, TOOL-AIF-190]
+        verification: [A, I, T]
+      - id: DSN-AIF-120
+        title: Evidence exclusion mode
+        statement: >
+          A configuration mode under which AI-produced artifacts cannot
+          contribute to certification evidence: they are excluded from the
+          verification report and their presence is stated in it.
+        satisfies: [TOOL-AIF-100]
+        verification: T
+      - id: DSN-AIF-130
+        title: Bounded, non-blocking operation
+        statement: >
+          Time and token limits per operation, with expiry or provider failure
+          returning control to the surrounding workflow rather than failing it.
+        satisfies: [TOOL-AIF-150]
+        verification: T
+
+  - id: CMP-PLG
+    name: Extension Framework
+    layer: L6
+    cross_cutting: true
+    responsibility: >
+      The published extension points and the loader that serves them.
+    depends_on: [CMP-CORE]
+    elements:
+      - id: DSN-PLG-010
+        title: Extension point catalogue
+        statement: >
+          Four documented extension points at minimum — compiler
+          configurations, framework back-ends, target execution methods, report
+          formats — each with a declared interface, a version, and a conformance
+          test an extension author can run.
+        satisfies: [TOOL-PLG-010]
+        verification: A
+      - id: DSN-PLG-020
+        title: Discovery and loading
+        statement: >
+          Extensions are discovered from a documented search path — installed,
+          user, and project scope, in that precedence — without reinstalling
+          the tool, and the resolved set is reported so it is clear which
+          definition won.
+        satisfies: [TOOL-PLG-070]
+        verification: T
+      - id: DSN-PLG-030
+        title: Load failure isolation
+        statement: >
+          An extension that fails to load or declares an incompatible interface
+          version is reported by name with the reason, and the tool continues
+          with the remainder rather than refusing to start.
+        satisfies: [TOOL-PLG-080]
+        verification: D
+      - id: DSN-PLG-040
+        title: Built-ins use the public interfaces
+        statement: >
+          The shipped compiler configurations, framework back-ends, and report
+          formats are implemented through the same public extension points
+          offered to users, with no private interface. This is the only
+          mechanism that reliably keeps those interfaces sufficient.
+        satisfies: [TOOL-PLG-090]
+        verification: I
+
+  - id: CMP-SEC
+    name: Security and Integrity Services
+    layer: L6
+    cross_cutting: true
+    responsibility: >
+      The tool compiles and runs code supplied by its user and produces evidence
+      others rely on. This component holds the controls that follow from both.
+    depends_on: [CMP-CORE]
+    elements:
+      - id: DSN-SEC-010
+        title: Release signing
+        statement: >
+          Every release artifact is cryptographically signed, with a documented
+          verification procedure a user can follow without contacting the
+          project.
+        satisfies: [TOOL-SEC-010]
+        verification: I
+      - id: DSN-SEC-020
+        title: SBOM and dependency integrity
+        statement: >
+          A published SBOM per release listing every dependency with resolved
+          version, cryptographic hash, and license. Dependencies are pinned to
+          exact versions with integrity hashes and the build fails on mismatch,
+          so the SBOM describes what was actually built.
+        satisfies: [TOOL-SEC-020, TOOL-SEC-040, TOOL-LIC-030]
+        verification: I
+      - id: DSN-SEC-030
+        title: Reproducible build
+        statement: >
+          An independent party building a given source revision obtains
+          functionally identical artifacts, following a documented procedure.
+          This is also the mechanism by which an archived evidence-producing
+          version can be reconstituted years later.
+        satisfies: [TOOL-SEC-030]
+        verification: D
+      - id: DSN-SEC-040
+        title: Untrusted project consent
+        statement: >
+          Opening a project not previously opened on this machine warns before
+          the first action that would compile or execute code from it — test
+          cases, stub bodies, build scripts — and records the consent.
+        satisfies: [TOOL-SEC-050]
+        verification: D
+      - id: DSN-SEC-050
+        title: Restricted harness execution
+        statement: >
+          An opt-in restricted execution context limiting filesystem and
+          network access for test harnesses. Opt-in because legitimate embedded
+          tests touch files and devices, and a mandatory sandbox would be
+          switched off wholesale.
+        satisfies: [TOOL-SEC-060]
+        verification: T
+      - id: DSN-SEC-060
+        title: Configuration is data
+        statement: >
+          No configuration format supports embedded expressions, includes, or
+          callable hooks. Where user-supplied behaviour is genuinely needed —
+          target adapter scripts, stub bodies — it lives in explicitly named,
+          separately consented files, not inside configuration.
+        satisfies: [TOOL-SEC-070]
+        verification: T
+      - id: DSN-SEC-070
+        title: Disclosure process and supported versions
+        statement: >
+          A documented security disclosure process and a supported-version
+          policy, published in the repository.
+        satisfies: [TOOL-SEC-080]
+        verification: I
+      - id: DSN-SEC-080
+        title: Untrusted external input
+        statement: >
+          Data retrieved from a target device or external process is parsed by
+          a bounded, non-evaluating parser. Nothing received from a target is
+          interpreted as a path, command, or format string.
+        satisfies: [TOOL-SEC-090]
+        verification: T
+      - id: DSN-SEC-090
+        title: Dependency vulnerability scanning
+        statement: >
+          Automated vulnerability scanning of dependencies in the project's own
+          CI, with results published rather than kept internal.
+        satisfies: [TOOL-SEC-100]
+        verification: I
+      - id: DSN-SEC-100
+        title: Credential storage
+        statement: >
+          Credentials for optional remote services are held in
+          platform-provided secure storage and are never written to project
+          files, logs, or reports. Configuration stores a reference to a
+          credential, never the credential.
+        satisfies: [TOOL-SEC-110]
+        verification: T
+      - id: DSN-SEC-110
+        title: Diagnostic content minimisation
+        statement: >
+          Logs and diagnostic bundles carry source locations, not source
+          content, beyond what is needed to identify a location, and the bundle
+          documents exactly what it contains so a user can approve sending it.
+        satisfies: [TOOL-SEC-120]
+        verification: T
+
+  - id: CMP-PKG
+    name: Packaging, Installation and Release Engineering
+    layer: L6
+    responsibility: >
+      Getting the tool onto machines that may have no network, no
+      administrative rights, and a ten-year retention obligation.
+    depends_on: [CMP-CORE, CMP-SEC]
+    elements:
+      - id: DSN-PKG-010
+        title: Offline installation
+        statement: >
+          A self-contained installation artifact per platform requiring no
+          network access at install time and no language runtime, package
+          manager, or compiler beyond the user's existing C toolchain.
+        satisfies: [TOOL-INS-010, TOOL-INS-030]
+        verification: D
+        open: ADR-007
+      - id: DSN-PKG-020
+        title: Unprivileged installation
+        statement: >
+          Installation into a user-writable location with no administrative
+          privileges and no system-wide registration.
+        satisfies: [TOOL-INS-020, TOOL-NFR-110]
+        verification: [D, I]
+      - id: DSN-PKG-030
+        title: Archivable, uniquely identified releases
+        statement: >
+          Each release is uniquely identified and retained as a self-contained
+          artifact that can be reinstalled years later with no reference to any
+          external service — which is what makes a specific version
+          reproducible on demand.
+        satisfies: [TOOL-INS-040, TOOL-QUA-050]
+        verification: I
+      - id: DSN-PKG-040
+        title: Side-by-side versions
+        statement: >
+          Installations are version-scoped and independently invocable, so a
+          project can stay pinned to the version under which its evidence was
+          produced while another project moves on.
+        satisfies: [TOOL-INS-050]
+        verification: T
+      - id: DSN-PKG-050
+        title: Non-destructive upgrade
+        statement: >
+          Upgrading installs alongside and never migrates project data without
+          explicit confirmation, which is the installation-side half of the
+          migration policy in DSN-PRJ-020.
+        satisfies: [TOOL-INS-060]
+        verification: T
+      - id: DSN-PKG-060
+        title: Documented uninstallation
+        statement: >
+          A documented procedure removing all installed components and naming
+          any user data deliberately left in place.
+        satisfies: [TOOL-INS-070]
+        verification: D
+      - id: DSN-PKG-070
+        title: CI container image
+        statement: >
+          A container image for CI use, versioned in lockstep with releases and
+          built from the same reproducible pipeline.
+        satisfies: [TOOL-INS-090]
+        verification: D
+      - id: DSN-PKG-080
+        title: Shared read-only installation
+        statement: >
+          A single installation on a shared or read-only mount serving multiple
+          users, with all per-user state held outside the installation tree.
+        satisfies: [TOOL-INS-100]
+        verification: D
+      - id: DSN-PKG-090
+        title: Licensing structure
+        statement: >
+          The tool's own source is permissively licensed, and any strong-copyleft
+          component is invoked as a separate process rather than linked, keeping
+          the license boundary at the process boundary where it is auditable.
+        satisfies: [TOOL-LIC-010, TOOL-LIC-020]
+        verification: I
+        open: ADR-005
+      - id: DSN-PKG-100
+        title: Generated code carries no license obligation
+        statement: >
+          Code the tool generates is free of licensing restriction imposed by
+          the tool, stated explicitly in the documentation and in the generated
+          file headers.
+        satisfies: [TOOL-LIC-040]
+        verification: I
+      - id: DSN-PKG-110
+        title: Bundling restrictions
+        statement: >
+          No bundled component may carry a license prohibiting commercial use or
+          redistribution.
+        satisfies: [TOOL-LIC-050]
+        verification: I
+      - id: DSN-PKG-120
+        title: Automated license verification
+        statement: >
+          The build resolves dependency licenses against an allowlist and fails
+          on introduction of a disallowed one, so license compliance is a build
+          property rather than a review activity.
+        satisfies: [TOOL-LIC-060]
+        verification: I
+      - id: DSN-PKG-130
+        title: Separable optional components
+        statement: >
+          Components with restrictive licenses are optional and separable, and
+          a build excluding them remains fully functional for its documented
+          feature set.
+        satisfies: [TOOL-LIC-070]
+        verification: I
+
+  - id: CMP-QUA
+    name: Qualification Evidence
+    layer: L6
+    responsibility: >
+      Everything a user needs to qualify the tool themselves. Per ADR-001 §1,
+      the goal is qualifiable, not qualified.
+    depends_on: [CMP-CORE, CMP-PKG, CMP-REP]
+    elements:
+      - id: DSN-QUA-010
+        title: Tool classification analysis
+        statement: >
+          A published analysis of Tool Impact and Tool error Detection yielding
+          a Tool Confidence Level under ISO 26262-8, stated as the project's
+          assessment and as an input to the user's own, not as a determination
+          on their behalf.
+        satisfies: [TOOL-QUA-010]
+        verification: I
+      - id: DSN-QUA-020
+        title: Tool Operational Requirements
+        statement: >
+          A document defining intended use, operating environment, and known
+          limitations — the specification the validation suite is written
+          against.
+        satisfies: [TOOL-QUA-020]
+        verification: I
+      - id: DSN-QUA-030
+        title: User-executable validation suite
+        statement: >
+          A validation suite demonstrating conformance to the Tool Operational
+          Requirements, shipped with the tool and executable by the end user in
+          their own environment, since that is where their qualification
+          argument has to hold.
+        satisfies: [TOOL-QUA-030]
+        verification: I
+      - id: DSN-QUA-040
+        title: Known error list
+        statement: >
+          A per-release list of known errors and their workarounds, maintained
+          as a release artifact rather than as an issue tracker query.
+        satisfies: [TOOL-QUA-040]
+        verification: I
+      - id: DSN-QUA-050
+        title: Development process transparency
+        statement: >
+          Public documentation of the development process, change control, and
+          defect management, with CI results and defect history publicly
+          readable — the open-source substitute for a vendor certification kit,
+          and the one advantage no commercial tool can match.
+        satisfies: [TOOL-QUA-070]
+        verification: I
+      - id: DSN-QUA-060
+        title: Standards objective mapping
+        statement: >
+          A mapping from tool capabilities to the verification objectives of
+          ISO 26262, IEC 61508, IEC 62304, EN 50128, and DO-178C.
+        satisfies: [TOOL-QUA-080]
+        verification: I
+      - id: DSN-QUA-070
+        title: No overclaiming
+        statement: >
+          Documentation states precisely what qualification evidence is provided
+          and what remains the user's responsibility, and claims no
+          certification the project does not hold. This is a release gate, not
+          a documentation preference (ADR-001 R-10).
+        satisfies: [TOOL-QUA-090]
+        verification: I
+      - id: DSN-QUA-080
+        title: User qualification templates
+        statement: >
+          Templates for the user's own qualification artifacts, so the routine
+          part of their work is not re-authored per project.
+        satisfies: [TOOL-QUA-100]
+        verification: I
+
+  - id: CMP-MIG
+    name: Migration and Interoperability
+    layer: L6
+    responsibility: >
+      Adoption path in, exit path out. Per SRS-001 §23 this is the primary
+      adoption mechanism, not a convenience.
+    depends_on: [CMP-CORE, CMP-TCM, CMP-GEN, CMP-REP]
+    elements:
+      - id: DSN-MIG-010
+        title: Existing suite execution
+        statement: >
+          Test suites already written against Unity or cmocka execute as-is,
+          discovered and run through the same runner, so a team can adopt the
+          tool before rewriting anything.
+        satisfies: [TOOL-MIG-010]
+        verification: T
+      - id: DSN-MIG-020
+        title: Ceedling project import
+        statement: >
+          An importer preserving test cases and configuration from an existing
+          Ceedling project.
+        satisfies: [TOOL-MIG-020]
+        verification: T
+      - id: DSN-MIG-030
+        title: Commercial tool import
+        statement: >
+          Importers for commercial tools that offer a documented or plain-text
+          export, converting inputs, expected values, and stub configuration
+          into the native test case model.
+        satisfies: [TOOL-MIG-030]
+        verification: T
+      - id: DSN-MIG-040
+        title: Import fidelity reporting
+        statement: >
+          Every import reports per artifact what converted cleanly, what
+          converted with loss of fidelity, and what could not convert at all.
+          Silent discarding is the failure mode that destroys trust in a
+          migration, so the report is part of the import, not an option on it.
+        satisfies: [TOOL-MIG-040]
+        verification: T
+      - id: DSN-MIG-050
+        title: CSV migration path
+        statement: >
+          Import from the documented CSV interchange format, allowing migration
+          via spreadsheet from any source the tool has no importer for.
+        satisfies: [TOOL-MIG-050]
+        verification: T
+      - id: DSN-MIG-060
+        title: Coexistence
+        statement: >
+          Operating on a project also tested by another tool without touching
+          that tool's artifacts, which follows from the output-root confinement
+          of DSN-CORE-060.
+        satisfies: [TOOL-MIG-070]
+        verification: T
+      - id: DSN-MIG-070
+        title: Migration assessment
+        statement: >
+          An analysis mode that reports expected migration fidelity and manual
+          effort before migration is attempted, so the decision is informed
+          rather than discovered halfway through.
+        satisfies: [TOOL-MIG-090]
+        verification: T
+      - id: DSN-MIG-080
+        title: Interchange format documentation
+        statement: >
+          Every format the tool consumes or produces is documented to a level
+          permitting independent implementation. This is what makes the export
+          path a genuine exit rather than a gesture.
+        satisfies: [TOOL-MIG-100]
+        verification: I
+
+# Requirements deliberately not allocated: TOOL-UIX-390 and TOOL-UIX-400 carry
+# priority F (Future) and are outside v1.0 scope per SRS-001 §2.2. The checker
+# treats an allocation of either as an error.
