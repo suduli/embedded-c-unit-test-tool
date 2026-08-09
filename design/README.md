@@ -9,6 +9,7 @@ machine-checked rather than asserted in prose.
 | Document | Content |
 |---|---|
 | [`SDD-001-architecture.md`](SDD-001-architecture.md) | Architectural drivers, seven-layer structure, 24 components, principal flows, cross-cutting rules, open decisions |
+| [`architecture-diagrams.md`](architecture-diagrams.md) | **Generated.** Layer map, whole-system component graph, and a complete per-layer view — all derived from the register |
 | [`SDD-002-interfaces.md`](SDD-002-interfaces.md) | The seven load-bearing seams (five of them published) and the one internal port: analysis model, test case model, result set, coverage model, report model, engine API, extension points |
 | [`SDD-003-data-model.md`](SDD-003-data-model.md) | What is written to disk: the project/output tree split, file granularity, diff stability, schema migration, archival records |
 | [`SDD-004-traceability-architecture.md`](SDD-004-traceability-architecture.md) | The trace meta-model, id rules, link types, checker, CI gate, and extension to code and tests |
@@ -21,6 +22,7 @@ machine-checked rather than asserted in prose.
 | [`trace/trace_check.py`](trace/trace_check.py) | Validator and matrix generator | Yes |
 | [`trace/requirement-matrix.csv`](trace/requirement-matrix.csv) | Per-requirement view: priority, phase, verification, components, elements | No — generated |
 | [`trace/trace-graph.json`](trace/trace-graph.json) | Full graph, both directions | No — generated |
+| [`architecture-diagrams.md`](architecture-diagrams.md) | Mermaid renderings of the component graph | No — generated |
 
 **The register is authoritative; the SDD documents render it.** Where they
 disagree, the SDD is defective. See SDD-004 §3 for why it is arranged that way.
@@ -66,9 +68,15 @@ Regenerate the derived artifacts after changing the register:
 
 ```sh
 python3 design/trace/trace_check.py \
-  --emit-matrix design/trace/requirement-matrix.csv \
-  --emit-json   design/trace/trace-graph.json
+  --emit-matrix  design/trace/requirement-matrix.csv \
+  --emit-json    design/trace/trace-graph.json \
+  --emit-mermaid design/architecture-diagrams.md
 ```
+
+The diagrams are generated for the same reason the matrix is: a drawing of the
+component graph maintained by hand is a second source of truth for something
+the register already states, and it goes stale without anything failing. These
+render natively on GitHub, so reading them costs no toolchain.
 
 ## Status
 

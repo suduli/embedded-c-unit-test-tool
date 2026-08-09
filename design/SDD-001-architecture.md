@@ -138,6 +138,13 @@ The dotted edges are the ones that actually exist in the register: `CMP-TCH`,
 `CMP-EXT` on `CMP-SEC`. No L5 component depends on L6 at all — the front-ends
 reach everything through the engine API.
 
+The diagram above states the *rule* — which dependencies the layering permits.
+For the graph as it actually stands, see
+[`architecture-diagrams.md`](architecture-diagrams.md), which is generated from
+the register on every run of `trace_check.py` and therefore cannot drift from
+it. The two are not interchangeable: the permitted edges here are a superset of
+the real ones, and the real graph skips levels freely.
+
 | Layer | Name | Rule |
 |---|---|---|
 | L0 | Platform and Persistence | Depends on nothing above. Everything may depend on it. |
