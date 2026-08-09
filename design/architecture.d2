@@ -1,0 +1,354 @@
+# Generated — do not edit. Produced by trace_check.py from
+# design-elements.yaml, which is the authoritative register. Compile
+# with: d2 design/architecture.d2 design/diagrams/architecture.svg
+#
+# 24 components across 7 layers, 69 dependency edges. Node labels are ids only — see the
+# legend in the generated companion doc for full names.
+
+direction: down
+vars: { d2-config: { theme-id: 0 } }
+
+# Root board — the layer map, aggregated from the component graph.
+# An edge means at least one component in the source layer depends
+# on a component in the target layer; the label counts how many.
+"L0": "L0 · Platform and Persistence\n2 components"
+"L1": "L1 · Comprehension\n3 components"
+"L2": "L2 · Synthesis\n3 components"
+"L3": "L3 · Realization\n3 components"
+"L4": "L4 · Evidence\n4 components"
+"L5": "L5 · Interfaces\n3 components"
+"L6": "L6 · Assurance and Ecosystem\n6 components"
+"L1" -> "L0": "4"
+"L1" -> "L6": "1"
+"L2" -> "L0": "4"
+"L2" -> "L1": "3"
+"L2" -> "L6": "1"
+"L3" -> "L0": "3"
+"L3" -> "L1": "1"
+"L3" -> "L2": "3"
+"L3" -> "L6": "3"
+"L4" -> "L0": "6"
+"L4" -> "L1": "4"
+"L4" -> "L2": "1"
+"L4" -> "L3": "4"
+"L4" -> "L6": "1"
+"L5" -> "L0": "1"
+"L6" -> "L0": "6"
+"L6" -> "L2": "5"
+"L6" -> "L4": "2"
+
+layers: {
+  # The whole system on one board. Laid out with ELK, which handles
+  # a dense graph more cleanly than the default Dagre engine — set
+  # per-board so the root layer map above keeps the simpler engine.
+  full: {
+    layout-engine: elk
+    "L0": "L0 · Platform and Persistence" {
+      "CMP-CORE"
+      "CMP-PRJ"
+    }
+    "L1": "L1 · Comprehension" {
+      "CMP-ANA"
+      "CMP-ING"
+      "CMP-TCH"
+    }
+    "L2": "L2 · Synthesis" {
+      "CMP-ATG"
+      "CMP-GEN"
+      "CMP-TCM"
+    }
+    "L3": "L3 · Realization" {
+      "CMP-BLD"
+      "CMP-EXH"
+      "CMP-EXT"
+    }
+    "L4": "L4 · Evidence" {
+      "CMP-CBT"
+      "CMP-COV"
+      "CMP-REP"
+      "CMP-TRC"
+    }
+    "L5": "L5 · Interfaces" {
+      "CMP-API"
+      "CMP-CLI"
+      "CMP-GUI"
+    }
+    "L6": "L6 · Assurance and Ecosystem" {
+      "CMP-AIF"
+      "CMP-MIG"
+      "CMP-PKG"
+      "CMP-PLG"
+      "CMP-PLG".style.stroke-dash: 4
+      "CMP-PLG".style.stroke-width: 3
+      "CMP-QUA"
+      "CMP-SEC"
+      "CMP-SEC".style.stroke-dash: 4
+      "CMP-SEC".style.stroke-width: 3
+    }
+    "L6"."CMP-AIF" -> "L2"."CMP-ATG"
+    "L6"."CMP-AIF" -> "L0"."CMP-CORE"
+    "L6"."CMP-AIF" -> "L2"."CMP-GEN"
+    "L6"."CMP-AIF" -> "L6"."CMP-SEC"
+    "L6"."CMP-AIF" -> "L2"."CMP-TCM"
+    "L1"."CMP-ANA" -> "L0"."CMP-CORE"
+    "L1"."CMP-ANA" -> "L1"."CMP-ING"
+    "L1"."CMP-ANA" -> "L1"."CMP-TCH"
+    "L5"."CMP-API" -> "L0"."CMP-CORE"
+    "L2"."CMP-ATG" -> "L1"."CMP-ANA"
+    "L2"."CMP-ATG" -> "L0"."CMP-CORE"
+    "L2"."CMP-ATG" -> "L2"."CMP-TCM"
+    "L3"."CMP-BLD" -> "L0"."CMP-CORE"
+    "L3"."CMP-BLD" -> "L2"."CMP-GEN"
+    "L3"."CMP-BLD" -> "L1"."CMP-TCH"
+    "L4"."CMP-CBT" -> "L1"."CMP-ANA"
+    "L4"."CMP-CBT" -> "L0"."CMP-CORE"
+    "L4"."CMP-CBT" -> "L4"."CMP-COV"
+    "L4"."CMP-CBT" -> "L0"."CMP-PRJ"
+    "L5"."CMP-CLI" -> "L5"."CMP-API"
+    "L4"."CMP-COV" -> "L1"."CMP-ANA"
+    "L4"."CMP-COV" -> "L0"."CMP-CORE"
+    "L4"."CMP-COV" -> "L3"."CMP-EXH"
+    "L4"."CMP-COV" -> "L3"."CMP-EXT"
+    "L4"."CMP-COV" -> "L1"."CMP-TCH"
+    "L3"."CMP-EXH" -> "L3"."CMP-BLD"
+    "L3"."CMP-EXH" -> "L0"."CMP-CORE"
+    "L3"."CMP-EXH" -> "L6"."CMP-SEC"
+    "L3"."CMP-EXH" -> "L2"."CMP-TCM"
+    "L3"."CMP-EXT" -> "L3"."CMP-BLD"
+    "L3"."CMP-EXT" -> "L0"."CMP-CORE"
+    "L3"."CMP-EXT" -> "L6"."CMP-PLG"
+    "L3"."CMP-EXT" -> "L6"."CMP-SEC"
+    "L3"."CMP-EXT" -> "L2"."CMP-TCM"
+    "L2"."CMP-GEN" -> "L1"."CMP-ANA"
+    "L2"."CMP-GEN" -> "L0"."CMP-CORE"
+    "L2"."CMP-GEN" -> "L6"."CMP-PLG"
+    "L2"."CMP-GEN" -> "L2"."CMP-TCM"
+    "L5"."CMP-GUI" -> "L5"."CMP-API"
+    "L1"."CMP-ING" -> "L0"."CMP-CORE"
+    "L1"."CMP-ING" -> "L0"."CMP-PRJ"
+    "L6"."CMP-MIG" -> "L0"."CMP-CORE"
+    "L6"."CMP-MIG" -> "L2"."CMP-GEN"
+    "L6"."CMP-MIG" -> "L4"."CMP-REP"
+    "L6"."CMP-MIG" -> "L2"."CMP-TCM"
+    "L6"."CMP-PKG" -> "L0"."CMP-CORE"
+    "L6"."CMP-PKG" -> "L6"."CMP-SEC"
+    "L6"."CMP-PLG" -> "L0"."CMP-CORE"
+    "L0"."CMP-PRJ" -> "L0"."CMP-CORE"
+    "L6"."CMP-QUA" -> "L0"."CMP-CORE"
+    "L6"."CMP-QUA" -> "L6"."CMP-PKG"
+    "L6"."CMP-QUA" -> "L4"."CMP-REP"
+    "L4"."CMP-REP" -> "L4"."CMP-CBT"
+    "L4"."CMP-REP" -> "L0"."CMP-CORE"
+    "L4"."CMP-REP" -> "L4"."CMP-COV"
+    "L4"."CMP-REP" -> "L3"."CMP-EXH"
+    "L4"."CMP-REP" -> "L3"."CMP-EXT"
+    "L4"."CMP-REP" -> "L6"."CMP-PLG"
+    "L4"."CMP-REP" -> "L4"."CMP-TRC"
+    "L6"."CMP-SEC" -> "L0"."CMP-CORE"
+    "L1"."CMP-TCH" -> "L0"."CMP-CORE"
+    "L1"."CMP-TCH" -> "L6"."CMP-PLG"
+    "L2"."CMP-TCM" -> "L1"."CMP-ANA"
+    "L2"."CMP-TCM" -> "L0"."CMP-CORE"
+    "L2"."CMP-TCM" -> "L0"."CMP-PRJ"
+    "L4"."CMP-TRC" -> "L1"."CMP-ANA"
+    "L4"."CMP-TRC" -> "L0"."CMP-CORE"
+    "L4"."CMP-TRC" -> "L0"."CMP-PRJ"
+    "L4"."CMP-TRC" -> "L2"."CMP-TCM"
+  }
+
+  # L0 · Platform and Persistence — complete, no edges
+  # omitted. External dependency targets are faded.
+  L0: {
+    "CMP-CORE"
+    "CMP-PRJ"
+    "CMP-PRJ" -> "CMP-CORE"
+  }
+
+  # L1 · Comprehension — complete, no edges
+  # omitted. External dependency targets are faded.
+  L1: {
+    "CMP-ANA"
+    "CMP-ING"
+    "CMP-TCH"
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-PLG"
+    "CMP-PLG".style.stroke-dash: 4
+    "CMP-PLG".style.stroke-width: 3
+    "CMP-PLG".style.opacity: 0.5
+    "CMP-PRJ"
+    "CMP-PRJ".style.opacity: 0.5
+    "CMP-ANA" -> "CMP-CORE"
+    "CMP-ANA" -> "CMP-ING"
+    "CMP-ANA" -> "CMP-TCH"
+    "CMP-ING" -> "CMP-CORE"
+    "CMP-ING" -> "CMP-PRJ"
+    "CMP-TCH" -> "CMP-CORE"
+    "CMP-TCH" -> "CMP-PLG"
+  }
+
+  # L2 · Synthesis — complete, no edges
+  # omitted. External dependency targets are faded.
+  L2: {
+    "CMP-ATG"
+    "CMP-GEN"
+    "CMP-TCM"
+    "CMP-ANA"
+    "CMP-ANA".style.opacity: 0.5
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-PLG"
+    "CMP-PLG".style.stroke-dash: 4
+    "CMP-PLG".style.stroke-width: 3
+    "CMP-PLG".style.opacity: 0.5
+    "CMP-PRJ"
+    "CMP-PRJ".style.opacity: 0.5
+    "CMP-ATG" -> "CMP-ANA"
+    "CMP-ATG" -> "CMP-CORE"
+    "CMP-ATG" -> "CMP-TCM"
+    "CMP-GEN" -> "CMP-ANA"
+    "CMP-GEN" -> "CMP-CORE"
+    "CMP-GEN" -> "CMP-PLG"
+    "CMP-GEN" -> "CMP-TCM"
+    "CMP-TCM" -> "CMP-ANA"
+    "CMP-TCM" -> "CMP-CORE"
+    "CMP-TCM" -> "CMP-PRJ"
+  }
+
+  # L3 · Realization — complete, no edges
+  # omitted. External dependency targets are faded.
+  L3: {
+    "CMP-BLD"
+    "CMP-EXH"
+    "CMP-EXT"
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-GEN"
+    "CMP-GEN".style.opacity: 0.5
+    "CMP-PLG"
+    "CMP-PLG".style.stroke-dash: 4
+    "CMP-PLG".style.stroke-width: 3
+    "CMP-PLG".style.opacity: 0.5
+    "CMP-SEC"
+    "CMP-SEC".style.stroke-dash: 4
+    "CMP-SEC".style.stroke-width: 3
+    "CMP-SEC".style.opacity: 0.5
+    "CMP-TCH"
+    "CMP-TCH".style.opacity: 0.5
+    "CMP-TCM"
+    "CMP-TCM".style.opacity: 0.5
+    "CMP-BLD" -> "CMP-CORE"
+    "CMP-BLD" -> "CMP-GEN"
+    "CMP-BLD" -> "CMP-TCH"
+    "CMP-EXH" -> "CMP-BLD"
+    "CMP-EXH" -> "CMP-CORE"
+    "CMP-EXH" -> "CMP-SEC"
+    "CMP-EXH" -> "CMP-TCM"
+    "CMP-EXT" -> "CMP-BLD"
+    "CMP-EXT" -> "CMP-CORE"
+    "CMP-EXT" -> "CMP-PLG"
+    "CMP-EXT" -> "CMP-SEC"
+    "CMP-EXT" -> "CMP-TCM"
+  }
+
+  # L4 · Evidence — complete, no edges
+  # omitted. External dependency targets are faded.
+  L4: {
+    "CMP-CBT"
+    "CMP-COV"
+    "CMP-REP"
+    "CMP-TRC"
+    "CMP-ANA"
+    "CMP-ANA".style.opacity: 0.5
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-EXH"
+    "CMP-EXH".style.opacity: 0.5
+    "CMP-EXT"
+    "CMP-EXT".style.opacity: 0.5
+    "CMP-PLG"
+    "CMP-PLG".style.stroke-dash: 4
+    "CMP-PLG".style.stroke-width: 3
+    "CMP-PLG".style.opacity: 0.5
+    "CMP-PRJ"
+    "CMP-PRJ".style.opacity: 0.5
+    "CMP-TCH"
+    "CMP-TCH".style.opacity: 0.5
+    "CMP-TCM"
+    "CMP-TCM".style.opacity: 0.5
+    "CMP-CBT" -> "CMP-ANA"
+    "CMP-CBT" -> "CMP-CORE"
+    "CMP-CBT" -> "CMP-COV"
+    "CMP-CBT" -> "CMP-PRJ"
+    "CMP-COV" -> "CMP-ANA"
+    "CMP-COV" -> "CMP-CORE"
+    "CMP-COV" -> "CMP-EXH"
+    "CMP-COV" -> "CMP-EXT"
+    "CMP-COV" -> "CMP-TCH"
+    "CMP-REP" -> "CMP-CBT"
+    "CMP-REP" -> "CMP-CORE"
+    "CMP-REP" -> "CMP-COV"
+    "CMP-REP" -> "CMP-EXH"
+    "CMP-REP" -> "CMP-EXT"
+    "CMP-REP" -> "CMP-PLG"
+    "CMP-REP" -> "CMP-TRC"
+    "CMP-TRC" -> "CMP-ANA"
+    "CMP-TRC" -> "CMP-CORE"
+    "CMP-TRC" -> "CMP-PRJ"
+    "CMP-TRC" -> "CMP-TCM"
+  }
+
+  # L5 · Interfaces — complete, no edges
+  # omitted. External dependency targets are faded.
+  L5: {
+    "CMP-API"
+    "CMP-CLI"
+    "CMP-GUI"
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-API" -> "CMP-CORE"
+    "CMP-CLI" -> "CMP-API"
+    "CMP-GUI" -> "CMP-API"
+  }
+
+  # L6 · Assurance and Ecosystem — complete, no edges
+  # omitted. External dependency targets are faded.
+  L6: {
+    "CMP-AIF"
+    "CMP-MIG"
+    "CMP-PKG"
+    "CMP-PLG"
+    "CMP-PLG".style.stroke-dash: 4
+    "CMP-PLG".style.stroke-width: 3
+    "CMP-QUA"
+    "CMP-SEC"
+    "CMP-SEC".style.stroke-dash: 4
+    "CMP-SEC".style.stroke-width: 3
+    "CMP-ATG"
+    "CMP-ATG".style.opacity: 0.5
+    "CMP-CORE"
+    "CMP-CORE".style.opacity: 0.5
+    "CMP-GEN"
+    "CMP-GEN".style.opacity: 0.5
+    "CMP-REP"
+    "CMP-REP".style.opacity: 0.5
+    "CMP-TCM"
+    "CMP-TCM".style.opacity: 0.5
+    "CMP-AIF" -> "CMP-ATG"
+    "CMP-AIF" -> "CMP-CORE"
+    "CMP-AIF" -> "CMP-GEN"
+    "CMP-AIF" -> "CMP-SEC"
+    "CMP-AIF" -> "CMP-TCM"
+    "CMP-MIG" -> "CMP-CORE"
+    "CMP-MIG" -> "CMP-GEN"
+    "CMP-MIG" -> "CMP-REP"
+    "CMP-MIG" -> "CMP-TCM"
+    "CMP-PKG" -> "CMP-CORE"
+    "CMP-PKG" -> "CMP-SEC"
+    "CMP-PLG" -> "CMP-CORE"
+    "CMP-QUA" -> "CMP-CORE"
+    "CMP-QUA" -> "CMP-PKG"
+    "CMP-QUA" -> "CMP-REP"
+    "CMP-SEC" -> "CMP-CORE"
+  }
+}

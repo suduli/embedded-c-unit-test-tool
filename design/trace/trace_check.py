@@ -21,6 +21,8 @@ Options:
     --model PATH        Design element register(default: design/trace/design-elements.yaml)
     --emit-matrix PATH  Write the requirement -> design CSV matrix
     --emit-json PATH    Write the full trace graph as JSON
+    --emit-mermaid PATH Write the architecture diagrams as Mermaid markdown
+    --emit-d2 PATH      Write the architecture diagrams as D2 source
     --quiet             Suppress the coverage summary; print findings only
 
 Exit status:
@@ -72,6 +74,22 @@ UNALLOCATED_PRIORITIES = {"F"}
 
 # SRS-001 §2.2 verification methods.
 VERIFICATION_METHODS = {"T", "A", "D", "I"}
+
+# A component depended on by at least this fraction of the others is drawn
+# without its incoming edges in the whole-system diagram. CMP-CORE alone
+# accounts for roughly a third of every dependency edge in the model, and
+# drawing them buries the structure the diagram exists to show. The node stays,
+# so the roster is still complete and countable, and the omission is stated
+# beneath the diagram naming the components that do *not* depend on it —
+# "nearly everything depends on this" is not a claim a reader can check.
+UBIQUITY_NUM, UBIQUITY_DEN = 2, 3
+
+# Mermaid lays a subgraph's members out in a row, so a single long component
+# name sets the width of the whole diagram. Unwrapped, the component graph
+# comes out wider than it is tall, and rendering it into a page column scales
+# the text below legibility. Wrapping the name trades width for height, which
+# a scrolling page has and a column does not.
+LABEL_WRAP = 18
 
 
 class Fatal(Exception):
@@ -587,6 +605,419 @@ def build_json(reqs: dict[str, dict], index: dict, model: dict) -> str:
     return json.dumps(payload, indent=2, sort_keys=False, default=str) + "\n"
 
 
+def _d2_str(value) -> str:
+    """Escape text for a double-quoted D2 string.
+
+    D2 double-quoted strings are single-line — an embedded newline is a syntax
+    error, not a line break, and its own multi-line form (the `|...|` block
+    string) renders as markdown into a foreignObject rather than plain shape
+    text. Neither is worth the complexity here, so labels stay one line and a
+    literal newline is folded to a space rather than left to break the parse.
+    """
+    return (str(value)
+            .replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("\n", " "))
+
+
+def build_d2(index: dict, model: dict) -> str:
+    """Render the component graph as D2 source: one board per architectural
+    layer plus a whole-system board, using D2's native `layers` composition.
+
+    Node labels are the bare component id, not id-plus-name. D2 auto-sizes a
+    shape to its label with no wrapping, so a mix of an 8-character id and a
+    60-character name — `CMP-CORE` next to `CMP-PKG — Packaging, Installation
+    and Release Engineering` — produces wildly uneven boxes; every id in this
+    register is close enough in length that boxes come out visually uniform
+    instead. Full names live in the legend this function also returns, not on
+    the diagram.
+
+    A component's cross-cutting/external treatment is computed once into
+    `style_of` and applied at every place that component is drawn — full
+    board, its home layer board, and any other layer board it appears in as
+    an external target — so a component's visual meaning cannot differ
+    between boards the way it could when each board applied its own styling
+    inline.
+
+    Unlike the Mermaid output, this is not itself viewable on GitHub — D2 has
+    no native fenced-code-block renderer there, so it must be compiled with
+    the `d2` CLI (https://d2lang.com) to SVG before it can be viewed or
+    committed as an image. See `d2` PNG export before relying on it: it
+    shells out to a Playwright-managed browser it downloads on first use,
+    which fails closed (not silently) in a network-restricted environment;
+    SVG export has no such dependency.
+    """
+    components: dict = index["components"]
+
+    names: dict[str, str] = {}
+    for layer in (model.get("layers") or []):
+        if isinstance(layer, dict) and isinstance(layer.get("id"), str):
+            names[layer["id"]] = str(layer.get("name") or layer["id"])
+
+    def deps(cid: str) -> list[str]:
+        return sorted(d for d in (components[cid].get("depends_on") or [])
+                      if isinstance(d, str) and d in components)
+
+    ordered = list(index["layer_ids"]) + sorted(
+        {c.get("layer") for c in components.values()
+         if isinstance(c.get("layer"), str)} - set(index["layer_ids"]))
+    by_layer: dict[str, list[str]] = {lid: [] for lid in ordered}
+    stray: list[str] = []
+    for cid in sorted(components):
+        lid = components[cid].get("layer")
+        (by_layer[lid] if lid in by_layer else stray).append(cid)
+
+    crosscutting = {c for c in components if components[c].get("cross_cutting")}
+    edges = sum(len(deps(c)) for c in components)
+
+    def style_lines(ref: str, cid: str, *, external: bool) -> list[str]:
+        lines = []
+        if cid in crosscutting:
+            lines.append(f"{ref}.style.stroke-dash: 4")
+            lines.append(f"{ref}.style.stroke-width: 3")
+        if external:
+            lines.append(f"{ref}.style.opacity: 0.5")
+        return lines
+
+    out: list[str] = [
+        "# Generated — do not edit. Produced by trace_check.py from",
+        "# design-elements.yaml, which is the authoritative register. Compile",
+        "# with: d2 design/architecture.d2 design/diagrams/architecture.svg",
+        "#",
+        f"# {len(components)} components across "
+        f"{sum(1 for lid in ordered if by_layer[lid])} layers, "
+        f"{edges} dependency edges. Node labels are ids only — see the",
+        "# legend in the generated companion doc for full names.",
+        "",
+        "direction: down",
+        "vars: { d2-config: { theme-id: 0 } }",
+        "",
+        "# Root board — the layer map, aggregated from the component graph.",
+        "# An edge means at least one component in the source layer depends",
+        "# on a component in the target layer; the label counts how many.",
+    ]
+
+    for lid in ordered:
+        if not by_layer[lid]:
+            continue
+        out.append(f'"{lid}": "{_d2_str(lid)} · '
+                   f'{_d2_str(names.get(lid, lid))}\\n'
+                   f'{len(by_layer[lid])} components"')
+
+    pairs: Counter = Counter()
+    for cid in sorted(components):
+        src = components[cid].get("layer")
+        for d in deps(cid):
+            dst = components[d].get("layer")
+            if src != dst and src in by_layer and dst in by_layer:
+                pairs[(src, dst)] += 1
+    for (src, dst), n in sorted(pairs.items()):
+        out.append(f'"{src}" -> "{dst}": "{n}"')
+
+    out += [
+        "",
+        "layers: {",
+        "  # The whole system on one board. Laid out with ELK, which handles",
+        "  # a dense graph more cleanly than the default Dagre engine — set",
+        "  # per-board so the root layer map above keeps the simpler engine.",
+        "  full: {",
+        "    layout-engine: elk",
+    ]
+    for lid in ordered:
+        if not by_layer[lid]:
+            continue
+        out.append(f'    "{lid}": "{_d2_str(lid)} · '
+                   f'{_d2_str(names.get(lid, lid))}" {{')
+        for cid in by_layer[lid]:
+            out.append(f'      "{cid}"')
+            for line in style_lines(f'"{cid}"', cid, external=False):
+                out.append(f"      {line}")
+        out.append("    }")
+    for cid in stray:
+        out.append(f'    "{cid}"')
+        for line in style_lines(f'"{cid}"', cid, external=False):
+            out.append(f"    {line}")
+    for cid in sorted(components):
+        src_lid = components[cid].get("layer")
+        for d in deps(cid):
+            dst_lid = components[d].get("layer")
+            src = f'"{src_lid}"."{cid}"' if src_lid in by_layer else f'"{cid}"'
+            dst = f'"{dst_lid}"."{d}"' if dst_lid in by_layer else f'"{d}"'
+            out.append(f"    {src} -> {dst}")
+    out.append("  }")
+
+    for lid in ordered:
+        members = by_layer[lid]
+        if not members:
+            continue
+        out += ["", f"  # {lid} · {names.get(lid, lid)} — complete, no edges",
+               "  # omitted. External dependency targets are faded.",
+               f'  {_mm_id(lid)}: {{']
+        external = sorted({d for c in members for d in deps(c)
+                           if d not in members})
+        for cid in members:
+            out.append(f'    "{cid}"')
+            for line in style_lines(f'"{cid}"', cid, external=False):
+                out.append(f"    {line}")
+        for cid in external:
+            out.append(f'    "{cid}"')
+            for line in style_lines(f'"{cid}"', cid, external=True):
+                out.append(f"    {line}")
+        for cid in members:
+            for d in deps(cid):
+                out.append(f'    "{cid}" -> "{d}"')
+        out.append("  }")
+
+    out.append("}")
+    return "\n".join(out).rstrip("\n") + "\n"
+
+
+def _mm_id(value: str) -> str:
+    """A Mermaid node id: the component id with anything the Mermaid parser
+    could read as syntax replaced."""
+    return re.sub(r"[^0-9A-Za-z_]", "_", value)
+
+
+def _mm_text(value) -> str:
+    """Escape text for use inside a double-quoted Mermaid label.
+
+    Mermaid takes HTML entities in labels, so the four characters that would
+    otherwise end the label or open a tag are spelled as entities. `&` goes
+    first or it would re-escape the entities emitted after it.
+    """
+    return (str(value)
+            .replace("&", "#amp;")
+            .replace('"', "#quot;")
+            .replace("<", "#lt;")
+            .replace(">", "#gt;"))
+
+
+def _wrap(text: str, width: int = LABEL_WRAP) -> list[str]:
+    """Greedy word wrap. A word longer than `width` gets its own line rather
+    than being broken — a hyphenated component name is harder to read than a
+    slightly wide box."""
+    lines: list[str] = []
+    current = ""
+    for word in str(text).split():
+        candidate = f"{current} {word}".strip()
+        if current and len(candidate) > width:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines
+
+
+def build_mermaid(index: dict, model: dict) -> str:
+    """Render the component graph as Mermaid, for GitHub-native display.
+
+    Generated rather than drawn. A hand-maintained diagram is a second source
+    of truth for a graph that already has one, and within a few revisions the
+    two disagree with no way to tell which is wrong — the same failure this
+    script exists to prevent between the SDDs and the register. Nothing here is
+    asserted that `check_structure` has not already validated.
+    """
+    components: dict = index["components"]
+
+    # Shape is not re-checked here: this only runs after a clean
+    # check_structure, so the guards below are for reading, not validation.
+    names: dict[str, str] = {}
+    for layer in (model.get("layers") or []):
+        if isinstance(layer, dict) and isinstance(layer.get("id"), str):
+            names[layer["id"]] = str(layer.get("name") or layer["id"])
+
+    def deps(cid: str) -> list[str]:
+        return sorted(d for d in (components[cid].get("depends_on") or [])
+                      if isinstance(d, str) and d in components)
+
+    def node(cid: str) -> str:
+        parts = [_mm_text(cid)]
+        parts += [_mm_text(line)
+                  for line in _wrap(components[cid].get("name") or "")]
+        return f'{_mm_id(cid)}["{"<br/>".join(parts)}"]'
+
+    # Declared layer order, then any layer the register uses but did not
+    # declare. check_structure already errors on those, so this only matters
+    # for keeping the diagram honest if that gate is ever loosened: an
+    # unexpected layer must not silently drop its components from the picture.
+    ordered = list(index["layer_ids"]) + sorted(
+        {c.get("layer") for c in components.values()
+         if isinstance(c.get("layer"), str)} - set(index["layer_ids"]))
+    by_layer: dict[str, list[str]] = {lid: [] for lid in ordered}
+    stray: list[str] = []
+    for cid in sorted(components):
+        lid = components[cid].get("layer")
+        (by_layer[lid] if lid in by_layer else stray).append(cid)
+
+    dependents: Counter = Counter()
+    for cid in sorted(components):
+        for d in deps(cid):
+            dependents[d] += 1
+    others = len(components) - 1
+    ubiquitous = sorted(
+        c for c in components
+        if others > 0 and dependents[c] * UBIQUITY_DEN >= others * UBIQUITY_NUM)
+    crosscutting = sorted(c for c in components
+                          if components[c].get("cross_cutting"))
+    edges = sum(len(deps(c)) for c in components)
+
+    out: list[str] = [
+        "# Architecture diagrams",
+        "",
+        "**Generated — do not edit.** Produced by "
+        "[`trace/trace_check.py`](trace/trace_check.py) from "
+        "[`trace/design-elements.yaml`](trace/design-elements.yaml), which is "
+        "the authoritative register. Everything below is derived from the same "
+        "component graph the checker validates, so it cannot drift from the "
+        "design it depicts.",
+        "",
+        "```sh",
+        "python3 design/trace/trace_check.py \\",
+        "  --emit-mermaid design/architecture-diagrams.md",
+        "```",
+        "",
+        f"{len(components)} components across "
+        f"{sum(1 for lid in ordered if by_layer[lid])} layers, "
+        f"{edges} dependency edges.",
+        "",
+        "---",
+        "",
+        "## 1. Layer map",
+        "",
+        "Aggregated from the component graph: an edge means at least one "
+        "component in the source layer depends on a component in the target "
+        "layer, and its label is how many such dependencies there are. "
+        "Dependencies within a single layer are not shown here — §3 has them.",
+        "",
+        "```mermaid",
+        "flowchart TD",
+    ]
+
+    for lid in reversed(ordered):
+        if not by_layer[lid]:
+            continue
+        label = f"{_mm_text(lid)} · {_mm_text(names.get(lid, lid))}"
+        out.append(f'  {_mm_id(lid)}["{label}<br/>'
+                   f'{len(by_layer[lid])} components"]')
+
+    pairs: Counter = Counter()
+    for cid in sorted(components):
+        src = components[cid].get("layer")
+        for d in deps(cid):
+            dst = components[d].get("layer")
+            if src != dst and src in by_layer and dst in by_layer:
+                pairs[(src, dst)] += 1
+    for (src, dst), n in sorted(pairs.items()):
+        out.append(f"  {_mm_id(src)} -->|{n}| {_mm_id(dst)}")
+    out += ["```", ""]
+
+    out += ["| Layer | Name | Components |", "|---|---|---|"]
+    for lid in ordered:
+        if not by_layer[lid]:
+            continue
+        out.append(f"| `{lid}` | {names.get(lid, lid)} | "
+                   + " ".join(f"`{c}`" for c in by_layer[lid]) + " |")
+    out.append("")
+
+    out += [
+        "---",
+        "",
+        "## 2. Component dependency graph",
+        "",
+        "Every component in the model, grouped by layer. An arrow is a "
+        "`depends_on` edge. Arrows run downward because a dependency on a "
+        "higher layer is a checker error unless the target is marked "
+        "`cross_cutting: true` — those are the thick dashed nodes, and the "
+        "upward arrows into them are the only ones in the diagram.",
+        "",
+        "This is the whole system on one page and it is dense; it is meant as "
+        "the reference view, so click to zoom. §3 is where the detail is "
+        "legible without zooming.",
+        "",
+        "```mermaid",
+        "flowchart TD",
+    ]
+
+    for lid in reversed(ordered):
+        if not by_layer[lid]:
+            continue
+        label = f"{_mm_text(lid)} · {_mm_text(names.get(lid, lid))}"
+        out.append(f'  subgraph {_mm_id(lid)}["{label}"]')
+        out.append("    direction LR")
+        for cid in by_layer[lid]:
+            out.append(f"    {node(cid)}")
+        out.append("  end")
+    for cid in stray:
+        out.append(f"  {node(cid)}")
+
+    for cid in sorted(components):
+        for d in deps(cid):
+            if d in ubiquitous:
+                continue
+            out.append(f"  {_mm_id(cid)} --> {_mm_id(d)}")
+
+    out.append("  classDef xcut stroke-width:3px,stroke-dasharray:5 3")
+    out.append("  classDef ubiq stroke-width:3px")
+    if crosscutting:
+        out.append("  class " + ",".join(_mm_id(c) for c in crosscutting)
+                   + " xcut")
+    if ubiquitous:
+        out.append("  class " + ",".join(_mm_id(c) for c in ubiquitous)
+                   + " ubiq")
+    out += ["```", ""]
+
+    for cid in ubiquitous:
+        missing = sorted(c for c in components
+                         if c != cid and cid not in deps(c))
+        out.append(
+            f"**`{cid}` edges omitted above.** {dependents[cid]} of the "
+            f"{others} other components depend on it; drawing those arrows "
+            f"hides the structure. The exceptions — the components that do "
+            f"**not** depend on `{cid}` — are "
+            + (", ".join(f"`{c}`" for c in missing) if missing else "none")
+            + ". §3 draws every edge, including these."
+        )
+        out.append("")
+
+    out += [
+        "---",
+        "",
+        "## 3. Per-layer views",
+        "",
+        "One diagram per layer, drawn complete — no edges are omitted here. "
+        "Solid nodes belong to the layer; the paler nodes are dependency "
+        "targets that live elsewhere, shown so the seam is visible.",
+        "",
+    ]
+
+    for lid in ordered:
+        members = by_layer[lid]
+        if not members:
+            continue
+        out += [f"### {lid} · {names.get(lid, lid)}", "", "```mermaid",
+                "flowchart LR"]
+        external = sorted({d for c in members for d in deps(c)
+                           if d not in members})
+        out.append(f'  subgraph {_mm_id(lid)}["{_mm_text(lid)}"]')
+        for cid in members:
+            out.append(f"    {node(cid)}")
+        out.append("  end")
+        for cid in external:
+            out.append(f"  {node(cid)}")
+        for cid in members:
+            for d in deps(cid):
+                out.append(f"  {_mm_id(cid)} --> {_mm_id(d)}")
+        out.append("  classDef ext stroke-dasharray:2 2,opacity:0.65")
+        if external:
+            out.append("  class " + ",".join(_mm_id(c) for c in external)
+                       + " ext")
+        out += ["```", ""]
+
+    return "\n".join(out).rstrip("\n") + "\n"
+
+
 def write_atomic(path: Path, content: str) -> None:
     """Write via a temp file and rename, so a failure part-way through cannot
     leave a half-written artifact behind."""
@@ -619,19 +1050,23 @@ def run(args: argparse.Namespace) -> int:
         # allocates TOOL-NFR-090 ("report the error and exit non-zero rather
         # than emitting incomplete or misleading results") to DSN-CORE-020;
         # this script does not get to break the rule it exists to enforce.
-        if args.emit_matrix or args.emit_json:
+        if args.emit_matrix or args.emit_json or args.emit_mermaid or args.emit_d2:
             print("note: artifacts not written because the run found errors",
                   file=sys.stderr)
         print(f"\nFAIL: {len(findings.errors)} error(s)", file=sys.stderr)
         return 1
 
-    # Build both payloads before writing either, so a serialisation failure
-    # cannot leave the matrix and the graph describing different models.
+    # Build every payload before writing any of them, so a serialisation
+    # failure cannot leave the artifacts describing different models.
     outputs: list[tuple[Path, str]] = []
     if args.emit_matrix:
         outputs.append((args.emit_matrix, build_matrix(reqs, index)))
     if args.emit_json:
         outputs.append((args.emit_json, build_json(reqs, index, model)))
+    if args.emit_mermaid:
+        outputs.append((args.emit_mermaid, build_mermaid(index, model)))
+    if args.emit_d2:
+        outputs.append((args.emit_d2, build_d2(index, model)))
     for path, content in outputs:
         write_atomic(path, content)
         print(f"wrote {path}")
@@ -648,6 +1083,8 @@ def main(argv: list[str] | None = None) -> int:
                     default=REPO_ROOT / "design" / "trace" / "design-elements.yaml")
     ap.add_argument("--emit-matrix", type=Path)
     ap.add_argument("--emit-json", type=Path)
+    ap.add_argument("--emit-mermaid", type=Path)
+    ap.add_argument("--emit-d2", type=Path)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args(argv)
 
