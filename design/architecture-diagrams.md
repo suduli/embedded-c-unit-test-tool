@@ -16,6 +16,7 @@ python3 design/trace/trace_check.py \
 Aggregated from the component graph: an edge means at least one component in the source layer depends on a component in the target layer, and its label is how many such dependencies there are. Dependencies within a single layer are not shown here — §3 has them.
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart TD
   L6["L6 · Assurance and Ecosystem<br/>6 components"]
   L5["L5 · Interfaces<br/>3 components"]
@@ -54,6 +55,35 @@ flowchart TD
 | `L5` | Interfaces | `CMP-API` `CMP-CLI` `CMP-GUI` |
 | `L6` | Assurance and Ecosystem | `CMP-AIF` `CMP-MIG` `CMP-PKG` `CMP-PLG` `CMP-QUA` `CMP-SEC` |
 
+Every diagram below labels a component with its id only, not its name — a box sized to fit a 60-character name next to one sized to fit an 8-character id is not a diagram anyone would call uniform. Full names:
+
+| Id | Name |
+|---|---|
+| `CMP-AIF` | AI Assist Subsystem |
+| `CMP-ANA` | Source Analyzer |
+| `CMP-API` | Engine Service Interface |
+| `CMP-ATG` | Automatic Test Generation |
+| `CMP-BLD` | Build Orchestrator |
+| `CMP-CBT` | Change Impact and Regression |
+| `CMP-CLI` | Command Line Front-End |
+| `CMP-CORE` | Core Platform Services |
+| `CMP-COV` | Coverage Engine |
+| `CMP-EXH` | Host Execution Runner |
+| `CMP-EXT` | Target Execution Runner |
+| `CMP-GEN` | Generation Engine |
+| `CMP-GUI` | Standalone Desktop Application |
+| `CMP-ING` | Ingestion and Scope Resolver |
+| `CMP-MIG` | Migration and Interoperability |
+| `CMP-PKG` | Packaging, Installation and Release Engineering |
+| `CMP-PLG` | Extension Framework |
+| `CMP-PRJ` | Project and Workspace Store |
+| `CMP-QUA` | Qualification Evidence |
+| `CMP-REP` | Reporting Pipeline |
+| `CMP-SEC` | Security and Integrity Services |
+| `CMP-TCH` | Toolchain Abstraction |
+| `CMP-TCM` | Test Case Model and Store |
+| `CMP-TRC` | Traceability Engine |
+
 ---
 
 ## 2. Component dependency graph
@@ -63,51 +93,52 @@ Every component in the model, grouped by layer. An arrow is a `depends_on` edge.
 This is the whole system on one page and it is dense; it is meant as the reference view, so click to zoom. §3 is where the detail is legible without zooming.
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart TD
   subgraph L6["L6 · Assurance and Ecosystem"]
     direction LR
-    CMP_AIF["CMP-AIF<br/>AI Assist<br/>Subsystem"]
-    CMP_MIG["CMP-MIG<br/>Migration and<br/>Interoperability"]
-    CMP_PKG["CMP-PKG<br/>Packaging,<br/>Installation and<br/>Release<br/>Engineering"]
-    CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-    CMP_QUA["CMP-QUA<br/>Qualification<br/>Evidence"]
-    CMP_SEC["CMP-SEC<br/>Security and<br/>Integrity Services"]
+    CMP_AIF["CMP-AIF"]
+    CMP_MIG["CMP-MIG"]
+    CMP_PKG["CMP-PKG"]
+    CMP_PLG["CMP-PLG"]
+    CMP_QUA["CMP-QUA"]
+    CMP_SEC["CMP-SEC"]
   end
   subgraph L5["L5 · Interfaces"]
     direction LR
-    CMP_API["CMP-API<br/>Engine Service<br/>Interface"]
-    CMP_CLI["CMP-CLI<br/>Command Line<br/>Front-End"]
-    CMP_GUI["CMP-GUI<br/>Standalone Desktop<br/>Application"]
+    CMP_API["CMP-API"]
+    CMP_CLI["CMP-CLI"]
+    CMP_GUI["CMP-GUI"]
   end
   subgraph L4["L4 · Evidence"]
     direction LR
-    CMP_CBT["CMP-CBT<br/>Change Impact and<br/>Regression"]
-    CMP_COV["CMP-COV<br/>Coverage Engine"]
-    CMP_REP["CMP-REP<br/>Reporting Pipeline"]
-    CMP_TRC["CMP-TRC<br/>Traceability<br/>Engine"]
+    CMP_CBT["CMP-CBT"]
+    CMP_COV["CMP-COV"]
+    CMP_REP["CMP-REP"]
+    CMP_TRC["CMP-TRC"]
   end
   subgraph L3["L3 · Realization"]
     direction LR
-    CMP_BLD["CMP-BLD<br/>Build Orchestrator"]
-    CMP_EXH["CMP-EXH<br/>Host Execution<br/>Runner"]
-    CMP_EXT["CMP-EXT<br/>Target Execution<br/>Runner"]
+    CMP_BLD["CMP-BLD"]
+    CMP_EXH["CMP-EXH"]
+    CMP_EXT["CMP-EXT"]
   end
   subgraph L2["L2 · Synthesis"]
     direction LR
-    CMP_ATG["CMP-ATG<br/>Automatic Test<br/>Generation"]
-    CMP_GEN["CMP-GEN<br/>Generation Engine"]
-    CMP_TCM["CMP-TCM<br/>Test Case Model<br/>and Store"]
+    CMP_ATG["CMP-ATG"]
+    CMP_GEN["CMP-GEN"]
+    CMP_TCM["CMP-TCM"]
   end
   subgraph L1["L1 · Comprehension"]
     direction LR
-    CMP_ANA["CMP-ANA<br/>Source Analyzer"]
-    CMP_ING["CMP-ING<br/>Ingestion and<br/>Scope Resolver"]
-    CMP_TCH["CMP-TCH<br/>Toolchain<br/>Abstraction"]
+    CMP_ANA["CMP-ANA"]
+    CMP_ING["CMP-ING"]
+    CMP_TCH["CMP-TCH"]
   end
   subgraph L0["L0 · Platform and Persistence"]
     direction LR
-    CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-    CMP_PRJ["CMP-PRJ<br/>Project and<br/>Workspace Store"]
+    CMP_CORE["CMP-CORE"]
+    CMP_PRJ["CMP-PRJ"]
   end
   CMP_AIF --> CMP_ATG
   CMP_AIF --> CMP_GEN
@@ -174,10 +205,11 @@ One diagram per layer, drawn complete — no edges are omitted here. Solid nodes
 ### L0 · Platform and Persistence
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L0["L0"]
-    CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-    CMP_PRJ["CMP-PRJ<br/>Project and<br/>Workspace Store"]
+    CMP_CORE["CMP-CORE"]
+    CMP_PRJ["CMP-PRJ"]
   end
   CMP_PRJ --> CMP_CORE
   classDef ext stroke-dasharray:2 2,opacity:0.65
@@ -186,15 +218,16 @@ flowchart LR
 ### L1 · Comprehension
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L1["L1"]
-    CMP_ANA["CMP-ANA<br/>Source Analyzer"]
-    CMP_ING["CMP-ING<br/>Ingestion and<br/>Scope Resolver"]
-    CMP_TCH["CMP-TCH<br/>Toolchain<br/>Abstraction"]
+    CMP_ANA["CMP-ANA"]
+    CMP_ING["CMP-ING"]
+    CMP_TCH["CMP-TCH"]
   end
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-  CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-  CMP_PRJ["CMP-PRJ<br/>Project and<br/>Workspace Store"]
+  CMP_CORE["CMP-CORE"]
+  CMP_PLG["CMP-PLG"]
+  CMP_PRJ["CMP-PRJ"]
   CMP_ANA --> CMP_CORE
   CMP_ANA --> CMP_ING
   CMP_ANA --> CMP_TCH
@@ -209,16 +242,17 @@ flowchart LR
 ### L2 · Synthesis
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L2["L2"]
-    CMP_ATG["CMP-ATG<br/>Automatic Test<br/>Generation"]
-    CMP_GEN["CMP-GEN<br/>Generation Engine"]
-    CMP_TCM["CMP-TCM<br/>Test Case Model<br/>and Store"]
+    CMP_ATG["CMP-ATG"]
+    CMP_GEN["CMP-GEN"]
+    CMP_TCM["CMP-TCM"]
   end
-  CMP_ANA["CMP-ANA<br/>Source Analyzer"]
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-  CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-  CMP_PRJ["CMP-PRJ<br/>Project and<br/>Workspace Store"]
+  CMP_ANA["CMP-ANA"]
+  CMP_CORE["CMP-CORE"]
+  CMP_PLG["CMP-PLG"]
+  CMP_PRJ["CMP-PRJ"]
   CMP_ATG --> CMP_ANA
   CMP_ATG --> CMP_CORE
   CMP_ATG --> CMP_TCM
@@ -236,18 +270,19 @@ flowchart LR
 ### L3 · Realization
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L3["L3"]
-    CMP_BLD["CMP-BLD<br/>Build Orchestrator"]
-    CMP_EXH["CMP-EXH<br/>Host Execution<br/>Runner"]
-    CMP_EXT["CMP-EXT<br/>Target Execution<br/>Runner"]
+    CMP_BLD["CMP-BLD"]
+    CMP_EXH["CMP-EXH"]
+    CMP_EXT["CMP-EXT"]
   end
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-  CMP_GEN["CMP-GEN<br/>Generation Engine"]
-  CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-  CMP_SEC["CMP-SEC<br/>Security and<br/>Integrity Services"]
-  CMP_TCH["CMP-TCH<br/>Toolchain<br/>Abstraction"]
-  CMP_TCM["CMP-TCM<br/>Test Case Model<br/>and Store"]
+  CMP_CORE["CMP-CORE"]
+  CMP_GEN["CMP-GEN"]
+  CMP_PLG["CMP-PLG"]
+  CMP_SEC["CMP-SEC"]
+  CMP_TCH["CMP-TCH"]
+  CMP_TCM["CMP-TCM"]
   CMP_BLD --> CMP_CORE
   CMP_BLD --> CMP_GEN
   CMP_BLD --> CMP_TCH
@@ -267,21 +302,22 @@ flowchart LR
 ### L4 · Evidence
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L4["L4"]
-    CMP_CBT["CMP-CBT<br/>Change Impact and<br/>Regression"]
-    CMP_COV["CMP-COV<br/>Coverage Engine"]
-    CMP_REP["CMP-REP<br/>Reporting Pipeline"]
-    CMP_TRC["CMP-TRC<br/>Traceability<br/>Engine"]
+    CMP_CBT["CMP-CBT"]
+    CMP_COV["CMP-COV"]
+    CMP_REP["CMP-REP"]
+    CMP_TRC["CMP-TRC"]
   end
-  CMP_ANA["CMP-ANA<br/>Source Analyzer"]
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-  CMP_EXH["CMP-EXH<br/>Host Execution<br/>Runner"]
-  CMP_EXT["CMP-EXT<br/>Target Execution<br/>Runner"]
-  CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-  CMP_PRJ["CMP-PRJ<br/>Project and<br/>Workspace Store"]
-  CMP_TCH["CMP-TCH<br/>Toolchain<br/>Abstraction"]
-  CMP_TCM["CMP-TCM<br/>Test Case Model<br/>and Store"]
+  CMP_ANA["CMP-ANA"]
+  CMP_CORE["CMP-CORE"]
+  CMP_EXH["CMP-EXH"]
+  CMP_EXT["CMP-EXT"]
+  CMP_PLG["CMP-PLG"]
+  CMP_PRJ["CMP-PRJ"]
+  CMP_TCH["CMP-TCH"]
+  CMP_TCM["CMP-TCM"]
   CMP_CBT --> CMP_ANA
   CMP_CBT --> CMP_CORE
   CMP_CBT --> CMP_COV
@@ -309,13 +345,14 @@ flowchart LR
 ### L5 · Interfaces
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L5["L5"]
-    CMP_API["CMP-API<br/>Engine Service<br/>Interface"]
-    CMP_CLI["CMP-CLI<br/>Command Line<br/>Front-End"]
-    CMP_GUI["CMP-GUI<br/>Standalone Desktop<br/>Application"]
+    CMP_API["CMP-API"]
+    CMP_CLI["CMP-CLI"]
+    CMP_GUI["CMP-GUI"]
   end
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
+  CMP_CORE["CMP-CORE"]
   CMP_API --> CMP_CORE
   CMP_CLI --> CMP_API
   CMP_GUI --> CMP_API
@@ -326,20 +363,21 @@ flowchart LR
 ### L6 · Assurance and Ecosystem
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
 flowchart LR
   subgraph L6["L6"]
-    CMP_AIF["CMP-AIF<br/>AI Assist<br/>Subsystem"]
-    CMP_MIG["CMP-MIG<br/>Migration and<br/>Interoperability"]
-    CMP_PKG["CMP-PKG<br/>Packaging,<br/>Installation and<br/>Release<br/>Engineering"]
-    CMP_PLG["CMP-PLG<br/>Extension<br/>Framework"]
-    CMP_QUA["CMP-QUA<br/>Qualification<br/>Evidence"]
-    CMP_SEC["CMP-SEC<br/>Security and<br/>Integrity Services"]
+    CMP_AIF["CMP-AIF"]
+    CMP_MIG["CMP-MIG"]
+    CMP_PKG["CMP-PKG"]
+    CMP_PLG["CMP-PLG"]
+    CMP_QUA["CMP-QUA"]
+    CMP_SEC["CMP-SEC"]
   end
-  CMP_ATG["CMP-ATG<br/>Automatic Test<br/>Generation"]
-  CMP_CORE["CMP-CORE<br/>Core Platform<br/>Services"]
-  CMP_GEN["CMP-GEN<br/>Generation Engine"]
-  CMP_REP["CMP-REP<br/>Reporting Pipeline"]
-  CMP_TCM["CMP-TCM<br/>Test Case Model<br/>and Store"]
+  CMP_ATG["CMP-ATG"]
+  CMP_CORE["CMP-CORE"]
+  CMP_GEN["CMP-GEN"]
+  CMP_REP["CMP-REP"]
+  CMP_TCM["CMP-TCM"]
   CMP_AIF --> CMP_ATG
   CMP_AIF --> CMP_CORE
   CMP_AIF --> CMP_GEN
