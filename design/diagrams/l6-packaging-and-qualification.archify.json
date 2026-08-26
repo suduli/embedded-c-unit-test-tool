@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L6 Ecosystem — Packaging, Qualification and Extension",
+    "output": "l6-packaging-and-qualification.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1140,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-REP",
+      "type": "backend",
+      "label": "CMP-REP",
+      "sublabel": "Reporting Pipeline",
+      "tag": "L4 · context",
+      "pos": [
+        40,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-SEC",
+      "type": "security",
+      "label": "CMP-SEC",
+      "sublabel": "Security and Integrity Services",
+      "tag": "L6",
+      "pos": [
+        400,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6",
+      "pos": [
+        760,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-QUA",
+      "type": "backend",
+      "label": "CMP-QUA",
+      "sublabel": "Qualification Evidence",
+      "tag": "L6",
+      "pos": [
+        400,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PKG",
+      "type": "backend",
+      "label": "CMP-PKG",
+      "sublabel": "Packaging and Release Engineering",
+      "tag": "L6",
+      "pos": [
+        760,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L6 · Assurance and Ecosystem",
+      "wraps": [
+        "CMP-SEC",
+        "CMP-PLG",
+        "CMP-QUA",
+        "CMP-PKG"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "qua-rep",
+      "from": "CMP-QUA",
+      "to": "CMP-REP",
+      "label": "evidence records",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "qua-pkg",
+      "from": "CMP-QUA",
+      "to": "CMP-PKG",
+      "label": "release manifest",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "qua-core",
+      "from": "CMP-QUA",
+      "to": "CMP-CORE",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "pkg-sec",
+      "from": "CMP-PKG",
+      "to": "CMP-SEC",
+      "label": "signing and provenance",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "pkg-core",
+      "from": "CMP-PKG",
+      "to": "CMP-CORE",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "plg-core",
+      "from": "CMP-PLG",
+      "to": "CMP-CORE",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          870,
+          15
+        ],
+        [
+          150,
+          15
+        ]
+      ]
+    },
+    {
+      "id": "sec-core",
+      "from": "CMP-SEC",
+      "to": "CMP-CORE",
+      "fromSide": "left",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "What ships is signed",
+      "items": [
+        "CMP-PKG depends on CMP-SEC, so the installer and its provenance record are produced together.",
+        "CMP-QUA consumes that release manifest along with reports to assemble qualification evidence."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The two cross-cutting components",
+      "items": [
+        "CMP-PLG and CMP-SEC are the register's only cross_cutting components.",
+        "That marking is what makes every upward edge elsewhere in the design legal; both sit at their home layer here."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Scope of this view",
+      "items": [
+        "All four solid nodes are L6 components; CMP-REP and CMP-CORE are dependency targets elsewhere.",
+        "CMP-AIF and CMP-MIG are drawn in the AI assist and migration view."
+      ]
+    }
+  ]
+}

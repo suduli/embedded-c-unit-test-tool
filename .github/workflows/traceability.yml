@@ -38,8 +38,14 @@ jobs:
       # does not exist, allocation of a Future-priority requirement, duplicate or
       # malformed ids, an unjustified derived element, a broken refines or
       # depends_on, an upward layer dependency, or a cycle in the component graph.
-      - name: Validate the design element register
-        run: python3 design/trace/trace_check.py
+      #
+      # --check-diagrams additionally reads the authored Archify specifications
+      # back and fails when a diagram draws a component or an edge the register
+      # does not have, omits an edge of a component it owns, or when any
+      # component is owned by no diagram or by more than one. The diagrams are
+      # hand-authored, so this is what stops them drifting from the design.
+      - name: Validate the design element register and the diagrams
+        run: python3 design/trace/trace_check.py --check-diagrams design/diagrams
 
       # The generated artifacts are committed so they are reviewable in a diff.
       # That is only safe if they cannot go stale, so regenerate and require the

@@ -139,11 +139,13 @@ The dotted edges are the ones that actually exist in the register: `CMP-TCH`,
 reach everything through the engine API.
 
 The diagram above states the *rule* — which dependencies the layering permits.
-For the graph as it actually stands, see
-[`architecture-diagrams.md`](architecture-diagrams.md), which is generated from
-the register on every run of `trace_check.py` and therefore cannot drift from
-it. The two are not interchangeable: the permitted edges here are a superset of
-the real ones, and the real graph skips levels freely.
+For the graph as it actually stands, see the diagrams in [`diagrams/`](diagrams/),
+rendered to interactive HTML under [`../docs/diagrams/`](../docs/diagrams/).
+Those are authored rather than generated, but `trace_check.py --check-diagrams`
+fails the build if they draw a component or an edge the register does not have,
+or omit one it does, so they cannot drift from it either. The two are not
+interchangeable: the permitted edges here are a superset of the real ones, and
+the real graph skips levels freely.
 
 | Layer | Name | Rule |
 |---|---|---|

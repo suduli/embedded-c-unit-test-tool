@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L3 Realization",
+    "output": "l3-realization.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1360,
+      610
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-GEN",
+      "type": "backend",
+      "label": "CMP-GEN",
+      "sublabel": "Generation Engine",
+      "tag": "L2 · context",
+      "pos": [
+        300,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCH",
+      "type": "backend",
+      "label": "CMP-TCH",
+      "sublabel": "Toolchain Abstraction",
+      "tag": "L1 · context",
+      "pos": [
+        560,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-BLD",
+      "type": "backend",
+      "label": "CMP-BLD",
+      "sublabel": "Build Orchestrator",
+      "tag": "L3",
+      "pos": [
+        560,
+        250
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        820,
+        420
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXH",
+      "type": "backend",
+      "label": "CMP-EXH",
+      "sublabel": "Host Execution Runner",
+      "tag": "L3",
+      "pos": [
+        40,
+        250
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXT",
+      "type": "backend",
+      "label": "CMP-EXT",
+      "sublabel": "Target Execution Runner",
+      "tag": "L3",
+      "pos": [
+        1080,
+        250
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-SEC",
+      "type": "security",
+      "label": "CMP-SEC",
+      "sublabel": "Security and Integrity Services",
+      "tag": "L6 · context",
+      "pos": [
+        300,
+        420
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCM",
+      "type": "database",
+      "label": "CMP-TCM",
+      "sublabel": "Test Case Model and Store",
+      "tag": "L2 · context",
+      "pos": [
+        560,
+        420
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6 · context",
+      "pos": [
+        1080,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L3 · Realization",
+      "wraps": [
+        "CMP-BLD",
+        "CMP-EXH",
+        "CMP-EXT"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "bld-gen",
+      "from": "CMP-BLD",
+      "to": "CMP-GEN",
+      "label": "generated source",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "bld-tch",
+      "from": "CMP-BLD",
+      "to": "CMP-TCH",
+      "label": "compiler and linker",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 70
+    },
+    {
+      "id": "bld-core",
+      "from": "CMP-BLD",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "exh-bld",
+      "from": "CMP-EXH",
+      "to": "CMP-BLD",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "exh-core",
+      "from": "CMP-EXH",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "exh-sec",
+      "from": "CMP-EXH",
+      "to": "CMP-SEC",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "exh-tcm",
+      "from": "CMP-EXH",
+      "to": "CMP-TCM",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ext-bld",
+      "from": "CMP-EXT",
+      "to": "CMP-BLD",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "ext-core",
+      "from": "CMP-EXT",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ext-sec",
+      "from": "CMP-EXT",
+      "to": "CMP-SEC",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ext-tcm",
+      "from": "CMP-EXT",
+      "to": "CMP-TCM",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ext-plg",
+      "from": "CMP-EXT",
+      "to": "CMP-PLG",
+      "label": "target adapters",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "L3 · Realization",
+      "items": [
+        "CMP-BLD turns generated source into an executable; the two runners execute it.",
+        "Host and target execution are separate components, not one runner with a flag."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Why the runners mirror",
+      "items": [
+        "CMP-EXH and CMP-EXT depend on the same four things: the build, the platform, security and the case store.",
+        "The difference is where the binary runs, not what it needs to run."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cross-cutting",
+      "items": [
+        "Both runners depend on CMP-SEC before executing anything they did not build themselves.",
+        "CMP-EXT → CMP-PLG is how a target adapter for a specific board is supplied."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Layer Map — Embedded C Unit Test Tool",
+    "output": "layer-map.html",
+    "quality_profile": "standard",
+    "viewBox": [
+      1220,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "L6",
+      "type": "security",
+      "label": "L6",
+      "sublabel": "Assurance and Ecosystem",
+      "tag": "6 components",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L5",
+      "type": "frontend",
+      "label": "L5",
+      "sublabel": "Interfaces",
+      "tag": "3 components",
+      "pos": [
+        330,
+        60
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L4",
+      "type": "backend",
+      "label": "L4",
+      "sublabel": "Evidence",
+      "tag": "4 components",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L3",
+      "type": "backend",
+      "label": "L3",
+      "sublabel": "Realization",
+      "tag": "3 components",
+      "pos": [
+        910,
+        60
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L2",
+      "type": "backend",
+      "label": "L2",
+      "sublabel": "Synthesis",
+      "tag": "3 components",
+      "pos": [
+        185,
+        300
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L1",
+      "type": "backend",
+      "label": "L1",
+      "sublabel": "Comprehension",
+      "tag": "3 components",
+      "pos": [
+        475,
+        300
+      ],
+      "size": [
+        250,
+        76
+      ]
+    },
+    {
+      "id": "L0",
+      "type": "database",
+      "label": "L0",
+      "sublabel": "Platform and Persistence",
+      "tag": "2 components",
+      "pos": [
+        765,
+        300
+      ],
+      "size": [
+        250,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "L1-L0",
+      "from": "L1",
+      "to": "L0",
+      "label": "4",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "L2-L1",
+      "from": "L2",
+      "to": "L1",
+      "label": "3",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "L3-L2",
+      "from": "L3",
+      "to": "L2",
+      "label": "3",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L4-L3",
+      "from": "L4",
+      "to": "L3",
+      "label": "4",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "L2-L0",
+      "from": "L2",
+      "to": "L0",
+      "label": "4",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "L3-L1",
+      "from": "L3",
+      "to": "L1",
+      "label": "1",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L3-L0",
+      "from": "L3",
+      "to": "L0",
+      "label": "3",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L4-L2",
+      "from": "L4",
+      "to": "L2",
+      "label": "1",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L4-L1",
+      "from": "L4",
+      "to": "L1",
+      "label": "4",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L4-L0",
+      "from": "L4",
+      "to": "L0",
+      "label": "6",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L5-L0",
+      "from": "L5",
+      "to": "L0",
+      "label": "1",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L6-L0",
+      "from": "L6",
+      "to": "L0",
+      "label": "6",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L6-L2",
+      "from": "L6",
+      "to": "L2",
+      "label": "5",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "L6-L4",
+      "from": "L6",
+      "to": "L4",
+      "label": "2",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "L1-L6",
+      "from": "L1",
+      "to": "L6",
+      "label": "1",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "L2-L6",
+      "from": "L2",
+      "to": "L6",
+      "label": "1",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "L3-L6",
+      "from": "L3",
+      "to": "L6",
+      "label": "3",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "L4-L6",
+      "from": "L4",
+      "to": "L6",
+      "label": "1",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "How to read it",
+      "items": [
+        "An arrow means at least one component in the source layer depends on a component in the target layer.",
+        "The label is how many such dependencies exist — 69 edges in all.",
+        "Dependencies inside a single layer are not shown here; the per-layer diagrams draw them."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cross-cutting",
+      "items": [
+        "Dashed arrows point upward into L6, which a strict layering would forbid.",
+        "They are legal only because CMP-PLG and CMP-SEC are marked cross_cutting in the register.",
+        "Every other arrow runs downward; the checker fails the build on any upward edge that is not cross-cutting."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Source",
+      "items": [
+        "Derived from design/trace/design-elements.yaml, the authoritative register.",
+        "24 components, 7 layers, 69 depends_on edges.",
+        "trace_check.py --check-diagrams fails CI if this diagram and the register disagree."
+      ]
+    }
+  ]
+}

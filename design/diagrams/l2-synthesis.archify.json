@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L2 Synthesis",
+    "output": "l2-synthesis.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1370,
+      500
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-ATG",
+      "type": "backend",
+      "label": "CMP-ATG",
+      "sublabel": "Automatic Test Generation",
+      "tag": "L2",
+      "pos": [
+        390,
+        30
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-ANA",
+      "type": "backend",
+      "label": "CMP-ANA",
+      "sublabel": "Source Analyzer",
+      "tag": "L1 · context",
+      "pos": [
+        40,
+        170
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCM",
+      "type": "database",
+      "label": "CMP-TCM",
+      "sublabel": "Test Case Model and Store",
+      "tag": "L2",
+      "pos": [
+        390,
+        170
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        1090,
+        170
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6 · context",
+      "pos": [
+        40,
+        310
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-GEN",
+      "type": "backend",
+      "label": "CMP-GEN",
+      "sublabel": "Generation Engine",
+      "tag": "L2",
+      "pos": [
+        390,
+        310
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PRJ",
+      "type": "database",
+      "label": "CMP-PRJ",
+      "sublabel": "Project and Workspace Store",
+      "tag": "L0 · context",
+      "pos": [
+        740,
+        310
+      ],
+      "size": [
+        240,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L2 · Synthesis",
+      "wraps": [
+        "CMP-ATG",
+        "CMP-TCM",
+        "CMP-GEN"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "atg-tcm",
+      "from": "CMP-ATG",
+      "to": "CMP-TCM",
+      "label": "generated cases",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "gen-tcm",
+      "from": "CMP-GEN",
+      "to": "CMP-TCM",
+      "label": "reads model",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "tcm-ana",
+      "from": "CMP-TCM",
+      "to": "CMP-ANA",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "tcm-core",
+      "from": "CMP-TCM",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "tcm-prj",
+      "from": "CMP-TCM",
+      "to": "CMP-PRJ",
+      "label": "persisted cases",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "atg-ana",
+      "from": "CMP-ATG",
+      "to": "CMP-ANA",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "atg-core",
+      "from": "CMP-ATG",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "gen-ana",
+      "from": "CMP-GEN",
+      "to": "CMP-ANA",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "gen-core",
+      "from": "CMP-GEN",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          510,
+          440
+        ],
+        [
+          1210,
+          440
+        ]
+      ]
+    },
+    {
+      "id": "gen-plg",
+      "from": "CMP-GEN",
+      "to": "CMP-PLG",
+      "label": "framework back-ends",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelDy": 26
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "L2 · Synthesis",
+      "items": [
+        "Consumes models only — no component here invokes a C front-end directly.",
+        "CMP-TCM is the hub: both producers read and write it rather than each other."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Two producers, one store",
+      "items": [
+        "CMP-ATG derives cases automatically; CMP-GEN renders them into framework source.",
+        "Every L2 component depends on CMP-ANA for the analysis model and on CMP-CORE for platform services."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cross-cutting",
+      "items": [
+        "CMP-GEN → CMP-PLG is the one upward edge, legal only because CMP-PLG is cross_cutting.",
+        "It is how a third-party test framework back-end plugs into generation."
+      ]
+    }
+  ]
+}

@@ -320,14 +320,41 @@ renumbering silently repoints them at the wrong thing.
 
 Any change to `design-elements.yaml` requires `trace_check.py` to pass, and any
 change to allocation requires the corresponding SDD prose to be updated in the
-same commit. Once CI exists, the check runs there:
+same commit. The check runs in CI:
 
 ```yaml
 - name: Requirement traceability
-  run: python3 design/trace/trace_check.py
+  run: python3 design/trace/trace_check.py --check-diagrams design/diagrams
 ```
 
 Exit codes: `0` clean, `1` findings, `2` could not run.
+
+`--check-diagrams` extends the gate to the architecture diagrams in
+`design/diagrams/`. Those are authored by hand rather than emitted, because
+choosing what belongs on a page is an editorial judgement and a mechanical
+rendering of a 69-edge graph is unreadable. Hand-authoring would normally make
+them a second source of truth — the exact failure §3 argues against — so the
+check constrains what they are permitted to assert:
+
+| Failure | Meaning |
+|---|---|
+| draws a component not in the register | the diagram names something that does not exist |
+| draws an edge that is not a `depends_on` | the diagram asserts a dependency the design does not have |
+| omits an edge of a component it *owns* | the diagram under-reports a real dependency |
+| a component owned by no diagram | some part of the design is drawn nowhere |
+| a component owned by more than one diagram | two views are each partially answerable for it |
+
+Ownership is declared per node by the `tag` field. A bare layer id (`L4`) means
+the diagram is answerable for that component's outgoing edges; a tag ending in
+`context` means the node is drawn only as a dependency target and its edges
+belong to whichever view owns it. This is the same convention the diagrams state
+in prose to their readers, made machine-checkable.
+
+The rendered HTML under `docs/diagrams/` is **not** covered by the determinism
+gate. It is produced by a third-party renderer whose output is not byte-stable
+across versions, so requiring it to regenerate identically would make the build
+depend on a pinned toolchain for no traceability benefit. The specifications are
+what carry the facts, and they are what is checked.
 
 ---
 

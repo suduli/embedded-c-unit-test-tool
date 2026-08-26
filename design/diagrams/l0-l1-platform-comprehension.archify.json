@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L0 Platform and L1 Comprehension",
+    "output": "l0-l1-platform-comprehension.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      480
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6 · context",
+      "pos": [
+        1080,
+        60
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-ING",
+      "type": "backend",
+      "label": "CMP-ING",
+      "sublabel": "Ingestion and Scope Resolver",
+      "tag": "L1",
+      "pos": [
+        60,
+        60
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-ANA",
+      "type": "backend",
+      "label": "CMP-ANA",
+      "sublabel": "Source Analyzer",
+      "tag": "L1",
+      "pos": [
+        400,
+        60
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCH",
+      "type": "backend",
+      "label": "CMP-TCH",
+      "sublabel": "Toolchain Abstraction",
+      "tag": "L1",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PRJ",
+      "type": "database",
+      "label": "CMP-PRJ",
+      "sublabel": "Project and Workspace Store",
+      "tag": "L0",
+      "pos": [
+        230,
+        330
+      ],
+      "size": [
+        240,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0",
+      "pos": [
+        570,
+        330
+      ],
+      "size": [
+        240,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L1 · Comprehension",
+      "wraps": [
+        "CMP-ING",
+        "CMP-ANA",
+        "CMP-TCH"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "L0 · Platform and Persistence",
+      "wraps": [
+        "CMP-PRJ",
+        "CMP-CORE"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ana-ing",
+      "from": "CMP-ANA",
+      "to": "CMP-ING",
+      "label": "translation units",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "ana-tch",
+      "from": "CMP-ANA",
+      "to": "CMP-TCH",
+      "label": "compiler front-end",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ing-prj",
+      "from": "CMP-ING",
+      "to": "CMP-PRJ",
+      "label": "resolved scope",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ana-core",
+      "from": "CMP-ANA",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ing-core",
+      "from": "CMP-ING",
+      "to": "CMP-CORE",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "via": [
+        [
+          20,
+          102
+        ],
+        [
+          20,
+          440
+        ],
+        [
+          690,
+          440
+        ]
+      ]
+    },
+    {
+      "id": "tch-core",
+      "from": "CMP-TCH",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "prj-core",
+      "from": "CMP-PRJ",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "tch-plg",
+      "from": "CMP-TCH",
+      "to": "CMP-PLG",
+      "label": "toolchain plugins",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "L1 · Comprehension",
+      "items": [
+        "Reads user code and build configuration, produces models, writes no generated code.",
+        "CMP-ANA is the only component that drives a C front-end; everything above it consumes its model."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "L0 · Platform and Persistence",
+      "items": [
+        "Depends on nothing above it; every other layer may depend on it.",
+        "CMP-CORE owns determinism, error handling, cancellation and provenance so no other component re-implements them."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The one upward edge",
+      "items": [
+        "CMP-TCH → CMP-PLG points up into L6, which strict layering forbids.",
+        "It is legal only because CMP-PLG is marked cross_cutting in the register."
+      ]
+    }
+  ]
+}

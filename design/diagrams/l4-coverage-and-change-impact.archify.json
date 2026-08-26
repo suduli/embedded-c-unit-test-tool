@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L4 Evidence — Coverage and Change Impact",
+    "output": "l4-coverage-and-change-impact.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1340,
+      540
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-CBT",
+      "type": "backend",
+      "label": "CMP-CBT",
+      "sublabel": "Change Impact and Regression",
+      "tag": "L4",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        40,
+        400
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-ANA",
+      "type": "backend",
+      "label": "CMP-ANA",
+      "sublabel": "Source Analyzer",
+      "tag": "L1 · context",
+      "pos": [
+        380,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-COV",
+      "type": "backend",
+      "label": "CMP-COV",
+      "sublabel": "Coverage Engine",
+      "tag": "L4",
+      "pos": [
+        380,
+        220
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PRJ",
+      "type": "database",
+      "label": "CMP-PRJ",
+      "sublabel": "Project and Workspace Store",
+      "tag": "L0 · context",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXH",
+      "type": "backend",
+      "label": "CMP-EXH",
+      "sublabel": "Host Execution Runner",
+      "tag": "L3 · context",
+      "pos": [
+        720,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXT",
+      "type": "backend",
+      "label": "CMP-EXT",
+      "sublabel": "Target Execution Runner",
+      "tag": "L3 · context",
+      "pos": [
+        720,
+        220
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCH",
+      "type": "backend",
+      "label": "CMP-TCH",
+      "sublabel": "Toolchain Abstraction",
+      "tag": "L1 · context",
+      "pos": [
+        1060,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cbt-cov",
+      "from": "CMP-CBT",
+      "to": "CMP-COV",
+      "label": "prior coverage",
+      "fromSide": "right",
+      "toSide": "top",
+      "labelDx": 70,
+      "labelDy": 30
+    },
+    {
+      "id": "cbt-ana",
+      "from": "CMP-CBT",
+      "to": "CMP-ANA",
+      "label": "changed units",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "cbt-core",
+      "from": "CMP-CBT",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "right"
+    },
+    {
+      "id": "cbt-prj",
+      "from": "CMP-CBT",
+      "to": "CMP-PRJ",
+      "label": "baseline",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "cov-ana",
+      "from": "CMP-COV",
+      "to": "CMP-ANA",
+      "label": "instrumentation points",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": -80
+    },
+    {
+      "id": "cov-core",
+      "from": "CMP-COV",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "right"
+    },
+    {
+      "id": "cov-exh",
+      "from": "CMP-COV",
+      "to": "CMP-EXH",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "cov-ext",
+      "from": "CMP-COV",
+      "to": "CMP-EXT",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "cov-tch",
+      "from": "CMP-COV",
+      "to": "CMP-TCH",
+      "label": "coverage back-end",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Coverage",
+      "items": [
+        "CMP-COV reads instrumentation points from the analysis model and results from both runners.",
+        "It depends on CMP-TCH because the coverage back-end is a property of the toolchain, not of the tool."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Change impact",
+      "items": [
+        "CMP-CBT compares the current analysis against a stored baseline to decide what must be re-run.",
+        "It consumes CMP-COV rather than re-measuring: prior coverage is what makes a regression set selectable."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Scope of this view",
+      "items": [
+        "CMP-CBT and CMP-COV are the two L4 components this view owns; every edge leaving them is drawn.",
+        "Nodes tagged with another layer are dependency targets shown so the seam is visible; their own edges belong to the view that owns them."
+      ]
+    }
+  ]
+}

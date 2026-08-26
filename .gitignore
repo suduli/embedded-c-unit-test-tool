@@ -31,3 +31,7 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Archify visual-check evidence: screenshots, contact sheet and JSON sidecars are
+# regenerated on demand beside each artifact and are not part of the deliverable.
+docs/diagrams/*.visual-check.*

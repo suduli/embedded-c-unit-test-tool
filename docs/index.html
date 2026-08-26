@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture diagrams — Embedded C Unit Test Tool</title>
+<style>
+  :root {
+    --bg: #fbfbfd; --panel: #fff; --ink: #16181d; --muted: #5d6470;
+    --line: #e3e5ea; --accent: #0f766e; --tag: #eef2f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f13; --panel: #151920; --ink: #e8eaee; --muted: #98a1af;
+      --line: #262c36; --accent: #5eead4; --tag: #1c222b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  h1 { font-size: 1.9rem; letter-spacing: -.02em; margin: 0 0 .35rem; }
+  .sub { color: var(--muted); margin: 0 0 2rem; }
+  h2 { font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase;
+       color: var(--muted); margin: 2.5rem 0 .9rem; font-weight: 600; }
+  .grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); }
+  a.card {
+    display: block; padding: 1.05rem 1.15rem; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; text-decoration: none;
+    color: inherit; transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  a.card .name { font-weight: 650; margin-bottom: .3rem; }
+  a.card .desc { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+  .tags { margin-top: .55rem; display: flex; flex-wrap: wrap; gap: .3rem; }
+  .tags span {
+    font: 600 .72rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: .3rem .45rem; border-radius: 5px; background: var(--tag); color: var(--muted);
+  }
+  .note {
+    border-left: 3px solid var(--accent); padding: .1rem 0 .1rem 1rem;
+    margin: 2rem 0; color: var(--muted); font-size: .93rem;
+  }
+  code { font: .88em ui-monospace, SFMono-Regular, Menlo, monospace; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+           color: var(--muted); font-size: .88rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Architecture diagrams</h1>
+  <p class="sub">Embedded C unit test tool — 24 components, 7 layers, 69 dependency edges.</p>
+
+  <p class="note">
+    These diagrams render the component graph held in
+    <code>design/trace/design-elements.yaml</code>, which is the authoritative
+    register. Where a diagram and the register disagree, the diagram is wrong —
+    and <code>trace_check.py --check-diagrams</code> fails the build when they do.
+    Each page is a standalone interactive artifact: pan, zoom, search, trace a
+    relationship, switch theme, export.
+  </p>
+
+  <h2>Whole system</h2>
+  <div class="grid">
+    <a class="card" href="diagrams/layer-map.html">
+      <div class="name">Layer map</div>
+      <div class="desc">All seven layers and the 18 aggregated dependencies between them, labelled with how many component edges each stands for.</div>
+      <div class="tags"><span>L0–L6</span><span>dense map</span></div>
+    </a>
+  </div>
+
+  <h2>Per layer</h2>
+  <div class="grid">
+    <a class="card" href="diagrams/l0-l1-platform-comprehension.html">
+      <div class="name">L0 Platform · L1 Comprehension</div>
+      <div class="desc">The platform every other layer sits on, and the layer that reads user code and produces the analysis model.</div>
+      <div class="tags"><span>CMP-CORE</span><span>CMP-PRJ</span><span>CMP-ANA</span><span>CMP-ING</span><span>CMP-TCH</span></div>
+    </a>
+    <a class="card" href="diagrams/l2-synthesis.html">
+      <div class="name">L2 Synthesis</div>
+      <div class="desc">Test case derivation and generation around the shared case store. Consumes models only; never drives a C front-end.</div>
+      <div class="tags"><span>CMP-ATG</span><span>CMP-GEN</span><span>CMP-TCM</span></div>
+    </a>
+    <a class="card" href="diagrams/l3-realization.html">
+      <div class="name">L3 Realization</div>
+      <div class="desc">Build orchestration and the two execution runners. Host and target execution are separate components, not one runner with a flag.</div>
+      <div class="tags"><span>CMP-BLD</span><span>CMP-EXH</span><span>CMP-EXT</span></div>
+    </a>
+    <a class="card" href="diagrams/l4-coverage-and-change-impact.html">
+      <div class="name">L4 Evidence · Coverage and change impact</div>
+      <div class="desc">Coverage measurement across both runners, and the baseline comparison that decides what must be re-run.</div>
+      <div class="tags"><span>CMP-COV</span><span>CMP-CBT</span></div>
+    </a>
+    <a class="card" href="diagrams/l4-reporting-and-traceability.html">
+      <div class="name">L4 Evidence · Reporting and traceability</div>
+      <div class="desc">The widest consumer in the design and the engine that links requirements to test cases to code locations.</div>
+      <div class="tags"><span>CMP-REP</span><span>CMP-TRC</span></div>
+    </a>
+    <a class="card" href="diagrams/l5-interfaces.html">
+      <div class="name">L5 Interfaces</div>
+      <div class="desc">Both front-ends on one published engine API. The only two components in the register that do not depend on CMP-CORE.</div>
+      <div class="tags"><span>CMP-API</span><span>CMP-CLI</span><span>CMP-GUI</span></div>
+    </a>
+    <a class="card" href="diagrams/l6-ai-assist-and-migration.html">
+      <div class="name">L6 Assurance · AI assist and migration</div>
+      <div class="desc">AI-proposed content fenced behind security review, and import of foreign suites and results.</div>
+      <div class="tags"><span>CMP-AIF</span><span>CMP-MIG</span></div>
+    </a>
+    <a class="card" href="diagrams/l6-packaging-and-qualification.html">
+      <div class="name">L6 Ecosystem · Packaging, qualification and extension</div>
+      <div class="desc">Signed releases, qualification evidence, and the two components the register marks cross-cutting.</div>
+      <div class="tags"><span>CMP-PKG</span><span>CMP-QUA</span><span>CMP-SEC</span><span>CMP-PLG</span></div>
+    </a>
+  </div>
+
+  <h2>How to read the set</h2>
+  <p class="note">
+    In a per-layer view, solid nodes are the components that view <em>owns</em> —
+    every one of their dependencies is drawn. Nodes tagged <code>· context</code>
+    are dependency targets that live in another layer; their own edges belong to
+    the view that owns them. Between them the eight component views own all 24
+    components exactly once. There is deliberately no single whole-system
+    component diagram: 24 nodes and 69 edges on one page is a picture nobody
+    reads, so the layer map carries the shape and the per-layer views carry the
+    detail.
+  </p>
+
+  <footer>
+    Generated with <a href="https://github.com/tt-a1i/archify">archify</a> from
+    hand-authored specifications in <code>design/diagrams/</code>.
+    Design documentation lives in <code>design/</code>; the register is
+    <code>design/trace/design-elements.yaml</code>.
+  </footer>
+</div>
+</body>
+</html>

@@ -21,7 +21,7 @@ Options:
     --model PATH        Design element register(default: design/trace/design-elements.yaml)
     --emit-matrix PATH  Write the requirement -> design CSV matrix
     --emit-json PATH    Write the full trace graph as JSON
-    --emit-mermaid PATH Write the architecture diagrams as Mermaid markdown
+    --check-diagrams DIR  Check the authored Archify diagrams against the register
     --quiet             Suppress the coverage summary; print findings only
 
 Exit status:
@@ -81,7 +81,6 @@ VERIFICATION_METHODS = {"T", "A", "D", "I"}
 # so the roster is still complete and countable, and the omission is stated
 # beneath the diagram naming the components that do *not* depend on it —
 # "nearly everything depends on this" is not a claim a reader can check.
-UBIQUITY_NUM, UBIQUITY_DEN = 2, 3
 
 class Fatal(Exception):
     """Cannot run at all. Maps to exit 2."""
@@ -597,252 +596,122 @@ def build_json(reqs: dict[str, dict], index: dict, model: dict) -> str:
 
 
 
-def _mm_id(value: str) -> str:
-    """A Mermaid node id: the component id with anything the Mermaid parser
-    could read as syntax replaced."""
-    return re.sub(r"[^0-9A-Za-z_]", "_", value)
+def check_diagrams(dir_path: Path, index: dict, findings: Findings) -> None:
+    """Check the authored Archify diagram specifications against the register.
 
+    The diagrams under design/diagrams/ are written by hand, not generated:
+    their layout, grouping and wording are editorial judgements a generator
+    cannot make, and Archify's own contract caps a legible view at about a
+    dozen nodes, which the 24-component graph exceeds. That freedom is only
+    safe if the facts they assert stay checked, which is what this does. A
+    diagram may choose how to say something; it may not say something the
+    register does not.
 
-def _mm_text(value) -> str:
-    """Escape text for use inside a double-quoted Mermaid label.
+    Two kinds of specification are recognised. A *layer* diagram draws the
+    declared layers and must show exactly the set of cross-layer dependencies
+    the register implies. A *component* diagram draws components, each tagged
+    with either a bare layer id -- meaning the diagram owns that component and
+    is answerable for all of its edges -- or a tag ending in `context`, meaning
+    the node appears only as a dependency target and its own edges belong to
+    another view. That is the convention the diagrams state in prose, made
+    machine-checkable.
 
-    Mermaid takes HTML entities in labels, so the four characters that would
-    otherwise end the label or open a tag are spelled as entities. `&` goes
-    first or it would re-escape the entities emitted after it.
-    """
-    return (str(value)
-            .replace("&", "#amp;")
-            .replace('"', "#quot;")
-            .replace("<", "#lt;")
-            .replace(">", "#gt;"))
-
-
-def build_mermaid(index: dict, model: dict) -> str:
-    """Render the component graph as Mermaid, for GitHub-native display.
-
-    Generated rather than drawn. A hand-maintained diagram is a second source
-    of truth for a graph that already has one, and within a few revisions the
-    two disagree with no way to tell which is wrong — the same failure this
-    script exists to prevent between the SDDs and the register. Nothing here is
-    asserted that `check_structure` has not already validated.
+    Between them the component diagrams must own every component exactly once,
+    so a component cannot be quietly left undrawn.
     """
     components: dict = index["components"]
+    layer_ids: list = index["layer_ids"]
 
-    # Shape is not re-checked here: this only runs after a clean
-    # check_structure, so the guards below are for reading, not validation.
-    names: dict[str, str] = {}
-    for layer in (model.get("layers") or []):
-        if isinstance(layer, dict) and isinstance(layer.get("id"), str):
-            names[layer["id"]] = str(layer.get("name") or layer["id"])
+    specs = sorted(dir_path.glob("*.archify.json"))
+    if not specs:
+        findings.error(f"no *.archify.json specifications found in {dir_path}")
+        return
 
-    def deps(cid: str) -> list[str]:
-        return sorted(d for d in (components[cid].get("depends_on") or [])
-                      if isinstance(d, str) and d in components)
+    # Every real cross-layer dependency, as layer pairs.
+    layer_pairs = {(components[c]["layer"], components[d]["layer"])
+                   for c in components
+                   for d in (components[c].get("depends_on") or [])
+                   if d in components
+                   and components[c]["layer"] != components[d]["layer"]}
 
-    def node(cid: str) -> str:
-        # The id alone, not id-plus-name: a wrapped name varies from one line
-        # to three depending on length, and a box that tall next to one a
-        # third its height reads as broken layout, not as a legitimate
-        # difference between components. Every id in this register is close
-        # enough in length that boxes come out visually uniform instead. Full
-        # names live in the legend table, not on the diagram.
-        return f'{_mm_id(cid)}["{_mm_text(cid)}"]'
+    owners: dict[str, list[str]] = defaultdict(list)
 
-    # Declared layer order, then any layer the register uses but did not
-    # declare. check_structure already errors on those, so this only matters
-    # for keeping the diagram honest if that gate is ever loosened: an
-    # unexpected layer must not silently drop its components from the picture.
-    ordered = list(index["layer_ids"]) + sorted(
-        {c.get("layer") for c in components.values()
-         if isinstance(c.get("layer"), str)} - set(index["layer_ids"]))
-    by_layer: dict[str, list[str]] = {lid: [] for lid in ordered}
-    stray: list[str] = []
-    for cid in sorted(components):
-        lid = components[cid].get("layer")
-        (by_layer[lid] if lid in by_layer else stray).append(cid)
-
-    dependents: Counter = Counter()
-    for cid in sorted(components):
-        for d in deps(cid):
-            dependents[d] += 1
-    others = len(components) - 1
-    ubiquitous = sorted(
-        c for c in components
-        if others > 0 and dependents[c] * UBIQUITY_DEN >= others * UBIQUITY_NUM)
-    crosscutting = sorted(c for c in components
-                          if components[c].get("cross_cutting"))
-    edges = sum(len(deps(c)) for c in components)
-
-    out: list[str] = [
-        "# Architecture diagrams",
-        "",
-        "**Generated — do not edit.** Produced by "
-        "[`trace/trace_check.py`](trace/trace_check.py) from "
-        "[`trace/design-elements.yaml`](trace/design-elements.yaml), which is "
-        "the authoritative register. Everything below is derived from the same "
-        "component graph the checker validates, so it cannot drift from the "
-        "design it depicts.",
-        "",
-        "```sh",
-        "python3 design/trace/trace_check.py \\",
-        "  --emit-mermaid design/architecture-diagrams.md",
-        "```",
-        "",
-        f"{len(components)} components across "
-        f"{sum(1 for lid in ordered if by_layer[lid])} layers, "
-        f"{edges} dependency edges.",
-        "",
-        "---",
-        "",
-        "## 1. Layer map",
-        "",
-        "Aggregated from the component graph: an edge means at least one "
-        "component in the source layer depends on a component in the target "
-        "layer, and its label is how many such dependencies there are. "
-        "Dependencies within a single layer are not shown here — §3 has them.",
-        "",
-        "```mermaid",
-        "%%{init: {'flowchart': {'curve': 'linear'}}}%%",
-        "flowchart TD",
-    ]
-
-    for lid in reversed(ordered):
-        if not by_layer[lid]:
+    for spec in specs:
+        name = spec.name
+        try:
+            doc = json.loads(spec.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            findings.error(f"{name}: cannot read specification: {exc}")
             continue
-        label = f"{_mm_text(lid)} · {_mm_text(names.get(lid, lid))}"
-        out.append(f'  {_mm_id(lid)}["{label}<br/>'
-                   f'{len(by_layer[lid])} components"]')
-
-    pairs: Counter = Counter()
-    for cid in sorted(components):
-        src = components[cid].get("layer")
-        for d in deps(cid):
-            dst = components[d].get("layer")
-            if src != dst and src in by_layer and dst in by_layer:
-                pairs[(src, dst)] += 1
-    for (src, dst), n in sorted(pairs.items()):
-        out.append(f"  {_mm_id(src)} -->|{n}| {_mm_id(dst)}")
-    out += ["```", ""]
-
-    out += ["| Layer | Name | Components |", "|---|---|---|"]
-    for lid in ordered:
-        if not by_layer[lid]:
+        if not isinstance(doc, dict):
+            findings.error(f"{name}: specification is not an object")
             continue
-        out.append(f"| `{lid}` | {names.get(lid, lid)} | "
-                   + " ".join(f"`{c}`" for c in by_layer[lid]) + " |")
-    out.append("")
 
-    out += [
-        "Every diagram below labels a component with its id only, not its "
-        "name — a box sized to fit a 60-character name next to one sized to "
-        "fit an 8-character id is not a diagram anyone would call uniform. "
-        "Full names:",
-        "",
-        "| Id | Name |", "|---|---|",
-    ]
-    for cid in sorted(components):
-        name = components[cid].get("name")
-        if name:
-            out.append(f"| `{cid}` | {name} |")
-    out.append("")
-
-    out += [
-        "---",
-        "",
-        "## 2. Component dependency graph",
-        "",
-        "Every component in the model, grouped by layer. An arrow is a "
-        "`depends_on` edge. Arrows run downward because a dependency on a "
-        "higher layer is a checker error unless the target is marked "
-        "`cross_cutting: true` — those are the thick dashed nodes, and the "
-        "upward arrows into them are the only ones in the diagram.",
-        "",
-        "This is the whole system on one page and it is dense; it is meant as "
-        "the reference view, so click to zoom. §3 is where the detail is "
-        "legible without zooming.",
-        "",
-        "```mermaid",
-        "%%{init: {'flowchart': {'curve': 'linear'}}}%%",
-        "flowchart TD",
-    ]
-
-    for lid in reversed(ordered):
-        if not by_layer[lid]:
+        nodes = doc.get("components")
+        conns = doc.get("connections") or []
+        if not isinstance(nodes, list) or not isinstance(conns, list):
+            findings.error(f"{name}: components and connections must be arrays")
             continue
-        label = f"{_mm_text(lid)} · {_mm_text(names.get(lid, lid))}"
-        out.append(f'  subgraph {_mm_id(lid)}["{label}"]')
-        out.append("    direction LR")
-        for cid in by_layer[lid]:
-            out.append(f"    {node(cid)}")
-        out.append("  end")
-    for cid in stray:
-        out.append(f"  {node(cid)}")
 
-    for cid in sorted(components):
-        for d in deps(cid):
-            if d in ubiquitous:
+        ids = [n.get("id") for n in nodes if isinstance(n, dict)]
+        if len(ids) != len(set(ids)):
+            findings.error(f"{name}: duplicate component id in the specification")
+        drawn = {(c.get("from"), c.get("to"))
+                 for c in conns if isinstance(c, dict)}
+
+        # A diagram whose every node names a declared layer is the layer map.
+        if ids and all(i in layer_ids for i in ids):
+            shown = set(ids)
+            for a, b in sorted(drawn):
+                if (a, b) not in layer_pairs:
+                    findings.error(
+                        f"{name}: draws {a} -> {b}, which is not a dependency "
+                        f"between those layers in the register")
+            for a, b in sorted(layer_pairs):
+                if a in shown and b in shown and (a, b) not in drawn:
+                    findings.error(
+                        f"{name}: omits the {a} -> {b} dependency the register "
+                        f"declares")
+            continue
+
+        for cid in ids:
+            if cid not in components:
+                findings.error(f"{name}: draws {cid}, which is not a component "
+                               f"in the register")
+        present = {i for i in ids if i in components}
+
+        for a, b in sorted(drawn):
+            if a in components and b in components and                     b not in (components[a].get("depends_on") or []):
+                findings.error(
+                    f"{name}: draws {a} -> {b}, which is not a depends_on edge "
+                    f"in the register")
+
+        for n in nodes:
+            if not isinstance(n, dict):
                 continue
-            out.append(f"  {_mm_id(cid)} --> {_mm_id(d)}")
+            cid = n.get("id")
+            tag = str(n.get("tag") or "")
+            if cid not in components or tag.strip().endswith("context"):
+                continue
+            owners[cid].append(name)
+            for dep in sorted(components[cid].get("depends_on") or []):
+                if dep not in present:
+                    findings.error(
+                        f"{name}: owns {cid} but does not draw its dependency "
+                        f"on {dep}")
+                elif (cid, dep) not in drawn:
+                    findings.error(
+                        f"{name}: draws {cid} and {dep} but omits the "
+                        f"{cid} -> {dep} edge the register declares")
 
-    out.append("  classDef xcut stroke-width:3px,stroke-dasharray:5 3")
-    out.append("  classDef ubiq stroke-width:3px")
-    if crosscutting:
-        out.append("  class " + ",".join(_mm_id(c) for c in crosscutting)
-                   + " xcut")
-    if ubiquitous:
-        out.append("  class " + ",".join(_mm_id(c) for c in ubiquitous)
-                   + " ubiq")
-    out += ["```", ""]
+    for cid in sorted(components):
+        who = owners.get(cid) or []
+        if not who:
+            findings.error(f"no diagram owns {cid}; it is drawn nowhere")
+        elif len(who) > 1:
+            findings.error(f"{cid} is owned by more than one diagram: "
+                           + ", ".join(sorted(who)))
 
-    for cid in ubiquitous:
-        missing = sorted(c for c in components
-                         if c != cid and cid not in deps(c))
-        out.append(
-            f"**`{cid}` edges omitted above.** {dependents[cid]} of the "
-            f"{others} other components depend on it; drawing those arrows "
-            f"hides the structure. The exceptions — the components that do "
-            f"**not** depend on `{cid}` — are "
-            + (", ".join(f"`{c}`" for c in missing) if missing else "none")
-            + ". §3 draws every edge, including these."
-        )
-        out.append("")
-
-    out += [
-        "---",
-        "",
-        "## 3. Per-layer views",
-        "",
-        "One diagram per layer, drawn complete — no edges are omitted here. "
-        "Solid nodes belong to the layer; the paler nodes are dependency "
-        "targets that live elsewhere, shown so the seam is visible.",
-        "",
-    ]
-
-    for lid in ordered:
-        members = by_layer[lid]
-        if not members:
-            continue
-        out += [f"### {lid} · {names.get(lid, lid)}", "", "```mermaid",
-                "%%{init: {'flowchart': {'curve': 'linear'}}}%%",
-                "flowchart LR"]
-        external = sorted({d for c in members for d in deps(c)
-                           if d not in members})
-        out.append(f'  subgraph {_mm_id(lid)}["{_mm_text(lid)}"]')
-        for cid in members:
-            out.append(f"    {node(cid)}")
-        out.append("  end")
-        for cid in external:
-            out.append(f"  {node(cid)}")
-        for cid in members:
-            for d in deps(cid):
-                out.append(f"  {_mm_id(cid)} --> {_mm_id(d)}")
-        out.append("  classDef ext stroke-dasharray:2 2,opacity:0.65")
-        if external:
-            out.append("  class " + ",".join(_mm_id(c) for c in external)
-                       + " ext")
-        out += ["```", ""]
-
-    return "\n".join(out).rstrip("\n") + "\n"
 
 
 def write_atomic(path: Path, content: str) -> None:
@@ -863,6 +732,9 @@ def run(args: argparse.Namespace) -> int:
     model = load_model(args.model)
     check_declared_requirement_count(model, reqs, findings)
     index = check_structure(model, reqs, findings)
+    if args.check_diagrams and not findings.errors:
+        # Only meaningful against a register that already validated.
+        check_diagrams(args.check_diagrams, index, findings)
 
     if not args.quiet:
         print(summarise(reqs, index))
@@ -877,7 +749,7 @@ def run(args: argparse.Namespace) -> int:
         # allocates TOOL-NFR-090 ("report the error and exit non-zero rather
         # than emitting incomplete or misleading results") to DSN-CORE-020;
         # this script does not get to break the rule it exists to enforce.
-        if args.emit_matrix or args.emit_json or args.emit_mermaid:
+        if args.emit_matrix or args.emit_json:
             print("note: artifacts not written because the run found errors",
                   file=sys.stderr)
         print(f"\nFAIL: {len(findings.errors)} error(s)", file=sys.stderr)
@@ -890,14 +762,13 @@ def run(args: argparse.Namespace) -> int:
         outputs.append((args.emit_matrix, build_matrix(reqs, index)))
     if args.emit_json:
         outputs.append((args.emit_json, build_json(reqs, index, model)))
-    if args.emit_mermaid:
-        outputs.append((args.emit_mermaid, build_mermaid(index, model)))
     for path, content in outputs:
         write_atomic(path, content)
         print(f"wrote {path}")
 
     print("OK: every in-scope requirement is allocated and the design graph "
-          "is well formed")
+          "is well formed"
+          + (" and the diagrams agree with it" if args.check_diagrams else ""))
     return 0
 
 
@@ -908,7 +779,7 @@ def main(argv: list[str] | None = None) -> int:
                     default=REPO_ROOT / "design" / "trace" / "design-elements.yaml")
     ap.add_argument("--emit-matrix", type=Path)
     ap.add_argument("--emit-json", type=Path)
-    ap.add_argument("--emit-mermaid", type=Path)
+    ap.add_argument("--check-diagrams", type=Path)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args(argv)
 

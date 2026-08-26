@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L5 Interfaces",
+    "output": "l5-interfaces.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1330,
+      470
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-CLI",
+      "type": "frontend",
+      "label": "CMP-CLI",
+      "sublabel": "Command Line Front-End",
+      "tag": "L5",
+      "pos": [
+        60,
+        50
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "CMP-GUI",
+      "type": "frontend",
+      "label": "CMP-GUI",
+      "sublabel": "Standalone Desktop Application",
+      "tag": "L5",
+      "pos": [
+        60,
+        300
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "CMP-API",
+      "type": "backend",
+      "label": "CMP-API",
+      "sublabel": "Engine Service Interface",
+      "tag": "L5",
+      "pos": [
+        540,
+        175
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        1020,
+        175
+      ],
+      "size": [
+        250,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L5 · Interfaces",
+      "wraps": [
+        "CMP-CLI",
+        "CMP-GUI",
+        "CMP-API"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cli-api",
+      "from": "CMP-CLI",
+      "to": "CMP-API",
+      "label": "engine API",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "gui-api",
+      "from": "CMP-GUI",
+      "to": "CMP-API",
+      "label": "engine API",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-core",
+      "from": "CMP-API",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "L5 · Interfaces",
+      "items": [
+        "Both front-ends sit on one published engine API — neither reaches past it.",
+        "CMP-CLI and CMP-GUI are the only two components in the register that do not depend on CMP-CORE."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Why the layer is thin",
+      "items": [
+        "L5 has exactly one outgoing dependency in the whole register: CMP-API → CMP-CORE.",
+        "Everything the front-ends do is expressed through the engine API seam described in SDD-002."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L4 Evidence — Reporting and Traceability",
+    "output": "l4-reporting-and-traceability.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1220,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-CBT",
+      "type": "backend",
+      "label": "CMP-CBT",
+      "sublabel": "Change Impact and Regression",
+      "tag": "L4 · context",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-REP",
+      "type": "backend",
+      "label": "CMP-REP",
+      "sublabel": "Reporting Pipeline",
+      "tag": "L4",
+      "pos": [
+        340,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXH",
+      "type": "backend",
+      "label": "CMP-EXH",
+      "sublabel": "Host Execution Runner",
+      "tag": "L3 · context",
+      "pos": [
+        640,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXT",
+      "type": "backend",
+      "label": "CMP-EXT",
+      "sublabel": "Target Execution Runner",
+      "tag": "L3 · context",
+      "pos": [
+        940,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6 · context",
+      "pos": [
+        40,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-COV",
+      "type": "backend",
+      "label": "CMP-COV",
+      "sublabel": "Coverage Engine",
+      "tag": "L4 · context",
+      "pos": [
+        340,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TRC",
+      "type": "backend",
+      "label": "CMP-TRC",
+      "sublabel": "Traceability Engine",
+      "tag": "L4",
+      "pos": [
+        640,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        940,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-ANA",
+      "type": "backend",
+      "label": "CMP-ANA",
+      "sublabel": "Source Analyzer",
+      "tag": "L1 · context",
+      "pos": [
+        340,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-PRJ",
+      "type": "database",
+      "label": "CMP-PRJ",
+      "sublabel": "Project and Workspace Store",
+      "tag": "L0 · context",
+      "pos": [
+        640,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCM",
+      "type": "database",
+      "label": "CMP-TCM",
+      "sublabel": "Test Case Model and Store",
+      "tag": "L2 · context",
+      "pos": [
+        940,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "rep-cbt",
+      "from": "CMP-REP",
+      "to": "CMP-CBT",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "rep-exh",
+      "from": "CMP-REP",
+      "to": "CMP-EXH",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "rep-ext",
+      "from": "CMP-REP",
+      "to": "CMP-EXT",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          450,
+          20
+        ],
+        [
+          1050,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "rep-plg",
+      "from": "CMP-REP",
+      "to": "CMP-PLG",
+      "label": "report formats",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "rep-cov",
+      "from": "CMP-REP",
+      "to": "CMP-COV",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "rep-trc",
+      "from": "CMP-REP",
+      "to": "CMP-TRC",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "rep-core",
+      "from": "CMP-REP",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "trc-ana",
+      "from": "CMP-TRC",
+      "to": "CMP-ANA",
+      "label": "code locations",
+      "fromSide": "left",
+      "toSide": "right",
+      "via": [
+        [
+          620,
+          252
+        ],
+        [
+          620,
+          422
+        ]
+      ]
+    },
+    {
+      "id": "trc-prj",
+      "from": "CMP-TRC",
+      "to": "CMP-PRJ",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "trc-tcm",
+      "from": "CMP-TRC",
+      "to": "CMP-TCM",
+      "label": "case links",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "trc-core",
+      "from": "CMP-TRC",
+      "to": "CMP-CORE",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Reporting",
+      "items": [
+        "CMP-REP is the widest consumer in the design: seven dependencies, one per kind of evidence it renders.",
+        "It reads results from both runners, coverage, change impact and trace links, and emits through CMP-PLG."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Traceability",
+      "items": [
+        "CMP-TRC links requirements to test cases to code locations — the same job trace_check.py does for this repository's own design.",
+        "It reads the analysis model and the case store, and persists links through CMP-PRJ."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Scope of this view",
+      "items": [
+        "CMP-REP and CMP-TRC are the two L4 components this view owns; every edge leaving them is drawn.",
+        "CMP-CBT and CMP-COV appear as context; their own edges are drawn in the coverage and change-impact view."
+      ]
+    }
+  ]
+}

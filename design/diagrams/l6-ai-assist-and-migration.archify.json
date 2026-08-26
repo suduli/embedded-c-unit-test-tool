@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "L6 Assurance — AI Assist and Migration",
+    "output": "l6-ai-assist-and-migration.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1220,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-ATG",
+      "type": "backend",
+      "label": "CMP-ATG",
+      "sublabel": "Automatic Test Generation",
+      "tag": "L2 · context",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-GEN",
+      "type": "backend",
+      "label": "CMP-GEN",
+      "sublabel": "Generation Engine",
+      "tag": "L2 · context",
+      "pos": [
+        340,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-TCM",
+      "type": "database",
+      "label": "CMP-TCM",
+      "sublabel": "Test Case Model and Store",
+      "tag": "L2 · context",
+      "pos": [
+        640,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-REP",
+      "type": "backend",
+      "label": "CMP-REP",
+      "sublabel": "Reporting Pipeline",
+      "tag": "L4 · context",
+      "pos": [
+        940,
+        40
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-AIF",
+      "type": "backend",
+      "label": "CMP-AIF",
+      "sublabel": "AI Assist Subsystem",
+      "tag": "L6",
+      "pos": [
+        190,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-MIG",
+      "type": "backend",
+      "label": "CMP-MIG",
+      "sublabel": "Migration and Interoperability",
+      "tag": "L6",
+      "pos": [
+        740,
+        210
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-SEC",
+      "type": "security",
+      "label": "CMP-SEC",
+      "sublabel": "Security and Integrity Services",
+      "tag": "L6 · context",
+      "pos": [
+        40,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
+      "id": "CMP-CORE",
+      "type": "backend",
+      "label": "CMP-CORE",
+      "sublabel": "Core Platform Services",
+      "tag": "L0 · context",
+      "pos": [
+        490,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "L6 · Assurance and Ecosystem",
+      "wraps": [
+        "CMP-AIF",
+        "CMP-MIG"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "aif-atg",
+      "from": "CMP-AIF",
+      "to": "CMP-ATG",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "aif-gen",
+      "from": "CMP-AIF",
+      "to": "CMP-GEN",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "aif-tcm",
+      "from": "CMP-AIF",
+      "to": "CMP-TCM",
+      "fromSide": "left",
+      "toSide": "top",
+      "via": [
+        [
+          20,
+          252
+        ],
+        [
+          20,
+          15
+        ],
+        [
+          750,
+          15
+        ]
+      ]
+    },
+    {
+      "id": "aif-sec",
+      "from": "CMP-AIF",
+      "to": "CMP-SEC",
+      "label": "prompt and output review",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": -90
+    },
+    {
+      "id": "aif-core",
+      "from": "CMP-AIF",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "mig-gen",
+      "from": "CMP-MIG",
+      "to": "CMP-GEN",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "mig-tcm",
+      "from": "CMP-MIG",
+      "to": "CMP-TCM",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "mig-rep",
+      "from": "CMP-MIG",
+      "to": "CMP-REP",
+      "label": "imported results",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "mig-core",
+      "from": "CMP-MIG",
+      "to": "CMP-CORE",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "AI assist is fenced",
+      "items": [
+        "CMP-AIF proposes generation and test-case content; it never writes to the store directly.",
+        "Every prompt and every returned artifact passes through CMP-SEC before it is used."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Migration reads and writes across the seam",
+      "items": [
+        "CMP-MIG imports foreign test suites into CMP-TCM and foreign results into CMP-REP.",
+        "It depends on CMP-GEN so an imported suite comes back out in the tool's own framework form."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Scope of this view",
+      "items": [
+        "Solid nodes are CMP-AIF and CMP-MIG; tagged nodes are dependency targets elsewhere.",
+        "The other four L6 components are drawn in the packaging and qualification view."
+      ]
+    }
+  ]
+}
