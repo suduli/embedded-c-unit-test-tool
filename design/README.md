@@ -68,7 +68,9 @@ does not get to break the fail-safe rule it exists to enforce. Requires PyYAML.
 Regenerate the derived artifacts after changing the register:
 
 ```sh
-python3 design/trace/trace_check.py   --emit-matrix design/trace/requirement-matrix.csv   --emit-json   design/trace/trace-graph.json
+python3 design/trace/trace_check.py \
+  --emit-matrix design/trace/requirement-matrix.csv \
+  --emit-json   design/trace/trace-graph.json
 ```
 
 ## Diagrams
@@ -99,7 +101,9 @@ Rebuild the HTML after editing a specification. This needs Node and the
 [archify](https://github.com/tt-a1i/archify) skill (`npx skills add tt-a1i/archify -g`):
 
 ```sh
-node "$ARCHIFY/bin/archify.mjs" deliver architecture   design/diagrams/<name>.archify.json docs/diagrams/<name>.html --quality showcase
+node "$ARCHIFY/bin/archify.mjs" deliver architecture \
+  design/diagrams/<name>.archify.json \
+  docs/diagrams/<name>.html --quality showcase
 ```
 
 `layer-map` is the one exception: it is delivered without `--quality showcase`.
