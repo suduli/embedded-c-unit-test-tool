@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component index &mdash; Embedded C Unit Test Tool</title>
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<div class="wrap">
+<p class="crumb"><a href="index.html">Documentation</a> &rsaquo; Component index</p>
+<h1>Component index</h1>
+<p class="sub">All 24 components of the design, with their full names, what each is responsible for, and how they depend on one another. 7 layers, 69 dependency edges, 239 design elements.</p>
+<p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by <code>trace_check.py --emit-components</code> from <code>design/trace/design-elements.yaml</code>, the authoritative register. The diagrams label a component with its id so every box comes out the same size; this page is where those ids are spelled out.</p>
+<nav class="jump"><a href="#L0">L0</a> <a href="#L1">L1</a> <a href="#L2">L2</a> <a href="#L3">L3</a> <a href="#L4">L4</a> <a href="#L5">L5</a> <a href="#L6">L6</a><a href="index.html#diagrams">Diagrams</a></nav>
+<section id="L0">
+<h2>L0 &middot; Platform and Persistence <span class="count">2 components</span></h2>
+<p class="rule">Depends on nothing above it. Every other layer may depend on it.</p>
+<article id="CMP-CORE">
+<h3><code>CMP-CORE</code> Core Platform Services</h3>
+<p>Determinism, error handling, logging, cancellation, resource governance, filesystem discipline, and provenance stamping. Every other component is built on these; none of them re-implements them.</p>
+<dl>
+<dt>Depends on</dt><dd><span class="none">nothing &mdash; this is the bottom of the graph</span></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-API">CMP-API<span>Engine Service Interface</span></a> <a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-ING">CMP-ING<span>Ingestion and Scope Resolver</span></a> <a class="chip" href="#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a> <a class="chip" href="#CMP-PKG">CMP-PKG<span>Packaging, Installation and Release Engineering</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a> <a class="chip" href="#CMP-QUA">CMP-QUA<span>Qualification Evidence</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a> <a class="chip" href="#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Design elements</dt><dd>14</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></dd>
+</dl>
+</article>
+<article id="CMP-PRJ">
+<h3><code>CMP-PRJ</code> Project and Workspace Store</h3>
+<p>The on-disk representation of a project: its scopes, environments, test cases, configuration, and archived records. Owns schema versioning, migration, and version-control behaviour.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="#CMP-ING">CMP-ING<span>Ingestion and Scope Resolver</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a> <a class="chip" href="#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Design elements</dt><dd>8</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></dd>
+</dl>
+</article>
+</section>
+<section id="L1">
+<h2>L1 &middot; Comprehension <span class="count">3 components</span></h2>
+<p class="rule">Reads user code and build configuration. Produces models. Writes no generated code.</p>
+<article id="CMP-ANA">
+<h3><code>CMP-ANA</code> Source Analyzer</h3>
+<p>Parse C with a production front-end and emit the Analysis Model. This is the only component permitted to hold a C front-end dependency.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-ING">CMP-ING<span>Ingestion and Scope Resolver</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a> <a class="chip" href="#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Design elements</dt><dd>9</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></dd>
+</dl>
+</article>
+<article id="CMP-ING">
+<h3><code>CMP-ING</code> Ingestion and Scope Resolver</h3>
+<p>Turn a user's build reality into a Project Model: translation units with their exact compilation flags, grouped into named test scopes with internal/external dependency classification.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a></dd>
+<dt>Design elements</dt><dd>11</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></dd>
+</dl>
+</article>
+<article id="CMP-TCH">
+<h3><code>CMP-TCH</code> Toolchain Abstraction</h3>
+<p>Describe compilers declaratively — invocation, flag syntax, output conventions, achievable coverage metrics — so that adding a compiler is a data change.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a></dd>
+<dt>Design elements</dt><dd>8</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></dd>
+</dl>
+</article>
+</section>
+<section id="L2">
+<h2>L2 &middot; Synthesis <span class="count">3 components</span></h2>
+<p class="rule">Consumes models only. Never invokes a C front-end directly.</p>
+<article id="CMP-ATG">
+<h3><code>CMP-ATG</code> Automatic Test Generation</h3>
+<p>Derive test cases from the code by analysis engines, and — as importantly — refuse to present anything the tool has not itself compiled and run.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a></dd>
+<dt>Design elements</dt><dd>11</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l2-synthesis.html">L2 Synthesis</a></dd>
+</dl>
+</article>
+<article id="CMP-GEN">
+<h3><code>CMP-GEN</code> Generation Engine</h3>
+<p>Produce harness and stub source from the Analysis Model via templates. Owns the regeneration contract that protects user edits.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a></dd>
+<dt>Design elements</dt><dd>16</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l2-synthesis.html">L2 Synthesis</a></dd>
+</dl>
+</article>
+<article id="CMP-TCM">
+<h3><code>CMP-TCM</code> Test Case Model and Store</h3>
+<p>The representation of a test case — data-driven or C-authored — its identity, its comparison semantics, and its interchange formats.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a> <a class="chip" href="#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Design elements</dt><dd>11</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l2-synthesis.html">L2 Synthesis</a></dd>
+</dl>
+</article>
+</section>
+<section id="L3">
+<h2>L3 &middot; Realization <span class="count">3 components</span></h2>
+<p class="rule">Compiles and runs. Owns every subprocess that executes user-derived code.</p>
+<article id="CMP-BLD">
+<h3><code>CMP-BLD</code> Build Orchestrator</h3>
+<p>Compile and link environments for host and cross targets, incrementally, without touching the user's own build system.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a></dd>
+<dt>Design elements</dt><dd>5</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l3-realization.html">L3 Realization</a></dd>
+</dl>
+</article>
+<article id="CMP-EXH">
+<h3><code>CMP-EXH</code> Host Execution Runner</h3>
+<p>Run built environments on the development host, contain their faults, and produce a normalised result set.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Design elements</dt><dd>6</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l3-realization.html">L3 Realization</a></dd>
+</dl>
+</article>
+<article id="CMP-EXT">
+<h3><code>CMP-EXT</code> Target Execution Runner</h3>
+<p>Run the same environments on simulators and physical hardware, and tell target infrastructure failures apart from test failures.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Design elements</dt><dd>10</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l3-realization.html">L3 Realization</a></dd>
+</dl>
+</article>
+</section>
+<section id="L4">
+<h2>L4 &middot; Evidence <span class="count">4 components</span></h2>
+<p class="rule">Consumes execution results. Produces the artifacts an auditor reads.</p>
+<article id="CMP-CBT">
+<h3><code>CMP-CBT</code> Change Impact and Regression</h3>
+<p>Relate a source change to the tests that cover it, and relate one run to another.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Design elements</dt><dd>5</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l4-coverage-and-change-impact.html">L4 Evidence — Coverage and Change Impact</a></dd>
+</dl>
+</article>
+<article id="CMP-COV">
+<h3><code>CMP-COV</code> Coverage Engine</h3>
+<p>Acquire coverage from the compiler's instrumentation, attribute it, merge it, and enforce it. Implements no instrumentation of its own.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Design elements</dt><dd>10</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l4-coverage-and-change-impact.html">L4 Evidence — Coverage and Change Impact</a></dd>
+</dl>
+</article>
+<article id="CMP-REP">
+<h3><code>CMP-REP</code> Reporting Pipeline</h3>
+<p>Turn results, coverage, and links into the artifacts people and machines read. One model in, many renderers out.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a> <a class="chip" href="#CMP-QUA">CMP-QUA<span>Qualification Evidence</span></a></dd>
+<dt>Design elements</dt><dd>13</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l4-reporting-and-traceability.html">L4 Evidence — Reporting and Traceability</a></dd>
+</dl>
+</article>
+<article id="CMP-TRC">
+<h3><code>CMP-TRC</code> Traceability Engine</h3>
+<p>Hold requirements, link them to test cases and code, and report the gaps in both directions.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Design elements</dt><dd>8</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l4-reporting-and-traceability.html">L4 Evidence — Reporting and Traceability</a></dd>
+</dl>
+</article>
+</section>
+<section id="L5">
+<h2>L5 &middot; Interfaces <span class="count">3 components</span></h2>
+<p class="rule">Front-ends. Hold no capability of their own; drive L0-L4 through the engine API.</p>
+<article id="CMP-API">
+<h3><code>CMP-API</code> Engine Service Interface</h3>
+<p>The one boundary every front-end crosses. Versioned, documented, local.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-CLI">CMP-CLI<span>Command Line Front-End</span></a> <a class="chip" href="#CMP-GUI">CMP-GUI<span>Standalone Desktop Application</span></a></dd>
+<dt>Design elements</dt><dd>4</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l5-interfaces.html">L5 Interfaces</a></dd>
+</dl>
+</article>
+<article id="CMP-CLI">
+<h3><code>CMP-CLI</code> Command Line Front-End</h3>
+<p>The complete, non-interactive, scriptable surface. The reference client of the engine API.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-API">CMP-API<span>Engine Service Interface</span></a></dd>
+<dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
+<dt>Design elements</dt><dd>6</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l5-interfaces.html">L5 Interfaces</a></dd>
+</dl>
+</article>
+<article id="CMP-GUI">
+<h3><code>CMP-GUI</code> Standalone Desktop Application</h3>
+<p>The complete workflow in one application, for a user with no IDE. A thin client of the engine API, holding no capability of its own.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-API">CMP-API<span>Engine Service Interface</span></a></dd>
+<dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
+<dt>Design elements</dt><dd>27</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l5-interfaces.html">L5 Interfaces</a></dd>
+</dl>
+</article>
+</section>
+<section id="L6">
+<h2>L6 &middot; Assurance and Ecosystem <span class="count">6 components</span></h2>
+<p class="rule">Assurance concerns and extension surfaces. Membership of L6 does not by itself license a dependency from below — only components explicitly marked `cross_cutting: true` may be depended on by a lower layer. The rest of L6 (packaging, qualification, migration, AI) is ordinary application code that happens to be cross-cutting in subject, not in dependency direction.</p>
+<article id="CMP-AIF">
+<h3><code>CMP-AIF</code> AI Assist Subsystem</h3>
+<p>Optional assistance, structurally quarantined: off by default, offline capable, validated before presentation, and permanently marked.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
+<dt>Design elements</dt><dd>13</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-ai-assist-and-migration.html">L6 Assurance — AI Assist and Migration</a></dd>
+</dl>
+</article>
+<article id="CMP-MIG">
+<h3><code>CMP-MIG</code> Migration and Interoperability</h3>
+<p>Adoption path in, exit path out. Per SRS-001 §23 this is the primary adoption mechanism, not a convenience.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
+<dt>Design elements</dt><dd>8</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-ai-assist-and-migration.html">L6 Assurance — AI Assist and Migration</a></dd>
+</dl>
+</article>
+<article id="CMP-PKG">
+<h3><code>CMP-PKG</code> Packaging, Installation and Release Engineering</h3>
+<p>Getting the tool onto machines that may have no network, no administrative rights, and a ten-year retention obligation.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-QUA">CMP-QUA<span>Qualification Evidence</span></a></dd>
+<dt>Design elements</dt><dd>13</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></dd>
+</dl>
+</article>
+<article id="CMP-PLG">
+<h3><code>CMP-PLG</code> Extension Framework</h3>
+<p>The published extension points and the loader that serves them.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Design elements</dt><dd>4</dd>
+<dt>Cross-cutting</dt><dd>Yes &mdash; components in lower layers may depend upward on it.</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></dd>
+</dl>
+</article>
+<article id="CMP-QUA">
+<h3><code>CMP-QUA</code> Qualification Evidence</h3>
+<p>Everything a user needs to qualify the tool themselves. Per ADR-001 §1, the goal is qualifiable, not qualified.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-PKG">CMP-PKG<span>Packaging, Installation and Release Engineering</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
+<dt>Design elements</dt><dd>8</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></dd>
+</dl>
+</article>
+<article id="CMP-SEC">
+<h3><code>CMP-SEC</code> Security and Integrity Services</h3>
+<p>The tool compiles and runs code supplied by its user and produces evidence others rely on. This component holds the controls that follow from both.</p>
+<dl>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-PKG">CMP-PKG<span>Packaging, Installation and Release Engineering</span></a></dd>
+<dt>Design elements</dt><dd>11</dd>
+<dt>Cross-cutting</dt><dd>Yes &mdash; components in lower layers may depend upward on it.</dd>
+<dt>Drawn in</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></dd>
+</dl>
+</article>
+</section>
+<footer>Register <code>design/trace/design-elements.yaml</code> &middot; checked by <code>design/trace/trace_check.py</code> &middot; <a href="index.html">back to the documentation map</a></footer>
+</div>
+</body>
+</html>

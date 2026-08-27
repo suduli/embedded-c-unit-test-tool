@@ -4,6 +4,13 @@ Design for the tool specified by [`SRS-001-requirements.md`](../SRS-001-requirem
 structured so that every requirement's allocation to a design element is
 machine-checked rather than asserted in prose.
 
+
+<!-- nav:start -->
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
+
+Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
+<!-- nav:end -->
+
 ## Documents
 
 | Document | Content |
@@ -24,6 +31,8 @@ machine-checked rather than asserted in prose.
 | [`trace/trace-graph.json`](trace/trace-graph.json) | Full graph, both directions | No — generated |
 | [`diagrams/*.archify.json`](diagrams/) | Architecture diagram specifications | Yes — authored, and checked against the register |
 | [`../docs/diagrams/*.html`](../docs/diagrams/) | Rendered interactive diagrams | No — produced by `archify deliver` |
+| [`../docs/components.html`](../docs/components.html) | Component index — every id spelled out in full | No — generated |
+| [`../docs/index.html`](../docs/index.html) | Documentation hub linking every document and view | No — generated |
 
 **The register is authoritative; the SDD documents render it.** Where they
 disagree, the SDD is defective. See SDD-004 §3 for why it is arranged that way.
@@ -69,8 +78,11 @@ Regenerate the derived artifacts after changing the register:
 
 ```sh
 python3 design/trace/trace_check.py \
-  --emit-matrix design/trace/requirement-matrix.csv \
-  --emit-json   design/trace/trace-graph.json
+  --check-diagrams  design/diagrams \
+  --emit-matrix     design/trace/requirement-matrix.csv \
+  --emit-json       design/trace/trace-graph.json \
+  --emit-components docs/components.html \
+  --emit-index      docs/index.html
 ```
 
 ## Diagrams
@@ -111,7 +123,30 @@ Its eighteen aggregated edges over seven layers contain a K5, so no layout can
 draw it without crossings and the showcase profile can never pass. It is a
 deliberately dense map and is rendered as one.
 
-The rendered artifacts are committed and published with GitHub Pages. They do
+## Reading the design
+
+`docs/` is a small published site, served by GitHub Pages from this repository:
+
+| Page | What it gives you |
+|---|---|
+| [`docs/index.html`](../docs/index.html) | The hub. Every document, every diagram, and for each view the components it owns — with their full names, not just their ids. |
+| [`docs/components.html`](../docs/components.html) | All 24 components spelled out: responsibility, dependencies in both directions, element count, and the view that draws each. |
+| [`docs/doc-map.html`](../docs/doc-map.html) | One picture of how the documents relate: what states the requirements, where they are allocated, what checks that, and what you read. |
+
+The hub and the component index are **generated**, for the same reason the
+matrix is. Both name components, and a component's full name is register data;
+a page that spelled those out in hand-written HTML would be a second source of
+truth for the one thing this directory exists to keep single. The one-line
+description under each diagram on the hub is read from that diagram's own first
+card, so the hub and the artifact it describes cannot disagree either. Both are
+covered by the determinism gate.
+
+The document map is a hand-authored Archify diagram
+([`doc-map.archify.json`](doc-map.archify.json)). It sits outside
+`design/diagrams/` because it draws documents rather than components, so the
+register check does not apply to it.
+
+The rendered diagram artifacts are committed and published with GitHub Pages. They do
 not render inline on GitHub the way the previous Mermaid diagrams did — that is
 the cost of the trade; the specifications stay readable in a diff, and the
 published pages are explorable rather than static.

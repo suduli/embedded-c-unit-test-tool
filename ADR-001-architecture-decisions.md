@@ -6,6 +6,13 @@
 
 ---
 
+<!-- nav:start -->
+**Related documents** — [SRS-001](SRS-001-requirements.md) · **ADR-001** *(you are here)* · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
+
+Architecture diagrams: [specifications](design/diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
+<!-- nav:end -->
+
+
 ## 0. Why these three are one decision
 
 They are not independent:

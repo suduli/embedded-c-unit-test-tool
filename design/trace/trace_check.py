@@ -22,6 +22,8 @@ Options:
     --emit-matrix PATH  Write the requirement -> design CSV matrix
     --emit-json PATH    Write the full trace graph as JSON
     --check-diagrams DIR  Check the authored Archify diagrams against the register
+    --emit-components PATH Write the component index (ids spelled out) as HTML
+    --emit-index PATH   Write the documentation hub as HTML
     --quiet             Suppress the coverage summary; print findings only
 
 Exit status:
@@ -50,6 +52,7 @@ except ImportError:  # pragma: no cover - environment problem, not a finding
 
 _HERE = Path(__file__).resolve()
 REPO_ROOT = _HERE.parents[2] if len(_HERE.parents) > 2 else _HERE.parent
+DIAGRAMS_DIR = REPO_ROOT / "design" / "diagrams"
 
 # The strict form every requirement must take:
 #   **TOOL-ING-010** *(M, P1, T)* — text
@@ -596,6 +599,352 @@ def build_json(reqs: dict[str, dict], index: dict, model: dict) -> str:
 
 
 
+def diagram_ownership(dir_path: Path) -> dict:
+    """Map each component id to the diagram that owns it: (output file, title).
+
+    Ownership is what `check_diagrams` already enforces, so this cannot report a
+    component into a view that does not draw it. An unreadable directory costs
+    the index a cross-reference and nothing else.
+    """
+    owners: dict = {}
+    for spec in sorted(dir_path.glob("*.archify.json")):
+        try:
+            doc = json.loads(spec.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        meta = doc.get("meta") or {}
+        out = str(meta.get("output") or (spec.name.split(".")[0] + ".html"))
+        title = str(meta.get("title") or spec.name)
+        for node in (doc.get("components") or []):
+            if not isinstance(node, dict):
+                continue
+            cid = node.get("id")
+            tag = str(node.get("tag") or "").strip()
+            if isinstance(cid, str) and not tag.endswith("context"):
+                owners.setdefault(cid, (out, title))
+    return owners
+
+
+def _h(value) -> str:
+    """Escape for HTML text and double-quoted attributes."""
+    return (str(value).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def _flow(value) -> str:
+    """Collapse the register's wrapped block scalars back into one line."""
+    return _h(" ".join(str(value or "").split()))
+
+
+def build_components_page(index: dict, model: dict, diagrams: Path) -> str:
+    """Render the component index: every component's full name, responsibility
+    and place in the graph, on one page.
+
+    This exists because the diagrams and the SDD prose both refer to components
+    by their eight-character id. An id is the right label on a diagram - names
+    of wildly different lengths make boxes of wildly different sizes - but it is
+    useless to a reader who does not already know the design. Expanding those
+    ids by hand somewhere would be a second source of truth for something the
+    register already states, so this expands them from the register instead.
+    """
+    components: dict = index["components"]
+    owners = diagram_ownership(diagrams)
+
+    layers = [(str(l["id"]), str(l.get("name") or l["id"]), str(l.get("rule") or ""))
+              for l in (model.get("layers") or [])
+              if isinstance(l, dict) and isinstance(l.get("id"), str)]
+
+    dependents: dict = defaultdict(list)
+    for cid in sorted(components):
+        for dep in sorted(components[cid].get("depends_on") or []):
+            if dep in components:
+                dependents[dep].append(cid)
+
+    edges = sum(len(c.get("depends_on") or []) for c in components.values())
+    elements = sum(len(c.get("elements") or []) for c in components.values())
+
+    def chip(cid: str) -> str:
+        name = _h(components[cid].get("name") or cid)
+        return ('<a class="chip" href="#' + _h(cid) + '">'
+                + _h(cid) + '<span>' + name + '</span></a>')
+
+    out = [
+        "<!doctype html>", '<html lang="en">', "<head>", '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>Component index &mdash; Embedded C Unit Test Tool</title>",
+        '<link rel="stylesheet" href="assets/docs.css">',
+        "</head>", "<body>", '<div class="wrap">',
+        '<p class="crumb"><a href="index.html">Documentation</a> &rsaquo; '
+        'Component index</p>',
+        "<h1>Component index</h1>",
+        '<p class="sub">All ' + str(len(components)) + ' components of the design, '
+        'with their full names, what each is responsible for, and how they depend on '
+        'one another. ' + str(len(layers)) + ' layers, ' + str(edges) + ' dependency '
+        'edges, ' + str(elements) + ' design elements.</p>',
+        '<p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by '
+        '<code>trace_check.py --emit-components</code> from '
+        '<code>design/trace/design-elements.yaml</code>, the authoritative register. '
+        'The diagrams label a component with its id so every box comes out the same '
+        'size; this page is where those ids are spelled out.</p>',
+        '<nav class="jump">' + " ".join(
+            '<a href="#' + _h(lid) + '">' + _h(lid) + '</a>' for lid, _, _ in layers)
+        + '<a href="index.html#diagrams">Diagrams</a></nav>',
+    ]
+
+    for lid, lname, lrule in layers:
+        members = sorted(c for c in components if components[c].get("layer") == lid)
+        if not members:
+            continue
+        plural = "s" if len(members) != 1 else ""
+        out += ['<section id="' + _h(lid) + '">',
+                "<h2>" + _h(lid) + " &middot; " + _h(lname)
+                + ' <span class="count">' + str(len(members)) + " component" + plural
+                + "</span></h2>"]
+        if lrule:
+            out.append('<p class="rule">' + _flow(lrule) + "</p>")
+        for cid in members:
+            c = components[cid]
+            deps = sorted(d for d in (c.get("depends_on") or []) if d in components)
+            rdeps = dependents.get(cid) or []
+            out += ['<article id="' + _h(cid) + '">',
+                    "<h3><code>" + _h(cid) + "</code> "
+                    + _h(c.get("name") or cid) + "</h3>",
+                    "<p>" + _flow(c.get("responsibility")) + "</p>", "<dl>",
+                    "<dt>Depends on</dt><dd>"
+                    + (" ".join(chip(d) for d in deps) if deps else
+                       '<span class="none">nothing &mdash; this is the bottom of '
+                       'the graph</span>') + "</dd>",
+                    "<dt>Depended on by</dt><dd>"
+                    + (" ".join(chip(d) for d in rdeps) if rdeps else
+                       '<span class="none">nothing depends on it</span>') + "</dd>",
+                    "<dt>Design elements</dt><dd>"
+                    + str(len(c.get("elements") or [])) + "</dd>"]
+            if c.get("cross_cutting"):
+                out.append("<dt>Cross-cutting</dt><dd>Yes &mdash; components in lower "
+                           "layers may depend upward on it.</dd>")
+            if cid in owners:
+                href, title = owners[cid]
+                out.append('<dt>Drawn in</dt><dd><a href="diagrams/' + _h(href) + '">'
+                           + _h(title) + "</a></dd>")
+            out += ["</dl>", "</article>"]
+        out.append("</section>")
+
+    out += ['<footer>Register <code>design/trace/design-elements.yaml</code> '
+            '&middot; checked by <code>design/trace/trace_check.py</code> &middot; '
+            '<a href="index.html">back to the documentation map</a></footer>',
+            "</div>", "</body>", "</html>"]
+    return "\n".join(out) + "\n"
+
+
+REPO_URL = "https://github.com/suduli/embedded-c-unit-test-tool"
+BLOB = REPO_URL + "/blob/main/"
+
+# The documents that are not generated, in reading order. Path, title, and what
+# a reader gets from it. Kept here rather than in the page so the index cannot
+# list a document that does not exist: `build_index_page` checks each path.
+DOCUMENTS = [
+    ("SRS-001-requirements.md", "SRS-001",
+     "Software Requirements Specification",
+     "What the tool must do: 323 numbered requirements with priority, phase and "
+     "verification method. Everything downstream exists to discharge these."),
+    ("ADR-001-architecture-decisions.md", "ADR-001",
+     "Architecture Decision Record",
+     "The open decisions - language, front-end technology, qualification scope. "
+     "No decision is recorded yet; elements that depend on one carry an `open:` marker."),
+    ("design/SDD-001-architecture.md", "SDD-001",
+     "Architecture and Component Design",
+     "The seven-layer structure, all 24 components, the principal flows and the "
+     "cross-cutting rules. Start here after the diagrams."),
+    ("design/SDD-002-interfaces.md", "SDD-002",
+     "Interface Design",
+     "The seven load-bearing seams: analysis model, test case model, result set, "
+     "coverage model, report model, engine API and the extension points."),
+    ("design/SDD-003-data-model.md", "SDD-003",
+     "Persistent Data Design",
+     "What is written to disk: the project and output tree split, file granularity, "
+     "diff stability, schema migration and archival records."),
+    ("design/SDD-004-traceability-architecture.md", "SDD-004",
+     "Traceability Architecture",
+     "The trace meta-model, id rules, link types, the checker and the CI gate - "
+     "including the rules that keep these diagrams honest."),
+]
+
+GENERATED = [
+    ("design/trace/design-elements.yaml", "design-elements.yaml",
+     "Design element register",
+     "The authoritative allocation of every requirement to a design element. "
+     "Where any document disagrees with this file, the document is defective."),
+    ("design/trace/requirement-matrix.csv", "requirement-matrix.csv",
+     "Requirement matrix",
+     "One row per requirement: priority, phase, verification method, and the "
+     "components and elements it is allocated to."),
+    ("design/trace/trace-graph.json", "trace-graph.json",
+     "Trace graph",
+     "The whole allocation as a graph, traversable in both directions."),
+]
+
+
+def build_index_page(index: dict, model: dict, diagrams: Path) -> str:
+    """Render the documentation hub.
+
+    Generated rather than written by hand for one reason: it names components,
+    and a component's full name is register data. A hub that spelled those out
+    in hand-written HTML would be a second source of truth for the one thing
+    this directory exists to keep single. The editorial one-liner under each
+    diagram comes from that diagram's own first card, so the page and the
+    artifact it describes cannot disagree either.
+    """
+    components: dict = index["components"]
+
+    layer_names = {str(l["id"]): str(l.get("name") or l["id"])
+                   for l in (model.get("layers") or [])
+                   if isinstance(l, dict) and isinstance(l.get("id"), str)}
+
+    views = []
+    for spec in sorted(diagrams.glob("*.archify.json")):
+        try:
+            doc = json.loads(spec.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        meta = doc.get("meta") or {}
+        nodes = [n for n in (doc.get("components") or []) if isinstance(n, dict)]
+        owned, context = [], []
+        for n in nodes:
+            cid = n.get("id")
+            if not isinstance(cid, str) or cid not in components:
+                continue
+            (context if str(n.get("tag") or "").strip().endswith("context")
+             else owned).append(cid)
+        cards = doc.get("cards") or []
+        blurb = ""
+        if cards and isinstance(cards[0], dict):
+            items = cards[0].get("items") or []
+            if items:
+                blurb = str(items[0])
+        views.append({
+            "output": str(meta.get("output") or (spec.name.split(".")[0] + ".html")),
+            "title": str(meta.get("title") or spec.name),
+            "owned": sorted(owned),
+            "context": sorted(context),
+            "blurb": blurb,
+            "layers": sorted({str(components[c].get("layer")) for c in owned}),
+        })
+
+    # Reading order, not filename order: the whole-system map first, then the
+    # per-layer views from the bottom of the stack upward.
+    views.sort(key=lambda v: (1 if v["owned"] else 0,
+                              v["layers"][0] if v["layers"] else "",
+                              v["output"]))
+
+    def named(cid: str) -> str:
+        name = _h(components[cid].get("name") or cid)
+        return ('<a class="chip" href="components.html#' + _h(cid) + '">'
+                + _h(cid) + '<span>' + name + '</span></a>')
+
+    def doc_rows(rows) -> list:
+        out = []
+        for path, ident, title, blurb in rows:
+            if not (REPO_ROOT / path).is_file():
+                continue
+            out += ['<article>',
+                    '<h3><a href="' + BLOB + _h(path) + '">' + _h(ident) + '</a> '
+                    + _h(title) + "</h3>",
+                    "<p>" + _h(blurb) + "</p>",
+                    '<p class="path"><code>' + _h(path) + "</code></p>",
+                    "</article>"]
+        return out
+
+    edges = sum(len(c.get("depends_on") or []) for c in components.values())
+    elements = sum(len(c.get("elements") or []) for c in components.values())
+
+    out = [
+        "<!doctype html>", '<html lang="en">', "<head>", '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>Design documentation &mdash; Embedded C Unit Test Tool</title>",
+        '<link rel="stylesheet" href="assets/docs.css">',
+        "</head>", "<body>", '<div class="wrap">',
+        "<h1>Design documentation</h1>",
+        '<p class="sub">An open-source unit testing tool for embedded C. '
+        + str(len(components)) + " components across " + str(len(layer_names))
+        + " layers, " + str(edges) + " dependency edges, " + str(elements)
+        + " design elements, all allocated from "
+        + str(len(index.get("allocation") or {})) + " requirements.</p>",
+        '<p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by '
+        '<code>trace_check.py --emit-index</code>. Component names come from the '
+        'register and the description under each diagram comes from that diagram\'s '
+        'own first card, so nothing on this page can drift from what it describes.</p>',
+
+        '<nav class="jump">'
+        '<a href="doc-map.html">How it fits together</a>'
+        '<a href="#diagrams">Diagrams</a>'
+        '<a href="components.html">Component index</a>'
+        '<a href="#documents">Documents</a>'
+        '<a href="' + REPO_URL + '">Repository</a></nav>',
+
+        "<h2>Start here</h2>",
+        '<article class="feature">',
+        '<h3><a href="doc-map.html">How the documents fit together</a></h3>',
+        "<p>One picture of the whole set: what states the requirements, where they "
+        "are allocated, what checks that allocation, and what you actually read. "
+        "If you are new to this repository, open it first.</p>",
+        "</article>",
+        '<article class="feature">',
+        '<h3><a href="components.html">Component index</a></h3>',
+        "<p>Every component id spelled out in full, with what it is responsible for, "
+        "what it depends on, what depends on it, and which diagram draws it. The "
+        "diagrams label a box with its id so every box comes out the same size; this "
+        "is where those ids are expanded.</p>",
+        "</article>",
+
+        '<h2 id="diagrams">Diagrams</h2>',
+        '<p class="sub">Nine interactive views. Each opens as a standalone page with '
+        'pan and zoom, search, relationship tracing, light and dark themes, and PNG '
+        'or SVG export. <strong>Owns</strong> lists the components a view is '
+        'answerable for &mdash; every one of their dependencies is drawn there. '
+        '<strong>Also shows</strong> lists dependency targets that live in another '
+        'layer, whose own edges belong to the view that owns them.</p>',
+    ]
+
+    for v in views:
+        layer_bits = ", ".join(
+            lid + " " + layer_names.get(lid, lid) for lid in v["layers"])
+        out += ['<article class="view">',
+                '<h3><a href="diagrams/' + _h(v["output"]) + '">'
+                + _h(v["title"]) + "</a></h3>"]
+        if layer_bits:
+            out.append('<p class="path">' + _h(layer_bits) + "</p>")
+        if v["blurb"]:
+            out.append("<p>" + _h(v["blurb"]) + "</p>")
+        out.append("<dl>")
+        if v["owned"]:
+            out.append("<dt>Owns</dt><dd>"
+                       + " ".join(named(c) for c in v["owned"]) + "</dd>")
+        else:
+            out.append('<dt>Shows</dt><dd><span class="none">the seven layers in '
+                       "aggregate, not individual components</span></dd>")
+        if v["context"]:
+            out.append("<dt>Also shows</dt><dd>"
+                       + " ".join(named(c) for c in v["context"]) + "</dd>")
+        out += ['<dt>Open</dt><dd><a href="diagrams/' + _h(v["output"])
+                + '">View the diagram &rarr;</a></dd>', "</dl>", "</article>"]
+
+    out += ['<h2 id="documents">Documents</h2>',
+            '<p class="sub">Written by hand, in reading order. Each links to the '
+            'source in the repository.</p>']
+    out += doc_rows(DOCUMENTS)
+    out += ["<h2>Register and generated artifacts</h2>",
+            '<p class="sub">The register is the source; everything else on this row '
+            'is emitted from it and regenerated in CI, which fails if the committed '
+            'copy is not byte-identical.</p>']
+    out += doc_rows(GENERATED)
+
+    out += ['<footer>Checked by <code>design/trace/trace_check.py</code> &middot; '
+            'diagrams rendered with <a href="https://github.com/tt-a1i/archify">'
+            'archify</a> &middot; <a href="' + REPO_URL + '">source repository</a>'
+            "</footer>", "</div>", "</body>", "</html>"]
+    return "\n".join(out) + "\n"
+
+
 def check_diagrams(dir_path: Path, index: dict, findings: Findings) -> None:
     """Check the authored Archify diagram specifications against the register.
 
@@ -749,7 +1098,8 @@ def run(args: argparse.Namespace) -> int:
         # allocates TOOL-NFR-090 ("report the error and exit non-zero rather
         # than emitting incomplete or misleading results") to DSN-CORE-020;
         # this script does not get to break the rule it exists to enforce.
-        if args.emit_matrix or args.emit_json:
+        if (args.emit_matrix or args.emit_json or args.emit_components
+                or args.emit_index):
             print("note: artifacts not written because the run found errors",
                   file=sys.stderr)
         print(f"\nFAIL: {len(findings.errors)} error(s)", file=sys.stderr)
@@ -762,6 +1112,14 @@ def run(args: argparse.Namespace) -> int:
         outputs.append((args.emit_matrix, build_matrix(reqs, index)))
     if args.emit_json:
         outputs.append((args.emit_json, build_json(reqs, index, model)))
+    if args.emit_components:
+        outputs.append((args.emit_components,
+                        build_components_page(index, model,
+                                              args.check_diagrams or DIAGRAMS_DIR)))
+    if args.emit_index:
+        outputs.append((args.emit_index,
+                        build_index_page(index, model,
+                                         args.check_diagrams or DIAGRAMS_DIR)))
     for path, content in outputs:
         write_atomic(path, content)
         print(f"wrote {path}")
@@ -780,6 +1138,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--emit-matrix", type=Path)
     ap.add_argument("--emit-json", type=Path)
     ap.add_argument("--check-diagrams", type=Path)
+    ap.add_argument("--emit-components", type=Path)
+    ap.add_argument("--emit-index", type=Path)
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args(argv)
 

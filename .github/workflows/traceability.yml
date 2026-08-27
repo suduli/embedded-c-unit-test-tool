@@ -9,11 +9,15 @@ on:
     paths:
       - "SRS-001-requirements.md"
       - "design/**"
+      - "docs/index.html"
+      - "docs/components.html"
       - ".github/workflows/traceability.yml"
   pull_request:
     paths:
       - "SRS-001-requirements.md"
       - "design/**"
+      - "docs/index.html"
+      - "docs/components.html"
       - ".github/workflows/traceability.yml"
   workflow_dispatch:
 
@@ -54,14 +58,20 @@ jobs:
       - name: Check generated artifacts are current and deterministic
         run: |
           python3 design/trace/trace_check.py --quiet \
-            --emit-matrix design/trace/requirement-matrix.csv \
-            --emit-json   design/trace/trace-graph.json
-          if ! git diff --exit-code --stat -- design/trace/; then
+            --check-diagrams  design/diagrams \
+            --emit-matrix     design/trace/requirement-matrix.csv \
+            --emit-json       design/trace/trace-graph.json \
+            --emit-components docs/components.html \
+            --emit-index      docs/index.html
+          if ! git diff --exit-code --stat -- design/trace/ docs/index.html docs/components.html; then
             echo
             echo "::error::Generated trace artifacts are out of date."
             echo "Run this and commit the result:"
             echo "  python3 design/trace/trace_check.py \\"
-            echo "    --emit-matrix design/trace/requirement-matrix.csv \\"
-            echo "    --emit-json   design/trace/trace-graph.json"
+            echo "    --check-diagrams  design/diagrams \\"
+            echo "    --emit-matrix     design/trace/requirement-matrix.csv \\"
+            echo "    --emit-json       design/trace/trace-graph.json \\"
+            echo "    --emit-components docs/components.html \\"
+            echo "    --emit-index      docs/index.html"
             exit 1
           fi

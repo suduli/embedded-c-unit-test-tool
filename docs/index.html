@@ -3,137 +3,164 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Architecture diagrams — Embedded C Unit Test Tool</title>
-<style>
-  :root {
-    --bg: #fbfbfd; --panel: #fff; --ink: #16181d; --muted: #5d6470;
-    --line: #e3e5ea; --accent: #0f766e; --tag: #eef2f6;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0d0f13; --panel: #151920; --ink: #e8eaee; --muted: #98a1af;
-      --line: #262c36; --accent: #5eead4; --tag: #1c222b;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  h1 { font-size: 1.9rem; letter-spacing: -.02em; margin: 0 0 .35rem; }
-  .sub { color: var(--muted); margin: 0 0 2rem; }
-  h2 { font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase;
-       color: var(--muted); margin: 2.5rem 0 .9rem; font-weight: 600; }
-  .grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); }
-  a.card {
-    display: block; padding: 1.05rem 1.15rem; background: var(--panel);
-    border: 1px solid var(--line); border-radius: 12px; text-decoration: none;
-    color: inherit; transition: border-color .15s, transform .15s;
-  }
-  a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  a.card .name { font-weight: 650; margin-bottom: .3rem; }
-  a.card .desc { color: var(--muted); font-size: .9rem; line-height: 1.5; }
-  .tags { margin-top: .55rem; display: flex; flex-wrap: wrap; gap: .3rem; }
-  .tags span {
-    font: 600 .72rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    padding: .3rem .45rem; border-radius: 5px; background: var(--tag); color: var(--muted);
-  }
-  .note {
-    border-left: 3px solid var(--accent); padding: .1rem 0 .1rem 1rem;
-    margin: 2rem 0; color: var(--muted); font-size: .93rem;
-  }
-  code { font: .88em ui-monospace, SFMono-Regular, Menlo, monospace; }
-  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
-           color: var(--muted); font-size: .88rem; }
-  a { color: var(--accent); }
-</style>
+<title>Design documentation &mdash; Embedded C Unit Test Tool</title>
+<link rel="stylesheet" href="assets/docs.css">
 </head>
 <body>
 <div class="wrap">
-  <h1>Architecture diagrams</h1>
-  <p class="sub">Embedded C unit test tool — 24 components, 7 layers, 69 dependency edges.</p>
-
-  <p class="note">
-    These diagrams render the component graph held in
-    <code>design/trace/design-elements.yaml</code>, which is the authoritative
-    register. Where a diagram and the register disagree, the diagram is wrong —
-    and <code>trace_check.py --check-diagrams</code> fails the build when they do.
-    Each page is a standalone interactive artifact: pan, zoom, search, trace a
-    relationship, switch theme, export.
-  </p>
-
-  <h2>Whole system</h2>
-  <div class="grid">
-    <a class="card" href="diagrams/layer-map.html">
-      <div class="name">Layer map</div>
-      <div class="desc">All seven layers and the 18 aggregated dependencies between them, labelled with how many component edges each stands for.</div>
-      <div class="tags"><span>L0–L6</span><span>dense map</span></div>
-    </a>
-  </div>
-
-  <h2>Per layer</h2>
-  <div class="grid">
-    <a class="card" href="diagrams/l0-l1-platform-comprehension.html">
-      <div class="name">L0 Platform · L1 Comprehension</div>
-      <div class="desc">The platform every other layer sits on, and the layer that reads user code and produces the analysis model.</div>
-      <div class="tags"><span>CMP-CORE</span><span>CMP-PRJ</span><span>CMP-ANA</span><span>CMP-ING</span><span>CMP-TCH</span></div>
-    </a>
-    <a class="card" href="diagrams/l2-synthesis.html">
-      <div class="name">L2 Synthesis</div>
-      <div class="desc">Test case derivation and generation around the shared case store. Consumes models only; never drives a C front-end.</div>
-      <div class="tags"><span>CMP-ATG</span><span>CMP-GEN</span><span>CMP-TCM</span></div>
-    </a>
-    <a class="card" href="diagrams/l3-realization.html">
-      <div class="name">L3 Realization</div>
-      <div class="desc">Build orchestration and the two execution runners. Host and target execution are separate components, not one runner with a flag.</div>
-      <div class="tags"><span>CMP-BLD</span><span>CMP-EXH</span><span>CMP-EXT</span></div>
-    </a>
-    <a class="card" href="diagrams/l4-coverage-and-change-impact.html">
-      <div class="name">L4 Evidence · Coverage and change impact</div>
-      <div class="desc">Coverage measurement across both runners, and the baseline comparison that decides what must be re-run.</div>
-      <div class="tags"><span>CMP-COV</span><span>CMP-CBT</span></div>
-    </a>
-    <a class="card" href="diagrams/l4-reporting-and-traceability.html">
-      <div class="name">L4 Evidence · Reporting and traceability</div>
-      <div class="desc">The widest consumer in the design and the engine that links requirements to test cases to code locations.</div>
-      <div class="tags"><span>CMP-REP</span><span>CMP-TRC</span></div>
-    </a>
-    <a class="card" href="diagrams/l5-interfaces.html">
-      <div class="name">L5 Interfaces</div>
-      <div class="desc">Both front-ends on one published engine API. The only two components in the register that do not depend on CMP-CORE.</div>
-      <div class="tags"><span>CMP-API</span><span>CMP-CLI</span><span>CMP-GUI</span></div>
-    </a>
-    <a class="card" href="diagrams/l6-ai-assist-and-migration.html">
-      <div class="name">L6 Assurance · AI assist and migration</div>
-      <div class="desc">AI-proposed content fenced behind security review, and import of foreign suites and results.</div>
-      <div class="tags"><span>CMP-AIF</span><span>CMP-MIG</span></div>
-    </a>
-    <a class="card" href="diagrams/l6-packaging-and-qualification.html">
-      <div class="name">L6 Ecosystem · Packaging, qualification and extension</div>
-      <div class="desc">Signed releases, qualification evidence, and the two components the register marks cross-cutting.</div>
-      <div class="tags"><span>CMP-PKG</span><span>CMP-QUA</span><span>CMP-SEC</span><span>CMP-PLG</span></div>
-    </a>
-  </div>
-
-  <h2>How to read the set</h2>
-  <p class="note">
-    In a per-layer view, solid nodes are the components that view <em>owns</em> —
-    every one of their dependencies is drawn. Nodes tagged <code>· context</code>
-    are dependency targets that live in another layer; their own edges belong to
-    the view that owns them. Between them the eight component views own all 24
-    components exactly once. There is deliberately no single whole-system
-    component diagram: 24 nodes and 69 edges on one page is a picture nobody
-    reads, so the layer map carries the shape and the per-layer views carry the
-    detail.
-  </p>
-
-  <footer>
-    Generated with <a href="https://github.com/tt-a1i/archify">archify</a> from
-    hand-authored specifications in <code>design/diagrams/</code>.
-    Design documentation lives in <code>design/</code>; the register is
-    <code>design/trace/design-elements.yaml</code>.
-  </footer>
+<h1>Design documentation</h1>
+<p class="sub">An open-source unit testing tool for embedded C. 24 components across 7 layers, 69 dependency edges, 239 design elements, all allocated from 321 requirements.</p>
+<p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by <code>trace_check.py --emit-index</code>. Component names come from the register and the description under each diagram comes from that diagram's own first card, so nothing on this page can drift from what it describes.</p>
+<nav class="jump"><a href="doc-map.html">How it fits together</a><a href="#diagrams">Diagrams</a><a href="components.html">Component index</a><a href="#documents">Documents</a><a href="https://github.com/suduli/embedded-c-unit-test-tool">Repository</a></nav>
+<h2>Start here</h2>
+<article class="feature">
+<h3><a href="doc-map.html">How the documents fit together</a></h3>
+<p>One picture of the whole set: what states the requirements, where they are allocated, what checks that allocation, and what you actually read. If you are new to this repository, open it first.</p>
+</article>
+<article class="feature">
+<h3><a href="components.html">Component index</a></h3>
+<p>Every component id spelled out in full, with what it is responsible for, what it depends on, what depends on it, and which diagram draws it. The diagrams label a box with its id so every box comes out the same size; this is where those ids are expanded.</p>
+</article>
+<h2 id="diagrams">Diagrams</h2>
+<p class="sub">Nine interactive views. Each opens as a standalone page with pan and zoom, search, relationship tracing, light and dark themes, and PNG or SVG export. <strong>Owns</strong> lists the components a view is answerable for &mdash; every one of their dependencies is drawn there. <strong>Also shows</strong> lists dependency targets that live in another layer, whose own edges belong to the view that owns them.</p>
+<article class="view">
+<h3><a href="diagrams/layer-map.html">Layer Map — Embedded C Unit Test Tool</a></h3>
+<p>An arrow means at least one component in the source layer depends on a component in the target layer.</p>
+<dl>
+<dt>Shows</dt><dd><span class="none">the seven layers in aggregate, not individual components</span></dd>
+<dt>Open</dt><dd><a href="diagrams/layer-map.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l0-l1-platform-comprehension.html">L0 Platform and L1 Comprehension</a></h3>
+<p class="path">L0 Platform and Persistence, L1 Comprehension</p>
+<p>Reads user code and build configuration, produces models, writes no generated code.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-ING">CMP-ING<span>Ingestion and Scope Resolver</span></a> <a class="chip" href="components.html#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a> <a class="chip" href="components.html#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l0-l1-platform-comprehension.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l2-synthesis.html">L2 Synthesis</a></h3>
+<p class="path">L2 Synthesis</p>
+<p>Consumes models only — no component here invokes a C front-end directly.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="components.html#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="components.html#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l2-synthesis.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l3-realization.html">L3 Realization</a></h3>
+<p class="path">L3 Realization</p>
+<p>CMP-BLD turns generated source into an executable; the two runners execute it.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-BLD">CMP-BLD<span>Build Orchestrator</span></a> <a class="chip" href="components.html#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="components.html#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="components.html#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="components.html#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l3-realization.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l4-coverage-and-change-impact.html">L4 Evidence — Coverage and Change Impact</a></h3>
+<p class="path">L4 Evidence</p>
+<p>CMP-COV reads instrumentation points from the analysis model and results from both runners.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="components.html#CMP-COV">CMP-COV<span>Coverage Engine</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="components.html#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="components.html#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a> <a class="chip" href="components.html#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l4-coverage-and-change-impact.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l4-reporting-and-traceability.html">L4 Evidence — Reporting and Traceability</a></h3>
+<p class="path">L4 Evidence</p>
+<p>CMP-REP is the widest consumer in the design: seven dependencies, one per kind of evidence it renders.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="components.html#CMP-TRC">CMP-TRC<span>Traceability Engine</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ANA">CMP-ANA<span>Source Analyzer</span></a> <a class="chip" href="components.html#CMP-CBT">CMP-CBT<span>Change Impact and Regression</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-COV">CMP-COV<span>Coverage Engine</span></a> <a class="chip" href="components.html#CMP-EXH">CMP-EXH<span>Host Execution Runner</span></a> <a class="chip" href="components.html#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="components.html#CMP-PRJ">CMP-PRJ<span>Project and Workspace Store</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l4-reporting-and-traceability.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l5-interfaces.html">L5 Interfaces</a></h3>
+<p class="path">L5 Interfaces</p>
+<p>Both front-ends sit on one published engine API — neither reaches past it.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-API">CMP-API<span>Engine Service Interface</span></a> <a class="chip" href="components.html#CMP-CLI">CMP-CLI<span>Command Line Front-End</span></a> <a class="chip" href="components.html#CMP-GUI">CMP-GUI<span>Standalone Desktop Application</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l5-interfaces.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l6-ai-assist-and-migration.html">L6 Assurance — AI Assist and Migration</a></h3>
+<p class="path">L6 Assurance and Ecosystem</p>
+<p>CMP-AIF proposes generation and test-case content; it never writes to the store directly.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="components.html#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="components.html#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="components.html#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l6-ai-assist-and-migration.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<article class="view">
+<h3><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></h3>
+<p class="path">L6 Assurance and Ecosystem</p>
+<p>CMP-PKG depends on CMP-SEC, so the installer and its provenance record are produced together.</p>
+<dl>
+<dt>Owns</dt><dd><a class="chip" href="components.html#CMP-PKG">CMP-PKG<span>Packaging, Installation and Release Engineering</span></a> <a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="components.html#CMP-QUA">CMP-QUA<span>Qualification Evidence</span></a> <a class="chip" href="components.html#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a></dd>
+<dt>Open</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">View the diagram &rarr;</a></dd>
+</dl>
+</article>
+<h2 id="documents">Documents</h2>
+<p class="sub">Written by hand, in reading order. Each links to the source in the repository.</p>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/SRS-001-requirements.md">SRS-001</a> Software Requirements Specification</h3>
+<p>What the tool must do: 323 numbered requirements with priority, phase and verification method. Everything downstream exists to discharge these.</p>
+<p class="path"><code>SRS-001-requirements.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/ADR-001-architecture-decisions.md">ADR-001</a> Architecture Decision Record</h3>
+<p>The open decisions - language, front-end technology, qualification scope. No decision is recorded yet; elements that depend on one carry an `open:` marker.</p>
+<p class="path"><code>ADR-001-architecture-decisions.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/SDD-001-architecture.md">SDD-001</a> Architecture and Component Design</h3>
+<p>The seven-layer structure, all 24 components, the principal flows and the cross-cutting rules. Start here after the diagrams.</p>
+<p class="path"><code>design/SDD-001-architecture.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/SDD-002-interfaces.md">SDD-002</a> Interface Design</h3>
+<p>The seven load-bearing seams: analysis model, test case model, result set, coverage model, report model, engine API and the extension points.</p>
+<p class="path"><code>design/SDD-002-interfaces.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/SDD-003-data-model.md">SDD-003</a> Persistent Data Design</h3>
+<p>What is written to disk: the project and output tree split, file granularity, diff stability, schema migration and archival records.</p>
+<p class="path"><code>design/SDD-003-data-model.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/SDD-004-traceability-architecture.md">SDD-004</a> Traceability Architecture</h3>
+<p>The trace meta-model, id rules, link types, the checker and the CI gate - including the rules that keep these diagrams honest.</p>
+<p class="path"><code>design/SDD-004-traceability-architecture.md</code></p>
+</article>
+<h2>Register and generated artifacts</h2>
+<p class="sub">The register is the source; everything else on this row is emitted from it and regenerated in CI, which fails if the committed copy is not byte-identical.</p>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/trace/design-elements.yaml">design-elements.yaml</a> Design element register</h3>
+<p>The authoritative allocation of every requirement to a design element. Where any document disagrees with this file, the document is defective.</p>
+<p class="path"><code>design/trace/design-elements.yaml</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/trace/requirement-matrix.csv">requirement-matrix.csv</a> Requirement matrix</h3>
+<p>One row per requirement: priority, phase, verification method, and the components and elements it is allocated to.</p>
+<p class="path"><code>design/trace/requirement-matrix.csv</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/trace/trace-graph.json">trace-graph.json</a> Trace graph</h3>
+<p>The whole allocation as a graph, traversable in both directions.</p>
+<p class="path"><code>design/trace/trace-graph.json</code></p>
+</article>
+<footer>Checked by <code>design/trace/trace_check.py</code> &middot; diagrams rendered with <a href="https://github.com/tt-a1i/archify">archify</a> &middot; <a href="https://github.com/suduli/embedded-c-unit-test-tool">source repository</a></footer>
 </div>
 </body>
 </html>

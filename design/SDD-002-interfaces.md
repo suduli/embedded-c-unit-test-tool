@@ -7,6 +7,13 @@
 
 ---
 
+<!-- nav:start -->
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [SDD-001](SDD-001-architecture.md) · **SDD-002** *(you are here)* · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
+
+Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
+<!-- nav:end -->
+
+
 ## 1. Purpose
 
 SDD-001 describes what the components are. This document describes the

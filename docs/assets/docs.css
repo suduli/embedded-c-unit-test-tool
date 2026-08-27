@@ -1,0 +1,132 @@
+/* Shared styling for the generated and hand-written documentation pages. */
+
+:root {
+  --bg: #fbfbfd;
+  --panel: #ffffff;
+  --ink: #16181d;
+  --muted: #5d6470;
+  --line: #e3e5ea;
+  --accent: #0f766e;
+  --accent-soft: #e6f4f1;
+  --tag: #eef2f6;
+  --code: #f4f6f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0f13;
+    --panel: #151920;
+    --ink: #e8eaee;
+    --muted: #98a1af;
+    --line: #262c36;
+    --accent: #5eead4;
+    --accent-soft: #10231f;
+    --tag: #1c222b;
+    --code: #1a1f27;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+a { color: var(--accent); }
+
+h1 { font-size: 1.95rem; letter-spacing: -.02em; margin: 0 0 .4rem; }
+h2 {
+  font-size: 1.15rem; margin: 2.75rem 0 .5rem; letter-spacing: -.01em;
+  padding-bottom: .45rem; border-bottom: 1px solid var(--line);
+}
+h3 { font-size: 1rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
+
+.crumb { color: var(--muted); font-size: .88rem; margin: 0 0 1.5rem; }
+.sub { color: var(--muted); margin: 0 0 1.5rem; max-width: 68ch; }
+
+code {
+  font: .87em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--code); padding: .12em .35em; border-radius: 4px;
+}
+h3 code { background: none; padding: 0; font-size: .95em; color: var(--accent); }
+
+.note {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: .85rem 1rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
+  color: var(--muted);
+  font-size: .93rem;
+}
+.note strong { color: var(--ink); }
+
+.jump { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1.5rem 0 0; }
+.jump a {
+  font: 600 .8rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: .45rem .6rem; border-radius: 6px; background: var(--tag);
+  color: var(--muted); text-decoration: none; border: 1px solid transparent;
+}
+.jump a:hover { border-color: var(--accent); color: var(--accent); }
+
+.count {
+  font: 500 .78rem/1 ui-sans-serif, sans-serif; color: var(--muted);
+  background: var(--tag); padding: .3rem .5rem; border-radius: 5px;
+  vertical-align: middle; margin-left: .4rem;
+}
+.rule { color: var(--muted); font-size: .92rem; margin: .4rem 0 1.25rem; max-width: 72ch; }
+
+article {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1rem 1.15rem; margin: .8rem 0;
+}
+article > p { margin: 0 0 .8rem; max-width: 74ch; color: var(--ink); }
+
+dl { display: grid; grid-template-columns: minmax(9rem, auto) 1fr; gap: .4rem .9rem; margin: 0; }
+dt { color: var(--muted); font-size: .84rem; font-weight: 600; }
+dd { margin: 0; font-size: .9rem; }
+.none { color: var(--muted); font-style: italic; }
+
+.chip {
+  display: inline-flex; align-items: baseline; gap: .38rem;
+  font: 600 .78rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: .28rem .5rem; border-radius: 6px; background: var(--tag);
+  color: var(--ink); text-decoration: none; margin: 0 .18rem .3rem 0;
+  border: 1px solid transparent;
+}
+.chip span {
+  font: 400 .95em ui-sans-serif, sans-serif; color: var(--muted); white-space: nowrap;
+}
+.chip:hover { border-color: var(--accent); }
+
+footer {
+  margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: .87rem;
+}
+
+@media (max-width: 620px) {
+  dl { grid-template-columns: 1fr; gap: .15rem; }
+  dt { margin-top: .6rem; }
+  .chip span { display: none; }
+}
+
+/* Hub page: feature panels and diagram cards. */
+article.feature {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+article.feature h3 { font-size: 1.05rem; }
+article.view h3 { font-size: 1.05rem; }
+article.view > dl { margin-top: .75rem; }
+
+.path { color: var(--muted); font-size: .84rem; margin: 0 0 .6rem; }
+.path code { background: none; padding: 0; }
+
+h3 a { text-decoration: none; }
+h3 a:hover { text-decoration: underline; }

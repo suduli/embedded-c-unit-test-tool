@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "How the documents fit together",
+    "output": "doc-map.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1360,
+      500
+    ]
+  },
+  "components": [
+    {
+      "id": "srs",
+      "type": "database",
+      "label": "SRS-001",
+      "sublabel": "Requirements specification",
+      "tag": "323 requirements",
+      "pos": [
+        40,
+        70
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "adr",
+      "type": "database",
+      "label": "ADR-001",
+      "sublabel": "Architecture decision record",
+      "tag": "no decision recorded",
+      "pos": [
+        40,
+        280
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "register",
+      "type": "database",
+      "label": "design-elements.yaml",
+      "sublabel": "Design element register",
+      "tag": "authoritative",
+      "pos": [
+        385,
+        70
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "specs",
+      "type": "database",
+      "label": "diagrams/*.archify.json",
+      "sublabel": "Nine authored diagram specs",
+      "pos": [
+        385,
+        280
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "checker",
+      "type": "backend",
+      "label": "trace_check.py",
+      "sublabel": "Validator, gate and emitter",
+      "pos": [
+        730,
+        70
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "archify",
+      "type": "external",
+      "label": "archify",
+      "sublabel": "Diagram renderer",
+      "tag": "third-party, MIT",
+      "pos": [
+        730,
+        280
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "prose",
+      "type": "database",
+      "label": "Prose and tables",
+      "sublabel": "SDD set, matrix, trace graph, index",
+      "pos": [
+        1075,
+        70
+      ],
+      "size": [
+        200,
+        84
+      ]
+    },
+    {
+      "id": "views",
+      "type": "frontend",
+      "label": "Nine interactive diagrams",
+      "sublabel": "Layer map and eight layer views",
+      "pos": [
+        1075,
+        280
+      ],
+      "size": [
+        200,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "What is required",
+      "wraps": [
+        "srs",
+        "adr"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Where it is allocated",
+      "wraps": [
+        "register",
+        "specs"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "What checks and renders it",
+      "wraps": [
+        "checker",
+        "archify"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "What you read",
+      "wraps": [
+        "prose",
+        "views"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "srs-reg",
+      "from": "srs",
+      "to": "register",
+      "label": "allocates 321 requirements",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "adr-reg",
+      "from": "adr",
+      "to": "register",
+      "label": "open decisions marked",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "reg-check",
+      "from": "register",
+      "to": "checker",
+      "label": "validated on every push",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "spec-check",
+      "from": "specs",
+      "to": "checker",
+      "label": "checked against the register",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "spec-render",
+      "from": "specs",
+      "to": "archify",
+      "label": "rendered locally",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "check-prose",
+      "from": "checker",
+      "to": "prose",
+      "label": "emits matrix and index",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "render-views",
+      "from": "archify",
+      "to": "views",
+      "label": "self-contained HTML",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "One direction of truth",
+      "items": [
+        "SRS-001 says what the tool must do; the register says where each requirement is discharged.",
+        "The SDD documents are the human-readable rendering of the register — where the two disagree, the SDD is defective, not the register."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "What the gate actually stops",
+      "items": [
+        "An unallocated requirement, a reference to one that does not exist, an upward layer dependency, or a cycle in the component graph.",
+        "A diagram that draws a component or an edge the register does not have, or omits one belonging to a component it owns."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Where to start reading",
+      "items": [
+        "New to the design: the component index, then the layer map, then SDD-001.",
+        "Tracing one requirement: the requirement matrix, then the SDD section for the component it lands in."
+      ]
+    }
+  ]
+}
