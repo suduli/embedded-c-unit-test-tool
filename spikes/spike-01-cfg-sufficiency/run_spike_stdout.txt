@@ -1,0 +1,198 @@
+{
+  "files_parsed": 94,
+  "approx_total_lines": 151558,
+  "totals_raw_per_tu_summed": {
+    "functions": 19974,
+    "types": 38354,
+    "globals": 548,
+    "direct_calls": 6566,
+    "indirect_calls": 32
+  },
+  "totals": {
+    "functions": 1810,
+    "types": 506,
+    "globals": 16,
+    "direct_calls": 1502,
+    "indirect_calls": 32,
+    "files_with_errors": 0
+  },
+  "indirect_calls_sample": [
+    {
+      "file": "stm32f4xx_hal_adc.c",
+      "caller": "ADC_DMAConvCplt",
+      "expr": "XferErrorCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 2052
+    },
+    {
+      "file": "stm32f4xx_hal_adc_ex.c",
+      "caller": "ADC_MultiModeDMAConvCplt",
+      "expr": "XferErrorCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1071
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferHalfCpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 813
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferM1HalfCpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 822
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferHalfCpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 838
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 873
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferM1CpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 886
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferCpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 895
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferCpltCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 917
+    },
+    {
+      "file": "stm32f4xx_hal_dma.c",
+      "caller": "HAL_DMA_IRQHandler",
+      "expr": "XferErrorCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 952
+    },
+    {
+      "file": "stm32f4xx_hal_exti.c",
+      "caller": "HAL_EXTI_IRQHandler",
+      "expr": "PendingCallback",
+      "type": "void (*)(void)",
+      "line": 452
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "HAL_I2C_Slave_Seq_Transmit_DMA",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 4284
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "HAL_I2C_Slave_Seq_Transmit_DMA",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 4306
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "HAL_I2C_Slave_Seq_Receive_DMA",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 4524
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "HAL_I2C_Slave_Seq_Receive_DMA",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 4546
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "I2C_Slave_STOPF",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 6210
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "I2C_Slave_STOPF",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 6238
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "I2C_ITError",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 6457
+    },
+    {
+      "file": "stm32f4xx_hal_i2c.c",
+      "caller": "I2C_ITError",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 6484
+    },
+    {
+      "file": "stm32f4xx_hal_i2s.c",
+      "caller": "HAL_I2S_IRQHandler",
+      "expr": "IrqHandlerISR",
+      "type": "void (*)(struct __I2S_HandleTypeDef *)",
+      "line": 1662
+    },
+    {
+      "file": "stm32f4xx_hal_irda.c",
+      "caller": "HAL_IRDA_AbortTransmit_IT",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1634
+    },
+    {
+      "file": "stm32f4xx_hal_irda.c",
+      "caller": "HAL_IRDA_AbortReceive_IT",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1712
+    },
+    {
+      "file": "stm32f4xx_hal_irda.c",
+      "caller": "HAL_IRDA_IRQHandler",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1841
+    },
+    {
+      "file": "stm32f4xx_hal_smartcard.c",
+      "caller": "HAL_SMARTCARD_AbortTransmit_IT",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1426
+    },
+    {
+      "file": "stm32f4xx_hal_smartcard.c",
+      "caller": "HAL_SMARTCARD_AbortReceive_IT",
+      "expr": "XferAbortCallback",
+      "type": "void (*)(struct __DMA_HandleTypeDef *)",
+      "line": 1504
+    }
+  ],
+  "indirect_calls_total": 32,
+  "files_with_errors_detail": []
+}

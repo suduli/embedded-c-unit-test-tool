@@ -1,0 +1,5 @@
+fixture/
+__pycache__/
+*.pyc
+report.json
+.venv/

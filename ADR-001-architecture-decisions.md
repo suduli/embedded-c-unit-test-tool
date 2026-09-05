@@ -1,13 +1,13 @@
 # ADR-001 — Core Language, Front-End Technology, and Qualification Scope
 
 **Document ID:** ADR-001
-**Status:** Analysis for decision — no decision recorded yet
+**Status:** Analysis for decision — validation spikes (§4.2) complete, recommendations in §4 now stand at high confidence; ADR-006 (§5) is the one remaining item before this can be accepted
 **Relates to:** SRS-001 open questions 1, 4, 5
 
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](SRS-001-requirements.md) · **ADR-001** *(you are here)* · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
+**Related documents** — [SRS-001](SRS-001-requirements.md) · **ADR-001** *(you are here)* · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [SDD-005](design/SDD-005-external-integration.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
 
 Architecture diagrams: [specifications](design/diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -118,6 +118,12 @@ Everything else favours Python. The counter-argument is that UIX-040 requires th
 
 Mitigations, in order of preference: bundle with PyInstaller or Nuitka into a signed installer per platform; ship the container image (NFR/CIC-040) as the CI path; document a `pipx` install for developer users. None is as clean as a Rust binary, but all are proven — gcovr, Twister, and pyOCD all ship this way to exactly this audience.
 
+#### 2.3.1 Validation update (`WP-SPIKE-03`, run after this analysis)
+
+A PyInstaller bundle of PySide6 + libclang together built cleanly on the first attempt — libclang's ctypes-loaded shared library was collected via a plain `binaries=[...]` spec entry, no `Config.set_library_file()` fallback needed — producing a 194.2 MB onedir distribution with a ~162ms in-process cold start, and no administrative privileges implicated anywhere in the build or run path. This was measured on the development machine that built it, not a clean one, so it cannot speak to Defender/SmartScreen behaviour on a genuinely clean install — that remains a manual follow-up, not something an agentic run can close. Full results: [`spikes/spike-03-packaging/RESULTS.md`](spikes/spike-03-packaging/RESULTS.md).
+
+**Verdict on R-03 (§6):** partially mitigated. The mechanical packaging risk — does PyInstaller even work with this exact dependency set — is resolved. The policy risk — does a locked-down corporate endpoint accept an unsigned bundle this size — is untested and needs a real clean-machine or VM run before that line of the risk register is marked closed.
+
 ### 2.4 Recommendation
 
 **Python core, with a deliberate architectural seam for a future C++ analyzer.**
@@ -132,6 +138,12 @@ This is UTBotCpp's client-server insight — isolate the toolchain-version-sensi
 **Choose Rust instead if** distribution to locked-down corporate environments is the single dominant constraint and you are willing to accept a much smaller contributor pool and reimplement what the Python ecosystem gives free.
 
 **Choose C++ only if** you decide to fork UTBotCpp, in which case the decision is made for you.
+
+### 2.5 Validation update (`WP-SPIKE-01`, run after this analysis)
+
+§2.1's premise held under real load. Run against 151,558 lines of real, unmodified vendor embedded C (STM32F4 HAL driver + CMSIS device headers — 7.5× the 20,000-line floor this spike set for itself), libclang's AST alone extracted 1,810 functions, 506 types, 16 globals and 1,502 direct calls with **zero parse errors**. 32 of 1,534 call sites (2.1%) are function-pointer dispatches — IRQ/DMA-completion callback tables, a single well-understood pattern — that AST-only extraction cannot resolve to a concrete callee. Every one was recorded as an explicit, located, unresolved edge rather than silently dropped or misattributed, and none of them needed statement-level control-flow reasoning to explain: resolving them is a points-to/symbol-table problem, not a CFG one. Full results: [`spikes/spike-01-cfg-sufficiency/RESULTS.md`](spikes/spike-01-cfg-sufficiency/RESULTS.md).
+
+**Verdict on R-01 (§6):** the risk does not materialize. The recommended path — libclang now, PAR-100's JSON seam held absolutely, a C++ analyzer only if a CFG-dependent requirement (PAR-070, UIX-270) is actually pursued — stands without the "contingent on §2.1 holding" qualifier §4 originally carried. The recommended next step is a scoped extension to `WP-ANA-03` for function-pointer resolution, not a reopening of this language question.
 
 ---
 
@@ -192,6 +204,12 @@ Rationale, in order of weight: the two hardest widgets come free and virtualized
 
 **Choose Electron only if** front-end contributor availability becomes the binding constraint — it is the least defensible technically but has the largest talent pool and VS Code proves the model works for this exact class of tool.
 
+### 3.6 Validation update (`WP-SPIKE-02`, run after this analysis)
+
+§3.1's hardest widget was prototyped and held up. A 4-deep nested struct — reaching through a union, a function-pointer member, and a fixed array, all three siblings at one level so none could mask a bug in another — was fully editable via `QAbstractItemModel` plus per-kind `QStyledItemDelegate`s: enum and function-pointer fields render by name, never by raw value; an out-of-range edit is rejected without corrupting the displayed value; array elements are independently addressable. Cold start measured at 242ms. Two findings are worth folding directly into `WP-GUI-11`'s own design rather than rediscovering them mid-implementation: arrays materialize as an extra UI tree row beyond what the schema's type-depth count suggests, and range enforcement has to live in the model's `validate()`, not the widget's `QValidator` (which only blocks keystrokes that are unambiguously invalid, not ones merely out of range — `"999"` against a 0–255 field is treated as `Intermediate`, not `Invalid`). Full results: [`spikes/spike-02-nested-editor/RESULTS.md`](spikes/spike-02-nested-editor/RESULTS.md).
+
+**Verdict on R-02 (§6):** substantially mitigated, not eliminated — this exercised one struct shape at a small scale, not the performance envelope at realistic data volumes (RESULTS.md says so explicitly), and undo/redo was out of scope. §3.5 holds for the editor's *shape*; `WP-GUI-11` still owns proving it at scale.
+
 ---
 
 ## 4. Recommended combined position
@@ -199,8 +217,8 @@ Rationale, in order of weight: the two hardest widgets come free and virtualized
 | Decision | Recommendation | Confidence |
 |---|---|---|
 | **Qualification scope** | Tier 1 (discipline) in v1.0; Tier 2 (documentation) in v1.1; Tier 3 (certification) not a shipped artifact. Target "qualifiable," not "qualified." | **High** — the cost argument against Cantata's free kit is decisive |
-| **Core language** | Python, with PAR-100's JSON model held as an inviolable seam permitting a later C++ LibTooling analyzer | **Moderate-high** — contingent on the CFG analysis in §2.1 holding |
-| **GUI** | PySide6 (Qt), standalone desktop, dynamically linked, LGPL documented in SBOM | **Moderate-high** — contingent on the language decision |
+| **Core language** | Python, with PAR-100's JSON model held as an inviolable seam permitting a later C++ LibTooling analyzer | **High** — §2.1's CFG-sufficiency premise confirmed against 151k lines of real vendor code (`WP-SPIKE-01`, §2.5). ADR-006 (§5) is the one remaining condition that could still overturn this |
+| **GUI** | PySide6 (Qt), standalone desktop, dynamically linked, LGPL documented in SBOM | **High** — the hardest widget (the nested type-aware editor) was prototyped and held up (`WP-SPIKE-02`, §3.6). Still downstream of the language decision, as before |
 
 ### 4.1 What would change these recommendations
 
@@ -211,11 +229,13 @@ Rationale, in order of weight: the two hardest widgets come free and virtualized
 
 ### 4.2 Suggested validation before committing
 
-1. **Spike the CFG question.** Attempt PAR-030 through PAR-060 against a real embedded codebase using python-clang. If the AST-only path covers it comfortably, §2.4 holds.
-2. **Spike the hard widget.** Build the type-aware nested test data editor in PySide6 against a struct-heavy interface. If it is comfortable, §3.5 holds. This is the single highest-risk UI component and it should be prototyped before the architecture is frozen.
-3. **Spike distribution.** Bundle a trivial PySide6 + libclang application with PyInstaller and install it on a clean Windows machine with no Python. Measure size, startup time, and whether endpoint security objects.
+All three spikes below (`WP-SPIKE-01/02/03`) have run. Each is summarized where it bears on the decision above (§2.5, §3.6, §2.3.1) and reported in full under [`spikes/`](spikes/); none is a formal ADR-006 evaluation (§5).
 
-Each spike is days, not weeks, and each directly tests the assumption its decision rests on.
+1. ~~**Spike the CFG question.**~~ **Done — held.** See §2.5. [`spikes/spike-01-cfg-sufficiency/RESULTS.md`](spikes/spike-01-cfg-sufficiency/RESULTS.md)
+2. ~~**Spike the hard widget.**~~ **Done — held.** See §3.6. [`spikes/spike-02-nested-editor/RESULTS.md`](spikes/spike-02-nested-editor/RESULTS.md)
+3. ~~**Spike distribution.**~~ **Done — mechanically sound; clean-machine AV/SmartScreen behaviour still untested.** See §2.3.1. [`spikes/spike-03-packaging/RESULTS.md`](spikes/spike-03-packaging/RESULTS.md)
+
+Each spike was days, not weeks, and each directly tested the assumption its decision rests on — exactly as intended. What they do not do is settle ADR-006 (§5), which needs a direct evaluation of UTBotCpp itself, not a viability check on the from-scratch alternative.
 
 ---
 
@@ -248,10 +268,11 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 **Question:** whether to fork UnitTestBot/UTBotCpp as a foundation.
 **Why it matters:** it is the closest existing open-source analog and it solves real problems — KLEE integration, stub synthesis with symbolic return values, automatic project configuration. But it is host-Linux-oriented, C++-implemented, and generates GoogleTest output — all three of which conflict with the recommendations in §2 and §3 and with SRS HAR-060.
 **Bearing on other decisions:** decisive. A fork settles the language question as C++ and reopens the GUI and framework decisions. This should be resolved before ADR-001's recommendations are accepted, not after.
+**Status after the §4.2 validation spikes:** still unresolved, and deliberately *not* addressed by any of them. `WP-SPIKE-01/02/03` tested whether a fresh Python + libclang + PySide6 build is *viable* — they say nothing about whether forking UTBotCpp would be *better*. The spikes' results are suggestive evidence for "build fresh" (a from-scratch Python pipeline handled 151k lines of real vendor embedded C cleanly, with no blocking gap — see §2.5), but suggestive is not a substitute for the comparative analysis this ADR actually needs: what UTBotCpp's KLEE integration and stub synthesis would actually save versus the cost of inheriting its host-Linux, C++, GoogleTest-output orientation. This remains the item PLAN-001 §4.2 calls "the decision that cannot wait" — resolve it with a direct evaluation of UTBotCpp before treating §4's combined position as final.
 
 ### ADR-007 — Distribution and packaging
 **Question:** the concrete packaging mechanism per platform, given INS-010 through INS-050.
-**Why it matters:** offline installation, side-by-side versions, no administrative privileges, and decade-scale archivability are demanding in combination. This is the primary risk attached to the Python recommendation in §2.4 and warrants its own analysis once the §4.2 distribution spike has run.
+**Why it matters:** offline installation, side-by-side versions, no administrative privileges, and decade-scale archivability are demanding in combination. This is the primary risk attached to the Python recommendation in §2.4; the §4.2 distribution spike (`WP-SPIKE-03`, §2.3.1) has now run and cleared the mechanical question, so this ADR can proceed — it should focus on the per-platform signing/installer mechanism and the still-open clean-machine endpoint-security question rather than re-litigating whether PyInstaller works at all.
 
 ---
 
@@ -259,9 +280,9 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 
 | ID | Risk | Impact | Likelihood | Mitigation |
 |---|---|---|---|---|
-| R-01 | libclang's AST-only API proves insufficient, forcing a C++ analyzer earlier than planned | Medium — schedule, not architecture, provided the PAR-100 seam is respected | Medium | Run the §4.2 CFG spike before committing; hold the JSON model boundary absolutely |
-| R-02 | The type-aware nested test data editor proves substantially harder than estimated | **High** — it is the widget users live in; a poor one undermines the whole product | Medium | Prototype it first, before architecture freeze; treat it as the schedule driver |
-| R-03 | Python distribution to locked-down corporate environments proves unacceptable | High — excludes the target market | Medium | Run the distribution spike early; retain Rust as a fallback while the codebase is small |
+| R-01 | libclang's AST-only API proves insufficient, forcing a C++ analyzer earlier than planned | Medium — schedule, not architecture, provided the PAR-100 seam is respected | **Low** (was Medium — `WP-SPIKE-01` ran clean at 7.5× the size floor, §2.5) | Hold the JSON model boundary absolutely; extend `WP-ANA-03` for function-pointer resolution rather than reopening the language question |
+| R-02 | The type-aware nested test data editor proves substantially harder than estimated | **High** — it is the widget users live in; a poor one undermines the whole product | **Low** (was Medium — `WP-SPIKE-02` ran and held, §3.6) | Carry both `WP-SPIKE-02` findings (array row-depth, validator-vs-`validate()` split) directly into `WP-GUI-11`'s design; performance at realistic data volumes is still untested |
+| R-03 | Python distribution to locked-down corporate environments proves unacceptable | High — excludes the target market | **Medium, narrowed to policy risk only** (was Medium overall — `WP-SPIKE-03` confirmed the packaging mechanics work, §2.3.1; clean-machine AV/SmartScreen behaviour is the untested remainder) | Run a real clean-machine or VM test for endpoint-security behaviour before closing this line; retain Rust as a fallback while the codebase is small |
 | R-04 | MC/DC support proves inadequate for users' certification authorities (masking vs. unique-cause) | High — removes the safety-critical use case | Medium | Document the distinction prominently per COV-060; validate with a real assessor before committing to COV-090 |
 | R-05 | Compiler and target support breadth becomes an unbounded maintenance burden | High — this is where commercial vendors have invested decades | High | Make TCH-040/PLG-020 genuinely sufficient so support is contributed rather than centrally maintained; resist bundling configurations the project cannot test |
 | R-06 | Insufficient contributors; the project becomes one person's maintenance burden | **High** — the common failure mode for tools of this ambition | High | Choose the language for contributor availability; keep extension points low-friction; ship something useful at P1 rather than architecting toward a distant v1.0 |

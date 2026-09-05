@@ -1,0 +1,9 @@
+# .gitignore
+dist/
+build/
+*.spec.bak
+__pycache__/
+measurements.json
+.venv/
+stdout.tmp
+stderr.tmp

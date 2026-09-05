@@ -1,0 +1,10 @@
+# requirements.txt
+#
+# Deviation from the plan: PySide6==6.7.3 has no wheel for Python 3.13
+# (PyPI reports it Requires-Python <3.13; this machine runs 3.13.2), so it
+# was bumped to the latest available release, which ships cp310-abi3 wheels
+# (i.e. explicitly supports 3.10-3.13+). libclang==18.1.1 and
+# pyinstaller==6.10.0 installed as originally pinned with no changes needed.
+PySide6==6.11.2
+libclang==18.1.1
+pyinstaller==6.10.0
