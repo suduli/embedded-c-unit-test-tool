@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "External Open-Source Integration Map",
+    "output": "oss-integration.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      620
+    ]
+  },
+  "components": [
+    {
+      "id": "CMP-ANA",
+      "type": "backend",
+      "label": "CMP-ANA",
+      "sublabel": "Source Analyzer",
+      "tag": "L1",
+      "pos": [
+        30,
+        60
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "CMP-GEN",
+      "type": "backend",
+      "label": "CMP-GEN",
+      "sublabel": "Generation Engine",
+      "tag": "L2",
+      "pos": [
+        300,
+        60
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "CMP-BLD",
+      "type": "backend",
+      "label": "CMP-BLD",
+      "sublabel": "Build Orchestrator",
+      "tag": "L3",
+      "pos": [
+        570,
+        60
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "CMP-COV",
+      "type": "backend",
+      "label": "CMP-COV",
+      "sublabel": "Coverage Engine",
+      "tag": "L4",
+      "pos": [
+        840,
+        60
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "CMP-EXT",
+      "type": "backend",
+      "label": "CMP-EXT",
+      "sublabel": "Target Runner",
+      "tag": "L3",
+      "pos": [
+        1110,
+        60
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "libclang",
+      "type": "security",
+      "label": "libclang",
+      "sublabel": "LINKED · Apache-2.0 + LLVM exc",
+      "tag": "C front-end · LLVM 18.1",
+      "pos": [
+        30,
+        300
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "harness-backends",
+      "type": "external",
+      "label": "Unity · cmocka · FFF",
+      "sublabel": "HARNESS LINK · MIT / Apache-2.0",
+      "tag": "Unity 2.6 · cmocka 1.1.7",
+      "pos": [
+        300,
+        300
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "ninja",
+      "type": "external",
+      "label": "Ninja",
+      "sublabel": "SUBPROCESS · Apache-2.0, vendored",
+      "tag": "Harness build · 1.10",
+      "pos": [
+        570,
+        300
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "gcov",
+      "type": "external",
+      "label": "gcov · llvm-cov",
+      "sublabel": "SUBPROCESS · GPL-3.0+ / Apache-2.0",
+      "tag": "MC/DC readers · GCC 14 · Clang 18.1",
+      "pos": [
+        840,
+        300
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "probes",
+      "type": "external",
+      "label": "OpenOCD · pyOCD",
+      "sublabel": "SUBPROCESS · GPL-2.0+ / Apache-2.0",
+      "tag": "Flash and run · OpenOCD 0.12",
+      "pos": [
+        1110,
+        300
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "googletest",
+      "type": "external",
+      "label": "GoogleTest",
+      "sublabel": "OPTIONAL host only · BSD-3-Clause",
+      "tag": "TOOL-HAR-065 · 1.14 C++14 / 1.15 C++17",
+      "pos": [
+        300,
+        470
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "cmake",
+      "type": "external",
+      "label": "CMake",
+      "sublabel": "SUBPROCESS · BSD-3, user-supplied",
+      "tag": "Compilation database · 3.20",
+      "pos": [
+        570,
+        470
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "libgcov",
+      "type": "external",
+      "label": "libgcov freestanding",
+      "sublabel": "HARNESS LINK · GCC RLE exception",
+      "tag": "Bare-metal dump · GCC 12",
+      "pos": [
+        840,
+        470
+      ],
+      "size": [
+        230,
+        84
+      ]
+    },
+    {
+      "id": "sim",
+      "type": "external",
+      "label": "QEMU · Renode",
+      "sublabel": "SUBPROCESS · GPL-2.0 / MIT",
+      "tag": "Simulators · TOOL-TGT-020",
+      "pos": [
+        1110,
+        470
+      ],
+      "size": [
+        230,
+        84
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "The tool · permissive licence required (TOOL-LIC-010)",
+      "wraps": [
+        "CMP-ANA",
+        "CMP-GEN",
+        "CMP-BLD",
+        "CMP-COV",
+        "CMP-EXT"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ana-libclang",
+      "from": "CMP-ANA",
+      "to": "libclang",
+      "label": "linked · the only linked front-end",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 80
+    },
+    {
+      "id": "gen-harness",
+      "from": "CMP-GEN",
+      "to": "harness-backends",
+      "label": "emits harness against",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 80
+    },
+    {
+      "id": "gen-gtest",
+      "from": "CMP-GEN",
+      "to": "googletest",
+      "label": "optional, never a default",
+      "fromSide": "left",
+      "toSide": "left",
+      "variant": "dashed"
+    },
+    {
+      "id": "bld-ninja",
+      "from": "CMP-BLD",
+      "to": "ninja",
+      "label": "vendored, runs",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 80
+    },
+    {
+      "id": "bld-cmake",
+      "from": "CMP-BLD",
+      "to": "cmake",
+      "label": "reads database from",
+      "fromSide": "left",
+      "toSide": "left",
+      "variant": "dashed"
+    },
+    {
+      "id": "cov-gcov",
+      "from": "CMP-COV",
+      "to": "gcov",
+      "label": "reads coverage via",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 80
+    },
+    {
+      "id": "cov-libgcov",
+      "from": "CMP-COV",
+      "to": "libgcov",
+      "label": "no filesystem, no OS",
+      "fromSide": "left",
+      "toSide": "left"
+    },
+    {
+      "id": "ext-probes",
+      "from": "CMP-EXT",
+      "to": "probes",
+      "label": "flash and run",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 80
+    },
+    {
+      "id": "ext-sim",
+      "from": "CMP-EXT",
+      "to": "sim",
+      "label": "simulate",
+      "fromSide": "left",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Mechanism decides the licence",
+      "items": [
+        "TOOL-LIC-020: strong copyleft may be invoked as a separate process, never linked into the tool.",
+        "So the GPL row above is safe: gcov, OpenOCD and QEMU are all subprocesses."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Three different link targets",
+      "items": [
+        "LINKED goes into the tool binary, so it must be permissive.",
+        "HARNESS LINK goes into the user's test binary, so the licence flows to the user, not to us.",
+        "SUBPROCESS goes nowhere; it is a separate program."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The keystone and the trap",
+      "items": [
+        "libgcov links into the user's binary but carries the GCC Runtime Library Exception, so the harness is not made GPL.",
+        "The gcov binary carries no such exception, and stays a subprocess.",
+        "gcov data is version-locked to the exact GCC that built the object."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Scope of this view",
+      "items": [
+        "External attachments only. Component-to-component dependencies are in diagrams/.",
+        "Not checked by trace_check.py: third-party projects are deliberately not register components."
+      ]
+    }
+  ]
+}

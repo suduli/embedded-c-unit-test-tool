@@ -6,7 +6,7 @@ machine-checked rather than asserted in prose.
 
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -20,6 +20,8 @@ Architecture diagrams: [specifications](diagrams) · published at [the documenta
 | [`SDD-002-interfaces.md`](SDD-002-interfaces.md) | The seven load-bearing seams (five of them published) and the one internal port: analysis model, test case model, result set, coverage model, report model, engine API, extension points |
 | [`SDD-003-data-model.md`](SDD-003-data-model.md) | What is written to disk: the project/output tree split, file granularity, diff stability, schema migration, archival records |
 | [`SDD-004-traceability-architecture.md`](SDD-004-traceability-architecture.md) | The trace meta-model, id rules, link types, checker, CI gate, and extension to code and tests |
+| [`SDD-005-external-integration.md`](SDD-005-external-integration.md) | The third-party projects the tool orchestrates — frameworks, front-end, coverage, target execution, supply chain — with version floors, and the linked-vs-subprocess licence rule |
+| [`oss-integration.archify.json`](oss-integration.archify.json) | **Authored, unchecked.** The integration dependency map. Sits beside [`doc-map.archify.json`](doc-map.archify.json) rather than in [`diagrams/`](diagrams/) because it draws third-party projects, which are deliberately not register components — see SDD-005 §9 |
 
 ## Trace artifacts
 

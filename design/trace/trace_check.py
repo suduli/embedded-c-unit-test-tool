@@ -767,6 +767,11 @@ DOCUMENTS = [
      "Traceability Architecture",
      "The trace meta-model, id rules, link types, the checker and the CI gate - "
      "including the rules that keep these diagrams honest."),
+    ("design/SDD-005-external-integration.md", "SDD-005",
+     "External Open-Source Integration Architecture",
+     "The third-party projects the tool orchestrates - test frameworks, front-end, "
+     "coverage, target execution - with the version floors and the licence rule "
+     "that decides whether each one may be linked or must be a subprocess."),
 ]
 
 GENERATED = [
