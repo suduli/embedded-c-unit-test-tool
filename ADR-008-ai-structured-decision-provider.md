@@ -2,7 +2,7 @@
 
 **Document ID:** ADR-008
 **Status:** **Accepted, 2026-09-19** — default provider and modular contract recorded; provider behavior not yet independently exercised (see §7)
-**Relates to:** SRS-001 §18 AIF (`TOOL-AIF-220` through `TOOL-AIF-260`), §25 PLG (`TOOL-PLG-080`), A-08, K-04
+**Relates to:** SRS-001 §18 AIF (`TOOL-AIF-220` through `TOOL-AIF-260`), §25 PLG (`TOOL-PLG-100`), A-08, K-04
 
 ---
 
@@ -74,7 +74,7 @@ directly.
    structured-decision role**, used only when a user has explicitly enabled a
    remote provider per `TOOL-AIF-030`. This satisfies `TOOL-AIF-240`.
 3. **The default is a configuration value, not a code dependency.** It is
-   reached through the AI-provider extension point defined in `TOOL-PLG-080`,
+   reached through the AI-provider extension point defined in `TOOL-PLG-100`,
    the same mechanism every AI-assisted capability uses — present ones
    (`TOOL-AIF-060`/`110`/`120`/`220`) and any added after this specification is
    baselined (`TOOL-AIF-260`). No feature code calls TypeSafe's or any other
@@ -111,7 +111,7 @@ research providers first — subject to §5's local-substitution requirement.
 **A. Reuse the existing generation provider (`TOOL-AIF-050`) for validation
 too, prompting it for JSON output.**
 Rejected as the *default*, not removed as an *option* — a general-purpose LLM
-remains reachable through the same `TOOL-PLG-080` contract and satisfies
+remains reachable through the same `TOOL-PLG-100` contract and satisfies
 `TOOL-AIF-250` like any other provider. Rejected as the default because it
 reproduces the exact mismatch `TOOL-AIF-220` exists to avoid: text generated,
 then parsed back into something code depends on. Reliability of that parse
@@ -130,7 +130,7 @@ function needs neither.
 **C. Defer `TOOL-AIF-220` past v1.0 rather than pick a default now.**
 Rejected: the capability was already scoped at *(S, P3)* in SRS-001; deferring
 the *requirement* is a product-scope decision this ADR does not have standing
-to make. Building the modular contract (`TOOL-PLG-080`) now costs the same
+to make. Building the modular contract (`TOOL-PLG-100`) now costs the same
 whether it initially serves one AI role or several — deferring the default
 does not defer that cost, it just leaves the role's provider unspecified.
 
@@ -148,7 +148,7 @@ instruction was written to prevent.
 
 **Accepted.**
 
-- `TOOL-AIF-220`–`260` and `TOOL-PLG-080` are satisfied by one adapter
+- `TOOL-AIF-220`–`260` and `TOOL-PLG-100` are satisfied by one adapter
   contract shared with the tool's other extension points (`TOOL-PLG-010`
   already lists compiler configurations, test-framework back-ends, target
   execution, and report formats as siblings), rather than a second, divergent
@@ -188,7 +188,7 @@ instruction was written to prevent.
    `TOOL-AIF-220`'s use cases need. This reopens the *default* only; §2's
    contract is unaffected because no feature code depends on Jev directly.
 2. **If `TOOL-AIF-220` is deprioritized below P3/S before construction begins.**
-   The validation role is dropped; `TOOL-PLG-080` remains in place for the
+   The validation role is dropped; `TOOL-PLG-100` remains in place for the
    generation role and for whatever AI-assisted capability is proposed next.
 3. **If a locally-runnable structured-decision model reaches comparable fit**
    for a user base where A-08 (air-gapped operation) is the common case rather
@@ -227,7 +227,7 @@ retention/local-candidate gaps above are closed, which should happen before
 
 | | |
 |---|---|
-| **Decision** | Structured-decision AI role, separate from generation; default provider TypeSafe AI (Jev), opt-in remote only; both roles — and any future AI role — integrate through one documented extension point (`TOOL-PLG-080`) |
+| **Decision** | Structured-decision AI role, separate from generation; default provider TypeSafe AI (Jev), opt-in remote only; both roles — and any future AI role — integrate through one documented extension point (`TOOL-PLG-100`) |
 | **Confidence** | **Medium** — architecture (modular contract) is high-confidence; the named default is a documentation-only claim, not yet independently verified |
 | **Strongest evidence for** | Jev's typed, parallel, isolated-evaluation primitives match `TOOL-AIF-220`'s shape more directly than prompting a free-text model for JSON and parsing the result |
 | **Strongest evidence against** | Vendor terms, data-retention behavior, and production reliability are unverified; local-provider parity for air-gapped users (A-08) is not yet demonstrated with a named candidate |

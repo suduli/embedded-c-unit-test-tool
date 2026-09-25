@@ -745,7 +745,7 @@ BLOB = REPO_URL + "/blob/main/"
 DOCUMENTS = [
     ("SRS-001-requirements.md", "SRS-001",
      "Software Requirements Specification",
-     "What the tool must do: 323 numbered requirements with priority, phase and "
+     "What the tool must do: 329 numbered requirements with priority, phase and "
      "verification method. Everything downstream exists to discharge these."),
     ("ADR-001-architecture-decisions.md", "ADR-001",
      "Architecture Decision Record",
@@ -758,6 +758,11 @@ DOCUMENTS = [
      "UTBotCpp's Apache-2.0 license removes the usual objection, but it collides "
      "with this specification on eight points and its one real asset serves only "
      "the lowest-priority requirement band."),
+    ("ADR-008-ai-structured-decision-provider.md", "ADR-008",
+     "AI Provider for Structured Test-Decision Validation",
+     "A structured-decision AI role, configured separately from generation, with "
+     "TypeSafe AI (Jev) as an opt-in remote default. Every AI capability reaches "
+     "its model through one provider extension point, so the default stays swappable."),
     ("design/SDD-001-architecture.md", "SDD-001",
      "Architecture and Component Design",
      "The seven-layer structure, all 24 components, the principal flows and the "

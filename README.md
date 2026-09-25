@@ -44,13 +44,13 @@ testing, verification engineers producing certification evidence,
 quality/safety managers reviewing coverage and traceability, and CI/CD
 engineers automating verification pipelines.
 
-Full detail: [`SRS-001-requirements.md`](SRS-001-requirements.md) — 323
+Full detail: [`SRS-001-requirements.md`](SRS-001-requirements.md) — 329
 numbered requirements with priority, phase, and verification method.
 
 ## Architecture at a glance
 
-24 components across 7 layers, 69 dependency edges, 239 design elements — all
-allocated from the 321 in-scope requirements above, and validated by a
+24 components across 7 layers, 70 dependency edges, 243 design elements — all
+allocated from the 327 in-scope requirements above, and validated by a
 checker that fails the build if any requirement goes unallocated or any
 diagram disagrees with the design it depicts.
 
@@ -75,22 +75,24 @@ relationship, switch theme, export.
 
 | Document | Content |
 |---|---|
-| [`SRS-001-requirements.md`](SRS-001-requirements.md) | What the tool must do — 323 requirements, priority, phase, verification method |
-| [`ADR-001-architecture-decisions.md`](ADR-001-architecture-decisions.md) | The open decisions: core language, front-end technology, qualification scope |
+| [`SRS-001-requirements.md`](SRS-001-requirements.md) | What the tool must do — 329 requirements, priority, phase, verification method |
+| [`ADR-001-architecture-decisions.md`](ADR-001-architecture-decisions.md) | Core language (Python), front-end technology (PySide6), qualification scope — Accepted 2026-09-19 |
+| [`ADR-006-fork-or-build-fresh.md`](ADR-006-fork-or-build-fresh.md) | Fork UTBotCpp or build fresh — Accepted: build fresh |
+| [`ADR-008-ai-structured-decision-provider.md`](ADR-008-ai-structured-decision-provider.md) | AI provider for structured test-decision validation — one provider extension point, TypeSafe AI (Jev) as opt-in default |
 | [`design/SDD-001-architecture.md`](design/SDD-001-architecture.md) | The seven-layer structure, all 24 components, principal flows, cross-cutting rules |
 | [`design/SDD-002-interfaces.md`](design/SDD-002-interfaces.md) | The seven load-bearing seams: analysis model, test case model, coverage model, engine API, extension points |
 | [`design/SDD-003-data-model.md`](design/SDD-003-data-model.md) | What is written to disk: project/output tree, file granularity, diff stability, schema migration |
 | [`design/SDD-004-traceability-architecture.md`](design/SDD-004-traceability-architecture.md) | The trace meta-model, id rules, the checker, and the CI gate |
 | [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml) | **The authoritative register.** Where every document disagrees with this file, the document is defective |
 | [`design/README.md`](design/README.md) | Full index of the design documentation, the trace artifacts, and how the diagrams are generated and checked |
-| [`PLAN-001-specification-analysis-and-work-breakdown.md`](PLAN-001-specification-analysis-and-work-breakdown.md) | Specification analysis, the 180-package work breakdown with critical path, and the specification-based test design for all 323 requirements |
+| [`PLAN-001-specification-analysis-and-work-breakdown.md`](PLAN-001-specification-analysis-and-work-breakdown.md) | Specification analysis, the 181-package work breakdown with critical path, and the specification-based test design for all 323 requirements |
 
 Every document above links to the others and to the published site — start
 at any one of them and you can reach the rest.
 
 ## Why the design is machine-checked
 
-A specification this size (323 requirements, 24 components) drifts from its
+A specification this size (329 requirements, 24 components) drifts from its
 own design documents the moment someone edits one without the other. Instead
 of relying on review discipline, `design/trace/design-elements.yaml` is the
 single authoritative allocation of every requirement to a design element, and

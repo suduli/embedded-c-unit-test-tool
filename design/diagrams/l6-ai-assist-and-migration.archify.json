@@ -117,13 +117,28 @@
       ]
     },
     {
+      "id": "CMP-PLG",
+      "type": "backend",
+      "label": "CMP-PLG",
+      "sublabel": "Extension Framework",
+      "tag": "L6 · context",
+      "pos": [
+        310,
+        380
+      ],
+      "size": [
+        220,
+        84
+      ]
+    },
+    {
       "id": "CMP-CORE",
       "type": "backend",
       "label": "CMP-CORE",
       "sublabel": "Core Platform Services",
       "tag": "L0 · context",
       "pos": [
-        490,
+        580,
         380
       ],
       "size": [
@@ -182,10 +197,19 @@
       "id": "aif-sec",
       "from": "CMP-AIF",
       "to": "CMP-SEC",
-      "label": "prompt and output review",
+      "label": "model integrity",
       "fromSide": "bottom",
       "toSide": "top",
-      "labelDx": -90
+      "labelDx": -70
+    },
+    {
+      "id": "aif-plg",
+      "from": "CMP-AIF",
+      "to": "CMP-PLG",
+      "label": "providers",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": 60
     },
     {
       "id": "aif-core",
@@ -229,8 +253,8 @@
       "dot": "cyan",
       "title": "AI assist is fenced",
       "items": [
-        "CMP-AIF proposes generation and test-case content; it never writes to the store directly.",
-        "Every prompt and every returned artifact passes through CMP-SEC before it is used."
+        "CMP-AIF reaches every model through the AI-provider extension point in CMP-PLG, per role: generation and structured decision.",
+        "Generated test cases enter CMP-TCM only through CMP-ATG's validation gate; CMP-SEC verifies local model integrity."
       ]
     },
     {

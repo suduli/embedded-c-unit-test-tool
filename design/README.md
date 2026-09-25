@@ -6,7 +6,7 @@ machine-checked rather than asserted in prose.
 
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [ADR-008](../ADR-008-ai-structured-decision-provider.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -47,12 +47,12 @@ python3 design/trace/trace_check.py
 
 ```
 Requirement allocation
-  SRS requirements            323
+  SRS requirements            329
   out of v1.0 scope (F)       2
-  in scope                    321
-  allocated                   321
+  in scope                    327
+  allocated                   327
   UNALLOCATED                 0
-  design elements             239
+  design elements             243
   derived (no requirement)    2
   components                  24
 ```

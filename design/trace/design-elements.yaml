@@ -28,10 +28,16 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 323
+      requirement_count: 329
     - id: ADR-001
-      version: "analysis, no decision recorded"
+      version: "Accepted 2026-09-19"
       path: ADR-001-architecture-decisions.md
+    - id: ADR-006
+      version: "Accepted 2026-09-19"
+      path: ADR-006-fork-or-build-fresh.md
+    - id: ADR-008
+      version: "Accepted"
+      path: ADR-008-ai-structured-decision-provider.md
 
 # Link semantics, per SRS-001 §28.
 link_types:
@@ -1957,7 +1963,7 @@ components:
     responsibility: >
       Optional assistance, structurally quarantined: off by default, offline
       capable, validated before presentation, and permanently marked.
-    depends_on: [CMP-CORE, CMP-TCM, CMP-GEN, CMP-ATG, CMP-SEC]
+    depends_on: [CMP-CORE, CMP-TCM, CMP-GEN, CMP-ATG, CMP-SEC, CMP-PLG]
     elements:
       - id: DSN-AIF-010
         title: Optionality and default-off
@@ -1968,12 +1974,19 @@ components:
         satisfies: [TOOL-AIF-010]
         verification: T
       - id: DSN-AIF-020
-        title: Provider abstraction
+        title: Provider abstraction and roles
         statement: >
           One provider interface serving local runtimes and remote APIs
           interchangeably, so no calling site knows which is in use and a
           policy that forbids remote providers is enforceable in one place.
-        satisfies: [TOOL-AIF-050]
+          The interface is bound per role — free-text generation and
+          structured decision — and each role is configured independently, so
+          validation can run on a different back end from generation. A local
+          or self-hosted enterprise model is a drop-in provider for either
+          role; which provider is the default never affects whether local
+          execution is available. Providers are contributed through the
+          AI-provider extension point (DSN-PLG-050).
+        satisfies: [TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250]
         verification: A
       - id: DSN-AIF-030
         title: Local model execution
@@ -2073,6 +2086,42 @@ components:
           returning control to the surrounding workflow rather than failing it.
         satisfies: [TOOL-AIF-150]
         verification: T
+      - id: DSN-AIF-140
+        title: Structured-decision test validation
+        statement: >
+          Discrete testing decisions — pass/fail classification of an
+          ambiguous result, flaky-test flagging, priority triage of AI-produced
+          artifacts awaiting review — are requested through the
+          structured-decision role and returned as typed values (choice, score,
+          or boolean judgment with confidence) that code consumes without
+          parsing prose. A decision is advice attached to a result or a review
+          queue, never a change to a result, and it carries the same provenance
+          record as any other AI output (DSN-AIF-110).
+        satisfies: [TOOL-AIF-220]
+        verification: A
+      - id: DSN-AIF-150
+        title: Default validation provider profile
+        statement: >
+          The shipped default profile for the structured-decision role names
+          TypeSafe AI (Jev), and applies only once a user has explicitly
+          enabled a remote provider under DSN-AIF-040. The default is a
+          configuration entry, not a code dependency: the provider is an
+          ordinary extension behind DSN-PLG-050, and removing or replacing it
+          changes no calling code.
+        satisfies: [TOOL-AIF-240]
+        verification: D
+      - id: DSN-AIF-160
+        title: Provider-only integration rule
+        statement: >
+          Every AI-assisted capability, present or future, reaches a model only
+          through the DSN-AIF-020 interface; no feature imports a vendor SDK or
+          calls a vendor API. This is checked mechanically — a dependency rule
+          over the source tree that fails the build when a module outside a
+          provider extension references a vendor client — so a provider or a
+          model type not yet supported can be substituted without modifying the
+          feature that uses it.
+        satisfies: [TOOL-AIF-260]
+        verification: A
 
   - id: CMP-PLG
     name: Extension Framework
@@ -2088,7 +2137,8 @@ components:
           Four documented extension points at minimum — compiler
           configurations, framework back-ends, target execution methods, report
           formats — each with a declared interface, a version, and a conformance
-          test an extension author can run.
+          test an extension author can run. The AI-provider point
+          (DSN-PLG-050) is a fifth, held to the same rules.
         satisfies: [TOOL-PLG-010]
         verification: A
       - id: DSN-PLG-020
@@ -2117,6 +2167,18 @@ components:
           mechanism that reliably keeps those interfaces sufficient.
         satisfies: [TOOL-PLG-090]
         verification: I
+      - id: DSN-PLG-050
+        title: AI-provider extension point
+        statement: >
+          A documented, versioned extension point through which AI providers
+          are contributed, structured like the other four: a declared
+          interface per role (generation, structured decision), a version, and
+          a conformance test. Local, self-hosted, and remote providers from any
+          vendor or model architecture are integrated by implementing it, not
+          by changing tool source. It is the mechanism DSN-AIF-020,
+          DSN-AIF-150, and DSN-AIF-160 rely on.
+        satisfies: [TOOL-PLG-100]
+        verification: A
 
   - id: CMP-SEC
     name: Security and Integrity Services
