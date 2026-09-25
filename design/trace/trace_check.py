@@ -749,8 +749,15 @@ DOCUMENTS = [
      "verification method. Everything downstream exists to discharge these."),
     ("ADR-001-architecture-decisions.md", "ADR-001",
      "Architecture Decision Record",
-     "The open decisions - language, front-end technology, qualification scope. "
-     "No decision is recorded yet; elements that depend on one carry an `open:` marker."),
+     "Core language, front-end technology and qualification scope. Accepted "
+     "2026-09-19 (Python, PySide6, Tier 1 discipline) after three validation "
+     "spikes and ADR-006 resolved the one condition that could have overturned it."),
+    ("ADR-006-fork-or-build-fresh.md", "ADR-006",
+     "Fork UTBotCpp or Build Fresh",
+     "The one genuine blocker SDD-001 named. Accepted 2026-09-19: build fresh - "
+     "UTBotCpp's Apache-2.0 license removes the usual objection, but it collides "
+     "with this specification on eight points and its one real asset serves only "
+     "the lowest-priority requirement band."),
     ("design/SDD-001-architecture.md", "SDD-001",
      "Architecture and Component Design",
      "The seven-layer structure, all 24 components, the principal flows and the "

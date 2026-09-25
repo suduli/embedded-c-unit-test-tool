@@ -9,7 +9,7 @@
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · **SDD-001** *(you are here)* · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · **SDD-001** *(you are here)* · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -391,20 +391,21 @@ it), and those carry no marker.
 
 | Open decision | Elements affected | How the design absorbs the outcome |
 |---|---|---|
-| ADR-001 §2 — core language | `DSN-ANA-040`, `DSN-ANA-070` | The analysis model is an interface. A C++ analyzer emitting the same JSON replaces `CMP-ANA` with no downstream change. |
-| ADR-001 §3 — GUI technology | `DSN-GUI-010`, `DSN-GUI-080` | The GUI holds no capability. Its data contract is the test case model, not a GUI-private structure. A technology change is a rewrite of L5 only. |
+| ADR-001 §2 — core language — **Accepted 2026-09-19: Python** | `DSN-ANA-040`, `DSN-ANA-070` | The analysis model is an interface. A C++ analyzer emitting the same JSON replaces `CMP-ANA` with no downstream change — kept as design record even though decided, since the seam is load-bearing either way. |
+| ADR-001 §3 — GUI technology — **Accepted 2026-09-19: PySide6** | `DSN-GUI-010`, `DSN-GUI-080` | The GUI holds no capability. Its data contract is the test case model, not a GUI-private structure. A technology change is a rewrite of L5 only. |
 | ADR-002 — project/test data format | `DSN-PRJ-010`, `DSN-TCM-020` | Surface syntax is confined to a serialisation adapter; the model layer is format-agnostic. |
 | ADR-003 — symbolic execution engine | `DSN-ATG-020`, `DSN-ATG-030` | Both engines implement one adapter interface, and the component is optional and never on a default install path. |
 | ADR-004 — coverage backend strategy | `DSN-COV-010` | Per-toolchain adapters. Designating one primary reduces adapter count; it does not change the interface. |
 | ADR-005 — license | `DSN-PKG-090` | Structural rule (copyleft at process boundaries) is independent of which permissive license is chosen. |
-| ADR-006 — fork UTBotCpp | Components, not elements: `CMP-ANA`, `CMP-ATG`, `CMP-GEN` | **Not absorbed**, and carries no `open:` marker because no single element can. A fork resets the language decision and the framework back-end together. This must be resolved before SDD-001 is baselined. |
+| ADR-006 — fork UTBotCpp — **Accepted 2026-09-19: build fresh, do not fork** | Components, not elements: `CMP-ANA`, `CMP-ATG`, `CMP-GEN` | Was **not absorbable** by design — a fork would have reset the language decision and the framework back-end together, which is exactly why this one could not be left open past this point. See [`ADR-006-fork-or-build-fresh.md`](../ADR-006-fork-or-build-fresh.md). |
 | ADR-007 — packaging | `DSN-PKG-010` | Confined to `CMP-PKG`; no other component observes the packaging mechanism. |
 | SRS open question 2 — MC/DC form | `DSN-COV-020` | The form obtained is a data field on the coverage model, rendered by every report — not a documentation claim. |
 | SRS open question 9 — debugger | `DSN-EXH-060`, `DSN-GUI-140` | The engine prepares and reports the invocation; the front-end choice is confined to L5. |
 
-ADR-006 is the one genuine blocker. The others can be decided late without
-rework; a fork decision arriving after implementation starts invalidates
-`CMP-ANA`, `CMP-ATG`, and the `CMP-GEN` framework back-end simultaneously.
+**ADR-006 was the one genuine blocker, and it is now cleared.** The remaining
+rows above (ADR-002 through ADR-005, ADR-007, and the two SRS open questions)
+can still be decided late without rework — that is what distinguished ADR-006
+from every other row in this table, not a claim that this table is now empty.
 
 ---
 

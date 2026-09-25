@@ -8,7 +8,7 @@
 ---
 
 <!-- nav:start -->
-**Related documents** — **SRS-001** *(you are here)* · [ADR-001](ADR-001-architecture-decisions.md) · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [SDD-005](design/SDD-005-external-integration.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
+**Related documents** — **SRS-001** *(you are here)* · [ADR-001](ADR-001-architecture-decisions.md) · [ADR-006](ADR-006-fork-or-build-fresh.md) · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [SDD-005](design/SDD-005-external-integration.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
 
 Architecture diagrams: [specifications](design/diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -665,6 +665,16 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-AIF-210** *(M, P3, T)* — Where an AI-generated artifact is rejected by the validation required in TOOL-AIF-070, the tool shall record that a rejection occurred, so that acceptance rates are visible rather than hidden.
 
+**TOOL-AIF-220** *(S, P3, A)* — The tool shall support an AI-assisted test-case validation capability that evaluates discrete testing decisions — for example, pass/fail classification of ambiguous results, flaky-test flagging, or priority triage of AI-generated artifacts awaiting review (TOOL-AIF-090) — using a structured-decision model that returns typed, code-consumable output (choice, score, or boolean-style judgments with confidence) rather than free-text requiring further parsing.
+
+**TOOL-AIF-230** *(S, P3, A)* — The structured-decision provider used for test-case validation (TOOL-AIF-220) shall be configurable independently of the free-text generation provider required by TOOL-AIF-050, so the tool may use different back ends for generation versus validation roles.
+
+**TOOL-AIF-240** *(C, P4, D)* — Where a user explicitly enables a remote structured-decision provider under TOOL-AIF-030, the tool's default provider profile for the validation role defined in TOOL-AIF-220 shall be TypeSafe AI (Jev). This default is expressed purely as configuration and carries no code-level dependency that would block substitution.
+
+**TOOL-AIF-250** *(M, P3, A)* — The structured-decision provider interface (TOOL-AIF-230) shall accept a locally-executed or self-hosted enterprise model as a drop-in substitute for any remote structured-decision provider, satisfying TOOL-AIF-020's local-execution requirement independently of which provider is configured as default.
+
+**TOOL-AIF-260** *(M, P3, A)* — Every AI-assisted capability in this section — including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined — shall integrate exclusively through the extension point defined in TOOL-PLG-080. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.
+
 ---
 
 ## 19. Qualification and Safety Standards (QUA)
@@ -852,6 +862,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-PLG-060** *(M, P2, I)* — Extension interfaces shall be versioned, and breaking changes shall be documented with a migration path.
 
 **TOOL-PLG-070** *(S, P3, T)* — The tool shall discover and load user-supplied extensions from a documented location without requiring reinstallation.
+
+**TOOL-PLG-080** *(M, P2, A)* — The tool shall define a documented AI-provider extension point (§18 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability — present or future, generative or structured-decision, local or remote, from any vendor or model architecture — is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.
 
 **TOOL-PLG-080** *(M, P3, D)* — The tool shall report clearly when an extension fails to load or is incompatible, and shall continue operating with the remaining functionality.
 

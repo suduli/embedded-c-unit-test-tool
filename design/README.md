@@ -6,7 +6,7 @@ machine-checked rather than asserted in prose.
 
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · **Design index** *(you are here)*
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -158,13 +158,11 @@ published pages are explorable rather than static.
 
 Draft, tracking SRS-001 v0.1, which is not baselined.
 
-This design deliberately does **not** decide the implementation language, GUI
-toolkit, project file syntax, symbolic execution engine, coverage backend
-strategy, license, or packaging mechanism. Those are ADR-001 through ADR-007 and
-none is recorded. Elements whose shape depends on an open decision carry an
-`open:` field naming it; SDD-001 §8 tabulates how each outcome is absorbed.
-
-One open decision is a genuine blocker rather than a deferral: **ADR-006**
-(fork UTBotCpp or build fresh) would reset the language decision, `CMP-ANA`,
-`CMP-ATG`, and the `CMP-GEN` framework back-end simultaneously. It should be
-resolved before this design is baselined.
+**ADR-001** (implementation language: Python; GUI: PySide6; qualification
+scope: Tier 1 discipline in v1.0) and **ADR-006** (build fresh, do not fork
+UTBotCpp) are both **Accepted** — the one genuine blocker SDD-001 §8 named is
+now cleared. Project file syntax, symbolic execution engine, coverage backend
+strategy, license, and packaging mechanism remain open as ADR-002 through
+ADR-005 and ADR-007; none of those is recorded yet. Elements whose shape
+depends on one of those still-open decisions carry an `open:` field naming it;
+SDD-001 §8 tabulates how each outcome is absorbed.

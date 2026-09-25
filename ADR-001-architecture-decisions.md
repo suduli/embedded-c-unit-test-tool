@@ -1,13 +1,13 @@
 # ADR-001 — Core Language, Front-End Technology, and Qualification Scope
 
 **Document ID:** ADR-001
-**Status:** Analysis for decision — validation spikes (§4.2) complete, recommendations in §4 now stand at high confidence; ADR-006 (§5) is the one remaining item before this can be accepted
+**Status:** **Accepted, 2026-09-19** — validation spikes (§4.2) complete, all three recommendations in §4 stand at high confidence, and ADR-006 (§5) — the one remaining condition — resolved as "build fresh," discharging it without overturning any recommendation here
 **Relates to:** SRS-001 open questions 1, 4, 5
 
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](SRS-001-requirements.md) · **ADR-001** *(you are here)* · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [SDD-005](design/SDD-005-external-integration.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
+**Related documents** — [SRS-001](SRS-001-requirements.md) · **ADR-001** *(you are here)* · [ADR-006](ADR-006-fork-or-build-fresh.md) · [SDD-001](design/SDD-001-architecture.md) · [SDD-002](design/SDD-002-interfaces.md) · [SDD-003](design/SDD-003-data-model.md) · [SDD-004](design/SDD-004-traceability-architecture.md) · [SDD-005](design/SDD-005-external-integration.md) · [Register](design/trace/design-elements.yaml) · [Design index](design/README.md)
 
 Architecture diagrams: [specifications](design/diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -133,7 +133,7 @@ Concretely:
 2. **Treat that JSON model as an inviolable interface.** Nothing downstream may call libclang directly.
 3. If and when CFG access proves necessary (PAR-070, UIX-270), write one focused C++ LibTooling binary that emits the same JSON model, and swap it in. Nothing else changes.
 
-This is UTBotCpp's client-server insight — isolate the toolchain-version-sensitive component — applied without inheriting the Docker requirement.
+This is UTBotCpp's client-server insight — isolate the toolchain-version-sensitive component — applied without inheriting its Ubuntu-resident server (Docker is merely how UTBotCpp makes that Ubuntu assumption portable to other hosts, not a separate requirement of its own — see [ADR-006](ADR-006-fork-or-build-fresh.md) §3.1).
 
 **Choose Rust instead if** distribution to locked-down corporate environments is the single dominant constraint and you are willing to accept a much smaller contributor pool and reimplement what the Python ecosystem gives free.
 
@@ -217,8 +217,8 @@ Rationale, in order of weight: the two hardest widgets come free and virtualized
 | Decision | Recommendation | Confidence |
 |---|---|---|
 | **Qualification scope** | Tier 1 (discipline) in v1.0; Tier 2 (documentation) in v1.1; Tier 3 (certification) not a shipped artifact. Target "qualifiable," not "qualified." | **High** — the cost argument against Cantata's free kit is decisive |
-| **Core language** | Python, with PAR-100's JSON model held as an inviolable seam permitting a later C++ LibTooling analyzer | **High** — §2.1's CFG-sufficiency premise confirmed against 151k lines of real vendor code (`WP-SPIKE-01`, §2.5). ADR-006 (§5) is the one remaining condition that could still overturn this |
-| **GUI** | PySide6 (Qt), standalone desktop, dynamically linked, LGPL documented in SBOM | **High** — the hardest widget (the nested type-aware editor) was prototyped and held up (`WP-SPIKE-02`, §3.6). Still downstream of the language decision, as before |
+| **Core language** | Python, with PAR-100's JSON model held as an inviolable seam permitting a later C++ LibTooling analyzer | **High** — §2.1's CFG-sufficiency premise confirmed against 151k lines of real vendor code (`WP-SPIKE-01`, §2.5), and ADR-006 (accepted: build fresh, §5) confirms this is not overturned |
+| **GUI** | PySide6 (Qt), standalone desktop, dynamically linked, LGPL documented in SBOM | **High** — the hardest widget (the nested type-aware editor) was prototyped and held up (`WP-SPIKE-02`, §3.6), and downstream of the now-accepted language decision |
 
 ### 4.1 What would change these recommendations
 
@@ -235,7 +235,7 @@ All three spikes below (`WP-SPIKE-01/02/03`) have run. Each is summarized where 
 2. ~~**Spike the hard widget.**~~ **Done — held.** See §3.6. [`spikes/spike-02-nested-editor/RESULTS.md`](spikes/spike-02-nested-editor/RESULTS.md)
 3. ~~**Spike distribution.**~~ **Done — mechanically sound; clean-machine AV/SmartScreen behaviour still untested.** See §2.3.1. [`spikes/spike-03-packaging/RESULTS.md`](spikes/spike-03-packaging/RESULTS.md)
 
-Each spike was days, not weeks, and each directly tested the assumption its decision rests on — exactly as intended. What they do not do is settle ADR-006 (§5), which needs a direct evaluation of UTBotCpp itself, not a viability check on the from-scratch alternative.
+Each spike was days, not weeks, and each directly tested the assumption its decision rests on — exactly as intended. They deliberately did not settle ADR-006 (§5), which needed a direct evaluation of UTBotCpp itself rather than a viability check on the from-scratch alternative — that evaluation has since been done and accepted.
 
 ---
 
@@ -268,7 +268,7 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 **Question:** whether to fork UnitTestBot/UTBotCpp as a foundation.
 **Why it matters:** it is the closest existing open-source analog and it solves real problems — KLEE integration, stub synthesis with symbolic return values, automatic project configuration. But it is host-Linux-oriented, C++-implemented, and generates GoogleTest output — all three of which conflict with the recommendations in §2 and §3 and with SRS HAR-060.
 **Bearing on other decisions:** decisive. A fork settles the language question as C++ and reopens the GUI and framework decisions. This should be resolved before ADR-001's recommendations are accepted, not after.
-**Status after the §4.2 validation spikes:** still unresolved, and deliberately *not* addressed by any of them. `WP-SPIKE-01/02/03` tested whether a fresh Python + libclang + PySide6 build is *viable* — they say nothing about whether forking UTBotCpp would be *better*. The spikes' results are suggestive evidence for "build fresh" (a from-scratch Python pipeline handled 151k lines of real vendor embedded C cleanly, with no blocking gap — see §2.5), but suggestive is not a substitute for the comparative analysis this ADR actually needs: what UTBotCpp's KLEE integration and stub synthesis would actually save versus the cost of inheriting its host-Linux, C++, GoogleTest-output orientation. This remains the item PLAN-001 §4.2 calls "the decision that cannot wait" — resolve it with a direct evaluation of UTBotCpp before treating §4's combined position as final.
+**Resolved — Accepted, 2026-09-19: build fresh, do not fork.** Recorded in full in [`ADR-006-fork-or-build-fresh.md`](ADR-006-fork-or-build-fresh.md), which is a direct evaluation of `UnitTestBot/UTBotCpp` against this specification (GitHub API, wiki, and repository, independently verified) — not the viability check the §4.2 spikes ran. Headline finding: UTBotCpp's Apache-2.0 license removes what usually kills a fork decision, but the fork collides with this specification on eight points — no target execution at all, line-coverage-only, an LLVM-14 pin four majors behind SDD-005's required floor on the API SDD-005 already rejects as unstable, an Ubuntu-resident server, C++ GoogleTest output that violates `TOOL-HAR-060`, a test-generation support matrix that excludes `void*`/variadics/external-state — exactly what embedded HAL code is made of — no standalone GUI, and a two-year-dormant upstream with no one to share the maintenance burden. Its one real asset, working KLEE-based test generation, serves `ATG-020`/`030`, which this specification files at *(S/C, P3)* — the lowest-priority band in the document. Four design ideas are harvested without forking (§5 of that document): the client-server split (already credited above), the `KLEE_MODE` symbolic-stub duality, `link_commands.json`'s link-closure insight, and the `c-syntax` support matrix as a ready-made risk list — all feeding `WP-GEN-05`/`06`/`07` and ADR-003. This discharges §4's outstanding condition without changing any recommendation in this document.
 
 ### ADR-007 — Distribution and packaging
 **Question:** the concrete packaging mechanism per platform, given INS-010 through INS-050.
