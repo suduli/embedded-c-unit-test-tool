@@ -9,18 +9,28 @@
         "id": "SRS-001",
         "version": "0.1",
         "path": "SRS-001-requirements.md",
-        "requirement_count": 323
+        "requirement_count": 329
       },
       {
         "id": "ADR-001",
-        "version": "analysis, no decision recorded",
+        "version": "Accepted 2026-09-19",
         "path": "ADR-001-architecture-decisions.md"
+      },
+      {
+        "id": "ADR-006",
+        "version": "Accepted 2026-09-19",
+        "path": "ADR-006-fork-or-build-fresh.md"
+      },
+      {
+        "id": "ADR-008",
+        "version": "Accepted",
+        "path": "ADR-008-ai-structured-decision-provider.md"
       }
     ]
   },
   "generated_from": {
-    "requirements": 323,
-    "elements": 239
+    "requirements": 329,
+    "elements": 243
   },
   "requirements": {
     "TOOL-AIF-010": {
@@ -252,6 +262,61 @@
       "text": "Where an AI-generated artifact is rejected by the validation required in TOOL-AIF-070, the tool shall record that a rejection occurred, so that acceptance rates are visible rather than hidden.",
       "satisfied_by": [
         "DSN-AIF-100"
+      ]
+    },
+    "TOOL-AIF-220": {
+      "id": "TOOL-AIF-220",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The tool shall support an AI-assisted test-case validation capability that evaluates discrete testing decisions \u2014 for example, pass/fail classification of ambiguous results, flaky-test flagging, or priority triage of AI-generated artifacts awaiting review (TOOL-AIF-090) \u2014 using a structured-decision model that returns typed, code-consumable output (choice, score, or boolean-style judgments with confidence) rather than free-text requiring further parsing.",
+      "satisfied_by": [
+        "DSN-AIF-140"
+      ]
+    },
+    "TOOL-AIF-230": {
+      "id": "TOOL-AIF-230",
+      "category": "AIF",
+      "priority": "S",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The structured-decision provider used for test-case validation (TOOL-AIF-220) shall be configurable independently of the free-text generation provider required by TOOL-AIF-050, so the tool may use different back ends for generation versus validation roles.",
+      "satisfied_by": [
+        "DSN-AIF-020"
+      ]
+    },
+    "TOOL-AIF-240": {
+      "id": "TOOL-AIF-240",
+      "category": "AIF",
+      "priority": "C",
+      "phase": "P4",
+      "verification": "D",
+      "text": "Where a user explicitly enables a remote structured-decision provider under TOOL-AIF-030, the tool's default provider profile for the validation role defined in TOOL-AIF-220 shall be TypeSafe AI (Jev). This default is expressed purely as configuration and carries no code-level dependency that would block substitution.",
+      "satisfied_by": [
+        "DSN-AIF-150"
+      ]
+    },
+    "TOOL-AIF-250": {
+      "id": "TOOL-AIF-250",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "A",
+      "text": "The structured-decision provider interface (TOOL-AIF-230) shall accept a locally-executed or self-hosted enterprise model as a drop-in substitute for any remote structured-decision provider, satisfying TOOL-AIF-020's local-execution requirement independently of which provider is configured as default.",
+      "satisfied_by": [
+        "DSN-AIF-020"
+      ]
+    },
+    "TOOL-AIF-260": {
+      "id": "TOOL-AIF-260",
+      "category": "AIF",
+      "priority": "M",
+      "phase": "P3",
+      "verification": "A",
+      "text": "Every AI-assisted capability in this section \u2014 including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined \u2014 shall integrate exclusively through the extension point defined in TOOL-PLG-100. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.",
+      "satisfied_by": [
+        "DSN-AIF-160"
       ]
     },
     "TOOL-ATG-010": {
@@ -1951,6 +2016,17 @@
         "DSN-PLG-040"
       ]
     },
+    "TOOL-PLG-100": {
+      "id": "TOOL-PLG-100",
+      "category": "PLG",
+      "priority": "M",
+      "phase": "P2",
+      "verification": "A",
+      "text": "The tool shall define a documented AI-provider extension point (\u00a718 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability \u2014 present or future, generative or structured-decision, local or remote, from any vendor or model architecture \u2014 is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.",
+      "satisfied_by": [
+        "DSN-PLG-050"
+      ]
+    },
     "TOOL-PRJ-010": {
       "id": "TOOL-PRJ-010",
       "category": "PRJ",
@@ -3594,11 +3670,13 @@
       "open": null
     },
     "DSN-AIF-020": {
-      "title": "Provider abstraction",
+      "title": "Provider abstraction and roles",
       "component": "CMP-AIF",
       "layer": "L6",
       "satisfies": [
-        "TOOL-AIF-050"
+        "TOOL-AIF-050",
+        "TOOL-AIF-230",
+        "TOOL-AIF-250"
       ],
       "refines": [],
       "derived": false,
@@ -3770,6 +3848,48 @@
       "derived": false,
       "verification": [
         "T"
+      ],
+      "open": null
+    },
+    "DSN-AIF-140": {
+      "title": "Structured-decision test validation",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-220"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "A"
+      ],
+      "open": null
+    },
+    "DSN-AIF-150": {
+      "title": "Default validation provider profile",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-240"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "D"
+      ],
+      "open": null
+    },
+    "DSN-AIF-160": {
+      "title": "Provider-only integration rule",
+      "component": "CMP-AIF",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-AIF-260"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "A"
       ],
       "open": null
     },
@@ -6068,6 +6188,20 @@
       ],
       "open": null
     },
+    "DSN-PLG-050": {
+      "title": "AI-provider extension point",
+      "component": "CMP-PLG",
+      "layer": "L6",
+      "satisfies": [
+        "TOOL-PLG-100"
+      ],
+      "refines": [],
+      "derived": false,
+      "verification": [
+        "A"
+      ],
+      "open": null
+    },
     "DSN-PRJ-010": {
       "title": "Plain-text project model with explicit schema versioning",
       "component": "CMP-PRJ",
@@ -7041,6 +7175,7 @@
         "CMP-ATG",
         "CMP-CORE",
         "CMP-GEN",
+        "CMP-PLG",
         "CMP-SEC",
         "CMP-TCM"
       ],
@@ -7057,7 +7192,10 @@
         "DSN-AIF-100",
         "DSN-AIF-110",
         "DSN-AIF-120",
-        "DSN-AIF-130"
+        "DSN-AIF-130",
+        "DSN-AIF-140",
+        "DSN-AIF-150",
+        "DSN-AIF-160"
       ]
     },
     "CMP-ANA": {
@@ -7402,7 +7540,8 @@
         "DSN-PLG-010",
         "DSN-PLG-020",
         "DSN-PLG-030",
-        "DSN-PLG-040"
+        "DSN-PLG-040",
+        "DSN-PLG-050"
       ]
     },
     "CMP-PRJ": {

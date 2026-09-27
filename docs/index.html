@@ -9,7 +9,7 @@
 <body>
 <div class="wrap">
 <h1>Design documentation</h1>
-<p class="sub">An open-source unit testing tool for embedded C. 24 components across 7 layers, 69 dependency edges, 239 design elements, all allocated from 321 requirements.</p>
+<p class="sub">An open-source unit testing tool for embedded C. 24 components across 7 layers, 70 dependency edges, 243 design elements, all allocated from 327 requirements.</p>
 <p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by <code>trace_check.py --emit-index</code>. Component names come from the register and the description under each diagram comes from that diagram's own first card, so nothing on this page can drift from what it describes.</p>
 <nav class="jump"><a href="doc-map.html">How it fits together</a><a href="#diagrams">Diagrams</a><a href="components.html">Component index</a><a href="#documents">Documents</a><a href="https://github.com/suduli/embedded-c-unit-test-tool">Repository</a></nav>
 <h2>Start here</h2>
@@ -94,10 +94,10 @@
 <article class="view">
 <h3><a href="diagrams/l6-ai-assist-and-migration.html">L6 Assurance — AI Assist and Migration</a></h3>
 <p class="path">L6 Assurance and Ecosystem</p>
-<p>CMP-AIF proposes generation and test-case content; it never writes to the store directly.</p>
+<p>CMP-AIF reaches every model through the AI-provider extension point in CMP-PLG, per role: generation and structured decision.</p>
 <dl>
 <dt>Owns</dt><dd><a class="chip" href="components.html#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="components.html#CMP-MIG">CMP-MIG<span>Migration and Interoperability</span></a></dd>
-<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="components.html#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="components.html#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Also shows</dt><dd><a class="chip" href="components.html#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="components.html#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="components.html#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="components.html#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="components.html#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="components.html#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="components.html#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
 <dt>Open</dt><dd><a href="diagrams/l6-ai-assist-and-migration.html">View the diagram &rarr;</a></dd>
 </dl>
 </article>
@@ -115,13 +115,23 @@
 <p class="sub">Written by hand, in reading order. Each links to the source in the repository.</p>
 <article>
 <h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/SRS-001-requirements.md">SRS-001</a> Software Requirements Specification</h3>
-<p>What the tool must do: 323 numbered requirements with priority, phase and verification method. Everything downstream exists to discharge these.</p>
+<p>What the tool must do: 329 numbered requirements with priority, phase and verification method. Everything downstream exists to discharge these.</p>
 <p class="path"><code>SRS-001-requirements.md</code></p>
 </article>
 <article>
 <h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/ADR-001-architecture-decisions.md">ADR-001</a> Architecture Decision Record</h3>
-<p>The open decisions - language, front-end technology, qualification scope. No decision is recorded yet; elements that depend on one carry an `open:` marker.</p>
+<p>Core language, front-end technology and qualification scope. Accepted 2026-09-19 (Python, PySide6, Tier 1 discipline) after three validation spikes and ADR-006 resolved the one condition that could have overturned it.</p>
 <p class="path"><code>ADR-001-architecture-decisions.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/ADR-006-fork-or-build-fresh.md">ADR-006</a> Fork UTBotCpp or Build Fresh</h3>
+<p>The one genuine blocker SDD-001 named. Accepted 2026-09-19: build fresh - UTBotCpp's Apache-2.0 license removes the usual objection, but it collides with this specification on eight points and its one real asset serves only the lowest-priority requirement band.</p>
+<p class="path"><code>ADR-006-fork-or-build-fresh.md</code></p>
+</article>
+<article>
+<h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/ADR-008-ai-structured-decision-provider.md">ADR-008</a> AI Provider for Structured Test-Decision Validation</h3>
+<p>A structured-decision AI role, configured separately from generation, with TypeSafe AI (Jev) as an opt-in remote default. Every AI capability reaches its model through one provider extension point, so the default stays swappable.</p>
+<p class="path"><code>ADR-008-ai-structured-decision-provider.md</code></p>
 </article>
 <article>
 <h3><a href="https://github.com/suduli/embedded-c-unit-test-tool/blob/main/design/SDD-001-architecture.md">SDD-001</a> Architecture and Component Design</h3>

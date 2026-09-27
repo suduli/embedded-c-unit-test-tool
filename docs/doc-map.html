@@ -589,8 +589,10 @@
       padding-bottom: calc(0.75rem + var(--archify-nav-reserve));
     }
     html[data-present="true"]:not([data-embed="true"]) .diagram-container > svg {
-      width: 100%;
+      flex: 1 1 auto;
       height: 100%;
+      min-height: 0;
+      width: 100%;
       min-width: 0;
     }
     html[data-present="true"]:not([data-embed="true"]) .cards { display: none; }
@@ -2885,6 +2887,11 @@
       body { padding-block: 1.25rem; }
       .header { margin-bottom: 0.875rem; }
       .cards { margin-top: 0.75rem; }
+      html[data-nav-stage-rail="true"] body { padding-block: 0.375rem; }
+      html[data-nav-stage-rail="true"] .header { margin-bottom: 0.5rem; }
+      html[data-nav-stage-rail="true"] .guided-views { margin-bottom: 0.375rem; }
+      html[data-nav-stage-rail="true"] .diagram-container[data-nav-stage-rail="true"] { padding-top: 0.5rem; }
+      html[data-nav-stage-rail="true"] .cards { margin-top: 0.375rem; }
     }
 
     html[data-preset="blueprint"] .card {
@@ -5032,7 +5039,7 @@
         <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="3" data-composition-frame-label="What you read" x="1045" y="40" width="260" height="344" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="srs" data-edge-to="register" data-edge-label="allocates 321 requirements" data-edge-key="0" data-edge-id="srs-reg" data-composition-points="240,105;385,105" d="M 240 105 L 385 105" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="srs" data-edge-to="register" data-edge-label="allocates 327 requirements" data-edge-key="0" data-edge-id="srs-reg" data-composition-points="240,105;385,105" d="M 240 105 L 385 105" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         <path data-edge-from="adr" data-edge-to="register" data-edge-label="open decisions marked" data-edge-key="1" data-edge-id="adr-reg" data-composition-points="240,322;312.5,322;312.5,119;385,119" d="M 240 322 L 304.5 322 Q 312.5 322 312.5 314 L 312.5 127 Q 312.5 119 320.5 119 L 385 119" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         <path data-edge-from="register" data-edge-to="checker" data-edge-label="validated on every push" data-edge-key="2" data-edge-id="reg-check" data-composition-points="585,112;730,112" d="M 585 112 L 730 112" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         <path data-edge-from="specs" data-edge-to="checker" data-edge-label="checked against the register" data-edge-key="3" data-edge-id="spec-check" data-composition-points="485,280;485,217;830,217;830,154" d="M 485 280 L 485 225 Q 485 217 493 217 L 822 217 Q 830 217 830 209 L 830 154" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
@@ -5041,30 +5048,30 @@
         <path data-edge-from="archify" data-edge-to="views" data-edge-label="self-contained HTML" data-edge-key="6" data-edge-id="render-views" data-composition-points="930,322;1075,322" d="M 930 322 L 1075 322" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
-        <g id="node-srs" data-node-id="srs" data-node-label="SRS-001" tabindex="0" role="button" aria-label="Focus SRS-001, Requirements specification, What is required" aria-pressed="false" data-node-kind="database" data-node-sublabel="Requirements specification" data-node-tag="323 requirements" data-node-context="What is required">
-          <title>SRS-001 · Requirements specification · What is required · 323 requirements</title>
+        <g id="node-srs" data-node-id="srs" data-node-label="SRS-001" tabindex="0" role="button" aria-label="Focus SRS-001, Requirements specification, What is required" aria-pressed="false" data-node-kind="database" data-node-sublabel="Requirements specification" data-node-tag="329 requirements" data-node-context="What is required">
+          <title>SRS-001 · Requirements specification · What is required · 329 requirements</title>
           <rect x="40" y="70" width="200" height="84" rx="6" class="c-mask"/>
           <rect x="40" y="70" width="200" height="84" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 76) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label data-detail-anchor x="140" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SRS-001</text>
+          <text data-node-label="" data-detail-anchor="" x="140" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SRS-001</text>
         <text data-detail="context" x="140" y="126" class="t-muted" font-size="9" text-anchor="middle">Requirements specification</text>
-        <text data-detail="fine" x="140" y="146" class="t-database" font-size="7" text-anchor="middle">323 requirements</text>
+        <text data-detail="fine" x="140" y="146" class="t-database" font-size="7" text-anchor="middle">329 requirements</text>
         </g>
 
-        <g id="node-adr" data-node-id="adr" data-node-label="ADR-001" tabindex="0" role="button" aria-label="Focus ADR-001, Architecture decision record, What is required" aria-pressed="false" data-node-kind="database" data-node-sublabel="Architecture decision record" data-node-tag="no decision recorded" data-node-context="What is required">
-          <title>ADR-001 · Architecture decision record · What is required · no decision recorded</title>
+        <g id="node-adr" data-node-id="adr" data-node-label="ADR-001 · 006 · 008" tabindex="0" role="button" aria-label="Focus ADR-001 · 006 · 008, Architecture decision records, What is required" aria-pressed="false" data-node-kind="database" data-node-sublabel="Architecture decision records" data-node-tag="3 accepted · 5 open" data-node-context="What is required">
+          <title>ADR-001 · 006 · 008 · Architecture decision records · What is required · 3 accepted · 5 open</title>
           <rect x="40" y="280" width="200" height="84" rx="6" class="c-mask"/>
           <rect x="40" y="280" width="200" height="84" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 286) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label data-detail-anchor x="140" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ADR-001</text>
-        <text data-detail="context" x="140" y="336" class="t-muted" font-size="9" text-anchor="middle">Architecture decision record</text>
-        <text data-detail="fine" x="140" y="356" class="t-database" font-size="7" text-anchor="middle">no decision recorded</text>
+          <text data-node-label="" data-detail-anchor="" x="140" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ADR-001 · 006 · 008</text>
+        <text data-detail="context" x="140" y="336" class="t-muted" font-size="9" text-anchor="middle">Architecture decision records</text>
+        <text data-detail="fine" x="140" y="356" class="t-database" font-size="7" text-anchor="middle">3 accepted · 5 open</text>
         </g>
 
         <g id="node-register" data-node-id="register" data-node-label="design-elements.yaml" tabindex="0" role="button" aria-label="Focus design-elements.yaml, Design element register, Where it is allocated" aria-pressed="false" data-node-kind="database" data-node-sublabel="Design element register" data-node-tag="authoritative" data-node-context="Where it is allocated">
@@ -5075,7 +5082,7 @@
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label data-detail-anchor x="485" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">design-elements.yaml</text>
+          <text data-node-label="" data-detail-anchor="" x="485" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">design-elements.yaml</text>
         <text data-detail="context" x="485" y="126" class="t-muted" font-size="9" text-anchor="middle">Design element register</text>
         <text data-detail="fine" x="485" y="146" class="t-database" font-size="7" text-anchor="middle">authoritative</text>
         </g>
@@ -5088,7 +5095,7 @@
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label data-detail-anchor x="485" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">diagrams/*.archify.json</text>
+          <text data-node-label="" data-detail-anchor="" x="485" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">diagrams/*.archify.json</text>
         <text data-detail="context" x="485" y="336" class="t-muted" font-size="9" text-anchor="middle">Nine authored diagram specs</text>
         </g>
 
@@ -5099,7 +5106,7 @@
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(736 76) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label data-detail-anchor x="830" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">trace_check.py</text>
+          <text data-node-label="" data-detail-anchor="" x="830" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">trace_check.py</text>
         <text data-detail="context" x="830" y="126" class="t-muted" font-size="9" text-anchor="middle">Validator, gate and emitter</text>
         </g>
 
@@ -5111,7 +5118,7 @@
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label data-detail-anchor x="830" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">archify</text>
+          <text data-node-label="" data-detail-anchor="" x="830" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">archify</text>
         <text data-detail="context" x="830" y="336" class="t-muted" font-size="9" text-anchor="middle">Diagram renderer</text>
         <text data-detail="fine" x="830" y="356" class="t-external" font-size="7" text-anchor="middle">third-party, MIT</text>
         </g>
@@ -5124,7 +5131,7 @@
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label data-detail-anchor x="1175" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prose and tables</text>
+          <text data-node-label="" data-detail-anchor="" x="1175" y="110" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prose and tables</text>
         <text data-detail="context" x="1175" y="126" class="t-muted" font-size="9" text-anchor="middle">SDD set, matrix, trace graph, index</text>
         </g>
 
@@ -5138,14 +5145,14 @@
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label data-detail-anchor x="1175" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Nine interactive diagrams</text>
+          <text data-node-label="" data-detail-anchor="" x="1175" y="320" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Nine interactive diagrams</text>
         <text data-detail="context" x="1175" y="336" class="t-muted" font-size="9" text-anchor="middle">Layer map and eight layer views</text>
         </g>
 
         <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="srs" data-edge-to="register" data-edge-label="allocates 321 requirements" data-edge-key="0" data-edge-id="srs-reg">
+        <g data-detail="context" data-edge-from="srs" data-edge-to="register" data-edge-label="allocates 327 requirements" data-edge-key="0" data-edge-id="srs-reg">
           <rect x="245.1" y="85" width="134.8" height="14" rx="3" class="c-mask"/>
-          <text x="312.5" y="95" class="t-muted" font-size="8" text-anchor="middle">allocates 321 requirements</text>
+          <text x="312.5" y="95" class="t-muted" font-size="8" text-anchor="middle">allocates 327 requirements</text>
         </g>
         <g data-detail="context" data-edge-from="adr" data-edge-to="register" data-edge-label="open decisions marked" data-edge-key="1" data-edge-id="adr-reg">
           <rect x="257.1" y="200.5" width="110.8" height="14" rx="3" class="c-mask"/>
@@ -5175,26 +5182,26 @@
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
         <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="What is required">
           <rect data-graph-role="structural-frame-label-mask" x="14" y="50" width="96.39999999999999" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label x="18" y="63" class="t-cloud" font-size="9" font-weight="600">What is required</text>
+          <text data-boundary-label="" x="18" y="63" class="t-cloud" font-size="9" font-weight="600">What is required</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Where it is allocated">
           <rect data-graph-role="structural-frame-label-mask" x="359" y="50" width="123.39999999999999" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label x="363" y="63" class="t-cloud" font-size="9" font-weight="600">Where it is allocated</text>
+          <text data-boundary-label="" x="363" y="63" class="t-cloud" font-size="9" font-weight="600">Where it is allocated</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="What checks and renders it">
           <rect data-graph-role="structural-frame-label-mask" x="704" y="50" width="150.4" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label x="708" y="63" class="t-cloud" font-size="9" font-weight="600">What checks and renders it</text>
+          <text data-boundary-label="" x="708" y="63" class="t-cloud" font-size="9" font-weight="600">What checks and renders it</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="3" data-composition-frame-kind="region" data-composition-frame-label="What you read">
           <rect data-graph-role="structural-frame-label-mask" x="1049" y="50" width="80.2" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label x="1053" y="63" class="t-cloud" font-size="9" font-weight="600">What you read</text>
+          <text data-boundary-label="" x="1053" y="63" class="t-cloud" font-size="9" font-weight="600">What you read</text>
         </g>
 
         <!-- Legend -->
-        <g data-legend data-legend-bridge>
+        <g data-legend="" data-legend-bridge="">
           <text x="40" y="464" class="t-primary" font-size="12" font-weight="650">Legend</text>
           <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="484" data-legend-width="83">
             <rect x="40" y="475" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
@@ -5906,6 +5913,7 @@
         // View transforms and neighborhood focus are HTML exploration state,
         // never part of a downloaded full-diagram artifact.
         clone.style.removeProperty('transform');
+        clone.style.removeProperty('clip-path');
         clone.removeAttribute('data-view-scale');
         clone.removeAttribute('data-focus-active');
         clone.removeAttribute('data-reach-active');
@@ -6080,6 +6088,7 @@
           !clone.hasAttribute('data-chapter-anchor') &&
           !clone.hasAttribute('data-chapter-preview') &&
           !clone.style.getPropertyValue('transform') &&
+          !clone.style.getPropertyValue('clip-path') &&
           clone.querySelectorAll('[data-story-overlay], [data-story-carrier-overlay], [data-story-carrier-token], [data-story-step], [data-story-beat-state], [data-story-beat-step], [data-chapter-handoff-overlay], [data-chapter-role], [data-chapter-preview-role], [data-focus-match], [data-focus-selected], [data-reach-match], [data-reach-origin], [data-reach-depth], [data-semantic-lens-overlay], [data-lens-match], [data-lens-selected], [data-lens-peer], [data-legend-bridge], [data-legend-kind], [data-legend-bridge-runtime], [data-legend-count], [data-legend-zero], [data-legend-selected], [data-legend-preview-match], [data-legend-preview-selected], [data-legend-preview-peer], [data-relationship-hit-overlay], [data-relationship-pulse-overlay], [data-relationship-preview], [data-relationship-preview-node], [data-relationship-preview-source], [data-relationship-preview-target], [data-intent-trace-overlay], [data-intent-trace-match], [data-intent-trace-selected], [data-route-probe-overlay], [data-route-journey-overlay], [data-route-match], [data-route-start], [data-route-end], [data-route-step], [data-route-candidate], [data-route-journey-state], [data-route-journey-current], [data-share-route-match], [data-share-route-step], [data-share-route-start], [data-share-route-end], [data-share-route-middle], [data-share-reach-match], [data-share-reach-origin], [data-share-reach-depth], [data-source-evidence-beacon], [data-source-evidence-count], [data-source-evidence-original-label], [data-detail], [data-detail-anchor]').length === 0;
 
         var vb = svg.viewBox.baseVal;
@@ -11043,9 +11052,9 @@
 
     /* ============================================================
        Viewer Chrome Layout — keep HTML controls clear of the canonical SVG
-       legend without changing authored geometry. The dock keeps its existing
-       position unless its zero-reserve position would cover the legend; only
-       then does a small bottom safe rail become part of the reader budget.
+       stage without changing authored geometry. The dock keeps its floating
+       appearance while a small bottom stage rail becomes part of the reader
+       budget whenever its zero-reserve position would enter the stage.
        ============================================================ */
     Archify.viewerChromeLayout = (function () {
       var html = document.documentElement;
@@ -11056,10 +11065,13 @@
       var frame = 0;
       var settleFrame = 0;
       var reserve = 0;
-      var collisionLatched = false;
+      var railLatched = false;
       var probingBaseline = false;
       var probePromise = null;
       var baselineIntersectionArea = 0;
+      var baselineStageGap = null;
+      var restorableReserve = 0;
+      var probeFallbackReserve = 0;
       var lastReceipt = null;
       var SAFE_GAP = 10;
 
@@ -11076,14 +11088,61 @@
         var height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
         return width * height;
       }
+      function protectedStageRect() {
+        if (!svg) return null;
+        var rect = svg.getBoundingClientRect();
+        var transform = '';
+        try { transform = window.getComputedStyle(svg).transform || ''; } catch (_) {}
+        var scaleX = 1;
+        var scaleY = 1;
+        var translateX = 0;
+        var translateY = 0;
+        var matrix = transform.match(/^matrix\(([^)]+)\)$/);
+        var matrix3d = transform.match(/^matrix3d\(([^)]+)\)$/);
+        if (matrix) {
+          var values = matrix[1].split(',').map(Number);
+          if (values.length === 6 && values.every(Number.isFinite)) {
+            scaleX = Math.abs(values[0]) || 1;
+            scaleY = Math.abs(values[3]) || 1;
+            translateX = values[4];
+            translateY = values[5];
+          }
+        } else if (matrix3d) {
+          var values3d = matrix3d[1].split(',').map(Number);
+          if (values3d.length === 16 && values3d.every(Number.isFinite)) {
+            scaleX = Math.abs(values3d[0]) || 1;
+            scaleY = Math.abs(values3d[5]) || 1;
+            translateX = values3d[12];
+            translateY = values3d[13];
+          }
+        }
+        var width = rect.width / scaleX;
+        var height = rect.height / scaleY;
+        var left = rect.left - translateX;
+        var top = rect.top - translateY;
+        return {
+          x: left,
+          y: top,
+          left: left,
+          top: top,
+          right: left + width,
+          bottom: top + height,
+          width: width,
+          height: height
+        };
+      }
       function eligible() {
         return Boolean(
-          container && svg && nav && legend &&
+          container && svg && nav &&
           window.innerWidth > 720 &&
           html.getAttribute('data-embed') !== 'true' &&
           (!window.matchMedia || !window.matchMedia('print').matches) &&
-          visible(nav) && visible(legend)
+          visible(nav)
         );
+      }
+      function cameraAtBaseline() {
+        var scale = Number(svg && svg.getAttribute('data-view-scale'));
+        return !Number.isFinite(scale) || Math.abs(scale - 1) < 0.001;
       }
       function writeReserve(next, options) {
         options = options || {};
@@ -11091,11 +11150,14 @@
         if (Math.abs(next - reserve) < 1) return false;
         reserve = next;
         if (reserve) {
+          if (options.remember !== false) restorableReserve = reserve;
           container.style.setProperty('--archify-nav-reserve', reserve + 'px');
-          container.setAttribute('data-nav-safe-rail', 'true');
+          container.setAttribute('data-nav-stage-rail', 'true');
+          html.setAttribute('data-nav-stage-rail', 'true');
         } else {
           container.style.removeProperty('--archify-nav-reserve');
-          container.removeAttribute('data-nav-safe-rail');
+          container.removeAttribute('data-nav-stage-rail');
+          html.removeAttribute('data-nav-stage-rail');
         }
         if (Archify.readerLayout && typeof Archify.readerLayout.schedule === 'function') {
           Archify.readerLayout.schedule();
@@ -11109,15 +11171,23 @@
         }
         return true;
       }
-      function clear() {
-        collisionLatched = false;
-        baselineIntersectionArea = 0;
+      function clear(options) {
+        options = options || {};
+        railLatched = false;
+        if (options.preserveBaseline !== true) {
+          baselineIntersectionArea = 0;
+          baselineStageGap = null;
+          restorableReserve = 0;
+        }
         writeReserve(0, { quiet: probingBaseline });
         lastReceipt = {
           eligible: false,
           active: false,
           reserve: 0,
           gap: SAFE_GAP,
+          baselineStageGap: null,
+          stageGap: null,
+          stageIntersectionArea: 0,
           baselineIntersectionArea: 0,
           intersectionArea: 0
         };
@@ -11126,50 +11196,93 @@
       function measure() {
         frame = 0;
         if (probingBaseline) return null;
-        if (!eligible()) return clear();
+        if (!eligible()) return clear({ preserveBaseline: !cameraAtBaseline() });
+
+        /* Camera transforms enlarge and translate authored paint inside the
+           fixed, clipped root SVG viewport. They must not redefine the
+           reader's baseline rail.
+           Restore that baseline after temporary mobile/embed/print states.
+           Camera Reset preserves the established rail while viewport, mode,
+           and content changes remain responsible for baseline reprobes. */
+        if (!cameraAtBaseline()) {
+          if (reserve === 0 && restorableReserve > 0) {
+            if (writeReserve(restorableReserve)) return null;
+          }
+          var cameraNavRect = nav.getBoundingClientRect();
+          var cameraLegendRect = visible(legend) ? legend.getBoundingClientRect() : null;
+          var cameraStageRect = protectedStageRect();
+          var cameraIntersectionArea = usable(cameraLegendRect) && intersectionArea(cameraNavRect, cameraStageRect) > 0
+            ? intersectionArea(cameraNavRect, cameraLegendRect)
+            : 0;
+          lastReceipt = {
+            eligible: true,
+            active: reserve > 0,
+            reserve: reserve,
+            gap: SAFE_GAP,
+            baselineStageGap: baselineStageGap == null ? null : Math.round(baselineStageGap * 100) / 100,
+            stageGap: Math.round((cameraNavRect.top - cameraStageRect.bottom) * 100) / 100,
+            stageIntersectionArea: Math.round(intersectionArea(cameraNavRect, cameraStageRect) * 100) / 100,
+            baselineIntersectionArea: Math.round(baselineIntersectionArea * 100) / 100,
+            intersectionArea: Math.round(cameraIntersectionArea * 100) / 100
+          };
+          return lastReceipt;
+        }
 
         var navRect = nav.getBoundingClientRect();
-        var legendRect = legend.getBoundingClientRect();
-        var svgRect = svg.getBoundingClientRect();
-        if (!usable(navRect) || !usable(legendRect) || !usable(svgRect)) return clear();
+        var legendRect = visible(legend) ? legend.getBoundingClientRect() : null;
+        var stageRect = protectedStageRect();
+        if (!usable(navRect) || !usable(stageRect)) return clear();
 
-        var actualIntersectionArea = intersectionArea(navRect, legendRect);
-        if (!collisionLatched && reserve === 0) {
+        var actualIntersectionArea = usable(legendRect) ? intersectionArea(navRect, legendRect) : 0;
+        var stageGap = navRect.top - stageRect.bottom;
+        if (!railLatched && reserve === 0) {
           baselineIntersectionArea = actualIntersectionArea;
-          if (actualIntersectionArea > 0) {
-            collisionLatched = true;
-            if (writeReserve(Math.max(0, svgRect.bottom + SAFE_GAP - navRect.top))) return null;
+          baselineStageGap = stageGap;
+          if (stageGap < SAFE_GAP) {
+            railLatched = true;
+            if (writeReserve(Math.max(0, SAFE_GAP - stageGap))) return null;
           }
-        } else if (collisionLatched && reserve > 0 && actualIntersectionArea > 0) {
-          /* Once zero-reserve geometry proves a collision, keep that decision
-             latched while Adaptive Reader incorporates the rail. If the first
-             rail is not quite tall enough (notably in Presentation flex
-             layout), grow only by the remaining vertical overlap. */
-          var remaining = Math.max(1, legendRect.bottom + SAFE_GAP - navRect.top);
+        } else if (railLatched && reserve > 0 && stageGap < SAFE_GAP) {
+          /* Keep the decision latched while Adaptive Reader incorporates the
+             rail. Presentation and rounded layout values can require one
+             bounded follow-up before the full stage gap is established. */
+          var remaining = Math.max(1, SAFE_GAP - stageGap);
           if (writeReserve(reserve + remaining)) return null;
         }
 
         navRect = nav.getBoundingClientRect();
-        legendRect = legend.getBoundingClientRect();
+        legendRect = visible(legend) ? legend.getBoundingClientRect() : null;
+        stageRect = protectedStageRect();
+        stageGap = navRect.top - stageRect.bottom;
         lastReceipt = {
           eligible: true,
           active: reserve > 0,
           reserve: reserve,
           gap: SAFE_GAP,
+          baselineStageGap: baselineStageGap == null ? null : Math.round(baselineStageGap * 100) / 100,
+          stageGap: Math.round(stageGap * 100) / 100,
+          stageIntersectionArea: Math.round(intersectionArea(navRect, stageRect) * 100) / 100,
           baselineIntersectionArea: Math.round(baselineIntersectionArea * 100) / 100,
-          intersectionArea: Math.round(intersectionArea(navRect, legendRect) * 100) / 100
+          intersectionArea: Math.round((usable(legendRect) ? intersectionArea(navRect, legendRect) : 0) * 100) / 100
         };
         return lastReceipt;
       }
       function reprobe() {
         if (probingBaseline) return probePromise || Promise.resolve(false);
-        if (!reserve && !collisionLatched) {
+        if (!cameraAtBaseline()) {
           schedule();
           return Promise.resolve(false);
         }
+        if (!reserve && !railLatched && !restorableReserve) {
+          schedule();
+          return Promise.resolve(false);
+        }
+        probeFallbackReserve = restorableReserve || reserve;
         probingBaseline = true;
-        collisionLatched = false;
+        railLatched = false;
         baselineIntersectionArea = 0;
+        baselineStageGap = null;
+        restorableReserve = 0;
         writeReserve(0, { quiet: true });
         var readerReady = Archify.readerLayout && typeof Archify.readerLayout.whenStable === 'function'
           ? Archify.readerLayout.whenStable().catch(function () {})
@@ -11177,6 +11290,10 @@
         probePromise = readerReady.then(function () {
           probingBaseline = false;
           probePromise = null;
+          if (!cameraAtBaseline() && probeFallbackReserve > 0) {
+            restorableReserve = probeFallbackReserve;
+          }
+          probeFallbackReserve = 0;
           schedule();
           return true;
         });
@@ -11198,8 +11315,8 @@
           Math.round(navRect.top * 100) / 100,
           Math.round(legendRect.left * 100) / 100,
           Math.round(legendRect.top * 100) / 100,
-          collisionLatched ? 'latched' : 'clear',
-          lastReceipt ? lastReceipt.intersectionArea : ''
+          railLatched ? 'latched' : 'clear',
+          lastReceipt ? lastReceipt.stageGap : ''
         ].join('|');
       }
       function whenStable() {
@@ -11218,7 +11335,7 @@
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(reprobe).catch(function () {});
       if (typeof ResizeObserver === 'function') {
         var resizeObserver = new ResizeObserver(schedule);
-        [nav, legend].forEach(function (element) { if (element) resizeObserver.observe(element); });
+        [nav, svg, legend].forEach(function (element) { if (element) resizeObserver.observe(element); });
       }
       if (typeof MutationObserver === 'function') {
         var contentObserver = new MutationObserver(function (records) {
@@ -11239,6 +11356,7 @@
         schedule: schedule,
         reprobe: reprobe,
         whenStable: whenStable,
+        stageRect: protectedStageRect,
         active: function () { return reserve > 0; },
         receipt: function () { return lastReceipt || measure(); }
       };
@@ -11258,6 +11376,7 @@
       var cameraFrame = null;
       var cameraGeneration = 0;
       var cameraTransaction = null;
+      var clipFrame = 0;
       var resizeFrame = 0;
       var autoScrollUntil = 0;
 
@@ -11343,9 +11462,43 @@
         container.setAttribute('data-camera-mode', state.mode);
         container.setAttribute('data-camera-indicator', semantic ? 'true' : 'false');
       }
+      function clipToViewport(camera) {
+        camera = camera || state;
+        if (camera.scale <= 1.001) {
+          svg.style.removeProperty('clip-path');
+          return;
+        }
+        var width = svg.clientWidth || 1;
+        var height = svg.clientHeight || 1;
+        var scale = camera.scale;
+        var top = Math.max(0, Math.min(height, -camera.y / scale));
+        var left = Math.max(0, Math.min(width, -camera.x / scale));
+        var right = Math.max(0, Math.min(width, width - (width - camera.x) / scale));
+        var bottom = Math.max(0, Math.min(height, height - (height - camera.y) / scale));
+        svg.style.clipPath = 'inset(' + [top, right, bottom, left].map(function (value) {
+          return Math.round(value * 1000) / 1000 + 'px';
+        }).join(' ') + ')';
+      }
+      function cameraSettled(rendered) {
+        return Math.abs(rendered.scale - state.scale) < 0.001 &&
+          Math.abs(rendered.x - state.x) < 0.05 &&
+          Math.abs(rendered.y - state.y) < 0.05;
+      }
+      function syncViewportClip() {
+        if (clipFrame) cancelAnimationFrame(clipFrame);
+        clipFrame = 0;
+        function sample() {
+          clipFrame = 0;
+          var rendered = sampleRenderedState();
+          clipToViewport(rendered);
+          if (!cameraSettled(rendered)) clipFrame = requestAnimationFrame(sample);
+        }
+        sample();
+      }
       function apply() {
         clamp();
         svg.style.transform = 'translate(' + state.x + 'px,' + state.y + 'px) scale(' + state.scale + ')';
+        syncViewportClip();
         renderControls();
         outBtn.disabled = state.scale <= 1;
         inBtn.disabled = state.scale >= 3;
@@ -11467,9 +11620,6 @@
         else stopCameraMotion('reset', false);
         state = { scale: 1, x: 0, y: 0, mode: 'overview' };
         apply();
-        if (Archify.viewerChromeLayout && typeof Archify.viewerChromeLayout.reprobe === 'function') {
-          Archify.viewerChromeLayout.reprobe();
-        }
       }
       function centerAt(logicalX, logicalY, options) {
         options = options || {};

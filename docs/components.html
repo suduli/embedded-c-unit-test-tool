@@ -10,7 +10,7 @@
 <div class="wrap">
 <p class="crumb"><a href="index.html">Documentation</a> &rsaquo; Component index</p>
 <h1>Component index</h1>
-<p class="sub">All 24 components of the design, with their full names, what each is responsible for, and how they depend on one another. 7 layers, 69 dependency edges, 239 design elements.</p>
+<p class="sub">All 24 components of the design, with their full names, what each is responsible for, and how they depend on one another. 7 layers, 70 dependency edges, 243 design elements.</p>
 <p class="note"><strong>Generated &mdash; do not edit.</strong> Produced by <code>trace_check.py --emit-components</code> from <code>design/trace/design-elements.yaml</code>, the authoritative register. The diagrams label a component with its id so every box comes out the same size; this page is where those ids are spelled out.</p>
 <nav class="jump"><a href="#L0">L0</a> <a href="#L1">L1</a> <a href="#L2">L2</a> <a href="#L3">L3</a> <a href="#L4">L4</a> <a href="#L5">L5</a> <a href="#L6">L6</a><a href="index.html#diagrams">Diagrams</a></nav>
 <section id="L0">
@@ -224,9 +224,9 @@
 <h3><code>CMP-AIF</code> AI Assist Subsystem</h3>
 <p>Optional assistance, structurally quarantined: off by default, offline capable, validated before presentation, and permanently marked.</p>
 <dl>
-<dt>Depends on</dt><dd><a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
+<dt>Depends on</dt><dd><a class="chip" href="#CMP-ATG">CMP-ATG<span>Automatic Test Generation</span></a> <a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-PLG">CMP-PLG<span>Extension Framework</span></a> <a class="chip" href="#CMP-SEC">CMP-SEC<span>Security and Integrity Services</span></a> <a class="chip" href="#CMP-TCM">CMP-TCM<span>Test Case Model and Store</span></a></dd>
 <dt>Depended on by</dt><dd><span class="none">nothing depends on it</span></dd>
-<dt>Design elements</dt><dd>13</dd>
+<dt>Design elements</dt><dd>16</dd>
 <dt>Drawn in</dt><dd><a href="diagrams/l6-ai-assist-and-migration.html">L6 Assurance — AI Assist and Migration</a></dd>
 </dl>
 </article>
@@ -255,8 +255,8 @@
 <p>The published extension points and the loader that serves them.</p>
 <dl>
 <dt>Depends on</dt><dd><a class="chip" href="#CMP-CORE">CMP-CORE<span>Core Platform Services</span></a></dd>
-<dt>Depended on by</dt><dd><a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
-<dt>Design elements</dt><dd>4</dd>
+<dt>Depended on by</dt><dd><a class="chip" href="#CMP-AIF">CMP-AIF<span>AI Assist Subsystem</span></a> <a class="chip" href="#CMP-EXT">CMP-EXT<span>Target Execution Runner</span></a> <a class="chip" href="#CMP-GEN">CMP-GEN<span>Generation Engine</span></a> <a class="chip" href="#CMP-REP">CMP-REP<span>Reporting Pipeline</span></a> <a class="chip" href="#CMP-TCH">CMP-TCH<span>Toolchain Abstraction</span></a></dd>
+<dt>Design elements</dt><dd>5</dd>
 <dt>Cross-cutting</dt><dd>Yes &mdash; components in lower layers may depend upward on it.</dd>
 <dt>Drawn in</dt><dd><a href="diagrams/l6-packaging-and-qualification.html">L6 Ecosystem — Packaging, Qualification and Extension</a></dd>
 </dl>

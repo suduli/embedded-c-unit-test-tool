@@ -9,7 +9,7 @@
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · **SDD-005** *(you are here)* · [Register](trace/design-elements.yaml) · [Design index](README.md)
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [ADR-008](../ADR-008-ai-structured-decision-provider.md) · [SDD-001](SDD-001-architecture.md) · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · **SDD-005** *(you are here)* · [Register](trace/design-elements.yaml) · [Design index](README.md)
 
 Architecture diagrams: [specifications](diagrams) · [integration map](oss-integration.archify.json) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/).
 <!-- nav:end -->

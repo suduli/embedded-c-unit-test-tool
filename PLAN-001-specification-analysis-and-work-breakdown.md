@@ -1,8 +1,8 @@
 # PLAN-001 — Specification Analysis and Work Breakdown
 
 **Status:** Draft v0.1 — analysis, not a commitment
-**Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (analysis, no decision recorded) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 323 SRS-001 requirements
+**Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (Accepted 2026-09-19) · [`ADR-006`](ADR-006-fork-or-build-fresh.md) · [`ADR-008`](ADR-008-ai-structured-decision-provider.md) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
+**Covers:** all 329 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -46,16 +46,16 @@ disagree with each other. The audit in §7 is arithmetic, not assertion. The pro
 
 ## 2. The specification at a glance
 
-323 requirements across 24 categories. Independently counted from `SRS-001-requirements.md` and reconciled
-against `design/trace/requirement-matrix.csv` — both yield 323, with no id in one and absent from the other.
+329 requirements across 24 categories. Independently counted from `SRS-001-requirements.md` and reconciled
+against `design/trace/requirement-matrix.csv` — both yield 329, with no id in one and absent from the other.
 
 | Attribute | Distribution |
 |---|---|
-| **Priority** | Must 199 · Should 107 · Could 15 · Future 2 |
-| **Phase** | P1 35 · P2 145 · P3 101 · P4 40 · deferred 2 |
-| **Verification** | Test 231 · Inspection 52 · Demonstration 24 · Analysis 14 · n/a 2 |
+| **Priority** | Must 202 · Should 109 · Could 16 · Future 2 |
+| **Phase** | P1 35 · P2 146 · P3 105 · P4 41 · deferred 2 |
+| **Verification** | Test 231 · Inspection 52 · Demonstration 25 · Analysis 19 · n/a 2 |
 
-Must-priority requirements are not front-loaded: **P1 33, P2 99, P3 48, P4 19**. Two thirds of the
+Must-priority requirements are not front-loaded: **P1 33, P2 100, P3 50, P4 19**. Two thirds of the
 non-negotiable scope sits at P2 or later, which is the first sign that "MVP" here means *thin*, not *complete*.
 
 ### 2.1 Requirement load by category
@@ -63,7 +63,7 @@ non-negotiable scope sits at P2 or later, which is the first sign that "MVP" her
 | Cat | Total | M | S | C | F | P1 | P2 | P3 | P4 | T | I | D | A |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
 | UIX | 40 | 27 | 10 | 1 | 2 | 2 | 22 | 10 | 4 | 31 | 3 | 2 | 2 |
-| AIF | 21 | 14 | 5 | 2 | 0 | 0 | 0 | 19 | 2 | 15 | 3 | 1 | 2 |
+| AIF | 26 | 16 | 7 | 3 | 0 | 0 | 0 | 23 | 3 | 15 | 3 | 2 | 6 |
 | ING | 19 | 8 | 9 | 2 | 0 | 4 | 14 | 1 | 0 | 16 | 1 | 2 | 0 |
 | NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
 | COV | 17 | 12 | 5 | 0 | 0 | 5 | 0 | 9 | 3 | 15 | 2 | 0 | 0 |
@@ -81,8 +81,8 @@ non-negotiable scope sits at P2 or later, which is the first sign that "MVP" her
 | QUA | 10 | 7 | 2 | 1 | 0 | 0 | 0 | 0 | 10 | 1 | 9 | 0 | 0 |
 | TCH | 10 | 5 | 4 | 1 | 0 | 2 | 0 | 8 | 0 | 8 | 1 | 1 | 0 |
 | TRC | 10 | 4 | 5 | 1 | 0 | 0 | 0 | 0 | 10 | 10 | 0 | 0 | 0 |
+| PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | EXE | 9 | 5 | 4 | 0 | 0 | 7 | 2 | 0 | 0 | 9 | 0 | 0 | 0 |
-| PLG | 9 | 5 | 4 | 0 | 0 | 0 | 4 | 5 | 0 | 5 | 2 | 1 | 1 |
 | CBT | 8 | 2 | 5 | 1 | 0 | 0 | 2 | 6 | 0 | 7 | 1 | 0 | 0 |
 | CIC | 8 | 4 | 4 | 0 | 0 | 4 | 3 | 1 | 0 | 4 | 1 | 3 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
@@ -192,7 +192,7 @@ are, the ADR is authoritative and the §27 entry is a restatement.
 
 | Decision | Source | Gates | Last responsible moment |
 |---|---|---|---|
-| **ADR-006** — fork UTBotCpp or build fresh | ADR-001 §5, SDD-001 §8 | `CMP-ANA`, `CMP-ATG`, `CMP-GEN` framework back-end — **whole components, not elements** | **Now.** Before `WP-ANA-01` starts (week 10) |
+| **ADR-006** — fork UTBotCpp or build fresh — **Accepted 2026-09-19: build fresh** | ADR-001 §5, SDD-001 §8 | `CMP-ANA`, `CMP-ATG`, `CMP-GEN` framework back-end — **whole components, not elements** | Discharged |
 | **ADR-001 §1** — qualification scope | ADR-001, §27 q5 | All 8 `WP-QUA-*`; the evidence shape of `WP-REP-05` | Before `WP-QUA-01` (P4) — but see §4.4 |
 | **ADR-001 §2** — core language | ADR-001, §27 q4 | `WP-ANA-01`, and the packaging shape of `WP-PKG-01` | Before `WP-ANA-01` (week 10) |
 | **ADR-001 §3** — GUI technology | ADR-001, §27 q1 | All 22 `WP-GUI-*` (33 requirements) | Before `WP-GUI-01` (P2) |
@@ -203,6 +203,7 @@ are, the ADR is authoritative and the §27 entry is a restatement.
 | **ADR-007** — distribution and packaging | ADR-001 §5 | `WP-PKG-01` | Before `WP-PKG-01` (P2) |
 | **§27 q2** — MC/DC form | SRS §27 | `WP-COV-05`, `WP-COV-10`, `WP-REP-04` | Before `WP-COV-05` (P3) |
 | **§27 q9** — debugger front-end | SRS §27, SDD-001 §8 | `WP-EXH-04`, `WP-GUI-15` | Before `WP-EXH-04` (P2) |
+| **ADR-008** — AI structured-decision provider — **Accepted** | SRS §18 AIF-220..260 | The default profile in `WP-AIF-14` only; the provider contract in `WP-AIF-01`/`WP-PLG-01` is vendor-neutral | Revisit per ADR-008 §6 before `WP-AIF-14` (P3) |
 
 ### 4.2 Decision order, and one correction to ADR-001
 
@@ -257,9 +258,9 @@ be prototyped **before the architecture is frozen**, not after `WP-GUI-10` has c
 
 ### 5.1 Method and shape
 
-**180 work packages plus 3 validation spikes**, organised into 24 work streams that align one-to-one with the
+**181 work packages plus 3 validation spikes**, organised into 24 work streams that align one-to-one with the
 components in SDD-001 §5. A work package is a cohesive, independently deliverable capability — not one per
-requirement (that would be 321 tasks with no structure) and not one per SRS category (that would be 24 buckets
+requirement (that would be 327 tasks with no structure) and not one per SRS category (that would be 24 buckets
 with no schedule). Every non-Future requirement lands in **exactly one** package; §7 proves it arithmetically.
 
 Three rules were applied and are worth stating because they are where a work breakdown usually goes wrong:
@@ -285,15 +286,15 @@ Three rules were applied and are worth stating because they are where a work bre
 |---|--:|--:|--:|--:|
 | P0 — validation spikes | 3 | 0 | 4 | 2 |
 | P1 — host-based MVP | 22 | 52 | 65 | 46 |
-| P2 — automation layer | 64 | 132 | 215 | 47 |
-| P3 — safety coverage and on-target | 66 | 101 | 239 | 52 |
+| P2 — automation layer | 64 | 133 | 216 | 47 |
+| P3 — safety coverage and on-target | 67 | 106 | 243 | 52 |
 | P4 — traceability, reporting, qualification | 28 | 36 | 99 | 52 |
-| **Total** | **183** | **321** | **622** | **52** |
+| **Total** | **184** | **327** | **627** | **52** |
 
 The calendar column is the critical path at unlimited parallelism, not the sum of the effort column. Read the
 two together and the shape of the programme is clear:
 
-- **622 person-weeks of effort compress into a 52-week critical path** — about **12 engineers** to stay on it.
+- **627 person-weeks of effort compress into a 52-week critical path** — about **12 engineers** to stay on it.
   A smaller team does not take 52 weeks; it takes proportionally longer, because the path is already saturated.
 - **P1 costs 46 of those 52 weeks.** Not because P1 is large, but because it is *deep*: the chain from
   determinism through the project store, ingestion, parsing, the analysis model, harness generation, build,
@@ -539,11 +540,11 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L6 — Assurance and Ecosystem
 
-49 work packages · 71 requirements · 151 person-weeks
+50 work packages · 77 requirements · 156 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
-| `WP-AIF-01` | Provider abstraction and local model runtime | CMP-AIF | P3 | 5w | AIF-020 AIF-050 | CORE-03 |  |
+| `WP-AIF-01` | Provider abstraction, per-role binding and local model runtime | CMP-AIF | P3 | 6w | AIF-020 AIF-050 AIF-230 AIF-250 AIF-260 | CORE-03 PLG-01 |  |
 | `WP-AIF-02` | Optionality, separability and default-off | CMP-AIF | P3 | 2w | AIF-010 | AIF-01 |  |
 | `WP-AIF-03` | Data egress control and pre-use disclosure | CMP-AIF | P3 | 3w | AIF-030 AIF-040 | AIF-01 SEC-08 |  |
 | `WP-AIF-04` | Generated artifact validation and rejection recording | CMP-AIF | P3 | 4w | AIF-070 AIF-210 | AIF-01 ATG-01 |  |
@@ -556,6 +557,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-AIF-11` | AI-assisted naming and documentation | CMP-AIF | P3 | 2w | AIF-140 | AIF-04 |  |
 | `WP-AIF-12` | Certification evidence exclusion mode | CMP-AIF | P4 | 2w | AIF-100 | AIF-05 REP-05 | ● |
 | `WP-AIF-13` | AI-proposed requirement-to-test links | CMP-AIF | P4 | 3w | AIF-130 | AIF-01 TRC-01 |  |
+| `WP-AIF-14` | Structured-decision test validation and default provider profile | CMP-AIF | P3 | 3w | AIF-220 AIF-240 | AIF-01 AIF-05 |  |
 | `WP-MIG-01` | Execution of existing Unity and cmocka suites | CMP-MIG | P2 | 4w | MIG-010 | GEN-02 EXH-01 |  |
 | `WP-MIG-02` | Ceedling project import | CMP-MIG | P2 | 4w | MIG-020 | MIG-01 ING-01 |  |
 | `WP-MIG-03` | Interchange format documentation | CMP-MIG | P2 | 2w | MIG-100 | TCM-06 |  |
@@ -572,7 +574,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-PKG-07` | License policy, process isolation and automated enforcement | CMP-PKG | P1 | 3w | LIC-010 LIC-020 LIC-030 LIC-040 LIC-050 LIC-060 | — | ● |
 | `WP-PKG-08` | Separable restrictively-licensed optional components | CMP-PKG | P3 | 2w | LIC-070 | PKG-07 | ● |
 | `WP-PKG-09` | Installation without administrative privileges | CMP-PKG | P2 | 1w | NFR-110 | PKG-01 |  |
-| `WP-PLG-01` | Extension point definition and versioning | CMP-PLG | P2 | 3w | PLG-010 | CORE-02 |  |
+| `WP-PLG-01` | Extension point definition and versioning, including the AI-provider point | CMP-PLG | P2 | 4w | PLG-010 PLG-100 | CORE-02 |  |
 | `WP-PLG-02` | Extension discovery and load failure isolation | CMP-PLG | P3 | 3w | PLG-070 PLG-080 | PLG-01 |  |
 | `WP-PLG-03` | Built-ins implemented through public extension points | CMP-PLG | P3 | 3w | PLG-090 | PLG-01 ~TCH-01 ~GEN-02 ~REP-11 |  |
 | `WP-QUA-01` | Tool classification analysis and confidence level | CMP-QUA | P4 | 3w | QUA-010 | CORE-04 | ● |
@@ -622,45 +624,45 @@ requirements whose failure would produce *wrong certification evidence*. The rem
 ### 6.2 Technique distribution
 | Technique | Requirements | Share |
 |---|--:|--:|
-| EQUIVALENCE PARTITIONING | 136 | 42% |
+| EQUIVALENCE PARTITIONING | 136 | 41% |
 | INSPECTION CHECKLIST | 50 | 15% |
 | BOUNDARY VALUE ANALYSIS | 30 | 9% |
-| DECISION TABLE | 26 | 8% |
-| SCENARIO (demonstration) | 23 | 7% |
+| DECISION TABLE | 26 | 7% |
+| SCENARIO (demonstration) | 24 | 7% |
 | STATE TRANSITION | 22 | 6% |
 | PAIRWISE | 21 | 6% |
-| ANALYSIS ARGUMENT | 13 | 4% |
+| ANALYSIS ARGUMENT | 18 | 5% |
 | — (deferred) | 2 | 0% |
-| **Total** | **323** | **100%** |
+| **Total** | **329** | **100%** |
 
-Equivalence partitioning at 42% is high but honest: a large part of this specification is of the form "the tool
+Equivalence partitioning at 41% is high but honest: a large part of this specification is of the form "the tool
 shall accept X and report Y", which is exactly what EP is for. The distribution is worth reading for what is
 *thin* rather than what is thick:
 
 - **Boundary value analysis is only 30 requirements** because the SRS states remarkably few numbers. That is
-  itself a finding (F-08): a specification for a verification tool that names three numeric thresholds in 323
+  itself a finding (F-08): a specification for a verification tool that names three numeric thresholds in 329
   requirements is under-constrained on performance and scale.
 - **Decision tables cluster in exactly the right place** — coverage, AI artifact acceptance, regeneration
   conflict, and target failure classification. These are the multi-condition behaviours where a missed
   combination becomes a wrong result rather than a visible bug.
-- **50 inspection checklists and 13 analysis arguments are 20% of the specification** and produce no
+- **50 inspection checklists and 18 analysis arguments are 20% of the specification** and produce no
   executable test. They are real deliverables with real cost, concentrated in QUA (9 of 10), LIC (7 of 7) and
   NFR (6 of 19), and they are the work most likely to be deferred into a v1.0 that then cannot claim
   qualifiability.
 
 ### 6.3 Verification method reconciliation
 
-Technique family cross-checked against the recorded verification method for all 323 requirements:
+Technique family cross-checked against the recorded verification method for all 329 requirements:
 
 | Recorded | Test technique | Inspection | Analysis | Demonstration | n/a |
 |---|--:|--:|--:|--:|--:|
 | T (231) | 230 | — | — | 1 | — |
 | I (52) | 2 | 50 | — | — | — |
-| D (24) | 2 | — | — | 22 | — |
-| A (14) | 1 | — | 13 | — | — |
+| D (25) | 2 | — | — | 23 | — |
+| A (19) | 1 | — | 18 | — | — |
 | n/a (2) | — | — | — | — | 2 |
 
-**Six mismatches in 323.** The specification is unusually well disciplined here, which makes each mismatch
+**Six mismatches in 329.** The specification is unusually well disciplined here, which makes each mismatch
 worth acting on rather than dismissing — and three of the six sit in the "nothing overclaimed" family:
 
 | Requirement | Recorded | Should be | Why |
@@ -740,19 +742,19 @@ of them drifts, these numbers stop reconciling and the document is wrong on its 
 
 | Check | Result |
 |---|---|
-| Requirement ids in SRS-001 | **323** |
-| Ids in `requirement-matrix.csv` | **323** |
+| Requirement ids in SRS-001 | **329** |
+| Ids in `requirement-matrix.csv` | **329** |
 | In SRS but not the matrix | **none** |
 | In the matrix but not the SRS | **none** |
 | Future-priority, correctly not allocated | **2** (`UIX-390`, `UIX-400`) |
-| Expected allocations (323 − 2) | **321** |
-| Allocation entries in the work breakdown | **321** |
-| Distinct requirements allocated | **321** |
+| Expected allocations (329 − 2) | **327** |
+| Allocation entries in the work breakdown | **327** |
+| Distinct requirements allocated | **327** |
 | **Orphans** — expected but in no work package | **none** |
 | **Double-allocated** — in more than one work package | **none** |
 | **Future requirements wrongly allocated** | **none** |
 
-**Verdict: 100% allocation of all 321 non-Future requirements, each to exactly one work package.**
+**Verdict: 100% allocation of all 327 non-Future requirements, each to exactly one work package.**
 
 Five requirements are legitimately discharged by more than one *design element* per SDD-001 §5 — `COV-060`,
 `EXE-010`, `MIG-060`, `PRJ-050`, `UIX-320`. A work package register cannot express that without breaking the
@@ -770,8 +772,8 @@ exactly-once rule, so each is assigned a single **owning** package with the coll
 
 | Check | Result |
 |---|---|
-| Work packages | 180 (plus 3 validation spikes) |
-| Dependency edges | 272 — 260 code, 2 port-mediated, 10 schedule-only |
+| Work packages | 181 (plus 3 validation spikes) |
+| Dependency edges | 275 — 263 code, 2 port-mediated, 10 schedule-only |
 | **Unresolved dependencies** | **none** |
 | **Upward layer violations** (code edges) | **none** |
 | **Cycles** | **none** |
@@ -793,12 +795,12 @@ rather than about the plan:
 
 | | P1 | P2 | P3 | P4 | n/a | Total |
 |---|--:|--:|--:|--:|--:|--:|
-| **Must** | 33 | 99 | 48 | 19 | — | 199 |
-| **Should** | 2 | 45 | 44 | 16 | — | 107 |
-| **Could** | — | 1 | 9 | 5 | — | 15 |
+| **Must** | 33 | 100 | 50 | 19 | — | 202 |
+| **Should** | 2 | 45 | 46 | 16 | — | 109 |
+| **Could** | — | 1 | 9 | 6 | — | 16 |
 | **Future** | — | — | — | — | 2 | 2 |
-| **Total** | 35 | 145 | 101 | 40 | 2 | 323 |
-| *Allocated* | *35* | *145* | *101* | *40* | *0* | *321* |
+| **Total** | 35 | 146 | 105 | 41 | 2 | 329 |
+| *Allocated* | *35* | *146* | *105* | *41* | *0* | *327* |
 
 ---
 
@@ -862,15 +864,16 @@ This document is downstream of SRS-001, ADR-001 and the SDD set, and derived fro
 
 **Open actions arising from this analysis**, in the order they need answering:
 
-1. **Decide ADR-006** (fork UTBotCpp or build fresh). Blocks `WP-ANA-01` at week 10 and invalidates the ADR-001
-   language assumption if answered "fork". SDD-001 §8 already names it the one genuine blocker.
+1. ~~**Decide ADR-006**~~ — **done.** Accepted 2026-09-19: build fresh, do not fork UTBotCpp.
 2. **Resolve F-01** — re-phase the 14 requirements into P1, or amend `TCD-010`. §3.3 recommends re-phasing.
 3. **Resolve F-16 (`LIC-010` vs the repository's current AGPL licence)** — these are in direct conflict today
    and the conflict is visible to anyone who reads both files.
 4. **Correct the verification methods** on `COV-150`, `CBT-040` and `NFR-050` (F-07, F-08).
 5. **Add requirements for the two gaps** — evidence integrity (F-10) and coverage measurement build (F-11).
-6. **Run the three spikes** before freezing the architecture, `WP-SPIKE-02` first.
+6. ~~**Run the three spikes**~~ — **done**; results folded into ADR-001 §4.2.
 7. **Decide ADR-002** (project and test data format) — it gates `WP-PRJ-01` at week 3, the earliest gate of all.
+8. **Settle two defects in the ADR-008 requirements** — `AIF-250` (Must) depends on the interface `AIF-230`
+   defines at Should, and `AIF-220` describes observable behaviour but records verification by analysis, not test.
 
 ---
 
@@ -901,6 +904,11 @@ the same dataset as §5.5; see §7 for the audit that proves it complete.
 | `TOOL-AIF-190` | M | P3 | I | `WP-AIF-05` | INSPECTION CHECKLIST |
 | `TOOL-AIF-200` | S | P3 | T | `WP-AIF-07` | EQUIVALENCE PARTITIONING |
 | `TOOL-AIF-210` | M | P3 | T | `WP-AIF-04` | STATE TRANSITION |
+| `TOOL-AIF-220` | S | P3 | A | `WP-AIF-14` | ANALYSIS ARGUMENT |
+| `TOOL-AIF-230` | S | P3 | A | `WP-AIF-01` | ANALYSIS ARGUMENT |
+| `TOOL-AIF-240` | C | P4 | D | `WP-AIF-14` | SCENARIO (demonstration) |
+| `TOOL-AIF-250` | M | P3 | A | `WP-AIF-01` | ANALYSIS ARGUMENT |
+| `TOOL-AIF-260` | M | P3 | A | `WP-AIF-01` | ANALYSIS ARGUMENT |
 | `TOOL-ATG-010` | S | P3 | T | `WP-ATG-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-ATG-020` | S | P3 | T | `WP-ATG-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-ATG-030` | C | P3 | T | `WP-ATG-03` | EQUIVALENCE PARTITIONING |
@@ -1055,6 +1063,7 @@ the same dataset as §5.5; see §7 for the audit that proves it complete.
 | `TOOL-PLG-070` | S | P3 | T | `WP-PLG-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-PLG-080` | M | P3 | D | `WP-PLG-02` | DECISION TABLE |
 | `TOOL-PLG-090` | S | P3 | I | `WP-PLG-03` | INSPECTION CHECKLIST |
+| `TOOL-PLG-100` | M | P2 | A | `WP-PLG-01` | ANALYSIS ARGUMENT |
 | `TOOL-PRJ-010` | M | P2 | I | `WP-PRJ-01` | INSPECTION CHECKLIST |
 | `TOOL-PRJ-020` | M | P2 | I | `WP-PRJ-01` | INSPECTION CHECKLIST |
 | `TOOL-PRJ-030` | M | P2 | T | `WP-PRJ-02` | STATE TRANSITION |

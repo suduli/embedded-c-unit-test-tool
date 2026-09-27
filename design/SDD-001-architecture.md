@@ -9,7 +9,7 @@
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · **SDD-001** *(you are here)* · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [ADR-008](../ADR-008-ai-structured-decision-provider.md) · **SDD-001** *(you are here)* · [SDD-002](SDD-002-interfaces.md) · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -248,9 +248,14 @@ TOOL-UIX-330 fall out of the design rather than needing separate work.
 the only component carrying an outbound network capability (DSN-CORE-090), it
 is separable, and with it absent everything else is unaffected. Its provenance
 record — model identity, prompt, temperature, seed, review state — is immutable
-and travels into every report (DSN-AIF-110).
+and travels into every report (DSN-AIF-110). It reaches a model only through
+the AI-provider extension point in `CMP-PLG` (DSN-PLG-050), bound per role —
+free-text generation and structured decision — so each role's back end,
+including a local or self-hosted model, is replaceable without touching the
+feature that calls it (DSN-AIF-020, DSN-AIF-160; ADR-008).
 
-`CMP-PLG` publishes the four extension points, and DSN-PLG-040 requires the
+`CMP-PLG` publishes the four tool extension points plus the AI-provider point,
+and DSN-PLG-040 requires the
 tool's own compiler configurations, framework back-ends, and report formats to
 be implemented through them, with no private interface. That is the only
 mechanism that reliably keeps an extension interface sufficient.
@@ -259,9 +264,9 @@ mechanism that reliably keeps an extension interface sufficient.
 
 ## 5. Component register
 
-24 components, 239 design elements. Requirement counts are per component.
+24 components, 243 design elements. Requirement counts are per component.
 Five requirements are legitimately discharged by more than one element — `TOOL-COV-060`, `TOOL-EXE-010`, `TOOL-MIG-060`, `TOOL-PRJ-050`, `TOOL-UIX-320` —
-and four of those span two components, so the column sums to 325 rather than 321.
+and four of those span two components, so the column sums to 331 rather than 327.
 
 | Layer | Component | Name | Elements | Reqs |
 |---|---|---|---:|---:|
@@ -284,11 +289,11 @@ and four of those span two components, so the column sums to 325 rather than 321
 | L5 | `CMP-CLI` | Command Line Front-End | 6 | 7 |
 | L5 | `CMP-GUI` | Standalone Desktop Application | 27 | 33 |
 | L6 | `CMP-SEC` | Security and Integrity Services | 11 | 13 |
-| L6 | `CMP-PLG` | Extension Framework | 4 | 4 |
+| L6 | `CMP-PLG` | Extension Framework | 5 | 5 |
 | L6 | `CMP-PKG` | Packaging, Installation and Release Engineering | 13 | 17 |
 | L6 | `CMP-QUA` | Qualification Evidence | 8 | 8 |
 | L6 | `CMP-MIG` | Migration and Interoperability | 8 | 8 |
-| L6 | `CMP-AIF` | AI Assist Subsystem | 13 | 21 |
+| L6 | `CMP-AIF` | AI Assist Subsystem | 16 | 26 |
 
 Full element statements, with their requirement allocations, are in
 `design/trace/design-elements.yaml`. The per-requirement view is
@@ -399,6 +404,7 @@ it), and those carry no marker.
 | ADR-005 — license | `DSN-PKG-090` | Structural rule (copyleft at process boundaries) is independent of which permissive license is chosen. |
 | ADR-006 — fork UTBotCpp — **Accepted 2026-09-19: build fresh, do not fork** | Components, not elements: `CMP-ANA`, `CMP-ATG`, `CMP-GEN` | Was **not absorbable** by design — a fork would have reset the language decision and the framework back-end together, which is exactly why this one could not be left open past this point. See [`ADR-006-fork-or-build-fresh.md`](../ADR-006-fork-or-build-fresh.md). |
 | ADR-007 — packaging | `DSN-PKG-010` | Confined to `CMP-PKG`; no other component observes the packaging mechanism. |
+| ADR-008 — AI structured-decision provider — **Accepted: TypeSafe AI (Jev) as opt-in default** | `DSN-AIF-150` | The default is a configuration entry behind DSN-PLG-050, not a code dependency. Changing it — ADR-008 §6 names when it reopens — edits one profile and nothing else. |
 | SRS open question 2 — MC/DC form | `DSN-COV-020` | The form obtained is a data field on the coverage model, rendered by every report — not a documentation claim. |
 | SRS open question 9 — debugger | `DSN-EXH-060`, `DSN-GUI-140` | The engine prepares and reports the invocation; the front-end choice is confined to L5. |
 

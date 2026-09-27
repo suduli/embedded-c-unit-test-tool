@@ -16,7 +16,7 @@
       "type": "database",
       "label": "SRS-001",
       "sublabel": "Requirements specification",
-      "tag": "323 requirements",
+      "tag": "329 requirements",
       "pos": [
         40,
         70
@@ -29,9 +29,9 @@
     {
       "id": "adr",
       "type": "database",
-      "label": "ADR-001",
-      "sublabel": "Architecture decision record",
-      "tag": "no decision recorded",
+      "label": "ADR-001 · 006 · 008",
+      "sublabel": "Architecture decision records",
+      "tag": "3 accepted · 5 open",
       "pos": [
         40,
         280
@@ -167,7 +167,7 @@
       "id": "srs-reg",
       "from": "srs",
       "to": "register",
-      "label": "allocates 321 requirements",
+      "label": "allocates 327 requirements",
       "fromSide": "right",
       "toSide": "left"
     },

@@ -8,7 +8,7 @@
 ---
 
 <!-- nav:start -->
-**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [SDD-001](SDD-001-architecture.md) · **SDD-002** *(you are here)* · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
+**Related documents** — [SRS-001](../SRS-001-requirements.md) · [ADR-001](../ADR-001-architecture-decisions.md) · [ADR-006](../ADR-006-fork-or-build-fresh.md) · [ADR-008](../ADR-008-ai-structured-decision-provider.md) · [SDD-001](SDD-001-architecture.md) · **SDD-002** *(you are here)* · [SDD-003](SDD-003-data-model.md) · [SDD-004](SDD-004-traceability-architecture.md) · [SDD-005](SDD-005-external-integration.md) · [Register](trace/design-elements.yaml) · [Design index](README.md)
 
 Architecture diagrams: [specifications](diagrams) · published at [the documentation site](https://suduli.github.io/embedded-c-unit-test-tool/), which spells out every component id in full and shows how these documents connect.
 <!-- nav:end -->
@@ -40,7 +40,7 @@ Anything not on this list is an internal call and may be refactored freely.
 | S4 | Coverage Model | `CMP-COV` → L4 | Internal | Yes | Coverage backend (ADR-004) |
 | S5 | Report Model | `CMP-REP` → renderers | Documented | Yes | Report formats |
 | S6 | Engine API | Engine ↔ front-ends | Documented | Yes | GUI technology (ADR-001 §3) |
-| S7 | Extension points | Tool ↔ extensions | Documented | Yes | Compiler/framework/target/report breadth |
+| S7 | Extension points | Tool ↔ extensions | Documented | Yes | Compiler/framework/target/report breadth; AI provider (ADR-008) |
 
 Plus one internal port that exists purely to keep the layer graph acyclic:
 
@@ -377,8 +377,8 @@ security analysis rather than widening S6.
 
 ## 10. S7 — Extension points
 
-**Requirements:** TOOL-PLG-010..090, but only four of those live in `CMP-PLG`
-(TOOL-PLG-010/070/080/090 → DSN-PLG-010..040). The rest are discharged at the
+**Requirements:** TOOL-PLG-010..100, but only five of those live in `CMP-PLG`
+(TOOL-PLG-010/070/080/090/100 → DSN-PLG-010..050). The rest are discharged at the
 extension point itself, which is the design: TOOL-PLG-020 → DSN-TCH-010,
 TOOL-PLG-030 → DSN-GEN-040, TOOL-PLG-040 → DSN-EXT-010, TOOL-PLG-050 →
 DSN-REP-010, TOOL-PLG-060 → DSN-API-020. `CMP-PLG` publishes and loads; it does
@@ -390,8 +390,9 @@ not implement the points.
 | Test framework back-end | Templates + descriptor (assertion macros, runner entry, result form) | Yes | TOOL-HAR-070, TOOL-PLG-030 |
 | Target execution method | `flash` / `run` / `collect` behind a documented interface | Script permitted | TOOL-TGT-120, TOOL-PLG-040 |
 | Report format | Renderer over the S5 report model | Script permitted | TOOL-REP-090, TOOL-PLG-050 |
+| AI provider | A provider for one or both roles — free-text generation, structured decision — local, self-hosted, or remote | Code permitted | TOOL-AIF-050/230/250/260, TOOL-PLG-100 |
 
-Two rules govern all four:
+Two rules govern all five:
 
 1. **Built-ins use the public interface.** Every shipped compiler
    configuration, framework back-end, and report format is implemented through
@@ -399,6 +400,9 @@ Two rules govern all four:
    (DSN-PLG-040, TOOL-PLG-090). This is the only mechanism that reliably keeps
    an extension interface sufficient — an interface with a private bypass
    accumulates gaps that nobody notices until an outside contributor hits one.
+   For AI providers the rule runs in both directions: a shipped provider,
+   including the default validation profile, has no private path in, and no
+   feature has a path around the point to a vendor SDK (DSN-AIF-160).
 2. **Failure is isolated and named.** An extension that fails to load or
    declares an incompatible version is reported by name with the reason, and
    the tool continues with the remainder (DSN-PLG-030, TOOL-PLG-080).
