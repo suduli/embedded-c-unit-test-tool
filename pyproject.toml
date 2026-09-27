@@ -16,10 +16,14 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "jsonschema>=4.20",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"ectt.ana.schema" = ["*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

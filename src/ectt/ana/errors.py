@@ -22,6 +22,15 @@ __all__ = [
     "FrontendParseError",
     "ExtractionError",
     "ExtractionRefusedError",
+    "AnalysisModelError",
+    "SchemaVersionError",
+    "MissingSchemaVersionError",
+    "InvalidSchemaVersionOrderError",
+    "MalformedSchemaVersionError",
+    "IncompatibleSchemaVersionError",
+    "TypeMergeError",
+    "TypeDefinitionConflictError",
+    "TypeClosureError",
 ]
 
 
@@ -195,3 +204,170 @@ class ExtractionRefusedError(ExtractionError):
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
+
+
+class AnalysisModelError(AnalysisError):
+    """Base exception for analysis model validation, persistence, and schema errors."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "analysis_model_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class SchemaVersionError(AnalysisModelError):
+    """Base exception for analysis model schema version violations."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "schema_version_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class MissingSchemaVersionError(SchemaVersionError):
+    """Raised when schema_version is absent from an analysis model document."""
+
+    def __init__(
+        self,
+        message: str = "Missing 'schema_version' in analysis model document",
+        *,
+        reason: str = "missing_schema_version",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidSchemaVersionOrderError(SchemaVersionError):
+    """Raised when schema_version is present but is not the first key in the document."""
+
+    def __init__(
+        self,
+        message: str = "'schema_version' must be the first key in the analysis model document",
+        *,
+        reason: str = "schema_version_not_first",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class MalformedSchemaVersionError(SchemaVersionError):
+    """Raised when schema_version does not conform to the expected 'MAJOR.MINOR' format."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        version: Any = None,
+        reason: str = "malformed_schema_version",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+        self.version = version
+
+
+class IncompatibleSchemaVersionError(SchemaVersionError):
+    """Raised when an analysis model has an incompatible major version or unsupported minor version.
+
+    Implements: SDD-002 §3.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reader_version: str = "1.0",
+        document_version: str,
+        reason: str = "incompatible_schema_version",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+        self.reader_version = reader_version
+        self.document_version = document_version
+
+    def __str__(self) -> str:
+        details: list[str] = [
+            f"reason={self.reason}",
+            f"reader_version={self.reader_version}",
+            f"document_version={self.document_version}",
+        ]
+        if self.path is not None:
+            details.append(f"path={self.path}")
+        return f"{self.message} [{', '.join(details)}]"
+
+
+class TypeMergeError(AnalysisModelError):
+    """Base exception for model-wide type graph merging errors."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "type_merge_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class TypeDefinitionConflictError(TypeMergeError):
+    """Raised when conflicting definitions for the same type ID appear in different translation units.
+
+    Implements: SDD-002 §4.1, DSN-ANA-070.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        type_id: str,
+        unit_a: str,
+        unit_b: str,
+        reason: str = "type_definition_conflict",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+        self.type_id = type_id
+        self.unit_a = unit_a
+        self.unit_b = unit_b
+
+    def __str__(self) -> str:
+        details: list[str] = [
+            f"reason={self.reason}",
+            f"type_id={self.type_id}",
+            f"unit_a={self.unit_a}",
+            f"unit_b={self.unit_b}",
+        ]
+        if self.path is not None:
+            details.append(f"path={self.path}")
+        return f"{self.message} [{', '.join(details)}]"
+
+
+class TypeClosureError(TypeMergeError):
+    """Raised when a type reference (ref:type.*) does not resolve in the model-wide types map.
+
+    Implements: SDD-002 §4.2.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        ref: str,
+        reason: str = "type_closure_violation",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+        self.ref = ref
+
+    def __str__(self) -> str:
+        details: list[str] = [f"reason={self.reason}", f"ref={self.ref}"]
+        if self.path is not None:
+            details.append(f"path={self.path}")
+        return f"{self.message} [{', '.join(details)}]"

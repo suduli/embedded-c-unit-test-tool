@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
@@ -162,10 +163,10 @@ def _stable_sort_key(item: Any) -> tuple[int, str, Any]:
     return (7, type(item).__qualname__, repr(item))
 
 
-def canonicalize(data: Any) -> Any:
+def canonicalize(data: Any, *, first_keys: Sequence[str] = ()) -> Any:
     """Recursively transform data structures into canonical forms:
 
-    - dict: keys sorted deterministically.
+    - dict: keys sorted deterministically, with optional first_keys prioritized.
     - set / frozenset: converted to sorted list (sets carry no semantic order).
     - list / tuple: semantic order preserved, elements canonicalized recursively.
     - Path: normalized to POSIX string format.
@@ -174,13 +175,23 @@ def canonicalize(data: Any) -> Any:
     """
     if isinstance(data, dict):
         result: dict[str, Any] = {}
+        stringified_keys: set[str] = set()
+        for k in data.keys():
+            k_str = str(k)
+            if k_str in stringified_keys:
+                raise ValueError(
+                    f"Duplicate stringified dictionary key '{k_str}' detected during canonicalization "
+                    f"(colliding key: {k!r})"
+                )
+            stringified_keys.add(k_str)
+
+        for fk in first_keys:
+            if fk in data:
+                result[fk] = canonicalize(data[fk])
         for k, v in sorted(data.items(), key=lambda kv: _stable_sort_key(kv[0])):
             key_str = str(k)
             if key_str in result:
-                raise ValueError(
-                    f"Duplicate stringified dictionary key '{key_str}' detected during canonicalization "
-                    f"(colliding key: {k!r})"
-                )
+                continue
             result[key_str] = canonicalize(v)
         return result
     if isinstance(data, (set, frozenset)):
@@ -225,31 +236,41 @@ def canonical_bytes(content: str | bytes) -> bytes:
     return bytes(content)
 
 
-def canonical_json(data: Any, *, indent: int | None = 2) -> str:
+def canonical_json(
+    data: Any,
+    *,
+    indent: int | None = 2,
+    first_keys: Sequence[str] = (),
+) -> str:
     """Serialize data to byte-deterministic canonical JSON:
 
-    - Keys sorted.
+    - Keys sorted (or ordered by first_keys then sorted).
     - Sets and non-semantic collections sorted.
     - LF line endings only.
     - UTF-8 representation (no unnecessary \\u escapes).
     - No trailing whitespace.
     - Shortest round-trip float representations ('0.1' stays '0.1', '-0.0' stays '-0.0').
     """
-    canonical_data = canonicalize(data)
+    canonical_data = canonicalize(data, first_keys=first_keys)
     separators = (",", ": ") if indent is not None else (",", ":")
     raw_json = json.dumps(
         canonical_data,
         indent=indent,
         ensure_ascii=False,
-        sort_keys=True,
+        sort_keys=False if first_keys else True,
         separators=separators,
     )
     return canonical_text(raw_json)
 
 
-def canonical_json_bytes(data: Any, *, indent: int | None = 2) -> bytes:
+def canonical_json_bytes(
+    data: Any,
+    *,
+    indent: int | None = 2,
+    first_keys: Sequence[str] = (),
+) -> bytes:
     """Return UTF-8 encoded canonical JSON bytes."""
-    return canonical_json(data, indent=indent).encode("utf-8")
+    return canonical_json(data, indent=indent, first_keys=first_keys).encode("utf-8")
 
 
 def _part_to_canonical_bytes(part: Any) -> bytes:

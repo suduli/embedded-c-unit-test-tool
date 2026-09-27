@@ -1,0 +1,514 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ectt:schema:analysis-model:1.0",
+  "title": "ECTT Analysis Model Schema v1.0",
+  "description": "Schema for ECTT S1 Analysis Model conforming to SDD-002 §4.1.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "provenance",
+    "units",
+    "types",
+    "capabilities"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "tool_version",
+        "front_end",
+        "generated_at",
+        "inputs"
+      ],
+      "properties": {
+        "tool_version": {
+          "type": "string"
+        },
+        "front_end": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "digest"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "status",
+          "diagnostics",
+          "functions",
+          "cfg"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "parsed",
+              "failed"
+            ]
+          },
+          "diagnostics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "message",
+                "severity",
+                "severity_code"
+              ],
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "ignored",
+                    "note",
+                    "warning",
+                    "error",
+                    "fatal"
+                  ]
+                },
+                "severity_code": {
+                  "type": "integer"
+                },
+                "file": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "line": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "column": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "category": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "linkage",
+                "storage_class",
+                "location",
+                "return_type",
+                "parameters",
+                "globals"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "linkage": {
+                  "type": "string",
+                  "enum": [
+                    "external",
+                    "internal"
+                  ]
+                },
+                "storage_class": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "static"
+                  ]
+                },
+                "location": {
+                  "type": "object",
+                  "required": [
+                    "file",
+                    "line"
+                  ],
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "type": "integer"
+                    },
+                    "origin": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "project",
+                        "include",
+                        "external",
+                        null
+                      ]
+                    }
+                  }
+                },
+                "return_type": {
+                  "type": "string",
+                  "pattern": "^ref:type\\.\\S+$"
+                },
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "type"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "pattern": "^ref:type\\.\\S+$"
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "in",
+                          "out",
+                          "inout",
+                          "unknown"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "globals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "access"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "access": {
+                        "type": "string",
+                        "enum": [
+                          "r",
+                          "w",
+                          "rw"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "calls": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "callee",
+                      "classification",
+                      "via"
+                    ],
+                    "properties": {
+                      "callee": {
+                        "type": "string"
+                      },
+                      "classification": {
+                        "type": "string",
+                        "enum": [
+                          "internal",
+                          "external"
+                        ]
+                      },
+                      "via": {
+                        "type": "string",
+                        "enum": [
+                          "direct",
+                          "function_pointer"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "decisions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "line",
+                      "conditions"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "integer"
+                      },
+                      "conditions": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "complexity": {
+                  "type": "integer"
+                },
+                "annotations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "detail"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "cfg": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    "types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "builtin",
+              "pointer",
+              "array",
+              "function_pointer",
+              "typedef",
+              "struct",
+              "union",
+              "enum"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "line": {
+                "type": "integer"
+              },
+              "origin": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "project",
+                  "include",
+                  "external",
+                  null
+                ]
+              }
+            }
+          },
+          "is_anonymous": {
+            "type": "boolean"
+          },
+          "underlying_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ref:type\\.\\S+$"
+          },
+          "target": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ref:type\\.\\S+$"
+          },
+          "element_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ref:type\\.\\S+$"
+          },
+          "size": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "is_const": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "return_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^ref:type\\.\\S+$"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "type"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "pattern": "^ref:type\\.\\S+$"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "in",
+                    "out",
+                    "inout",
+                    "unknown"
+                  ]
+                }
+              }
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "type"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "pattern": "^ref:type\\.\\S+$"
+                },
+                "bit_width": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "enumerators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "propertyNames": {
+        "pattern": "^type\\.\\S+$"
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": [
+        "cfg"
+      ],
+      "properties": {
+        "cfg": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}
