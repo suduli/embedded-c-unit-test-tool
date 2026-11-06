@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 332
+      requirement_count: 334
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -600,6 +600,27 @@ components:
           and reported. Downstream stages see an explicitly incomplete model
           rather than a silently smaller one.
         satisfies: [TOOL-PAR-130]
+        verification: T
+      - id: DSN-ANA-100
+        title: Unsupported-construct inventory
+        statement: >
+          Every translation unit entry carries a machine-checkable inventory of
+          constructs the analyzer does not support — kind, count, optional
+          detail, and source location where known — emitted even when empty, so
+          downstream capabilities fail closed on unsupported input instead of
+          discovering it in prose.
+        satisfies: [TOOL-PAR-140]
+        verification: T
+      - id: DSN-ANA-110
+        title: Decision inventory with recorded completeness
+        statement: >
+          The model carries an explicit decision inventory whose completeness
+          is data — not_extracted, partial, or complete — and the inventory
+          cannot be omitted from a schema-valid model. A reader that meets an
+          unknown inventory status fails closed with a named error, so the
+          coverage reconciliation (DSN-COV-040) can trust what the model
+          claims.
+        satisfies: [TOOL-PAR-150]
         verification: T
 
   - id: CMP-TCH

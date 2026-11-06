@@ -37,6 +37,7 @@ from ectt.ana.errors import (
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
+    DecisionInventoryModel,
     Diagnostic,
     EnumeratorModel,
     FunctionModel,
@@ -49,6 +50,7 @@ from ectt.ana.model import (
     SourceLocation,
     StructMemberModel,
     TypeModel,
+    UnsupportedConstructModel,
 )
 from ectt.ana.persist import (
     READER_MAJOR,

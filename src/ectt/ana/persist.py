@@ -1,7 +1,7 @@
 # implements: DSN-ANA-070, DSN-ANA-040, DSN-ANA-090
 """Analysis model assembly, persistence, type graph merging, and schema versioning.
 
-Satisfies: TOOL-PAR-100, TOOL-PAR-110, DSN-ANA-070, DSN-ANA-040, DSN-ANA-090.
+Satisfies: TOOL-PAR-100, TOOL-PAR-110, TOOL-PAR-150, DSN-ANA-070, DSN-ANA-040, DSN-ANA-090.
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ from ectt.ana.errors import (
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
+    DecisionInventoryModel,
     Diagnostic,
     FunctionModel,
     InputFileModel,
@@ -233,11 +234,15 @@ def assemble_analysis_model(
     )
 
     return AnalysisModel(
-        schema_version="1.0",
+        schema_version="1.1",
         provenance=provenance,
         units=tuple(final_units),
         types=merged_types,
         capabilities={"cfg": False},
+        decision_inventory=DecisionInventoryModel(
+            status="not_extracted",
+            detail="decision extraction is not implemented in this analyzer build (capabilities.cfg is false)",
+        ),
     )
 
 
@@ -362,6 +367,32 @@ def read_analysis_model(
                 f"Missing required top-level key '{rk}' in analysis model document",
                 reason="missing_required_key",
             )
+
+    # 6b. Minor-version-gated inventories (schema 1.1: TOOL-PAR-140, TOOL-PAR-150).
+    # Fail-closed per SDD-002 §3: unknown semantic values are rejected, never
+    # interpreted, and a 1.1 document cannot omit either inventory.
+    if doc_minor >= 1:
+        if "decision_inventory" not in doc:
+            raise AnalysisModelError(
+                "Missing required top-level key 'decision_inventory' in analysis model document (schema >= 1.1)",
+                reason="missing_decision_inventory",
+            )
+        inventory = doc["decision_inventory"]
+        allowed_status = ("not_extracted", "partial", "complete")
+        status = inventory.get("status") if isinstance(inventory, dict) else None
+        if status not in allowed_status:
+            raise AnalysisModelError(
+                f"Unknown decision inventory status {status!r}; expected one of {allowed_status}",
+                reason="unknown_decision_inventory_status",
+            )
+        units_obj = doc.get("units")
+        if isinstance(units_obj, list):
+            for idx, unit_doc in enumerate(units_obj):
+                if isinstance(unit_doc, dict) and "unsupported_constructs" not in unit_doc:
+                    raise AnalysisModelError(
+                        f"Unit at index {idx} is missing required 'unsupported_constructs' (schema >= 1.1)",
+                        reason="missing_unsupported_constructs",
+                    )
 
     # 7. Type closure validation over merged map on read (SDD-002 §4.2)
     types_obj = doc["types"]

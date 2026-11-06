@@ -195,6 +195,10 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-PAR-130** *(S, P2, T)* — The tool shall continue analysis and report partial results when a subset of translation units fails to parse.
 
+**TOOL-PAR-140** *(S, P2, T)* — The analysis model shall carry, per translation unit, a machine-checkable inventory of constructs the analyzer does not support — each recorded with a kind, a count, an optional detail, and a source location where known — and the inventory shall be emitted even when empty, so downstream capabilities fail closed on unsupported input instead of discovering it in prose.
+
+**TOOL-PAR-150** *(M, P2, T)* — The analysis model shall carry an explicit decision inventory whose completeness is recorded as data (`not_extracted`, `partial`, or `complete`); the inventory cannot be omitted from a schema-valid model, and a decision-inventory status unknown to the reader shall fail closed with a named error.
+
 ---
 
 ## 5. Toolchain and Compiler Abstraction (TCH)

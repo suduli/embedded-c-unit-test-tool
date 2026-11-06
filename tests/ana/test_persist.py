@@ -533,3 +533,103 @@ def test_missing_model_file_raises_named_error(tmp_path: Path) -> None:
     with pytest.raises(AnalysisModelError) as exc_info:
         read_analysis_model(tmp_path / "absent.json")
     assert exc_info.value.reason == "model_read_error"
+
+
+# ---------------------------------------------------------------------------
+# Schema 1.1 inventories (TOOL-PAR-140, TOOL-PAR-150, DSN-ANA-100, DSN-ANA-110)
+
+
+def _unit_doc_1_1() -> dict[str, Any]:
+    return {
+        "path": "src/adc.c",
+        "status": "parsed",
+        "diagnostics": [],
+        "functions": [],
+        "unsupported_constructs": [],
+        "cfg": None,
+    }
+
+
+def _model_doc_1_1() -> dict[str, Any]:
+    return {
+        "schema_version": "1.1",
+        "provenance": {"tool_version": "0.1.0", "front_end": "libclang 18.1.8", "generated_at": "...", "inputs": []},
+        "units": [_unit_doc_1_1()],
+        "types": {},
+        "capabilities": {"cfg": False},
+        "decision_inventory": {"status": "not_extracted"},
+    }
+
+
+def test_read_accepts_1_1_with_inventories() -> None:
+    """Verifies: TOOL-PAR-140, TOOL-PAR-150 — a complete 1.1 document reads and
+    carries the decision inventory."""
+    model = read_analysis_model(_model_doc_1_1())
+    assert model.schema_version == "1.1"
+    assert model.decision_inventory.status == "not_extracted"
+    assert model.units[0].unsupported_constructs == ()
+
+
+def test_read_rejects_1_1_missing_decision_inventory() -> None:
+    """Verifies: TOOL-PAR-150 — a 1.1 document cannot omit the decision
+    inventory."""
+    doc = _model_doc_1_1()
+    del doc["decision_inventory"]
+    with pytest.raises(AnalysisModelError) as exc_info:
+        read_analysis_model(doc)
+    assert exc_info.value.reason == "missing_decision_inventory"
+
+
+def test_read_rejects_unknown_decision_inventory_status() -> None:
+    """Verifies: TOOL-PAR-150, SDD-002 §3 — an unknown inventory status fails
+    closed with a named error."""
+    doc = _model_doc_1_1()
+    doc["decision_inventory"] = {"status": "probably_fine"}
+    with pytest.raises(AnalysisModelError) as exc_info:
+        read_analysis_model(doc)
+    assert exc_info.value.reason == "unknown_decision_inventory_status"
+
+
+def test_read_rejects_1_1_unit_missing_unsupported_constructs() -> None:
+    """Verifies: TOOL-PAR-140 — a 1.1 unit cannot omit the unsupported-construct
+    inventory."""
+    doc = _model_doc_1_1()
+    del doc["units"][0]["unsupported_constructs"]
+    with pytest.raises(AnalysisModelError) as exc_info:
+        read_analysis_model(doc)
+    assert exc_info.value.reason == "missing_unsupported_constructs"
+
+
+def test_read_accepts_1_0_historical_document() -> None:
+    """Verifies: SDD-002 §3 — a historical 1.0 document (no inventories) still
+    reads; the inventory requirements are minor-version gated."""
+    doc = {
+        "schema_version": "1.0",
+        "provenance": {"tool_version": "0.1.0", "front_end": "libclang 18.1.8", "generated_at": "...", "inputs": []},
+        "units": [{"path": "src/adc.c", "status": "parsed", "diagnostics": [], "functions": [], "cfg": None}],
+        "types": {},
+        "capabilities": {"cfg": False},
+    }
+    model = read_analysis_model(doc)
+    assert model.schema_version == "1.0"
+
+
+def test_assemble_emits_1_1_with_not_extracted_inventory(tmp_path: Path) -> None:
+    """Verifies: TOOL-PAR-150 — the assembler emits schema 1.1 with an explicit
+    not_extracted decision inventory and per-unit empty unsupported inventories."""
+    src = tmp_path / "adc.c"
+    src.write_text("int adc(void) { return 1; }\n", encoding="utf-8")
+    unit = AnalysisUnit(path="adc.c", status="parsed")
+    model = assemble_analysis_model(
+        [unit],
+        clock=FixedClock(),
+        source_root=tmp_path,
+        tool_version="0.1.0",
+        front_end="libclang 18.1.8 (assumed)",
+    )
+    assert model.schema_version == "1.1"
+    assert model.decision_inventory.status == "not_extracted"
+    assert model.units[0].unsupported_constructs == ()
+    # The emitted document survives its own reader gates.
+    reread = read_analysis_model(model.to_dict())
+    assert reread.decision_inventory.status == "not_extracted"
