@@ -199,6 +199,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-PAR-150** *(M, P2, T)* — The analysis model shall carry an explicit decision inventory whose completeness is recorded as data (`not_extracted`, `partial`, or `complete`); the inventory cannot be omitted from a schema-valid model, and a decision-inventory status unknown to the reader shall fail closed with a named error.
 
+**TOOL-PAR-160** *(S, P2, T)* — The analysis model shall support optional value-range constraints (lower and upper bounds) on parameters, struct/union fields, and type definitions, and optional array dimension metadata (size bounds and index type) on array types, as first-class data that bounded generation consumes as model input; the model shall round-trip such constraints losslessly, and their absence shall remain explicitly optional.
+
 ---
 
 ## 5. Toolchain and Compiler Abstraction (TCH)

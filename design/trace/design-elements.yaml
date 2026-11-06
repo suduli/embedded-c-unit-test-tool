@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 334
+      requirement_count: 335
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -621,6 +621,18 @@ components:
           coverage reconciliation (DSN-COV-040) can trust what the model
           claims.
         satisfies: [TOOL-PAR-150]
+        verification: T
+      - id: DSN-ANA-120
+        title: Value ranges and array dimensions as model data
+        statement: >
+          Parameters, struct/union fields and type definitions carry optional
+          value-range constraints (lower and upper bounds), and array types
+          carry optional dimension metadata (size bounds and index type), as
+          first-class model data. The model round-trips such constraints
+          losslessly and their absence is explicitly optional — bounded
+          generation (CMP-ATG) consumes them as model input rather than
+          per-case data, and no C source construct manufactures them.
+        satisfies: [TOOL-PAR-160]
         verification: T
 
   - id: CMP-TCH

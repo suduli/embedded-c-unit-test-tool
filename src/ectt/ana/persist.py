@@ -234,7 +234,7 @@ def assemble_analysis_model(
     )
 
     return AnalysisModel(
-        schema_version="1.1",
+        schema_version="1.2",
         provenance=provenance,
         units=tuple(final_units),
         types=merged_types,

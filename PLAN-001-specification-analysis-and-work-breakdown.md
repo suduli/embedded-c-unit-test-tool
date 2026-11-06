@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 334 SRS-001 requirements
+**Covers:** all 335 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-334 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+335 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 206 · S 110 · C 16 · F 2 |
-| Phase | P1 35 · P2 151 · P3 104 · P4 42 · — 2 |
-| Verification | T 236 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 206 · S 111 · C 16 · F 2 |
+| Phase | P1 35 · P2 152 · P3 104 · P4 42 · — 2 |
+| Verification | T 237 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -57,7 +57,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 10 | 4 | 5 | 1 | 0 | 0 | 4 | 4 | 2 | 9 | 1 | 0 | 0 |
 | NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
-| PAR | 15 | 8 | 6 | 1 | 0 | 0 | 14 | 1 | 0 | 14 | 0 | 0 | 1 |
+| PAR | 16 | 8 | 7 | 1 | 0 | 0 | 15 | 1 | 0 | 15 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | PRJ | 11 | 9 | 2 | 0 | 0 | 0 | 8 | 1 | 2 | 7 | 4 | 0 | 0 |
 | QUA | 10 | 7 | 2 | 1 | 0 | 0 | 0 | 0 | 10 | 1 | 9 | 0 | 0 |
@@ -208,12 +208,12 @@ Three rules were applied and are worth stating because they are where a work bre
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 66 | 88 | 46 |
-| P2 | 68 | 131 | 227 | 48 |
+| P2 | 69 | 132 | 228 | 48 |
 | P3 | 65 | 100 | 230 | 52 |
 | P4 | 26 | 35 | 92 | 52 |
-| Total | 190 | 332 | 641 | 52 |
+| Total | 191 | 333 | 642 | 52 |
 
-Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 19 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
+Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
 ### 5.3 The critical path
 
@@ -292,7 +292,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L1 — Comprehension
 
-22 work packages · 49 requirements · 71 person-weeks
+23 work packages · 50 requirements · 72 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -304,6 +304,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-ANA-06` | Static function testability and macro resolution | CMP-ANA | P2 | 4w | PAR-080 PAR-090 | ANA-02 | ● |
 | `WP-ANA-07` | Partial-failure resilience | CMP-ANA | P2 | 2w | PAR-130 PAR-140 | ANA-01 CORE-02 |  |
 | `WP-ANA-08` | Analysis model decision inventory | CMP-ANA | P2 | 1w | PAR-150 | ANA-04 |  |
+| `WP-ANA-09` | Value ranges and dimension metadata in the analysis model | CMP-ANA | P2 | 1w | PAR-160 | ANA-04 |  |
 | `WP-ING-01` | Compilation database ingestion | CMP-ING | P1 | 3w | ING-010 ING-020 ING-030 ING-040 | PRJ-01 |  |
 | `WP-ING-02` | Alternative ingestion paths | CMP-ING | P2 | 3w | ING-050 ING-060 ING-080 ING-210 | ING-01 |  |
 | `WP-ING-03` | Ingestion diagnostics, persistence and staleness | CMP-ING | P2 | 3w | ING-070 ING-090 ING-100 ING-220 | ING-01 |  |
@@ -536,8 +537,8 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 142 | 42.5% |
-| INSPECTION CHECKLIST | 52 | 15.6% |
+| EQUIVALENCE PARTITIONING | 143 | 42.7% |
+| INSPECTION CHECKLIST | 52 | 15.5% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.4% |
 | DECISION TABLE | 25 | 7.5% |
 | SCENARIO (demonstration) | 25 | 7.5% |
@@ -545,7 +546,7 @@ method, with authored technique choices for test requirements where the rule wou
 | STATE TRANSITION | 20 | 6.0% |
 | ANALYSIS ARGUMENT | 19 | 5.7% |
 | — (deferred) | 2 | 0.6% |
-| Total | 334 | 100% |
+| Total | 335 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -555,7 +556,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 236 |
+| T | 237 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -628,10 +629,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 334 |
-| Non-Future IDs | 332 |
-| Primary allocation entries | 332 |
-| Distinct allocated IDs | 332 |
+| SRS unique IDs | 335 |
+| Non-Future IDs | 333 |
+| Primary allocation entries | 333 |
+| Distinct allocated IDs | 333 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -648,9 +649,9 @@ The allocation check uses current SRS and §5.5 directly; the separately generat
 
 | Check | Result |
 |---|---|
-| Work packages (including spikes) | 190 |
-| Dependency edges | 286 |
-| Code / port-mediated / schedule-only | 274 / 2 / 10 |
+| Work packages (including spikes) | 191 |
+| Dependency edges | 287 |
+| Code / port-mediated / schedule-only | 275 / 2 / 10 |
 | Unresolved dependencies / cycles | 0 / 0 |
 | Package later than owned requirement / prerequisite later than package phase | 0 / 0 |
 
@@ -661,10 +662,10 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
 | M | 33 | 104 | 49 | 20 | 0 | 206 |
-| S | 2 | 46 | 46 | 16 | 0 | 110 |
+| S | 2 | 47 | 46 | 16 | 0 | 111 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 35 | 151 | 104 | 42 | 2 | 334 |
+| Total | 35 | 152 | 104 | 42 | 2 | 335 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -885,6 +886,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-PAR-130` | S | P2 | T | `WP-ANA-07` | DECISION TABLE |
 | `TOOL-PAR-140` | S | P2 | T | `WP-ANA-07` | EQUIVALENCE PARTITIONING |
 | `TOOL-PAR-150` | M | P2 | T | `WP-ANA-08` | EQUIVALENCE PARTITIONING |
+| `TOOL-PAR-160` | S | P2 | T | `WP-ANA-09` | EQUIVALENCE PARTITIONING |
 | `TOOL-PLG-010` | M | P2 | A | `WP-PLG-01` | ANALYSIS ARGUMENT |
 | `TOOL-PLG-020` | M | P2 | T | `WP-TCH-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-PLG-030` | M | P2 | T | `WP-GEN-02` | EQUIVALENCE PARTITIONING |
