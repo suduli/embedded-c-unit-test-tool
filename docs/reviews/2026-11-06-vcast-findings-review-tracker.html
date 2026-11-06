@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vcast-findings ↔ ectt architecture review — task tracker (2026-11-06)</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1c2330; --muted: #5b6575;
+    --line: #dde2ea; --accent: #2456a6;
+    --ns-bg: #e7eaf0; --ns-ink: #4a5568;
+    --ip-bg: #fff3d6; --ip-ink: #8a6100;
+    --cp-bg: #ddf3e4; --cp-ink: #14683a;
+    --bl-bg: #fde2e2; --bl-ink: #a02222;
+    --cf-bg: #fde8d8; --cf-ink: #9a4a12;
+    --gp-bg: #e5e9fa; --gp-ink: #32419a;
+    --rk-bg: #fbe3ef; --rk-ink: #99295e;
+    --al-bg: #ddf3e4; --al-ink: #14683a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; font: 14px/1.55 "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 10px; border-bottom: 2px solid var(--line); padding-bottom: 6px; }
+  h3 { font-size: 15px; margin: 18px 0 6px; }
+  .meta { color: var(--muted); margin: 0 0 18px; }
+  .meta code, td code, li code, p code { background: #eef1f5; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; font-size: 12.5px; }
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 18px; min-width: 130px; }
+  .card .n { font-size: 24px; font-weight: 700; }
+  .card .l { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+  .filters { margin: 6px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .filters button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 14px; cursor: pointer; font: inherit; color: var(--ink); }
+  .filters button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  table { border-collapse: collapse; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  th, td { border-bottom: 1px solid var(--line); padding: 9px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef1f6; font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  td.id { font-weight: 700; white-space: nowrap; }
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 11px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .s-ns { background: var(--ns-bg); color: var(--ns-ink); }
+  .s-ip { background: var(--ip-bg); color: var(--ip-ink); }
+  .s-cp { background: var(--cp-bg); color: var(--cp-ink); }
+  .s-bl { background: var(--bl-bg); color: var(--bl-ink); }
+  .fchip { display: inline-block; border-radius: 4px; padding: 0 6px; font-size: 11.5px; font-weight: 600; margin-right: 4px; }
+  .f-aligned  { background: var(--al-bg); color: var(--al-ink); }
+  .f-gap      { background: var(--gp-bg); color: var(--gp-ink); }
+  .f-conflict { background: var(--cf-bg); color: var(--cf-ink); }
+  .f-risk     { background: var(--rk-bg); color: var(--rk-ink); }
+  .small { color: var(--muted); font-size: 12.5px; }
+  .pending { color: var(--muted); font-style: italic; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 16px 12px; margin: 10px 0; }
+  footer { margin-top: 26px; color: var(--muted); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>vcast-findings ↔ ectt architecture review — task tracker</h1>
+  <p class="meta">
+    Date: 2026-11-06 (created) · Last updated: 2026-11-07 (all six review tasks complete) ·
+    Subject: <code>vcast-findings/</code> (VectorCAST 2026 SP4 static investigation, consolidated 2026-10-27; 225 files) ·
+    Baseline: ADR-001/002/006/008, SDD-001..005, SRS-001, PLAN-001, implemented <code>src/ectt</code> (WP-CORE-01, PRJ-01, ING-01, ANA-01/02/04) ·
+    Method: six parallel review agents (RV-01..RV-06). Authoritative tracker:
+    <a href="2026-11-06-vcast-findings-review-tracker.md">markdown</a>.
+  </p>
+
+  <div class="cards">
+    <div class="card"><div class="n" id="c-total">6</div><div class="l">Total tasks</div></div>
+    <div class="card"><div class="n" id="c-complete">0</div><div class="l">Complete</div></div>
+    <div class="card"><div class="n" id="c-inprog">0</div><div class="l">In progress</div></div>
+    <div class="card"><div class="n" id="c-notstart">6</div><div class="l">Not started</div></div>
+    <div class="card"><div class="n" id="c-blocked">0</div><div class="l">Blocked</div></div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button data-f="all" class="active">All</button>
+    <button data-f="ns">Not Started</button>
+    <button data-f="ip">In Progress</button>
+    <button data-f="cp">Complete</button>
+    <button data-f="bl">Blocked</button>
+  </div>
+
+  <h2>1 · Task register</h2>
+  <table id="tasks">
+    <thead>
+      <tr>
+        <th>ID</th><th>Review task</th><th>Evidence inputs (vcast-findings)</th><th>ectt baseline</th>
+        <th>Status</th><th>Evidence output</th><th>Findings summary</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-status="cp">
+        <td class="id">RV-01</td>
+        <td><strong>Stack &amp; architecture comparison</strong><br><span class="small">Proposed stack (§2), alternatives, support contract (§1), prerequisites (§10), phases (§11) vs accepted language/GUI/storage decisions.</span></td>
+        <td class="small"><code>deep-20261027/PRODUCT_ARCHITECTURE.md</code> §1,2,10–12 · <code>ARCHITECTURE.md</code> · <code>VCAPPLIB.md</code> · <code>deep-20261027/DEEP_ANALYSIS.md</code></td>
+        <td class="small">ADR-001 · ADR-006 · SDD-001 · SDD-005 · PLAN-001</td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-01.md">evidence-RV-01.md</a></td>
+        <td class="small"><span class="fchip f-conflict">5 conflict</span><span class="fchip f-aligned">10 aligned</span><span class="fchip f-gap">1 gap</span><span class="fchip f-risk">1 risk</span><br>
+          Proposal defaults conflict with accepted ADRs: React/TS web UI vs PySide6 + DSN-API-030, SQLite store vs ADR-002 YAML, GoogleTest foundation vs TOOL-HAR-060, C++ worker default (seam already accommodates swap), C++17 in first release. Incumbent's VcAppLib 81-export boundary, 7-mechanism pipeline and stub limits independently validate SDD-001/SDD-002. LinkPlan concept triple-validated.</td>
+      </tr>
+      <tr data-status="cp">
+        <td class="id">RV-02</td>
+        <td><strong>Seams &amp; contracts reconciliation</strong><br><span class="small">Recovered subsystem boundaries 1–7 and core contracts (BuildContext … CoverageSnapshot) vs seam register S1–S7.</span></td>
+        <td class="small"><code>DEEP_ANALYSIS.md</code> (D1–D13, boundaries) · <code>PRODUCT_ARCHITECTURE.md</code> §3–6 · <code>SPECIFICATION_RECOVERY.md</code></td>
+        <td class="small">SDD-002 · SDD-004 · <code>src/ectt/ana</code> · <code>src/ectt/ing</code></td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-02.md">evidence-RV-02.md</a></td>
+        <td class="small"><span class="fchip f-aligned">5 aligned</span><span class="fchip f-gap">8 gap</span><span class="fchip f-conflict">1 conflict</span><span class="fchip f-risk">1 risk</span><br>
+          AnalysisSnapshot↔S1, TestSpec↔S2, RunRecord↔S3 core, CoverageSnapshot↔S4 semantics match. Gaps: LinkPlan, HostProfile, CompiledTestManifest pre-run gate, RunAttempt identity, eligibility/observability gate. <strong>Conflict verified:</strong> SRS-001 TOOL-EXE-040 (timeout→fail) contradicts SDD-002 "timeout is a distinct outcome". Risk: schema-valid S1 docs can omit the decision inventory.</td>
+      </tr>
+      <tr data-status="cp">
+        <td class="id">RV-03</td>
+        <td><strong>Data model &amp; persistence review</strong><br><span class="small">Recovered unit-test + build-capture schemas, expected/actual + slots/histories structures vs two-tree data model and restricted YAML.</span></td>
+        <td class="small"><code>master-schema.sql</code> · <code>master-tables.json</code> · <code>vcapplib-recovered-schema.sql</code> · <code>VCAPPLIB.md</code> · <code>SPECIFICATION_RECOVERY.md</code></td>
+        <td class="small">SDD-003 · ADR-002 · <code>src/ectt/prj</code> · <code>src/ectt/ing/model.py</code> · <code>src/ectt/ana/model.py</code>, <code>persist.py</code></td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-03.md">evidence-RV-03.md</a></td>
+        <td class="small"><span class="fchip f-aligned">4 aligned</span><span class="fchip f-gap">4 gap</span><span class="fchip f-risk">1 risk</span><br>
+          ADR-002/SDD-003 two-tree design reinforced by recovered SQLite evidence. Gaps: compound/slots tests unrecorded, per-datum actuals missing for passing runs, build tags on ingested sets, first-class ranges/dimensions in type model. Risk: requirement-verdict aggregation anomaly (numerator 2 / denominator 1) unguarded in S5.</td>
+      </tr>
+      <tr data-status="cp">
+        <td class="id">RV-04</td>
+        <td><strong>Coverage &amp; MC/DC review</strong><br><span class="small">Masking vs unique-cause MC/DC, optimized storage/thresholds/limits, I/O sinks &amp; overflow vs coverage model and backend floors.</span></td>
+        <td class="small"><code>COVERAGE_AND_IO.md</code> · D4 (<code>selected/IO/c_cover.h</code>) · <code>PRODUCT_ARCHITECTURE.md</code> §5 · MC/DC text aids</td>
+        <td class="small">SDD-002 S4 · SDD-005 §6.1 · PLAN-001 COV WPs</td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-04.md">evidence-RV-04.md</a></td>
+        <td class="small"><span class="fchip f-aligned">4 aligned</span><span class="fchip f-gap">4 gap</span><span class="fchip f-risk">2 risk</span><br>
+          S4 already holds MC/DC variant as data, rows-vs-pairs separation and provider-named metrics. Gaps: no <code>truncated</code> coverage-artifact state, MC/DC condition-limit probing absent from §6.3, no known-answer MC/DC corpus, macro-variant merge incompatibility unnamed. Risk: VectorCAST's own threshold doc self-contradicts on equality — backend-boundary fixtures needed.</td>
+      </tr>
+      <tr data-status="cp">
+        <td class="id">RV-05</td>
+        <td><strong>Requirements &amp; work-package mapping</strong><br><span class="small">P01–P15 and FR-01..FR-12 classified: covered by implemented WP / designed but unimplemented / absent.</span></td>
+        <td class="small"><code>PROTOTYPE_REQUIREMENTS.md</code> (P01–P15) · <code>PRODUCT_ARCHITECTURE.md</code> §8 (FR-01..FR-12), §9</td>
+        <td class="small">SRS-001 · PLAN-001 §5.5, §5.3 · <code>docs/verification/</code></td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-05.md">evidence-RV-05.md</a></td>
+        <td class="small">27 items classified: 3 covered by implemented WPs (P01, P03 discovery, FR-01 context half), 19 designed-but-unimplemented, 4 absent from SRS/PLAN (P02 LinkPlan, P06 stub-resolution proof, P09 exit(0)-gate, P15 validated pilot WP). Conflicts: test-revision model vs ectt stable-ids+digests; Windows-first pilot vs Linux-first SRS.</td>
+      </tr>
+      <tr data-status="cp">
+        <td class="id">RV-06</td>
+        <td><strong>Gaps, risks &amp; open decisions</strong><br><span class="small">8 recovery gaps, 12 dispositioned review findings (Codex 1–6, Claude F1–F6) vs open ADRs and the DR register.</span></td>
+        <td class="small"><code>GAPS.md</code> · <code>REVIEW_DECISIONS.md</code> · <code>REVIEW_NOTES.md</code> · <code>DEEP_ANALYSIS.md</code> "What remains unknown"</td>
+        <td class="small">Open ADR-003/004/005/007 · PLAN-001 §3.2 (F-16/LIC-010) · <code>docs/reviews/2026-10-15-document-review.md</code></td>
+        <td><span class="badge s-cp">Complete</span></td>
+        <td class="small"><a href="2026-11-06-vcast-findings-evidence-RV-06.md">evidence-RV-06.md</a></td>
+        <td class="small"><span class="fchip f-aligned">17 aligned</span><span class="fchip f-gap">8 gap</span><span class="fchip f-risk">3 risk</span><br>
+          Codex-5 (denominator), Codex-6 (reproducibility split) and Claude-F6 (libclang vs LibTooling) dispositions fully anticipated by SDD-002/ADR-001. Highest-value imports: run-integrity gaps (attempt-before-build, exit(0)-completion-marker, crashed-run coverage admission, artifact↔test-revision binding). Risk: licence blocker unresolved while repo hosts extracted proprietary assets.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2 · Classification legend</h2>
+  <ul>
+    <li><strong>aligned</strong> — vcast-findings confirms or independently supports an existing ectt decision/design element.</li>
+    <li><strong>conflict</strong> — vcast-findings recommends something contradicting an accepted ADR/SDD decision; needs a user decision, not a silent change.</li>
+    <li><strong>gap</strong> — vcast-findings introduces a concept ectt's design or plan does not cover (candidate new ADR/WP).</li>
+    <li><strong>risk</strong> — evidence-backed caution affecting planning, scope claims, or verification strategy.</li>
+  </ul>
+
+  <h2>3 · Evidence map — vcast-findings identifiers</h2>
+  <details>
+    <summary>Identifier ranges and authoritative files</summary>
+    <ul>
+      <li><strong>E1–E7</strong> static architecture evidence — <code>ARCHITECTURE.md</code> §"Evidence and coverage"</li>
+      <li><strong>D1–D13</strong> deep-analysis evidence register — <code>deep-20261027/DEEP_ANALYSIS.md</code></li>
+      <li><strong>Boundaries 1–7</strong> recovered subsystem boundaries — <code>DEEP_ANALYSIS.md</code></li>
+      <li><strong>FR-01..FR-12</strong> proposed release requirements — <code>PRODUCT_ARCHITECTURE.md</code> §8</li>
+      <li><strong>P01–P15</strong> proposed prototype requirements — <code>deep-specifications/PROTOTYPE_REQUIREMENTS.md</code></li>
+      <li><strong>Codex 1–6, Claude F1–F6</strong> dispositioned review findings — <code>REVIEW_DECISIONS.md</code></li>
+      <li><strong>Gaps (8 rows)</strong> — <code>deep-specifications/GAPS.md</code></li>
+      <li><strong>Build-capture schema (27 tables)</strong> — <code>vcapplib-recovered-schema.sql</code>, <code>VCAPPLIB.md</code></li>
+      <li><strong>Unit-test schema (26 tables)</strong> — <code>deep-specifications/master-schema.sql</code>, <code>master-tables.json</code></li>
+    </ul>
+  </details>
+
+  <h2>4 · Findings synthesis</h2>
+  <p><strong>Total: 91 findings — <span class="fchip f-aligned">42 aligned</span> <span class="fchip f-gap">32 gap</span> <span class="fchip f-conflict">7 conflict</span> <span class="fchip f-risk">9 risk</span></strong>, plus RV-05's 27-item requirement classification (3 covered by implemented WPs, 19 designed-but-unimplemented, 4 absent from SRS/PLAN). Full citations in the per-task evidence files.</p>
+
+  <div class="panel">
+    <h3>A · What vcast-findings confirms</h3>
+    <ol>
+      <li><strong>SDD-001 decomposition validated by the incumbent's own evidence:</strong> VcAppLib is one shared 81-export boundary consumed identically by GUI, clicast and manage; the seven recovered mechanisms map onto ectt's component families; separate AI executables corroborate CMP-AIF; the 10-slot host-populated callback bridge corroborates inverted composition ports. (RV-01 F-07/09/11/16)</li>
+      <li><strong>Seam semantics independently converged:</strong> TestSpec ≡ S2; RunRecord ≡ S3 core (timeout distinct, <code>partial</code>/<code>not_executed</code> fields, <code>infrastructure_faults</code> channel, <code>order_seed</code>); CoverageSnapshot ≡ S4 (unmeasured ≠ uncovered, MC/DC form as data, rows-vs-pairs, provider-named metrics); AnalysisSnapshot ≡ S1 (failed TUs visible, no invented denominators). (RV-02 F-02/08/09/12; RV-04 F-01/02/08/09; RV-06 F-13/14/16/17)</li>
+      <li><strong>ADR-002/SDD-003 plain-text two-tree model reinforced</strong> by the recovered SQLite evidence (unmergeable DB, trigger-maintained FKs, identity cautions — all designed out). (RV-03 F-02/07/09)</li>
+      <li><strong>Implemented WPs hold up:</strong> WP-ING-01 covers P01 incl. distinct configurations; WP-PRJ-01 satisfies the storage half of FR-10/P14; WP-ANA implements the parser/build-compiler separation the shipped Clang.py adapter shows. (RV-05 F-09/10; RV-02 F-14)</li>
+      <li><strong>LinkPlan triple-validated</strong> (UTBotCpp harvest, VcAppLib COMPILATION schema, proposal). (RV-01 F-12)</li>
+    </ol>
+  </div>
+
+  <div class="panel">
+    <h3>B · Conflicts needing user decisions</h3>
+    <table>
+      <thead><tr><th>#</th><th>Topic</th><th>Proposal position</th><th>ectt accepted position</th><th>Ref</th></tr></thead>
+      <tbody>
+        <tr><td class="id">B1</td><td>UI stack</td><td>React/TS local web UI + loopback API</td><td>PySide6/Qt; DSN-API-030 no TCP listener; browser UI rejected on security-policy/product-feel grounds</td><td class="small">RV-01 F-02</td></tr>
+        <tr><td class="id">B2</td><td>Evidence store</td><td>SQLite + content-addressed blobs</td><td>ADR-002 restricted YAML + SDD-003 two trees</td><td class="small">RV-01 F-03</td></tr>
+        <tr><td class="id">B3</td><td>Host harness</td><td>GoogleTest foundation</td><td>TOOL-HAR-060 Unity/cmocka mandatory; HAR-065 GoogleTest optional host-only (incumbent wires GoogleTest as optional too)</td><td class="small">RV-01 F-04</td></tr>
+        <tr><td class="id">B4</td><td><strong>Internal SRS contradiction (verified)</strong></td><td>"timeout never a pass/fail"</td><td>SRS-001 TOOL-EXE-040 "report timed-out tests as failures" vs SDD-002 "timeout is a distinct outcome" — SRS change request needed</td><td class="small">RV-02 F-11</td></tr>
+        <tr><td class="id">B5</td><td>Identity model</td><td>TestRevision/EnvironmentRevision entities</td><td>Stable-id + digest staleness (SDD-003 §6/§7) — reconcile before WP-TCM-02</td><td class="small">RV-05 F-05</td></tr>
+        <tr><td class="id">B6</td><td>Platform order</td><td>Windows-first validated pilot</td><td>SRS-001 is Linux-first (NFR-010 Must)</td><td class="small">RV-05 F-06</td></tr>
+      </tbody>
+    </table>
+    <p class="small">B1–B3 are defaults-only conflicts already absorbed by the PAR-100 seam and the SDD-005 back-end catalogue — no ADR change implied unless the user wants the proposal's defaults. B4–B6 need doc changes regardless of the proposal.</p>
+  </div>
+
+  <div class="panel">
+    <h3>C · Missing concepts (candidates for new requirements/WPs)</h3>
+    <ul>
+      <li><strong>Identity chain — largest structural blind spot:</strong> LinkPlan manifest; CompiledTestManifest pre-run gate; RunAttempt before build; EnvironmentRevision digest binding result → recipe → artifact → test revision. Allocate before WP-BLD-01/WP-EXH-01. (RV-02 F-01/04/05/06/07/10/15; RV-05 F-01/03/04; RV-06 F-09/11/12)</li>
+      <li><strong>Run-integrity four-pack (cheap, highest-value):</strong> attempt-before-build record; exit(0)-without-finalized-record ≠ pass; crashed-run coverage admission; artifact↔test-revision pre-run binding — one-contract-point additions to WP-EXH-01/02, WP-CBT-01, WP-COV-02. (RV-06 F-11/12/18/19)</li>
+      <li><strong>HostProfile / ABI-divergence record</strong> for target→host derivations. (RV-02 F-04; RV-06 F-15)</li>
+      <li><strong>Function-eligibility/observability gate</strong> ("discovery must not imply eligibility"). (RV-02 F-13)</li>
+      <li><strong>Coverage:</strong> <code>truncated</code> artifact state (complete|truncated|missing); MC/DC condition-limit probing in §6.3; known-answer MC/DC corpus before WP-COV-05; macro-variant merge incompatibility. (RV-04 F-03/04/06/10)</li>
+      <li><strong>Data model:</strong> first-class ranges/dimensions (before WP-ATG); compound/slots tests (explicit defer decision); per-datum actuals on passing runs; per-requirement verdict dedup/denominator rule in SDD-002 §8. (RV-03 F-03/04/05/06/08)</li>
+      <li><strong>Implementation lag:</strong> response-file expansion + compiler/SDK/target identity in <code>ing</code>; decision inventory mandatory in the S1 schema. (RV-02 F-01/03)</li>
+      <li><strong>Validation:</strong> harness-vs-reference-test agreement check in WP-QUA-03. (RV-06 F-02)</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>D · Recommended order of follow-up (doc/plan changes — none made; all require user approval)</h3>
+    <ol>
+      <li><strong>Resolve ADR-005 (licence)</strong> before further implementation; record the no-import rule for the extracted proprietary assets under <code>vcast-findings/</code>. (RV-06 F-27)</li>
+      <li><strong>SRS change request for TOOL-EXE-040</strong> (timeout classification); settle revision-vs-stable-id identity model before WP-TCM-02. (RV-02 F-11; RV-05 F-05)</li>
+      <li><strong>Add identity-chain contracts</strong> (LinkPlan, CompiledTestManifest, RunAttempt, EnvironmentRevision digests) to SDD-002/SDD-003 + new SRS requirements before WP-BLD-01/WP-EXH-01. (RV-02 F-15; RV-05 F-01)</li>
+      <li><strong>Fold the run-integrity four-pack</strong> and crashed-run coverage admission into WP-EXH-01/02, WP-CBT-01, WP-COV-02 acceptance criteria. (RV-06)</li>
+      <li><strong>MC/DC capability probes, boundary fixtures, known-answer corpus</strong> into SDD-005 §6.3/§6.4 and WP-COV-05/06. (RV-04 F-04/05/10)</li>
+      <li><strong>Smaller guards:</strong> verdict/denominator rule (SDD-002 §8); harness-vs-reference check (WP-QUA-03); ranges/dimensions in the S1 schema before WP-ATG. (RV-03 F-08/F-06; RV-06 F-02)</li>
+      <li><strong>Hold ADR-001 UI/storage decisions</strong>; ADR-007's clean-machine endpoint test is the shared prerequisite for packaging/UI-stack decisions. (RV-01 F-02/03/17)</li>
+    </ol>
+  </div>
+
+  <footer>Review artifacts: this file (HTML rendering) ·
+    <a href="2026-11-06-vcast-findings-review-tracker.md">tracker (markdown, authoritative)</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-01.md">RV-01</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-02.md">RV-02</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-03.md">RV-03</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-04.md">RV-04</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-05.md">RV-05</a> ·
+    <a href="2026-11-06-vcast-findings-evidence-RV-06.md">RV-06</a> ·
+    <a href="diagrams/proposed-architecture.html">architecture diagram (Archify, showcase-passed)</a>.
+    <code>vcast-findings/</code> treated as read-only evidence; its helper scripts were not executed.
+  </footer>
+</div>
+<script>
+(function () {
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#tasks tbody tr"));
+  var counts = { ns: 0, ip: 0, cp: 0, bl: 0 };
+  rows.forEach(function (r) { counts[r.getAttribute("data-status")]++; });
+  document.getElementById("c-complete").textContent = counts.cp;
+  document.getElementById("c-inprog").textContent = counts.ip;
+  document.getElementById("c-notstart").textContent = counts.ns;
+  document.getElementById("c-blocked").textContent = counts.bl;
+  var buttons = document.querySelectorAll("#filters button");
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      buttons.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      var f = b.getAttribute("data-f");
+      rows.forEach(function (r) {
+        r.style.display = (f === "all" || r.getAttribute("data-status") === f) ? "" : "none";
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
