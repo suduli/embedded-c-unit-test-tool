@@ -201,6 +201,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-PAR-160** *(S, P2, T)* — The analysis model shall support optional value-range constraints (lower and upper bounds) on parameters, struct/union fields, and type definitions, and optional array dimension metadata (size bounds and index type) on array types, as first-class data that bounded generation consumes as model input; the model shall round-trip such constraints losslessly, and their absence shall remain explicitly optional.
 
+**TOOL-PAR-170** *(S, P2, T)* — The tool shall provide an eligibility and observability gate over the analysis model that evaluates each discovered function against declared capability flags, recording per function the observable channels (parameters, return value, global accesses) and machine-readable reasons when a function is not eligible — for example a static function without opt-in exposure, or a function with no observable channel. Discovery shall not imply eligibility, and requested-but-inaccessible state shall be reported explicitly as gate reasons rather than silently dropped.
+
 ---
 
 ## 5. Toolchain and Compiler Abstraction (TCH)

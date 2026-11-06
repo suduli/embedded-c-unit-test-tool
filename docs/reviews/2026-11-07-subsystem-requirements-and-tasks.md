@@ -1,7 +1,7 @@
 # Subsystem requirements & tasks — full inventory (features, WPs, SRS requirements)
 
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
-- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (335 unique requirement IDs: 333 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
+- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (336 unique requirement IDs: 334 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
 - **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
@@ -46,7 +46,7 @@
 
 ## L1 — Comprehension
 
-23 work packages · 72 person-weeks · 50 SRS requirements allocated · 4 implemented · 8 review-derived requirements · 6 review tasks
+23 work packages · 72 person-weeks · 51 SRS requirements allocated · 4 implemented · 8 review-derived requirements · 6 review tasks
 
 ### CMP-ING — 7 WPs · 21 pw · 22 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
@@ -59,7 +59,7 @@
 | `WP-ING-06` | Multi-toolchain ingestion | P3 | 2w | ING-110 | Planned |
 | `WP-ING-07` | Authored link plan ingestion and validation | P2 | 2w | ING-200 | Planned |
 
-### CMP-ANA — 9 WPs · 29 pw · 16 requirements allocated
+### CMP-ANA — 9 WPs · 29 pw · 17 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
 |---|---|:--:|--:|---|---|
 | `WP-ANA-01` | C front-end binding and dialect support | P1 | 4w | PAR-010 PAR-020 | **Complete** |
@@ -67,7 +67,7 @@
 | `WP-ANA-03` | Call graph and scope classification | P2 | 3w | PAR-060 | Planned |
 | `WP-ANA-04` | Analysis model persistence and schema versioning | P1 | 3w | PAR-100 PAR-110 | **Complete** |
 | `WP-ANA-05` | Control flow graph capability | P2 | 6w | PAR-070 PAR-120 | Planned |
-| `WP-ANA-06` | Static function testability and macro resolution | P2 | 4w | PAR-080 PAR-090 | Planned |
+| `WP-ANA-06` | Static function testability and macro resolution | P2 | 4w | PAR-080 PAR-090 PAR-170 | Planned |
 | `WP-ANA-07` | Partial-failure resilience | P2 | 2w | PAR-130 PAR-140 | Planned |
 | `WP-ANA-08` | Analysis model decision inventory | P2 | 1w | PAR-150 | Planned |
 | `WP-ANA-09` | Value ranges and dimension metadata in the analysis model | P2 | 1w | PAR-160 | Planned |
@@ -104,7 +104,7 @@
 | T-08 | ING-100 fail-closed staleness: content fingerprints (compdb, sources, response files, include surface) + invalidation fixtures | NR-09 | RV-06 F-10 | P1 | **Complete** | — |
 | T-09 | S1 schema 1.1: mandatory decision + unsupported inventories, reader gates fail closed | NR-10, NR-11 | RV-02 F-03, RV-05 F-08 | P1 | **Complete** | — |
 | T-10 | Value ranges + array dimension metadata in ana model and schema 1.2 (round-trip + conformance tests) | NR-12 | RV-03 F-06 | P1 | **Complete** | — |
-| T-11 | Eligibility/observability gate contract + ATG consumption | NR-13 | RV-02 F-13 | P1 | Not Started | — |
+| T-11 | Eligibility/observability gate: assess_eligibility over the S1 model (channels, named reasons), consumed by CMP-ATG | NR-13 | RV-02 F-13 | P1 | **Complete** | — |
 | T-12 | LinkPlan: TOOL-ING-200 + WP-ING-07 + DSN-ING-120 + SDD-002/SDD-003 amendments | NR-14 | RV-02 F-05 | P0 | **Complete** | — |
 
 ## L2 — Synthesis
@@ -508,6 +508,14 @@
 - **Code:** model.py — RangeModel, DimensionModel, ParameterModel.value_range, StructMemberModel.value_range, TypeModel.value_range + TypeModel.dimensions (nested element chains remain the primary shape encoding; the analyzer never manufactures ranges from C source — authored data, TCM/ATG scope).
 - **Tests:** 5 new (round-trips, absent-key omission, jsonschema conformance vs 1.2) — 146 passed, 1 skipped.
 - **Gates:** plan_check exit 0 — 335 requirements, 333 allocations, 190 packages, 641 person-weeks; trace_check exit 0 — 333/333 allocated, 245 elements.
+
+### T-11 evidence (landed 2026-11-07 — L1 Comprehension)
+
+- **SRS-001:** TOOL-PAR-170 (S, P2, T) — eligibility and observability gate over the analysis model; per-function observable channels (parameters, return value, global accesses) and machine-readable ineligibility reasons (static without opt-in exposure; no observable channel); discovery does not imply eligibility; requested-but-inaccessible state reported as gate reasons. Allocated to WP-ANA-06.
+- **Design register:** DSN-ANA-130 added; requirement_count 336.
+- **Code:** src/ectt/ana/eligibility.py — assess_eligibility(units, expose_static, void_type_refs) → EligibilityRecord (ref-normalized void detection; caller-supplied void set keeps type-graph naming decoupled). Records are S1-adjacent derived data consumed by CMP-ATG, deterministic and libclang-free.
+- **Tests:** 8 new in tests/ana/test_eligibility.py — 154 passed, 1 skipped.
+- **Gates:** plan_check exit 0 — 336 requirements, 334 allocations, 190 packages, 642 person-weeks; trace_check exit 0 — 334/334 allocated, 246 elements.
 
 ## Validation spikes (complete — ADR-001)
 

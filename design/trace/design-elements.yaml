@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 335
+      requirement_count: 336
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -633,6 +633,20 @@ components:
           generation (CMP-ATG) consumes them as model input rather than
           per-case data, and no C source construct manufactures them.
         satisfies: [TOOL-PAR-160]
+        verification: T
+      - id: DSN-ANA-130
+        title: Eligibility and observability gate
+        statement: >
+          A gate over the analysis model evaluates each discovered function
+          against declared capability flags and records per function the
+          observable channels — parameters, return value, global accesses —
+          and machine-readable reasons when the function is not eligible, such
+          as a static function without opt-in exposure or a function with no
+          observable channel. Discovery does not imply eligibility;
+          requested-but-inaccessible state is reported as gate reasons rather
+          than silently dropped. CMP-ATG consumes the gate records as
+          S1-adjacent derived data, deterministic and libclang-free.
+        satisfies: [TOOL-PAR-170]
         verification: T
 
   - id: CMP-TCH

@@ -6,13 +6,18 @@ Front-end bindings are loaded lazily so that importing persist/reader modules
 does not load libclang (SDD-002 S4).
 
 Satisfies: TOOL-PAR-010, TOOL-PAR-020, TOOL-PAR-030, TOOL-PAR-040, TOOL-PAR-050,
-           TOOL-PAR-100, TOOL-PAR-110, DSN-ANA-090, DSN-ANA-020, DSN-ANA-070.
+           TOOL-PAR-100, TOOL-PAR-110, TOOL-PAR-170, DSN-ANA-090, DSN-ANA-020, DSN-ANA-070,
+           DSN-ANA-130.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+from ectt.ana.eligibility import (
+    EligibilityRecord,
+    assess_eligibility,
+)
 from ectt.ana.errors import (
     AnalysisError,
     AnalysisModelError,
@@ -106,6 +111,8 @@ def __getattr__(name: str) -> Any:
 
 
 __all__ = [
+    "EligibilityRecord",
+    "assess_eligibility",
     # Binding & frontend (lazy)
     "ClangFrontend",
     "parse",
