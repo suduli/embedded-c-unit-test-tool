@@ -139,7 +139,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-ING-090** *(S, P2, T)* — The tool shall persist the ingested project model to a version-controllable text format so ingestion need not be repeated on every invocation.
 
-**TOOL-ING-100** *(S, P2, T)* — The tool shall detect that the ingested project model is stale relative to the build system and re-ingest or warn.
+**TOOL-ING-100** *(S, P2, T)* — The tool shall detect that the ingested project model is stale relative to the build system and shall force re-ingestion before any downstream use; a stale ingested model shall never be consumed with only a warning. Staleness shall be judged content-based: a changed source file, a changed response file, a changed ingested configuration definition, and changes to the include surface — including a newly created header that shadows an earlier resolution, or one whose appearance or removal alters `__has_include` outcomes — shall all mark the model stale.
 
 **TOOL-ING-110** *(C, P3, T)* — The tool shall support ingestion of projects that build with more than one toolchain, retaining per-toolchain flags.
 

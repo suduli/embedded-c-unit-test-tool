@@ -87,7 +87,7 @@
 |---|---|---|---|:--:|
 | NR-07 | Ingested context captures response files (expanded), compiler/SDK/sysroot/target identity — landed 2026-11-07 as TOOL-ING-210/220 | TOOL-ING-210, TOOL-ING-220 | RV-02 F-01 | P1 |
 | NR-08 | Explicit build identity/tag per ingested configuration set — landed 2026-11-07 (CompilationDatabase.build_tag) | TOOL-ING-220 | RV-03 F-05 | P1 |
-| NR-09 | Stale ingest forces re-analysis; shadowing-header/__has_include invalidation | TOOL-ING-100 | RV-06 F-10 | P1 |
+| NR-09 | Stale ingest forces re-analysis; shadowing-header/__has_include invalidation — landed 2026-11-07 (fail-closed staleness.py, no warn path) | TOOL-ING-100 | RV-06 F-10 | P1 |
 | NR-10 | S1 schema mandates the decision inventory | DSN-COV-040 | RV-02 F-03 | P1 |
 | NR-11 | Unsupported constructs as first-class S1 inventory data | TOOL-PAR-130 | RV-05 F-08 | P1 |
 | NR-12 | Ranges/dimensions first-class in the type model | ana type model | RV-03 F-06 | P1 |
@@ -99,7 +99,7 @@
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
 | T-07 | Extend ing: response-file expansion, build-context identity, build tags (TOOL-ING-210/220, DSN-ING-130/140) | NR-07, NR-08 | RV-02 F-01, RV-03 F-05 | P1 | **Complete** | — |
-| T-08 | ING-100 stale→re-analysis; invalidation fixtures | NR-09 | RV-06 F-10 | P1 | Not Started | — |
+| T-08 | ING-100 fail-closed staleness: content fingerprints (compdb, sources, response files, include surface) + invalidation fixtures | NR-09 | RV-06 F-10 | P1 | **Complete** | — |
 | T-09 | S1 schema: mandatory decision + unsupported inventories | NR-10, NR-11 | RV-02 F-03, RV-05 F-08 | P1 | Not Started | — |
 | T-10 | Ranges/dimensions in ana type model + schema | NR-12 | RV-03 F-06 | P1 | Not Started | — |
 | T-11 | Eligibility/observability gate contract + ATG consumption | NR-13 | RV-02 F-13 | P1 | Not Started | — |
@@ -478,6 +478,15 @@
 - **Code:** src/ectt/ing — expand_response_files() with size/depth bounds, ResponseFileError with named reasons, CompilerInvocation.raw_arguments/target_triple/sysroot, TranslationUnit.response_files, CompilationDatabase.build_tag.
 - **Tests:** 10 new tests; tests/ing+core+prj: 129 passed, 1 skipped (pre-existing); tests/ana requires libclang (environmental).
 - **Gates:** plan_check exit 0 — 332 requirements, 330 allocations, 189 packages, 640 person-weeks; trace_check exit 0 — 330/330 allocated, 245 elements.
+
+### T-08 evidence (landed 2026-11-07 — L1 Comprehension)
+
+- **SRS-001:** TOOL-ING-100 reworded fail-closed — a stale ingested model forces re-ingestion before downstream use; warning-only consumption is no longer an available behavior; staleness is content-based (source, response file, configuration, include surface incl. shadowing and __has_include changes).
+- **Design register:** DSN-ING-060 restated; unknown include-surface completeness forces rebuild.
+- **Code:** src/ectt/ing/staleness.py (capture_staleness_inputs / check_staleness / assert_fresh; StalenessError with reasons and changed paths; include-surface bounded at 20000 headers, unknown → stale).
+- **Fixtures:** tests/ing/test_staleness.py — 10 fixtures incl. shadowing create/revert, __has_include change, identical-mtime content change, missing source, unknown surface.
+- **Tests:** tests/ing+core+prj: 138 passed, 1 skipped.
+- **Gates:** plan_check exit 0 (332 requirements); trace_check exit 0 (330/330 allocated).
 
 ## Validation spikes (complete — ADR-001)
 

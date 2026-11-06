@@ -400,12 +400,20 @@ components:
         satisfies: [TOOL-ING-070]
         verification: T
       - id: DSN-ING-060
-        title: Persisted project model with staleness detection
+        title: Persisted project model with fail-closed staleness detection
         statement: >
-          The ingested model is written to the project store with the digest
-          and mtime of every input it was derived from. A cheap staleness check
-          compares those on each invocation and either re-ingests or warns,
-          so ingestion is not repeated needlessly and is never silently stale.
+          The ingested model records a content fingerprint of every input it
+          was derived from: the compilation database itself, each source file,
+          each response file, and the include surface of every include
+          directory (the headers visible per directory, in resolution order).
+          A cheap digest comparison on each invocation marks the model stale on
+          any change — including a newly created header that shadows an
+          earlier resolution, or one whose appearance or removal changes
+          __has_include outcomes — and a stale model forces re-ingestion
+          before downstream use; consuming a stale model with only a warning
+          is not an available behavior. When the include surface cannot be
+          enumerated within documented bounds, completeness is unknown and the
+          model is treated as stale (unknown completeness forces rebuild).
         satisfies: [TOOL-ING-090, TOOL-ING-100]
         verification: T
       - id: DSN-ING-070

@@ -6,6 +6,7 @@ Satisfies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030, TOOL-ING-040.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 from ectt.core.determinism import CoreError
@@ -19,6 +20,7 @@ __all__ = [
     "CommandParseError",
     "CMakeConfigureError",
     "ResponseFileError",
+    "StalenessError",
 ]
 
 
@@ -192,3 +194,23 @@ class ResponseFileError(IngestionError):
         )
         self.response_file = response_file
         self.depth = depth
+
+
+class StalenessError(IngestionError):
+    """Raised when a stale ingested model is consumed downstream (TOOL-ING-100).
+
+    The fail-closed contract has no warn path: callers must re-ingest. Carries
+    the machine-readable staleness reasons and the changed input paths.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reasons: Sequence[str] = (),
+        changed_paths: Sequence[str] = (),
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason="stale_ingested_model", path=path)
+        self.reasons = tuple(reasons)
+        self.changed_paths = tuple(changed_paths)
