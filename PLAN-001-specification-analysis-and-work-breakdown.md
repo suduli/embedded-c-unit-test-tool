@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 330 SRS-001 requirements
+**Covers:** all 332 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-330 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+332 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 203 · S 109 · C 16 · F 2 |
-| Phase | P1 35 · P2 147 · P3 104 · P4 42 · — 2 |
-| Verification | T 232 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 205 · S 109 · C 16 · F 2 |
+| Phase | P1 35 · P2 149 · P3 104 · P4 42 · — 2 |
+| Verification | T 234 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -52,7 +52,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | COV | 17 | 12 | 5 | 0 | 0 | 5 | 0 | 8 | 4 | 15 | 2 | 0 | 0 |
 | EXE | 9 | 5 | 4 | 0 | 0 | 7 | 2 | 0 | 0 | 9 | 0 | 0 | 0 |
 | HAR | 13 | 9 | 3 | 1 | 0 | 0 | 12 | 1 | 0 | 11 | 1 | 0 | 1 |
-| ING | 20 | 9 | 9 | 2 | 0 | 4 | 15 | 1 | 0 | 17 | 1 | 2 | 0 |
+| ING | 22 | 11 | 9 | 2 | 0 | 4 | 17 | 1 | 0 | 19 | 1 | 2 | 0 |
 | INS | 11 | 9 | 2 | 0 | 0 | 0 | 10 | 1 | 0 | 4 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 10 | 4 | 5 | 1 | 0 | 0 | 4 | 4 | 2 | 9 | 1 | 0 | 0 |
@@ -208,10 +208,10 @@ Three rules were applied and are worth stating because they are where a work bre
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 66 | 88 | 46 |
-| P2 | 67 | 127 | 226 | 48 |
+| P2 | 67 | 129 | 226 | 48 |
 | P3 | 65 | 100 | 230 | 52 |
 | P4 | 26 | 35 | 92 | 52 |
-| Total | 189 | 328 | 640 | 52 |
+| Total | 189 | 330 | 640 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 18 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -292,7 +292,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L1 — Comprehension
 
-21 work packages · 45 requirements · 70 person-weeks
+21 work packages · 47 requirements · 70 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -304,8 +304,8 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-ANA-06` | Static function testability and macro resolution | CMP-ANA | P2 | 4w | PAR-080 PAR-090 | ANA-02 | ● |
 | `WP-ANA-07` | Partial-failure resilience | CMP-ANA | P2 | 2w | PAR-130 | ANA-01 CORE-02 |  |
 | `WP-ING-01` | Compilation database ingestion | CMP-ING | P1 | 3w | ING-010 ING-020 ING-030 ING-040 | PRJ-01 |  |
-| `WP-ING-02` | Alternative ingestion paths | CMP-ING | P2 | 3w | ING-050 ING-060 ING-080 | ING-01 |  |
-| `WP-ING-03` | Ingestion diagnostics, persistence and staleness | CMP-ING | P2 | 3w | ING-070 ING-090 ING-100 | ING-01 |  |
+| `WP-ING-02` | Alternative ingestion paths | CMP-ING | P2 | 3w | ING-050 ING-060 ING-080 ING-210 | ING-01 |  |
+| `WP-ING-03` | Ingestion diagnostics, persistence and staleness | CMP-ING | P2 | 3w | ING-070 ING-090 ING-100 ING-220 | ING-01 |  |
 | `WP-ING-04` | Test scope model and resolution | CMP-ING | P2 | 5w | ING-120 ING-130 ING-140 ING-150 ING-190 | ING-01 |  |
 | `WP-ING-05` | Scope conflict detection and external dependency reporting | CMP-ING | P2 | 3w | ING-160 ING-170 ING-180 | ING-04 ANA-03 |  |
 | `WP-ING-06` | Multi-toolchain ingestion | CMP-ING | P3 | 2w | ING-110 | ING-01 TCH-01 |  |
@@ -535,16 +535,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 138 | 41.8% |
-| INSPECTION CHECKLIST | 52 | 15.8% |
-| BOUNDARY VALUE ANALYSIS | 28 | 8.5% |
-| DECISION TABLE | 25 | 7.6% |
-| SCENARIO (demonstration) | 25 | 7.6% |
-| PAIRWISE | 21 | 6.4% |
-| STATE TRANSITION | 20 | 6.1% |
-| ANALYSIS ARGUMENT | 19 | 5.8% |
+| EQUIVALENCE PARTITIONING | 140 | 42.2% |
+| INSPECTION CHECKLIST | 52 | 15.7% |
+| BOUNDARY VALUE ANALYSIS | 28 | 8.4% |
+| DECISION TABLE | 25 | 7.5% |
+| SCENARIO (demonstration) | 25 | 7.5% |
+| PAIRWISE | 21 | 6.3% |
+| STATE TRANSITION | 20 | 6.0% |
+| ANALYSIS ARGUMENT | 19 | 5.7% |
 | — (deferred) | 2 | 0.6% |
-| Total | 330 | 100% |
+| Total | 332 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -554,7 +554,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 232 |
+| T | 234 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -627,10 +627,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 330 |
-| Non-Future IDs | 328 |
-| Primary allocation entries | 328 |
-| Distinct allocated IDs | 328 |
+| SRS unique IDs | 332 |
+| Non-Future IDs | 330 |
+| Primary allocation entries | 330 |
+| Distinct allocated IDs | 330 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -659,11 +659,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 33 | 101 | 49 | 20 | 0 | 203 |
+| M | 33 | 103 | 49 | 20 | 0 | 205 |
 | S | 2 | 45 | 46 | 16 | 0 | 109 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 35 | 147 | 104 | 42 | 2 | 330 |
+| Total | 35 | 149 | 104 | 42 | 2 | 332 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -820,6 +820,8 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-ING-180` | S | P2 | T | `WP-ING-05` | EQUIVALENCE PARTITIONING |
 | `TOOL-ING-190` | S | P2 | I | `WP-ING-04` | INSPECTION CHECKLIST |
 | `TOOL-ING-200` | M | P2 | T | `WP-ING-07` | EQUIVALENCE PARTITIONING |
+| `TOOL-ING-210` | M | P2 | T | `WP-ING-02` | EQUIVALENCE PARTITIONING |
+| `TOOL-ING-220` | M | P2 | T | `WP-ING-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-INS-010` | M | P2 | D | `WP-PKG-01` | SCENARIO (demonstration) |
 | `TOOL-INS-020` | M | P2 | D | `WP-PKG-01` | SCENARIO (demonstration) |
 | `TOOL-INS-030` | M | P2 | D | `WP-PKG-01` | SCENARIO (demonstration) |

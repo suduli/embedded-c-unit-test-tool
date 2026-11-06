@@ -161,6 +161,10 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-ING-200** *(M, P2, T)* — The tool shall require, before any test-harness build, an explicit authored link plan for the scope that enumerates the ordered link inputs (objects, archives and libraries) with their resolved identities, the linker and runtime identities, and the effective link command; an input that cannot be resolved shall block the build with a diagnostic naming the unresolved entry, and a compilation database alone shall not be treated as sufficient to define the link.
 
+**TOOL-ING-210** *(M, P2, T)* — The tool shall expand response-file references (`@file`) in ingested compile commands: the referenced file shall be resolved relative to the entry's working directory, parsed into arguments under documented quoting rules in which quoted sections remain whole, and recursion into nested response files shall be depth-bounded; the raw, unexpanded invocation shall be preserved on the entry, and a response file that is missing, unreadable, or over the documented size limit shall produce a named diagnostic rather than a silent guess.
+
+**TOOL-ING-220** *(M, P2, T)* — The tool shall capture per entry the build-context identity derivable from the invocation — the compiler executable path, the target triple when specified (`--target`, `-target`, `-mtriple`), and the sysroot when specified (`--sysroot`, `-isysroot`) — and shall attach an explicit caller-supplied build tag to each ingested configuration set; entries differing in any captured identity field shall remain distinct configurations.
+
 ---
 
 ## 4. Source Parsing and Analysis (PAR)

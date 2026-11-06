@@ -18,6 +18,7 @@ __all__ = [
     "MissingCommandOrArgumentsError",
     "CommandParseError",
     "CMakeConfigureError",
+    "ResponseFileError",
 ]
 
 
@@ -161,3 +162,33 @@ class CMakeConfigureError(IngestionError):
         super().__init__(message, reason=reason, path=path)
         self.exit_code = exit_code
         self.stderr = stderr
+
+
+class ResponseFileError(IngestionError):
+    """Raised when a response file referenced by an ingested command cannot be expanded.
+
+    Satisfies: TOOL-ING-210. Reason codes: ``response_file_not_found``,
+    ``response_file_unreadable``, ``response_file_too_large``,
+    ``response_file_depth_exceeded``.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "response_file_error",
+        response_file: str | None = None,
+        depth: int | None = None,
+        path: Path | str | None = None,
+        entry_index: int | None = None,
+        entry_file: str | None = None,
+    ) -> None:
+        super().__init__(
+            message,
+            reason=reason,
+            path=path,
+            entry_index=entry_index,
+            entry_file=entry_file,
+        )
+        self.response_file = response_file
+        self.depth = depth

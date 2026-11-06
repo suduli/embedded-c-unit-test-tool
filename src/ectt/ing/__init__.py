@@ -7,6 +7,9 @@ for C projects per TOOL-ING-010, TOOL-ING-020, TOOL-ING-030, and TOOL-ING-040:
 - Normalizes single-string 'command' and array 'arguments' forms to one internal shape.
 - Extracts per translation unit: source path, working directory, include paths,
   preprocessor definitions, language standard, compiler invocation, and residual flags.
+- Expands response-file references (@file) with depth and size bounds, preserving
+  the raw invocation, and captures build-context identity (target triple, sysroot)
+  plus an explicit build tag per ingested set.
 - Confines and normalizes project paths to relative POSIX format without escaping project bounds.
 - Recommends and supports CMake export via CMAKE_EXPORT_COMPILE_COMMANDS=ON.
 """
@@ -17,6 +20,7 @@ from ectt.ing.cmake import (
 )
 from ectt.ing.compdb_adapter import (
     CompDbAdapter,
+    expand_response_files,
     extract_compiler_flags,
     load_compdb,
     parse_command_to_arguments,
@@ -30,6 +34,7 @@ from ectt.ing.errors import (
     IngestionError,
     MissingCommandOrArgumentsError,
     MissingEntryKeyError,
+    ResponseFileError,
 )
 from ectt.ing.model import (
     CompilationDatabase,
@@ -46,6 +51,7 @@ __all__ = [
     "MissingCommandOrArgumentsError",
     "CommandParseError",
     "CMakeConfigureError",
+    "ResponseFileError",
     # Models
     "CompilerInvocation",
     "TranslationUnit",
@@ -55,6 +61,7 @@ __all__ = [
     "load_compdb",
     "parse_compdb",
     "parse_command_to_arguments",
+    "expand_response_files",
     "extract_compiler_flags",
     # CMake integration
     "generate_compdb_via_cmake",

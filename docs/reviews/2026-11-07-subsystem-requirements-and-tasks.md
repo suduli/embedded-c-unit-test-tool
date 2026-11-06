@@ -1,7 +1,7 @@
 # Subsystem requirements & tasks — full inventory (features, WPs, SRS requirements)
 
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
-- **Inventory source:** PLAN-001 §5.5 register (186 work packages · 636 person-weeks) and SRS-001 (330 unique requirement IDs: 328 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
+- **Inventory source:** PLAN-001 §5.5 register (186 work packages · 636 person-weeks) and SRS-001 (332 unique requirement IDs: 330 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
 - **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
@@ -46,14 +46,14 @@
 
 ## L1 — Comprehension
 
-21 work packages · 70 person-weeks · 45 SRS requirements allocated · 4 implemented · 8 review-derived requirements · 6 review tasks
+21 work packages · 70 person-weeks · 47 SRS requirements allocated · 4 implemented · 8 review-derived requirements · 6 review tasks
 
-### CMP-ING — 7 WPs · 21 pw · 20 requirements allocated
+### CMP-ING — 7 WPs · 21 pw · 22 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
 |---|---|:--:|--:|---|---|
 | `WP-ING-01` | Compilation database ingestion | P1 | 3w | ING-010 ING-020 ING-030 ING-040 | **Complete** |
-| `WP-ING-02` | Alternative ingestion paths | P2 | 3w | ING-050 ING-060 ING-080 | Planned |
-| `WP-ING-03` | Ingestion diagnostics, persistence and staleness | P2 | 3w | ING-070 ING-090 ING-100 | Planned |
+| `WP-ING-02` | Alternative ingestion paths | P2 | 3w | ING-050 ING-060 ING-080 ING-210 | Planned |
+| `WP-ING-03` | Ingestion diagnostics, persistence and staleness | P2 | 3w | ING-070 ING-090 ING-100 ING-220 | Planned |
 | `WP-ING-04` | Test scope model and resolution | P2 | 5w | ING-120 ING-130 ING-140 ING-150 ING-190 | Planned |
 | `WP-ING-05` | Scope conflict detection and external dependency reporting | P2 | 3w | ING-160 ING-170 ING-180 | Planned |
 | `WP-ING-06` | Multi-toolchain ingestion | P3 | 2w | ING-110 | Planned |
@@ -85,8 +85,8 @@
 
 | ID | Requirement (proposed) | Baseline | Source | Priority |
 |---|---|---|---|:--:|
-| NR-07 | Ingested context captures response files, compiler/SDK/sysroot/target identity | TOOL-ING-010..030 | RV-02 F-01 | P1 |
-| NR-08 | Explicit build identity/tag per ingested configuration set | WP-ING-01 | RV-03 F-05 | P1 |
+| NR-07 | Ingested context captures response files (expanded), compiler/SDK/sysroot/target identity — landed 2026-11-07 as TOOL-ING-210/220 | TOOL-ING-210, TOOL-ING-220 | RV-02 F-01 | P1 |
+| NR-08 | Explicit build identity/tag per ingested configuration set — landed 2026-11-07 (CompilationDatabase.build_tag) | TOOL-ING-220 | RV-03 F-05 | P1 |
 | NR-09 | Stale ingest forces re-analysis; shadowing-header/__has_include invalidation | TOOL-ING-100 | RV-06 F-10 | P1 |
 | NR-10 | S1 schema mandates the decision inventory | DSN-COV-040 | RV-02 F-03 | P1 |
 | NR-11 | Unsupported constructs as first-class S1 inventory data | TOOL-PAR-130 | RV-05 F-08 | P1 |
@@ -98,7 +98,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-07 | Extend ing: response files, compiler/SDK/target identity, build tags | NR-07, NR-08 | RV-02 F-01, RV-03 F-05 | P1 | Not Started | — |
+| T-07 | Extend ing: response-file expansion, build-context identity, build tags (TOOL-ING-210/220, DSN-ING-130/140) | NR-07, NR-08 | RV-02 F-01, RV-03 F-05 | P1 | **Complete** | — |
 | T-08 | ING-100 stale→re-analysis; invalidation fixtures | NR-09 | RV-06 F-10 | P1 | Not Started | — |
 | T-09 | S1 schema: mandatory decision + unsupported inventories | NR-10, NR-11 | RV-02 F-03, RV-05 F-08 | P1 | Not Started | — |
 | T-10 | Ranges/dimensions in ana type model + schema | NR-12 | RV-03 F-06 | P1 | Not Started | — |
@@ -469,6 +469,15 @@
 - **Design register:** DSN-ING-120 (authored link plan validation, fails closed; authored intent vs DSN-GEN-090's computed closure) satisfies TOOL-ING-200.
 - **SDD-002 §2:** authored-inputs note (scopes, link plans, justifications cross seams as versioned project files). **SDD-003:** `link-plans/` added to the authored project tree.
 - **Gates:** plan_check exit 0 — 330 requirements, 328 allocations, 189 packages, 640 person-weeks; trace_check exit 0 — 328/328 allocated, 243 elements.
+
+### T-07 evidence (landed 2026-11-07 — L1 Comprehension)
+
+- **SRS-001:** TOOL-ING-210 (response-file expansion: @file resolved against the entry working directory, depth-bounded recursion, raw invocation preserved, named diagnostics for missing/unreadable/oversized files) and TOOL-ING-220 (build-context identity: compiler path, target triple, sysroot; explicit build tag per ingested set).
+- **PLAN-001:** ING-210 → WP-ING-02, ING-220 → WP-ING-03.
+- **Design register:** DSN-ING-130 and DSN-ING-140 added; requirement_count 332.
+- **Code:** src/ectt/ing — expand_response_files() with size/depth bounds, ResponseFileError with named reasons, CompilerInvocation.raw_arguments/target_triple/sysroot, TranslationUnit.response_files, CompilationDatabase.build_tag.
+- **Tests:** 10 new tests; tests/ing+core+prj: 129 passed, 1 skipped (pre-existing); tests/ana requires libclang (environmental).
+- **Gates:** plan_check exit 0 — 332 requirements, 330 allocations, 189 packages, 640 person-weeks; trace_check exit 0 — 330/330 allocated, 245 elements.
 
 ## Validation spikes (complete — ADR-001)
 

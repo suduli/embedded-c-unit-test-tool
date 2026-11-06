@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 330
+      requirement_count: 332
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -465,6 +465,30 @@ components:
           harness link-closure check (DSN-GEN-090) is the computed fact that
           confirms it before the build runs.
         satisfies: [TOOL-ING-200]
+        verification: T
+      - id: DSN-ING-130
+        title: Response-file expansion
+        statement: >
+          Compile-command tokens of the form @file are expanded at ingestion:
+          the referenced file is resolved against the entry's working
+          directory, parsed into arguments with the same quoting rules as the
+          command form, and nested response files are expanded recursively
+          under a documented depth bound. The raw, unexpanded invocation is
+          preserved alongside the expansion, and a missing, unreadable or
+          oversized response file fails ingestion with a named diagnostic
+          instead of a silent guess.
+        satisfies: [TOOL-ING-210]
+        verification: T
+      - id: DSN-ING-140
+        title: Build-context identity and build tag
+        statement: >
+          Each ingested entry captures the build-context identity derivable
+          from its invocation — compiler executable path, target triple, and
+          sysroot when specified — and each ingested configuration set carries
+          an explicit caller-supplied build tag. Entries differing in any
+          captured identity field remain distinct configurations; identity
+          capture is what keeps multiple configurations of one source honest.
+        satisfies: [TOOL-ING-220]
         verification: T
 
   - id: CMP-ANA
