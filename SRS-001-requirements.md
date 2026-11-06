@@ -5,6 +5,8 @@
 **Date:** 2026-07-30
 **Status:** Draft — not yet baselined
 
+> **Correction note, 2026-11-07:** TOOL-EXE-040 reworded so a timeout is a distinct outcome — never a failure — aligning with SDD-002 §6.1 (review finding RV-02 F-11). The AI-provider extension point is renumbered TOOL-PLG-080 → TOOL-PLG-100 per the ADR-008 correction note of 2026-10-17 (TOOL-PLG-080 retains load-failure handling; DSN-PLG-050 added to the design register), and TOOL-COV-150 moves to P4 per the recorded F-05 resolution. These repair the three `plan_check.py` gate failures (duplicate identifier, PLG-100 allocation, COV-09 deadline).
+
 ---
 
 <!-- nav:start -->
@@ -156,6 +158,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-ING-180** *(S, P2, T)* — The tool shall report, for a given test scope, the complete list of external dependencies requiring stubs, before harness generation is performed.
 
 **TOOL-ING-190** *(S, P2, I)* — Test scope definitions shall be stored in a plain-text, version-controllable file.
+
+**TOOL-ING-200** *(M, P2, T)* — The tool shall require, before any test-harness build, an explicit authored link plan for the scope that enumerates the ordered link inputs (objects, archives and libraries) with their resolved identities, the linker and runtime identities, and the effective link command; an input that cannot be resolved shall block the build with a diagnostic naming the unresolved entry, and a compilation database alone shall not be treated as sufficient to define the link.
 
 ---
 
@@ -341,7 +345,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-EXE-030** *(M, P1, T)* — The tool shall isolate test execution such that a crash, hang, or abort in one test case does not prevent the remaining test cases from executing.
 
-**TOOL-EXE-040** *(M, P1, T)* — The tool shall enforce a configurable per-test timeout and report timed-out tests as failures.
+**TOOL-EXE-040** *(M, P1, T)* — The tool shall enforce a configurable per-test timeout and report a timeout as a distinct outcome — neither pass nor fail — and the process exit status shall be non-zero when any test case timed out or failed (TOOL-EXE-060).
 
 **TOOL-EXE-050** *(S, P1, T)* — The tool shall execute independent test executables in parallel, with configurable concurrency.
 
@@ -413,7 +417,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-COV-140** *(S, P4, T)* — The tool shall support coverage-by-analysis: recording a user-supplied justification for code that cannot be covered by test, and reflecting it in reports as justified rather than covered.
 
-**TOOL-COV-150** *(M, P3, I)* — Justifications under TOOL-COV-140 shall record author, date, and rationale, and shall be invalidated when the associated source changes.
+**TOOL-COV-150** *(M, P4, I)* — Justifications under TOOL-COV-140 shall record author, date, and rationale, and shall be invalidated when the associated source changes.
 
 **TOOL-COV-160** *(S, P3, T)* — The tool shall report coverage of the unit under test separately from coverage of harness, stub, and framework code.
 
@@ -673,7 +677,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-AIF-250** *(M, P3, A)* — The structured-decision provider interface (TOOL-AIF-230) shall accept a locally-executed or self-hosted enterprise model as a drop-in substitute for any remote structured-decision provider, satisfying TOOL-AIF-020's local-execution requirement independently of which provider is configured as default.
 
-**TOOL-AIF-260** *(M, P3, A)* — Every AI-assisted capability in this section — including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined — shall integrate exclusively through the extension point defined in TOOL-PLG-080. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.
+**TOOL-AIF-260** *(M, P3, A)* — Every AI-assisted capability in this section — including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined — shall integrate exclusively through the extension point defined in TOOL-PLG-100. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.
 
 ---
 
@@ -863,11 +867,11 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-PLG-070** *(S, P3, T)* — The tool shall discover and load user-supplied extensions from a documented location without requiring reinstallation.
 
-**TOOL-PLG-080** *(M, P2, A)* — The tool shall define a documented AI-provider extension point (§18 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability — present or future, generative or structured-decision, local or remote, from any vendor or model architecture — is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.
-
 **TOOL-PLG-080** *(M, P3, D)* — The tool shall report clearly when an extension fails to load or is incompatible, and shall continue operating with the remaining functionality.
 
 **TOOL-PLG-090** *(S, P3, I)* — The tool's own built-in compiler configurations, framework back-ends, and report formats shall be implemented through the same public extension points available to users, so those interfaces are proven by use.
+
+**TOOL-PLG-100** *(M, P2, A)* — The tool shall define a documented AI-provider extension point (§18 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability — present or future, generative or structured-decision, local or remote, from any vendor or model architecture — is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.
 
 ---
 

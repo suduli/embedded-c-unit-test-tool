@@ -2,7 +2,7 @@
 
 **Document ID:** ADR-002
 **Status:** **Accepted, 2026-09-26** — restricted YAML format and single-adapter architecture decided
-**Relates to:** SRS-001 §26 PRJ (`TOOL-PRJ-010`, `TOOL-PRJ-020`, `TOOL-PRJ-050`, `TOOL-PRJ-070`), §17 UIX (`TOOL-UIX-320`), §16 CIC (`TOOL-CIC-080`), §22 SEC (`TOOL-SEC-070`), SDD-001 §396, SDD-003 §2.1, §4, §5, §10, `DSN-PRJ-010`, `DSN-PRJ-030`, `DSN-PRJ-040`, `DSN-SEC-060`
+**Relates to:** SRS-001 §26 PRJ (`TOOL-PRJ-010`, `TOOL-PRJ-020`, `TOOL-PRJ-050`, `TOOL-PRJ-070`), §17 UIX (`TOOL-UIX-320`), §16 CIC (`TOOL-CIC-080`), §22 SEC (`TOOL-SEC-070`), SDD-001 §8 (decision table), SDD-003 §2.1, §4, §5, §10, `DSN-PRJ-010`, `DSN-PRJ-030`, `DSN-PRJ-040`, `DSN-SEC-060`
 
 ---
 
@@ -37,10 +37,11 @@ Open question 6 in SRS-001 §27 required choosing a concrete plain-text serialis
 
 ## 2. Decision
 
-1. **Adopt Restricted YAML as the project storage syntax.**
+1. **Adopt Restricted YAML for authored project-state documents.**
+   - This decision applies to authored project-state documents only. JSON remains the format for analysis/report exchange models and archive manifests.
    - All scalar values are parsed strictly as strings with implicit type resolution disabled. Type conversion occurs solely at the schema/model layer.
    - On write, every scalar value is double-quoted (`"..."`). This structurally eliminates implicit typing hazards (`NO` -> false, `1.10` -> float, version strings -> numbers).
-2. **Isolate syntax behind a single serialisation adapter (DSN-PRJ-010, SDD-001 §396).**
+2. **Isolate syntax behind a single serialisation adapter (DSN-PRJ-010, SDD-001 §8 decision table).**
    - The core data model is completely format-agnostic. Surface syntax is confined to one adapter (`RestrictedYamlAdapter`).
    - A secondary adapter (e.g. JSON or binary) can be introduced in the future without modifying domain models or workflow engines.
 3. **Deterministic emission rules (DSN-PRJ-030, SDD-003 §4).**
@@ -48,7 +49,7 @@ Open question 6 in SRS-001 §27 required choosing a concrete plain-text serialis
    - Default values are omitted on write, keeping files minimal and clean.
    - Output uses LF line endings (`\n`), no trailing whitespace, a single trailing newline, and UTF-8 encoding without BOM.
    - Floating-point numbers are formatted via `canonical_float_repr` and emitted as quoted strings.
-   - Indentation is fixed at 2 spaces per nesting level. Semantically null load->save cycles are strictly byte-identical.
+   - Indentation is fixed at 2 spaces per nesting level. After initial normalization, loading and saving canonical input with no semantic changes is guaranteed to reproduce identical bytes. Valid noncanonical input may be normalized during save and is not guaranteed to retain its original bytes.
 
 ---
 
@@ -104,4 +105,8 @@ Project files are treated as untrusted inputs (DSN-SEC-060). Configuration is da
 
 ## 7. Summary
 
-ADR-002 establishes **Restricted YAML** as the storage format for all `ectt` project artifacts. Every scalar is double-quoted on write and loaded as a string without implicit typing. Surface syntax is encapsulated in a single adapter, protecting domain logic from format dependencies while enforcing strict security guards against code execution and diff churn.
+ADR-002 establishes **Restricted YAML** for authored `ectt` project-state documents. Analysis/report exchange models and archive manifests remain JSON. Every scalar is double-quoted on write and loaded as a string without implicit typing. Surface syntax is encapsulated in a single adapter, protecting domain logic from format dependencies while enforcing strict security guards against code execution and diff churn.
+
+## 8. Correction history
+
+- **2026-10-17:** Clarified byte stability as applying to canonical input after initial normalization; valid noncanonical input may normalize on save. Scoped Restricted YAML to authored project-state documents, preserved JSON analysis/report exchange and archive manifests, and corrected the SDD-001 reference to §8. The original acceptance date and decision history above remain unchanged. This documentation correction does not claim new implementation verification.

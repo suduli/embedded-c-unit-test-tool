@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 323
+      requirement_count: 330
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -452,6 +452,19 @@ components:
           as part of an integration set in another — with per-scope generated
           artifacts kept in per-scope output directories.
         satisfies: [TOOL-ING-170]
+        verification: T
+      - id: DSN-ING-120
+        title: Authored link plan validation
+        statement: >
+          Every test scope carries an explicit, version-controlled link plan:
+          ordered link inputs with resolved identities, linker and runtime
+          identity, and the effective link command. Validation fails closed —
+          an input that cannot be resolved blocks the build with a diagnostic
+          naming the entry, and the compilation database is never treated as
+          sufficient to define the link. The plan is authored intent; the
+          harness link-closure check (DSN-GEN-090) is the computed fact that
+          confirms it before the build runs.
+        satisfies: [TOOL-ING-200]
         verification: T
 
   - id: CMP-ANA
@@ -2073,6 +2086,30 @@ components:
           returning control to the surrounding workflow rather than failing it.
         satisfies: [TOOL-AIF-150]
         verification: T
+      - id: DSN-AIF-140
+        title: Structured-decision validation role
+        statement: >
+          A second AI role evaluates discrete testing decisions — pass/fail
+          classification of ambiguous results, flaky-test flagging, priority
+          triage — and returns typed, code-consumable output rather than free
+          text. Its provider is configured independently of the generation
+          provider, accepts a local or self-hosted model as a drop-in
+          substitute, and the role's default provider profile is expressed
+          purely as configuration. The role integrates only through the
+          AI-provider extension point (TOOL-PLG-100), never a vendor SDK, and
+          its output is advisory: deterministic checks and human oracles stay
+          authoritative (ADR-008).
+        satisfies: [TOOL-AIF-220, TOOL-AIF-230, TOOL-AIF-250, TOOL-AIF-260]
+        verification: A
+      - id: DSN-AIF-150
+        title: Default validation provider is configuration
+        statement: >
+          The default provider profile for the structured-decision validation
+          role is a documented configuration value (TypeSafe AI (Jev) where a
+          remote provider is explicitly enabled), carrying no code-level
+          dependency that would block substituting any other provider (ADR-008).
+        satisfies: [TOOL-AIF-240]
+        verification: D
 
   - id: CMP-PLG
     name: Extension Framework
@@ -2117,6 +2154,18 @@ components:
           mechanism that reliably keeps those interfaces sufficient.
         satisfies: [TOOL-PLG-090]
         verification: I
+      - id: DSN-PLG-050
+        title: AI provider extension point
+        statement: >
+          A dedicated extension point, structured like the compiler,
+          test-framework and report-format extension points, through which
+          every AI-assisted capability — generative or structured-decision,
+          local or remote, from any vendor or model architecture — integrates
+          by implementing the interface rather than by modifying tool source,
+          so the provider behind any role is replaceable without modifying
+          calling features (ADR-008).
+        satisfies: [TOOL-PLG-100]
+        verification: A
 
   - id: CMP-SEC
     name: Security and Integrity Services
