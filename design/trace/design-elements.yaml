@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 337
+      requirement_count: 338
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1454,6 +1454,18 @@ components:
           derived from the call graph and the global access model and reported
           as coverage of the coupling set.
         satisfies: [TOOL-COV-170]
+        verification: T
+      - id: DSN-COV-110
+        title: Coverage-artifact completeness state
+        statement: >
+          Every coverage artifact carries a completeness state — complete,
+          truncated, or missing — recorded at collection time. A truncated or
+          missing artifact forces the decisions and constructs it would have
+          measured to unmeasured and emits an advisory into the report model;
+          the state is surfaced through CLI and UI exactly as recorded, without
+          relabeling. This closes the last open overclaim channel: a latched or
+          lost coverage sink can never read as a full score.
+        satisfies: [TOOL-COV-180]
         verification: T
 
   - id: CMP-CBT

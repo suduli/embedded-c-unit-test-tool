@@ -249,6 +249,10 @@ that information is present as metadata, but no logic branches on it.
   (TOOL-CBT-040, DSN-CBT-030).
 - `infrastructure_faults` is a separate channel from `results`. A rig that fails
   to flash must never read as failing software (TOOL-TGT-090).
+- **`coverage.completeness` is a field.** Every coverage artifact reference
+  carries `complete`, `truncated`, or `missing`, recorded at collection time
+  (TOOL-COV-180, DSN-COV-110). A latched or lost coverage sink must never read
+  as a full score.
 - `timeout` is a distinct outcome from `fail`, since the diagnosis differs.
 - `order_seed` is recorded so a randomised-order failure is reproducible
   (DSN-TCM-060).
@@ -330,6 +334,10 @@ incompatible merges, and zero/unsupported denominators.
 - **`unmeasured` is not `uncovered`.** A decision the compiler declined to
   instrument is a third state. Collapsing it into either of the other two is the
   most dangerous misreport the tool can make (DSN-COV-040).
+- **`truncated` forces `unmeasured`.** Decisions and constructs that an
+  artifact would have measured but did not — buffer latch, exceeded sink, lost
+  file — are `unmeasured`, with the artifact's completeness state carried as
+  the reason and an advisory emitted (TOOL-COV-180, DSN-COV-110).
 - **`justified` has a `state`.** Bound to `source_digest`; when the source moves
   the justification expires rather than continuing to excuse code it no longer
   describes (TOOL-COV-150, DSN-COV-080).
@@ -368,7 +376,8 @@ delta, and the provenance record — **persisted**, so that:
                     "unlinked_tests": [...] },
   "delta": { "baseline_run": "...", "newly_failing": [...], "newly_passing": [...] },
   "advisories": [{ "kind": "partial_run" }, { "kind": "unreviewed_expectations",
-                  "count": 12 }, { "kind": "ai_generated_present", "count": 3 }]
+                  "count": 12 }, { "kind": "ai_generated_present", "count": 3 },
+                  { "kind": "coverage_truncated", "artifacts": 1 }]
 }
 ```
 

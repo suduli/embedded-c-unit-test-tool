@@ -1,7 +1,7 @@
 # Subsystem requirements & tasks — full inventory (features, WPs, SRS requirements)
 
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
-- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (337 unique requirement IDs: 335 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
+- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
 - **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
@@ -207,13 +207,13 @@
 
 ## L4 — Evidence
 
-32 work packages · 115 person-weeks · 52 SRS requirements allocated · 0 implemented · 6 review-derived requirements · 5 review tasks
+32 work packages · 115 person-weeks · 53 SRS requirements allocated · 0 implemented · 6 review-derived requirements · 5 review tasks
 
-### CMP-COV — 11 WPs · 43 pw · 17 requirements allocated
+### CMP-COV — 11 WPs · 43 pw · 18 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
 |---|---|:--:|--:|---|---|
 | `WP-COV-01` | Statement and branch coverage from compiler backend | P1 | 4w | COV-010 COV-020 | Planned |
-| `WP-COV-02` | Coverage merge and per-test attribution | P1 | 4w | COV-110 COV-120 | Planned |
+| `WP-COV-02` | Coverage merge and per-test attribution | P1 | 4w | COV-110 COV-120 COV-180 | Planned |
 | `WP-COV-03` | Coverage threshold enforcement | P1 | 1w | COV-130 | Planned |
 | `WP-COV-04` | Function and function-call coverage | P3 | 2w | COV-030 COV-040 | Planned |
 | `WP-COV-05` | MC/DC measurement and form declaration | P3 | 6w | COV-050 COV-060 COV-070 | Planned |
@@ -272,7 +272,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-16 | Coverage completeness state in S3/S4 + S5 advisory (+NR-27 surfacing) | NR-21, NR-27 | RV-04 F-06 | P1 | Not Started | — |
+| T-16 | Coverage completeness state: TOOL-COV-180 + SDD-002 §6.1/§7.2/§8 amendments + DSN-COV-110 | NR-21, NR-27 | RV-04 F-06 | P1 | **Complete** | — |
 | T-17 | MC/DC limit probing + boundary fixtures + macro-variant merge rule | NR-22, NR-24 | RV-04 F-03..05 | P1 | Not Started | — |
 | T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | Not Started | — |
 | T-19 | Verdict dedup + labeled denominators + 2/1 anomaly fixture | NR-26 | RV-03 F-08 | P1 | Not Started | — |
@@ -523,6 +523,13 @@
 - **PLAN-001:** MIG-110 allocated to WP-MIG-05 (Import fidelity reporting, P3); derived tables regenerated.
 - **Design register:** DSN-MIG-090 (Deferred-structure reporting) added; requirement_count 337.
 - **Gates:** plan_check exit 0 — 337 requirements, 335 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 335/335 allocated, 246 elements.
+
+### T-16 evidence (landed 2026-11-07 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-180 (M, P1, T) — every coverage artifact records a completeness state (complete | truncated | missing); truncated or missing forces the affected decisions and constructs to unmeasured with an advisory carried into the report; CLI and UI surface the state exactly as recorded, without relabeling (NR-21 + NR-27 in one requirement). Allocated to WP-COV-02.
+- **Design register:** DSN-COV-110 added — closes the last open overclaim channel: a latched or lost coverage sink can never read as a full score; requirement_count 338.
+- **SDD-002 amendments:** §6.1 — coverage.completeness is a field on every artifact reference; §7.2 — truncated forces unmeasured with the completeness state as the reason and an advisory emitted; §8 — the S5 advisories example gains the coverage_truncated kind.
+- **Gates:** plan_check exit 0 — 338 requirements, 336 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 336/336 allocated, 246 elements. Count reconciled: HEAD SRS had 337 lines, +TOOL-COV-180 = 338.
 
 ## Validation spikes (complete — ADR-001)
 

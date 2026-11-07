@@ -435,6 +435,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-COV-170** *(S, P4, T)* — The tool shall support control coupling and data coupling analysis between integrated units.
 
+**TOOL-COV-180** *(M, P1, T)* — The tool shall record a completeness state for every coverage artifact — `complete`, `truncated`, or `missing` — and a truncated or missing artifact shall force the decisions and constructs it would have measured to `unmeasured`, with an advisory carried into the report; the completeness state shall be surfaced through the CLI and UI exactly as recorded, without relabeling.
+
 ---
 
 ## 13. Change-Based and Regression Testing (CBT)
