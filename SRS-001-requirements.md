@@ -829,6 +829,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-MIG-090** *(C, P4, T)* — The tool shall provide a migration assessment mode that analyses an existing project and reports the expected fidelity and manual effort of migration before migration is attempted.
 
+**TOOL-MIG-110** *(S, P3, T)* — When imported or assessed legacy material contains compound or iterative test structures — slots, slot iterations, or per-slot histories — the tool shall report each such structure explicitly as deferred, with its location, rather than silently flattening, dropping, or emulating it; the set of deferred structures shall be machine-checkable so migration scope is auditable. Compound and iterative test authoring is explicitly deferred in the initial release (decision recorded 2026-11-07, review finding RV-03 F-03).
+
 **TOOL-MIG-100** *(M, P2, I)* — All interchange formats the tool consumes or produces shall be documented to a level permitting independent implementation.
 
 ---

@@ -1,7 +1,7 @@
 # Subsystem requirements & tasks — full inventory (features, WPs, SRS requirements)
 
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
-- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (336 unique requirement IDs: 334 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
+- **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (337 unique requirement IDs: 335 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
 - **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
@@ -150,7 +150,7 @@
 
 | ID | Requirement (proposed) | Baseline | Source | Priority |
 |---|---|---|---|:--:|
-| NR-15 | Compound/iterative tests explicitly deferred with a migration flag | TOOL-MIG-090, TCD-070 | RV-03 F-03 | P1 |
+| NR-15 | Compound/iterative tests explicitly deferred with a migration flag — landed 2026-11-07 (TOOL-MIG-110, DSN-MIG-090) | TOOL-MIG-110, DSN-MIG-090 | RV-03 F-03 | P1 |
 | NR-16 | Test identity per NR-04 implemented in TCM (assigned ids + digest binding) | SDD-003 §6/§7 | RV-05 F-05 | P0 |
 
 ### Review-derived tasks
@@ -332,7 +332,7 @@
 
 ## L6 — Assurance & Ecosystem
 
-53 work packages · 164 person-weeks · 77 SRS requirements allocated · 0 implemented · 2 review-derived requirements · 2 review tasks
+53 work packages · 164 person-weeks · 78 SRS requirements allocated · 0 implemented · 2 review-derived requirements · 2 review tasks
 
 ### CMP-AIF — 16 WPs · 51 pw · 26 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
@@ -354,14 +354,14 @@
 | `WP-AIF-15` | Local/enterprise substitution and all-role extension conformance | P3 | 4w | AIF-250 AIF-260 | Planned |
 | `WP-AIF-16` | Configurable remote structured-decision default profile | P4 | 2w | AIF-240 | Planned |
 
-### CMP-MIG — 7 WPs · 26 pw · 8 requirements allocated
+### CMP-MIG — 7 WPs · 26 pw · 9 requirements allocated
 | WP | Capability delivered | Phase | Effort | Requirements | Status |
 |---|---|:--:|--:|---|---|
 | `WP-MIG-01` | Execution of existing Unity and cmocka suites | P2 | 4w | MIG-010 | Planned |
 | `WP-MIG-02` | Ceedling project import | P2 | 4w | MIG-020 | Planned |
 | `WP-MIG-03` | Interchange format documentation | P2 | 2w | MIG-100 | Planned |
 | `WP-MIG-04` | Commercial tool and CSV test data import | P3 | 6w | MIG-030 MIG-050 | Planned |
-| `WP-MIG-05` | Import fidelity reporting | P3 | 3w | MIG-040 | Planned |
+| `WP-MIG-05` | Import fidelity reporting | P3 | 3w | MIG-040 MIG-110 | Planned |
 | `WP-MIG-06` | Coexistence with another tool on one project | P3 | 3w | MIG-070 | Planned |
 | `WP-MIG-07` | Migration assessment mode | P4 | 4w | MIG-090 | Planned |
 
@@ -516,6 +516,13 @@
 - **Code:** src/ectt/ana/eligibility.py — assess_eligibility(units, expose_static, void_type_refs) → EligibilityRecord (ref-normalized void detection; caller-supplied void set keeps type-graph naming decoupled). Records are S1-adjacent derived data consumed by CMP-ATG, deterministic and libclang-free.
 - **Tests:** 8 new in tests/ana/test_eligibility.py — 154 passed, 1 skipped.
 - **Gates:** plan_check exit 0 — 336 requirements, 334 allocations, 190 packages, 642 person-weeks; trace_check exit 0 — 334/334 allocated, 246 elements.
+
+### T-13 evidence (landed 2026-11-07 — L6 Migration)
+
+- **SRS-001:** TOOL-MIG-110 (S, P3, T) — legacy material containing compound or iterative test structures (slots, slot iterations, per-slot histories) is reported explicitly as deferred with its location; flattening, dropping and silent emulation are non-behaviors; the deferred set is machine-checkable so migration scope is auditable. The defer decision is recorded in the requirement text (RV-03 F-03).
+- **PLAN-001:** MIG-110 allocated to WP-MIG-05 (Import fidelity reporting, P3); derived tables regenerated.
+- **Design register:** DSN-MIG-090 (Deferred-structure reporting) added; requirement_count 337.
+- **Gates:** plan_check exit 0 — 337 requirements, 335 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 335/335 allocated, 246 elements.
 
 ## Validation spikes (complete — ADR-001)
 

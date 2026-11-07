@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 336 SRS-001 requirements
+**Covers:** all 337 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-336 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+337 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 206 · S 112 · C 16 · F 2 |
-| Phase | P1 35 · P2 153 · P3 104 · P4 42 · — 2 |
-| Verification | T 238 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 206 · S 113 · C 16 · F 2 |
+| Phase | P1 35 · P2 153 · P3 105 · P4 42 · — 2 |
+| Verification | T 239 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -55,7 +55,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | ING | 22 | 11 | 9 | 2 | 0 | 4 | 17 | 1 | 0 | 19 | 1 | 2 | 0 |
 | INS | 11 | 9 | 2 | 0 | 0 | 0 | 10 | 1 | 0 | 4 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
-| MIG | 10 | 4 | 5 | 1 | 0 | 0 | 4 | 4 | 2 | 9 | 1 | 0 | 0 |
+| MIG | 11 | 4 | 6 | 1 | 0 | 0 | 4 | 5 | 2 | 10 | 1 | 0 | 0 |
 | NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
 | PAR | 17 | 8 | 8 | 1 | 0 | 0 | 16 | 1 | 0 | 16 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
@@ -209,9 +209,9 @@ Three rules were applied and are worth stating because they are where a work bre
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 66 | 88 | 46 |
 | P2 | 69 | 133 | 228 | 48 |
-| P3 | 65 | 100 | 230 | 52 |
+| P3 | 65 | 101 | 230 | 52 |
 | P4 | 26 | 35 | 92 | 52 |
-| Total | 191 | 334 | 642 | 52 |
+| Total | 191 | 335 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -450,7 +450,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L6 — Assurance and Ecosystem
 
-53 work packages · 77 requirements · 164 person-weeks
+53 work packages · 78 requirements · 164 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -474,7 +474,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-MIG-02` | Ceedling project import | CMP-MIG | P2 | 4w | MIG-020 | MIG-01 ING-01 |  |
 | `WP-MIG-03` | Interchange format documentation | CMP-MIG | P2 | 2w | MIG-100 | TCM-06 REP-12 |  |
 | `WP-MIG-04` | Commercial tool and CSV test data import | CMP-MIG | P3 | 6w | MIG-030 MIG-050 | TCM-06 |  |
-| `WP-MIG-05` | Import fidelity reporting | CMP-MIG | P3 | 3w | MIG-040 | MIG-04 |  |
+| `WP-MIG-05` | Import fidelity reporting | CMP-MIG | P3 | 3w | MIG-040 MIG-110 | MIG-04 |  |
 | `WP-MIG-06` | Coexistence with another tool on one project | CMP-MIG | P3 | 3w | MIG-070 | CORE-01 PRJ-01 |  |
 | `WP-MIG-07` | Migration assessment mode | CMP-MIG | P4 | 4w | MIG-090 | MIG-05 |  |
 | `WP-PKG-01` | Offline, non-admin, runtime-free installation | CMP-PKG | P2 | 6w | INS-010 INS-020 INS-030 | SPIKE-03 CORE-03 | ● |
@@ -537,16 +537,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 144 | 42.9% |
-| INSPECTION CHECKLIST | 52 | 15.5% |
+| EQUIVALENCE PARTITIONING | 145 | 43.0% |
+| INSPECTION CHECKLIST | 52 | 15.4% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.3% |
 | DECISION TABLE | 25 | 7.4% |
 | SCENARIO (demonstration) | 25 | 7.4% |
 | PAIRWISE | 21 | 6.2% |
-| STATE TRANSITION | 20 | 6.0% |
-| ANALYSIS ARGUMENT | 19 | 5.7% |
+| STATE TRANSITION | 20 | 5.9% |
+| ANALYSIS ARGUMENT | 19 | 5.6% |
 | — (deferred) | 2 | 0.6% |
-| Total | 336 | 100% |
+| Total | 337 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -556,7 +556,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 238 |
+| T | 239 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -629,10 +629,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 336 |
-| Non-Future IDs | 334 |
-| Primary allocation entries | 334 |
-| Distinct allocated IDs | 334 |
+| SRS unique IDs | 337 |
+| Non-Future IDs | 335 |
+| Primary allocation entries | 335 |
+| Distinct allocated IDs | 335 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -662,10 +662,10 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
 | M | 33 | 104 | 49 | 20 | 0 | 206 |
-| S | 2 | 48 | 46 | 16 | 0 | 112 |
+| S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 35 | 153 | 104 | 42 | 2 | 336 |
+| Total | 35 | 153 | 105 | 42 | 2 | 337 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -852,6 +852,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-MIG-080` | S | P4 | T | `WP-REP-10` | EQUIVALENCE PARTITIONING |
 | `TOOL-MIG-090` | C | P4 | T | `WP-MIG-07` | STATE TRANSITION |
 | `TOOL-MIG-100` | M | P2 | I | `WP-MIG-03` | INSPECTION CHECKLIST |
+| `TOOL-MIG-110` | S | P3 | T | `WP-MIG-05` | EQUIVALENCE PARTITIONING |
 | `TOOL-NFR-010` | M | P1 | T | `WP-CORE-03` | BOUNDARY VALUE ANALYSIS |
 | `TOOL-NFR-020` | S | P2 | T | `WP-CORE-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-NFR-030` | M | P2 | D | `WP-CORE-05` | SCENARIO (demonstration) |

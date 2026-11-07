@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 336
+      requirement_count: 337
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -2603,6 +2603,17 @@ components:
           path a genuine exit rather than a gesture.
         satisfies: [TOOL-MIG-100]
         verification: I
+      - id: DSN-MIG-090
+        title: Deferred-structure reporting
+        statement: >
+          Legacy material containing compound or iterative test structures —
+          slots, slot iterations, per-slot histories — has every such structure
+          reported explicitly as deferred, with its location, and recorded in a
+          machine-checkable set so migration scope is auditable. Flattening,
+          dropping and silent emulation are all non-behaviors: the initial
+          release defers compound authoring by decision, not by omission.
+        satisfies: [TOOL-MIG-110]
+        verification: T
 
 # Requirements deliberately not allocated: TOOL-UIX-390 and TOOL-UIX-400 carry
 # priority F (Future) and are outside v1.0 scope per SRS-001 §2.2. The checker
