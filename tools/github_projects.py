@@ -170,11 +170,13 @@ class Gh:
 
     def rest(self, path: str, method: str = "GET", body: dict | None = None,
              params: dict[str, str] | None = None) -> Any:
+        # GET parameters must be part of the URL: `gh api -f key=value` implies
+        # POST (a live issue-listing came back as a 422 "title wasn't supplied").
+        if params:
+            path = f"{path}?{urllib.parse.urlencode(params)}"
         args = ["api", path]
         if method != "GET":
             args += ["--method", method]
-        for key, value in (params or {}).items():
-            args += ["-f", f"{key}={value}"]
         if body is not None:
             args += ["--input", "-"]
             out = self._run(args, stdin=json.dumps(body))
@@ -790,6 +792,16 @@ def plan_import(
             counts["update"] += 1
             wrote = True
         else:
+            # An item with no Status at all is an interrupted initialization
+            # (crash between add_item and the initial-status write): complete it.
+            # A status that exists is human-owned and is never touched.
+            if "Status" not in item.field_values:
+                operations.append({
+                    "op": "init_status", "wp": pkg.wid, "issue_number": issue.number,
+                    "item_id": item.item_id, "status": INITIAL_STATUS,
+                })
+                counts["update"] += 1
+                wrote = True
             stale = {
                 name: value for name, value in wanted_fields.items()
                 if item.field_values.get(name) != value
@@ -937,6 +949,22 @@ def apply_operations(
                 "wp": wp, "action": "set_fields",
                 "issue_number": op["issue_number"], "fields": sorted(op["fields"]),
             })
+        elif kind == "init_status":
+            status_field = project.fields.get("Status")
+            if status_field is None or op["status"] not in status_field["options"]:
+                raise ProjectsError(
+                    f"cannot initialize status for {wp}: the project's Status field lacks '{op['status']}' — re-run bootstrap"
+                )
+            gh.graphql(
+                """mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$optionId:String!){
+                     updateProjectV2ItemFieldValue(
+                       input:{projectId:$projectId, itemId:$itemId, fieldId:$fieldId,
+                              value:{singleSelectOptionId:$optionId}}){ projectV2Item{ id } }
+                   }""",
+                {"projectId": project.id, "itemId": op["item_id"], "fieldId": status_field["id"],
+                 "optionId": status_field["options"][op["status"]]},
+            )
+            report["updated"].append({"wp": wp, "action": "init_status", "issue_number": op["issue_number"]})
         else:
             raise ProjectsError(f"unknown operation in preview: {kind}")
     # Report-only surface: retired packages are never closed or deleted.
@@ -946,9 +974,10 @@ def apply_operations(
 def add_item_and_initialize(gh: Gh, project: RemoteProjectState, issue: RemoteIssue, status: str) -> str:
     """Add the issue to the project and set its initial Status — once.
 
-    Status is written only here (item creation), never during updates, so
-    reconciled statuses survive synchronization. Re-adding an existing item is
-    a no-op, which is what makes interrupted runs resumable."""
+    Status is written only during initialization (item creation, or completing
+    an interrupted initialization via the init_status op) — an existing status
+    is human-owned and never overwritten. Re-adding an existing item is a no-op,
+    which is what makes interrupted runs resumable."""
     existing = project.items.get(issue.number)
     if existing is not None:
         return existing.item_id
@@ -973,7 +1002,7 @@ def add_item_and_initialize(gh: Gh, project: RemoteProjectState, issue: RemoteIs
         """mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$optionId:String!){
              updateProjectV2ItemFieldValue(
                input:{projectId:$projectId, itemId:$itemId, fieldId:$fieldId,
-                      value:{singleSelectOptionId:$optionId}}){ item{id} }
+                      value:{singleSelectOptionId:$optionId}}){ projectV2Item{ id } }
            }""",
         {"projectId": project.id, "itemId": item_id, "fieldId": status_field["id"],
          "optionId": status_field["options"][status]},
@@ -998,7 +1027,7 @@ def set_field_values(gh: Gh, project: RemoteProjectState, item_id: str, fields: 
         gh.graphql(
             """mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$value:ProjectV2FieldValue!){
                  updateProjectV2ItemFieldValue(
-                   input:{projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:$value}){ item{id} }
+                   input:{projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:$value}){ projectV2Item{ id } }
                }""",
             {"projectId": project.id, "itemId": item_id, "fieldId": meta["id"], "value": mutation_value},
         )

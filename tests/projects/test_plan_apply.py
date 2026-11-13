@@ -461,3 +461,33 @@ def test_smoke_test_subset_via_wp_filter(bootstrapped):
     assert len(bootstrapped.items) == 3
     fresh = run_plan(bootstrapped, only=smoke)
     assert fresh["counts"]["unchanged"] == 3 and fresh["operations"] == []
+
+
+def test_interrupted_initialization_status_is_completed_on_rerun(bootstrapped):
+    """A crash between add_item and the initial-status write leaves an item
+    with no Status; the next run completes the initialization. An item whose
+    status exists is never touched."""
+    run_apply(bootstrapped, run_plan(bootstrapped))
+    managed, _ = gp.fetch_managed_issues(bootstrapped, REPO)
+    issue = managed["WP-CORE-01"]
+    item = bootstrapped.item_for_issue(issue.number)
+    del item["field_values"]["Status"]              # simulate the crash window
+    preview = run_plan(bootstrapped)
+    ops = [op for op in preview["operations"] if op["wp"] == "WP-CORE-01"]
+    assert [op["op"] for op in ops] == ["init_status"]
+    assert ops[0]["status"] == "Needs reconciliation"
+    run_apply(bootstrapped, preview)
+    assert bootstrapped.item_for_issue(issue.number)["field_values"]["Status"] == "Needs reconciliation"
+    # A deliberately cleared status gets re-initialized on the next run; a set
+    # human status never does.
+    preview = run_plan(bootstrapped)
+    assert preview["operations"] == []
+
+
+def test_existing_human_status_is_never_overwritten_after_init_status_fix(bootstrapped):
+    run_apply(bootstrapped, run_plan(bootstrapped))
+    managed, _ = gp.fetch_managed_issues(bootstrapped, REPO)
+    issue = managed["WP-CORE-02"]
+    bootstrapped.item_for_issue(issue.number)["field_values"]["Status"] = "Review"
+    preview = run_plan(bootstrapped)
+    assert [op["op"] for op in preview["operations"] if op["wp"] == "WP-CORE-02"] == []
