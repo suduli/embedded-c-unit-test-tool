@@ -4,6 +4,8 @@
 **Status:** **Accepted, 2026-09-19 — build fresh. Do not fork `UnitTestBot/UTBotCpp`.**
 **Relates to:** ADR-001 §2, §3, §4, §5; SDD-001 §8; SDD-005 §5.1, §5.2, §5.7; PLAN-001 §4.1, §4.2, §4.3, §5.5; SRS-001 open question 4
 
+**Correction note, 2026-10-17:** DR-29 withdraws the claim that all fork savings are off the critical path. Related DR-10/21 correct the JSON IPC and LibTooling rationale. Effort ranges remain dated estimates; no new calendar schedule has been validated. The 2026-09-19 acceptance is historical; these corrections do not assert new approval or implementation validation.
+
 ---
 
 <!-- nav:start -->
@@ -222,7 +224,7 @@ understates the problem. Eight collisions, ordered by severity.
 | 1 | **No target execution at all.** x64 host only; x86 and ARM explicitly unsupported. No cross-compilation, simulator, or on-hardware path exists anywhere in the pipeline | wiki `system-requirements` | `TOOL-TGT-010` (build harness for a cross-compiled target), `TOOL-TGT-070` (test cases execute unmodified on host *and* target). The whole `CMP-EXT` lane has no counterpart |
 | 2 | **Line coverage only** | wiki `coverage` | `TOOL-COV-010`–`080`. `TOOL-COV-060` requires every report to state which MC/DC form was measured. Nothing in `CMP-COV` (10 elements, 17 requirements) is served |
 | 3 | **Pinned to LLVM 14** | commit `9370dfa`, 2024-01-15; `Dockerfile_base` | SDD-005 §5.3 sets CMP-ANA's floor at **LLVM 18.1**, and §10.2 confirms as verified that Clang `-fcoverage-mcdc` first shipped in 18.1. The fork's own pin is four major versions below the floor the coverage strategy requires |
-| 4 | **LibTooling throughout** | wiki `utbot-inside` — the Fetcher "uses LibTooling" | SDD-005 §5.3 marks LibTooling **REJECT**, with the reason "*no usable floor exists*" — it has no stable API. This is what makes collision #3 expensive rather than mechanical |
+| 4 | **LibTooling throughout** | wiki `utbot-inside` — the Fetcher "uses LibTooling" | SDD-005 §5.3 rejects in-process C++ API linkage but permits a pinned JSON-emitting executable. UTBotCpp still requires a version-sensitive port to the selected LLVM baseline and a PAR-100 adapter; isolation does not make this port mechanical |
 | 5 | **Ubuntu-resident server; Windows means WSL + Ubuntu 18.04** | wiki `system-requirements`, `windows-local` | `TOOL-UIX-040` (installable by a user with no development environment beyond a C toolchain), `TOOL-INS-030` (no language runtime, package manager, or compiler beyond the existing C toolchain). "Install WSL, then Ubuntu 18.04, then a gRPC server" is the negation of both |
 | 6 | **GoogleTest output, in C++ translation units** | wiki `utbot-inside` stage 9; `utbot.org` user guide | `TOOL-HAR-060` — Unity and cmocka mandatory, "**Neither back-end shall introduce a C++ compilation or runtime dependency**." SDD-005 §5.1.1 adds the sharper problem: `#include "foo.c"` inside a C++ TU breaks on ordinary C99, so `TOOL-HAR-030` static-function testing does not survive |
 | 7 | **Its C support matrix excludes what embedded C is made of** | wiki `c-syntax` | `void*` **not supported**; variadic arguments **not supported**; the ternary operator **not supported**; function pointers **partial**; and "functions depending on external state and functions whose result depends on the number of calls aren't supported." Memory-mapped register access *is* external state; `void*` handles are the HAL idiom. `WP-SPIKE-01`'s fixture — STM32F4 HAL — is exactly this code |
@@ -283,11 +285,7 @@ from a work breakdown.
 | `WP-GEN-05` link closure | 2w | ~2w | The Bear `link_commands.json` fork is directly on point |
 | **Total** | | **~23–28w** | |
 
-**Every one of those weeks sits in P2 or P3.** PLAN-001 §5.2 is unusually
-explicit about why that matters: 622 person-weeks compress into a 52-week
-critical path, "**P1 costs 46 of those 52 weeks**," and "the programme is not
-schedule-limited by its size; it is limited by one long serial chain at the
-start." A fork saves effort that is not on the constraint.
+These are **effort savings**, not measured calendar acceleration. In particular, the ANA-01/02 portion is on PLAN-001's serial dependency path, so some savings could shorten the schedule. ATG and other downstream savings need separate dependency analysis. The prior claim that every saving lies in P2/P3 and outside the constraint is withdrawn. Porting/rehosting prerequisites (§4.2), available staffing and overlap determine whether any saved analysis effort actually reduces completion time.
 
 ### 4.2 What a fork costs
 
@@ -296,7 +294,7 @@ start." A fork saves effort that is not on the constraint.
 | LibTooling port, LLVM 14 → 18.1 | 8–15w | **Low** — LibTooling has no stable API (SDD-005 §5.3). Could be materially worse |
 | Removing the Ubuntu assumption for native Windows/macOS hosts | 15–25w | **Low** — the server assumes Linux paths, generated Makefiles, and Bear, which interposes on process execution. This is not a port, it is a re-hosting |
 | C harness TU: Unity/cmocka back-end, de-C++-ifying generation | 10–15w | Medium — the *emitter* is maybe 4w. Making the harness a C TU so `#include "foo.c"` works and `--wrap` seams apply reaches into KleeGenerator, Linker, and SourceToHeaderRewriter |
-| GUI against a C++ gRPC server | +5–8w, plus permanent | Medium — `CMP-GUI` costs 85w either way, but ADR-001 §3.5's "in-process with a Python core eliminates an entire IPC layer" is forfeited, and a protocol boundary is added between the GUI and every capability |
+| GUI against a C++ gRPC server | +5–8w, plus permanent | Low — the mandatory JSON engine IPC exists on either path. A fork adds a gRPC-to-project-contract adaptation/maintenance burden; the old estimate must not be read as the cost of introducing an otherwise absent IPC layer |
 | Coverage | **0 saved** | High — `CMP-COV` is built fresh regardless, now in C++ without gcovr |
 | Ecosystem reuse | **inverted** | High — ADR-001 §2.2 rates Python's ecosystem reuse "**Enormous** — gcovr, lizard, StrictDoc, pyOCD, Twister are all Python and importable as libraries." In C++, every one becomes a subprocess |
 | Learning ~1.75 MB of unfamiliar C++ with no upstream to ask | unquantified | — |
@@ -304,15 +302,9 @@ start." A fork saves effort that is not on the constraint.
 
 ### 4.3 The arithmetic, stated plainly
 
-A fork saves roughly **23–28 person-weeks**, all of it off the critical path, and
-costs roughly **38–63 person-weeks** of new work, much of it *on* the critical
-path — because the LLVM port and the re-hosting must land before `WP-ANA-01` can
-proceed, lengthening precisely the serial chain PLAN-001 identifies as the
-binding constraint. It also inverts the ecosystem argument that carries much of
-ADR-001 §2's weight, and it reopens three decisions currently held at high
-confidence.
+The dated estimate is **23–28 person-weeks saved** against **38–63 person-weeks of additional work**, with wide uncertainty and no validated conversion to calendar duration. ANA-01/02 savings could affect the critical path; LLVM porting and native-host rehosting may gate those same activities. The net schedule effect requires recomputing PLAN-001's dependency graph with those prerequisites, staffing and overlap. This document does not claim a particular delay or acceleration.
 
-Even granting generous error bars in the fork's favour, the sign does not change.
+Build fresh remains the recorded decision because of the target-execution, C-harness, coverage, packaging and maintenance mismatch, rather than a proven critical-path disadvantage for the fork. The effort comparison supports that rationale as judgement; it is not a measured schedule result.
 
 ---
 
@@ -502,7 +494,7 @@ performs.
 | **Decision** | Build fresh; harvest four design ideas (§5) |
 | **Confidence** | **High** |
 | **Strongest evidence for** | The fork's one great asset — end-to-end KLEE-based test generation — serves `ATG-020`/`030`, which SRS-001 files as *(S/C, P3)*. It costs an inherited LLVM-14 LibTooling codebase, an Ubuntu-resident server, a C++ GoogleTest harness, line-only coverage, no target execution, and no GUI, to accelerate the lowest-priority band in the specification |
-| **Strongest evidence against** | Apache-2.0. There is no license obstacle, no patent friction, and exact alignment with ADR-005's own recommendation — the objection that most often kills a fork is simply absent here, and roughly 23–28 person-weeks of genuinely hard, genuinely working KLEE integration are being declined |
+| **Strongest evidence against** | Apache-2.0. The top-level Apache-2.0 license permits reuse subject to its terms; retained subcomponent licenses and the unresolved project-license decision still require review, alongside ADR-005's recommendation — the objection that most often kills a fork is simply absent here, and roughly 23–28 person-weeks of genuinely hard, genuinely working KLEE integration are being declined |
 | **Discharges** | ADR-001 §4's outstanding condition; SDD-001 §8's blocker; PLAN-001 §4.2's "decision that cannot wait" |
 | **Feeds** | ADR-003 (§5 items 2 and 4; §9.2's determinism note) |
 | **Requires** | Corrections to ADR-001 §2.4 and §5 (§3.1) |

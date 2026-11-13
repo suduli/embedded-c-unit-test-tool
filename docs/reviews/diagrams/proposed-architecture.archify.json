@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Proposed Architecture — Local Embedded C/C++ Testing Product",
+    "output": "proposed-architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "viewBox": [
+      1070,
+      570
+    ]
+  },
+  "components": [
+    {
+      "id": "cli",
+      "type": "frontend",
+      "label": "CLI & local CI",
+      "sublabel": "engine usable without UI",
+      "pos": [
+        50,
+        22
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "React + TypeScript UI",
+      "sublabel": "local web UI",
+      "pos": [
+        50,
+        232
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "api",
+      "type": "security",
+      "label": "Loopback API",
+      "sublabel": "per-session secret · origin check",
+      "pos": [
+        50,
+        124
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "Application workflows",
+      "sublabel": "owns scheduling & persistence",
+      "pos": [
+        250,
+        60
+      ],
+      "size": [
+        190,
+        84
+      ]
+    },
+    {
+      "id": "sup",
+      "type": "backend",
+      "label": "Process supervisor",
+      "sublabel": "job queue · bounded worker pool",
+      "pos": [
+        250,
+        220
+      ],
+      "size": [
+        190,
+        84
+      ]
+    },
+    {
+      "id": "ast",
+      "type": "backend",
+      "label": "Clang analysis worker",
+      "sublabel": "LibTooling · pinned LLVM",
+      "pos": [
+        620,
+        60
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "gen",
+      "type": "backend",
+      "label": "Harness & stub generator",
+      "sublabel": "original environment planner",
+      "pos": [
+        620,
+        152
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "build",
+      "type": "backend",
+      "label": "Compiler adapter",
+      "sublabel": "host build workspace",
+      "pos": [
+        620,
+        244
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "exec",
+      "type": "backend",
+      "label": "Execution adapter",
+      "sublabel": "one host process per test",
+      "pos": [
+        620,
+        336
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "cov",
+      "type": "backend",
+      "label": "Coverage decoder",
+      "sublabel": "llvm-profdata / llvm-cov",
+      "pos": [
+        620,
+        428
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Evidence store",
+      "sublabel": "SQLite + content-addressed artifacts",
+      "pos": [
+        850,
+        240
+      ],
+      "size": [
+        190,
+        80
+      ]
+    },
+    {
+      "id": "report",
+      "type": "backend",
+      "label": "Reports & traceability",
+      "sublabel": "JSON · JUnit · HTML",
+      "pos": [
+        850,
+        400
+      ],
+      "size": [
+        190,
+        80
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cli-to-app",
+      "from": "cli",
+      "to": "app",
+      "label": "same use cases",
+      "variant": "emphasis",
+      "labelAt": [
+        125,
+        8
+      ]
+    },
+    {
+      "id": "ui-to-api",
+      "from": "ui",
+      "to": "api",
+      "label": "loopback"
+    },
+    {
+      "id": "api-to-app",
+      "from": "api",
+      "to": "app"
+    },
+    {
+      "id": "app-to-sup",
+      "from": "app",
+      "to": "sup",
+      "label": "job queue",
+      "variant": "emphasis",
+      "labelAt": [
+        345,
+        182
+      ]
+    },
+    {
+      "id": "app-to-store",
+      "from": "app",
+      "to": "store",
+      "label": "metadata",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          345,
+          14
+        ],
+        [
+          945,
+          14
+        ],
+        [
+          945,
+          240
+        ]
+      ],
+      "labelAt": [
+        700,
+        14
+      ]
+    },
+    {
+      "id": "app-to-report",
+      "from": "app",
+      "to": "report",
+      "label": "report workflows",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "via": [
+        [
+          250,
+          102
+        ],
+        [
+          20,
+          102
+        ],
+        [
+          20,
+          530
+        ],
+        [
+          945,
+          530
+        ]
+      ],
+      "labelAt": [
+        500,
+        530
+      ]
+    },
+    {
+      "id": "sup-to-ast",
+      "from": "sup",
+      "to": "ast",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "sup-to-gen",
+      "from": "sup",
+      "to": "gen",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "sup-to-build",
+      "from": "sup",
+      "to": "build",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "sup-to-exec",
+      "from": "sup",
+      "to": "exec",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "sup-to-cov",
+      "from": "sup",
+      "to": "cov",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ast-to-gen",
+      "from": "ast",
+      "to": "gen",
+      "label": "typed source model",
+      "labelAt": [
+        760,
+        138
+      ],
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "gen-to-build",
+      "from": "gen",
+      "to": "build",
+      "label": "harness + stubs",
+      "labelAt": [
+        760,
+        230
+      ],
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "build-to-exec",
+      "from": "build",
+      "to": "exec",
+      "label": "artifact",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        715,
+        322
+      ]
+    },
+    {
+      "id": "exec-to-cov",
+      "from": "exec",
+      "to": "cov",
+      "label": "per-test profiles",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        760,
+        414
+      ]
+    },
+    {
+      "id": "cov-to-store",
+      "from": "cov",
+      "to": "store",
+      "label": "coverage results",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        800,
+        322
+      ],
+      "via": [
+        [
+          815,
+          460
+        ],
+        [
+          815,
+          280
+        ]
+      ]
+    },
+    {
+      "id": "store-to-report",
+      "from": "store",
+      "to": "report",
+      "label": "consistent snapshots",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        945,
+        360
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Entry points",
+      "items": [
+        "CLI first, local web UI second — both call the same application workflows",
+        "Loopback API: explicit interface, per-session secret, origin validation",
+        "No network or AI dependency in the core analyze/build/test/report loop"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Worker pipeline",
+      "items": [
+        "Isolated native workers under one process supervisor and job queue",
+        "Analyze → generate harness/stubs → build → execute → decode coverage",
+        "One fresh host process per test; future target runtime stays a dashed adapter boundary"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Evidence",
+      "items": [
+        "SQLite metadata beside a content-addressed immutable artifact store",
+        "Reports merge results, coverage and requirement traceability from stored snapshots",
+        "Every result is labeled with the exact source, build and tool identities"
+      ]
+    }
+  ]
+}

@@ -25,22 +25,39 @@ class CompilerInvocation:
 
     Attributes:
         executable: The compiler binary / driver (e.g. 'gcc', 'arm-none-eabi-gcc', 'clang').
-        arguments: Complete normalized sequence of command-line arguments.
+        arguments: Complete normalized sequence of command-line arguments, after
+            response-file expansion when expansion occurred (TOOL-ING-210).
         residual_flags: Additional compiler flags not captured by includes, defines,
             standards, outputs, or source files (e.g. '-Wall', '-O2', '-g').
+        raw_arguments: Pre-expansion argument sequence when response files were
+            used; identical to arguments (empty) when no expansion occurred.
+        target_triple: Target triple captured from the invocation when specified
+            via --target/-target/-mtriple (TOOL-ING-220).
+        sysroot: Sysroot captured from the invocation when specified via
+            --sysroot/-isysroot (TOOL-ING-220).
     """
 
     executable: str
     arguments: tuple[str, ...] = field(default_factory=tuple)
     residual_flags: tuple[str, ...] = field(default_factory=tuple)
+    raw_arguments: tuple[str, ...] = field(default_factory=tuple)
+    target_triple: str | None = None
+    sysroot: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain dictionary representation."""
-        return {
+        data: dict[str, Any] = {
             "executable": self.executable,
             "arguments": list(self.arguments),
             "residual_flags": list(self.residual_flags),
         }
+        if self.raw_arguments and self.raw_arguments != self.arguments:
+            data["raw_arguments"] = list(self.raw_arguments)
+        if self.target_triple is not None:
+            data["target_triple"] = self.target_triple
+        if self.sysroot is not None:
+            data["sysroot"] = self.sysroot
+        return data
 
 
 @dataclass(frozen=True)
@@ -57,6 +74,8 @@ class TranslationUnit:
         compiler_invocation: Executable and flags for this translation unit.
         language_standard: Language standard string (e.g. 'c99', 'gnu11', 'c17') if specified.
         output_file: Path to compilation output file if specified.
+        response_files: Response-file paths referenced by the invocation and
+            expanded at ingestion, in encounter order (TOOL-ING-210).
     """
 
     source_path: str
@@ -68,6 +87,7 @@ class TranslationUnit:
     )
     language_standard: str | None = None
     output_file: str | None = None
+    response_files: tuple[str, ...] = field(default_factory=tuple)
 
     @property
     def file(self) -> str:
@@ -119,7 +139,19 @@ class TranslationUnit:
             data["language_standard"] = self.language_standard
         if self.output_file is not None:
             data["output_file"] = self.output_file
+        if self.response_files:
+            data["response_files"] = list(self.response_files)
         return data
+
+    @property
+    def target_triple(self) -> str | None:
+        """Target triple captured from the invocation, if specified (TOOL-ING-220)."""
+        return self.compiler_invocation.target_triple
+
+    @property
+    def sysroot(self) -> str | None:
+        """Sysroot captured from the invocation, if specified (TOOL-ING-220)."""
+        return self.compiler_invocation.sysroot
 
 
 @dataclass(frozen=True)
@@ -127,9 +159,16 @@ class CompilationDatabase:
     """An ingested collection of normalized TranslationUnits.
 
     Preserves deterministic ordering and provides indexed and query access.
+
+    Attributes:
+        translation_units: The normalized translation units in database order.
+        build_tag: Explicit caller-supplied build identity for this ingested
+            configuration set (TOOL-ING-220); None when the caller supplied no
+            tag.
     """
 
     translation_units: tuple[TranslationUnit, ...] = field(default_factory=tuple)
+    build_tag: str | None = None
 
     def __len__(self) -> int:
         return len(self.translation_units)
@@ -160,9 +199,12 @@ class CompilationDatabase:
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize database to a plain dictionary representation."""
-        return {
+        data: dict[str, Any] = {
             "translation_units": [tu.to_dict() for tu in self.translation_units],
         }
+        if self.build_tag is not None:
+            data["build_tag"] = self.build_tag
+        return data
 
     def canonical_json(self) -> str:
         """Serialize to deterministically ordered canonical JSON."""

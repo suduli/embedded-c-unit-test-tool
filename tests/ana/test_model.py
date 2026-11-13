@@ -1,7 +1,7 @@
 # implements: DSN-ANA-090
 """Unit tests for ectt.ana model classes.
 
-Verifies: TOOL-PAR-010, TOOL-PAR-020, DSN-ANA-090.
+Verifies: TOOL-PAR-010, TOOL-PAR-020, TOOL-PAR-160, DSN-ANA-090, DSN-ANA-120.
 """
 
 from __future__ import annotations
@@ -20,6 +20,8 @@ from ectt.ana.model import (
     ParameterModel,
     ParsedTranslationUnit,
     ParseResult,
+    RangeModel,
+    DimensionModel,
     SourceLocation,
     StructMemberModel,
     TypeModel,
@@ -169,3 +171,103 @@ def test_function_and_type_models_properties_and_immutability() -> None:
     assert u_dict["status"] == "parsed"
     assert "type.MyStruct" in u_dict["types"]
     assert json.loads(unit.to_json())["path"] == "src/test.c"
+
+
+# ---------------------------------------------------------------------------
+# Value ranges and array dimensions (TOOL-PAR-160, DSN-ANA-120)
+
+
+def test_parameter_range_round_trip() -> None:
+    """verifies: TOOL-PAR-160, DSN-ANA-120"""
+    p = ParameterModel(name="level", type="ref:type.u16", value_range=RangeModel(low="0", high="100"))
+    d = p.to_dict()
+    assert d["value_range"] == {"low": "0", "high": "100"}
+    assert ParameterModel.from_dict(d) == p
+
+
+def test_struct_member_range_round_trip() -> None:
+    """verifies: TOOL-PAR-160, DSN-ANA-120"""
+    m = StructMemberModel(name="raw", type="ref:type.u16", value_range=RangeModel(low="0", high="65535"))
+    d = m.to_dict()
+    assert StructMemberModel.from_dict(d) == m
+
+
+def test_array_dimensions_round_trip() -> None:
+    """verifies: TOOL-PAR-160, DSN-ANA-120"""
+    t = TypeModel(
+        kind="array",
+        element_type="ref:type.u16",
+        size=8,
+        dimensions=(DimensionModel(size=8, low="0", high="7", index_type="ref:type.u16"),),
+    )
+    d = t.to_dict()
+    assert d["dimensions"] == [{"size": 8, "low": "0", "high": "7", "index_type": "ref:type.u16"}]
+    assert TypeModel.from_dict(d) == t
+
+
+def test_range_absent_omits_key() -> None:
+    """verifies: TOOL-PAR-160 — absence is explicitly optional."""
+    p = ParameterModel(name="x", type="ref:type.int")
+    assert "value_range" not in p.to_dict()
+
+
+def test_model_with_ranges_validates_against_1_2_schema() -> None:
+    """verifies: TOOL-PAR-160, DSN-ANA-120 — a model carrying ranges and
+    dimensions validates against the published 1.2 schema."""
+    import jsonschema
+    from importlib import resources
+
+    schema = json.loads(
+        resources.files("ectt.ana.schema")
+        .joinpath("analysis-model-1.2.schema.json")
+        .read_text(encoding="utf-8")
+    )
+    doc = {
+        "schema_version": "1.2",
+        "provenance": {"tool_version": "t", "front_end": "f", "generated_at": "g", "inputs": []},
+        "units": [
+            {
+                "path": "x.c",
+                "status": "parsed",
+                "diagnostics": [],
+                "cfg": None,
+                "unsupported_constructs": [],
+                "functions": [
+                    {
+                        "name": "f",
+                        "linkage": "external",
+                        "storage_class": "none",
+                        "location": {"file": "x.c", "line": 1},
+                        "return_type": "ref:type.int",
+                        "parameters": [
+                            {
+                                "name": "level",
+                                "type": "ref:type.u16",
+                                "direction": "in",
+                                "value_range": {"low": "0", "high": "100"},
+                            }
+                        ],
+                        "globals": [],
+                    }
+                ],
+                "unsupported_constructs": [],
+            }
+        ],
+        "types": {
+            "type.buf": {
+                "kind": "array",
+                "element_type": "ref:type.u16",
+                "size": 8,
+                "dimensions": [{"size": 8, "low": "0", "high": "7", "index_type": "ref:type.u16"}],
+            },
+            "type.u16": {
+                "kind": "typedef",
+                "underlying_type": "ref:type.builtin.u16",
+                "value_range": {"low": "0", "high": "65535"},
+            },
+            "type.builtin.u16": {"kind": "builtin", "name": "u16"},
+        },
+        "capabilities": {"cfg": False},
+        "decision_inventory": {"status": "not_extracted"},
+    }
+    jsonschema.validate(doc, schema)

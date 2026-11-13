@@ -1,8 +1,10 @@
-# verifies: TOOL-PAR-100, TOOL-PAR-110, DSN-ANA-070
-"""Conformance of emitted analysis models to the published 1.0 JSON Schema.
+# verifies: TOOL-PAR-100, TOOL-PAR-110, TOOL-PAR-140, TOOL-PAR-150, DSN-ANA-070
+"""Conformance of emitted analysis models to the published 1.2 JSON Schema.
 
 This is the first clause of the WP-ANA-04 exit criterion (PLAN-001 5.4): a model
-emitted by the analyzer validates against its published schema.
+emitted by the analyzer validates against its published schema. Since the 1.1/1.2
+minor bumps (TOOL-PAR-140/150/160) the schema also requires the decision inventory
+and per-unit unsupported-construct inventories.
 """
 
 from __future__ import annotations
@@ -22,7 +24,7 @@ from ectt.ana.persist import assemble_analysis_model, write_analysis_model
 from ectt.core.determinism import FixedClock
 from ectt.core.fs import OutputRoot
 
-SCHEMA_RESOURCE = "analysis-model-1.0.schema.json"
+SCHEMA_RESOURCE = "analysis-model-1.2.schema.json"
 
 HEADER = """\
 typedef unsigned short u16;

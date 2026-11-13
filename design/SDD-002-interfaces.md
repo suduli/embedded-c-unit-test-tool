@@ -3,7 +3,11 @@
 **Document ID:** SDD-002
 **Version:** 0.1 (draft for review)
 **Status:** Draft — tracks SRS-001 v0.1
-**Upstream:** SDD-001, SRS-001 v0.1
+**Upstream:** SDD-001, SRS-001 v0.1, ADR-008
+
+**Revision note — 2026-10-17:** Draft contract corrections for DR-11–14: AI
+provider roles, MC/DC evidence, compatibility policy, and framed/cancellable IPC.
+These are design decisions and acceptance obligations, not implemented claims.
 
 ---
 
@@ -40,13 +44,19 @@ Anything not on this list is an internal call and may be refactored freely.
 | S4 | Coverage Model | `CMP-COV` → L4 | Internal | Yes | Coverage backend (ADR-004) |
 | S5 | Report Model | `CMP-REP` → renderers | Documented | Yes | Report formats |
 | S6 | Engine API | Engine ↔ front-ends | Documented | Yes | GUI technology (ADR-001 §3) |
-| S7 | Extension points | Tool ↔ extensions | Documented | Yes | Compiler/framework/target/report breadth |
+| S7 | Extension points | Tool ↔ extensions | Documented | Yes | Compiler/framework/target/report/AI breadth |
 
 Plus one internal port that exists purely to keep the layer graph acyclic:
 
 | # | Port | Declared by | Implemented by | Reason |
 |---|---|---|---|---|
 | P1 | `TestValidationPort` | `CMP-ATG` | `CMP-BLD`, `CMP-EXH`, `CMP-COV` | ATG (L2) must build, run, and measure (L3/L4) — DSN-ATG-110 |
+
+Authored inputs — test scopes, link plans, justifications — cross these seams as
+versioned project files (SDD-003), not engine seams. The build additionally consumes
+an explicit, validated link plan per scope (TOOL-ING-200): the compilation database
+alone does not define the link, and an unresolvable plan input blocks the build with
+a diagnostic (DSN-ING-120).
 
 ---
 
@@ -55,19 +65,30 @@ Plus one internal port that exists purely to keep the layer graph acyclic:
 Every seam above carries an explicit `schema_version` or `interface_version` as
 a **required** field, present as the first key where the encoding has an order.
 
-- **Minor bump** — a field is added, or an enumeration gains a member that older
-  readers may ignore. Readers accept any minor version at or above the one they
-  were written for and ignore unknown fields.
-- **Major bump** — a field is removed, renamed, or changes meaning. Readers
-  **reject** a major version they do not implement and say so, naming both
-  versions. They never attempt a best-effort read.
+- **Minor bump** — only additive, optional fields whose omission cannot change
+  correctness, authorization, evidence meaning, or execution. A newer minor may
+  be accepted by a read-only S1/S3/S4/S5 consumer only when unknown fields are
+  explicitly ignorable under that seam's schema. Unknown semantic enum values
+  (outcome, review state, capability, MC/DC form) fail closed; they are never
+  coerced to a known value or treated as success.
+- **Major bump** — removal, renaming, changed meaning, or a new required field
+  or semantic enum member. Unsupported major versions are rejected with both
+  versions and a migration/capability diagnostic.
+- **Authored persisted state (S2 and SDD-003)** — readers accept only explicitly
+  supported versions between their declared min/max; newer unsupported minors
+  are rejected before editing. Supported optional extension fields must survive
+  read/edit/write unchanged; if preservation is impossible, saving is refused.
+  No writable reader silently discards fields. Migration is explicit (SDD-003 §5).
+- **Live S6/S7** — negotiate an exact common interface version and required
+  capabilities before operations; no common version/capability means rejection.
+  Unknown operation, role, result type, or semantic enum is an error. Optional
+  descriptive fields may be ignored only as declared by the negotiated schema.
 
-Rejection rather than degradation is deliberate. A downstream stage that
-half-understands an analysis model produces a harness that compiles and is
-wrong, which is worse than one that does not run (TOOL-PAR-110, TOOL-NFR-090).
-
-Extension interfaces follow the same rule, with breaking changes documented
-with a migration path (TOOL-PLG-060, DSN-API-020).
+The published schema defines which fields are ignorable; missing evidence is
+never inferred from an ignored field. Acceptance fixtures must cover an older
+reader/newer writer, unknown semantic enums, preserved optional fields, refused
+lossy saves, and negotiation failure. Extension breaking changes ship a migration
+path (TOOL-PLG-060, DSN-API-020).
 
 ---
 
@@ -228,6 +249,10 @@ that information is present as metadata, but no logic branches on it.
   (TOOL-CBT-040, DSN-CBT-030).
 - `infrastructure_faults` is a separate channel from `results`. A rig that fails
   to flash must never read as failing software (TOOL-TGT-090).
+- **`coverage.completeness` is a field.** Every coverage artifact reference
+  carries `complete`, `truncated`, or `missing`, recorded at collection time
+  (TOOL-COV-180, DSN-COV-110). A latched or lost coverage sink must never read
+  as a full score.
 - `timeout` is a distinct outcome from `fail`, since the diagnosis differs.
 - `order_seed` is recorded so a randomised-order failure is reproducible
   (DSN-TCM-060).
@@ -249,7 +274,8 @@ that information is present as metadata, but no logic branches on it.
     "lines":     [{ "line": 51, "status": "partial", "hits": 3,
                     "attributed_tests": ["tc.adc_read.nominal.7f3a"] }],
     "decisions": [{ "id": "d1", "line": 51, "status": "partial",
-                    "conditions": [{ "index": 0, "true": true, "false": false }] }],
+                    "conditions": [{ "index": 0, "true": true, "false": false,
+                      "independence": "not_demonstrated", "evidence": [] }] }],
     "unmeasured":[{ "id": "d7", "line": 96,
                     "reason": "condition count exceeds compiler limit" }],
     "justified": [{ "construct": "d9", "author": "...", "date": "...",
@@ -259,7 +285,48 @@ that information is present as metadata, but no logic branches on it.
 }
 ```
 
-### 7.1 Contract points
+### 7.1 MC/DC independence and merge contract
+
+Each condition has `independence`: `demonstrated`, `not_demonstrated`,
+`unmeasured`, or `unsupported`. True/false flags record exercised outcomes only;
+neither two true flags nor decision outcome coverage proves independence.
+`demonstrated` requires evidence under the declared `mcdc.form` and compiler
+mechanism. Evidence identifies source/expression digest, condition index,
+run/test/vector IDs, condition evaluations (including short-circuit unevaluated
+values), decision outcomes, and the witness pair. The pair must satisfy the
+form's independence rule; masking evidence must record the masking relation.
+When a backend exports an authoritative independence bit but no vectors, retain
+its raw artifact digest, tool/version, command/configuration and record locator;
+mark `evidence_kind: backend_assertion`, not an invented witness pair. If neither
+vectors nor a traceable backend assertion exists, status is `unmeasured`.
+
+Summary counts report inventory conditions, instrumentable/measured conditions,
+`demonstrated`, `not_demonstrated`, `unmeasured`, `unsupported`, and separately
+justified conditions. The primary percentage is demonstrated / all in-scope
+inventory conditions; the optional measured-only percentage uses demonstrated /
+measured conditions (`demonstrated` + `not_demonstrated`) and must label that
+denominator. A zero denominator is N/A.
+Unsupported, unmeasured and justified conditions do not count as demonstrated.
+A decision is fully MC/DC-covered only if every inventory condition is
+`demonstrated`; otherwise it exposes its per-condition states.
+
+Merge only records with identical source/expression identity, condition mapping,
+MC/DC form, backend semantics and build/instrumentation configuration. Union
+outcome flags and deduplicate evidence by digest; retain originating run/test IDs.
+Recompute independence from compatible evidence or union traceable backend
+assertions whose documented merge semantics support it. Never OR ordinary
+outcome flags into independence. Cross-run witness pairing is allowed only when
+full compatible vectors prove the selected form; otherwise preserve separate
+run evidence. Incompatible records remain separate with a diagnostic. Missing
+measurement stays visible in per-run provenance; an aggregate demonstrated
+status requires at least one valid proof. Justifications remain separate and
+expire on source-digest mismatch.
+
+Acceptance fixtures must include equal true/false outcome flags with different
+independence results, short-circuit/masking pairs, missing backend evidence,
+incompatible merges, and zero/unsupported denominators.
+
+### 7.2 Contract points
 
 - **`mcdc.form` is data.** Every renderer is obliged to display it. TOOL-COV-060
   demands the form appear in every report; making it a field rather than a
@@ -267,6 +334,10 @@ that information is present as metadata, but no logic branches on it.
 - **`unmeasured` is not `uncovered`.** A decision the compiler declined to
   instrument is a third state. Collapsing it into either of the other two is the
   most dangerous misreport the tool can make (DSN-COV-040).
+- **`truncated` forces `unmeasured`.** Decisions and constructs that an
+  artifact would have measured but did not — buffer latch, exceeded sink, lost
+  file — are `unmeasured`, with the artifact's completeness state carried as
+  the reason and an advisory emitted (TOOL-COV-180, DSN-COV-110).
 - **`justified` has a `state`.** Bound to `source_digest`; when the source moves
   the justification expires rather than continuing to excuse code it no longer
   describes (TOOL-COV-150, DSN-COV-080).
@@ -305,7 +376,8 @@ delta, and the provenance record — **persisted**, so that:
                     "unlinked_tests": [...] },
   "delta": { "baseline_run": "...", "newly_failing": [...], "newly_passing": [...] },
   "advisories": [{ "kind": "partial_run" }, { "kind": "unreviewed_expectations",
-                  "count": 12 }, { "kind": "ai_generated_present", "count": 3 }]
+                  "count": 12 }, { "kind": "ai_generated_present", "count": 3 },
+                  { "kind": "coverage_truncated", "artifacts": 1 }]
 }
 ```
 
@@ -340,30 +412,80 @@ UI as an *additional* one, which is where TOOL-UIX-400 (deferred, not rejected)
 would live. Should that be built, it gets its own transport and its own
 security analysis rather than widening S6.
 
-### 9.2 Message shape
+### 9.2 Framing, messages and cancellation
+
+Design choice for both byte-stream transports: a four-byte unsigned big-endian
+payload length followed by exactly that many UTF-8 bytes containing one JSON
+object (no BOM). Length is 1–8,388,608 bytes inclusive. Readers buffer partial
+headers/bodies and accept several frames per read; socket message boundaries
+carry no meaning. Duplicate JSON keys and malformed UTF-8/JSON are rejected.
+Invalid length, malformed envelope or truncated frame at EOF closes the
+connection; valid request envelopes with invalid params receive a correlated
+error. stdout is protocol-only; logs go to stderr. Larger artifacts use
+permission-checked local artifact references with size/digest, not oversized
+frames. A pre-negotiation `session.hello` exchanges supported versions and selects
+an exact common version; all later messages use it (example below uses 1.0).
+Hello uses the fixed bootstrap envelope `{"bootstrap_version":"1", "id":"h1",
+"op":"session.hello", "params":{"interface_versions":["1.0"]}}`; the reply
+uses `bootstrap_version`, the same ID, `status`, and either
+`result:{"interface_version":"1.0"}` or the error envelope with
+`code:"NO_COMMON_VERSION"` followed by connection close. No operation is admitted
+before hello succeeds. Bootstrap IDs are reserved from later reuse.
 
 ```jsonc
-// request
-{ "interface_version": "1.0", "id": 17, "op": "environment.build",
+// Each object below is one length-prefixed frame; id is a session-unique string.
+{ "interface_version": "1.0", "id": "17", "op": "environment.build",
   "params": { "environment": "env.adc" } }
-
-// response
-{ "interface_version": "1.0", "id": 17, "status": "ok",
-  "result": { ... },
-  "cli_equivalent": "ectt environment build --environment env.adc",   // DSN-API-040
-  "diagnostics": [ ... ] }
-
-// progress / cancellation (unsolicited, correlated by id)
-{ "interface_version": "1.0", "id": 17, "event": "progress",
-  "phase": "compile", "completed": 12, "total": 40, "cancellable": true }
+{ "interface_version": "1.0", "id": "17", "event": "progress",
+  "sequence": 1, "phase": "compile", "completed": 12, "total": 40,
+  "cancellable": true }
+// Cancellation has its own request ID, and identifies the original operation.
+{ "interface_version": "1.0", "id": "18", "op": "operation.cancel",
+  "params": { "target_id": "17" } }
+{ "interface_version": "1.0", "id": "18", "status": "ok",
+  "result": { "target_id": "17", "disposition": "accepted" },
+  "cli_equivalent": "ectt operation cancel --target-id 17", "diagnostics": [] }
+{ "interface_version": "1.0", "id": "17", "status": "cancelled",
+  "result": { "partial_artifacts": [] },
+  "cli_equivalent": "ectt environment build --environment env.adc",
+  "diagnostics": [] }
+// Alternative terminal failure, with no result field:
+{ "interface_version": "1.0", "id": "19", "status": "error",
+  "error": { "code": "INVALID_PARAMS", "message": "Unknown environment",
+             "retryable": false, "details": {} },
+  "cli_equivalent": "ectt environment build --environment missing",
+  "diagnostics": [] }
 ```
+
+IDs cannot be reused during a session. Concurrent operations may interleave
+frames; each operation's progress sequence increases and has exactly one
+terminal response (`ok`, `error`, or `cancelled`), after which it emits nothing.
+Cancellation transitions a cancellable running operation to cancelling;
+`accepted` means the token was set, not that completion has been observed.
+The engine serializes terminal publication and cancellation admission: if normal
+completion wins, cancel returns `already_terminal`; if admission wins, the
+original terminates `cancelled` after reaching a safe boundary. A noncancellable
+commit phase returns `not_cancellable`; an unknown ID returns `unknown_target`.
+Repeated cancellation returns `already_requested` while cancelling. The terminal
+response is authoritative, even if it arrives before the cancel acknowledgement.
+Cancellation rolls back uncommitted project changes and explicitly lists any
+valid partial output; it never reports an incomplete write as a completed save.
+On disconnect, outstanding session operations receive cancellation tokens and
+reach safe boundaries; accepted durable changes remain discoverable on reconnect.
+
+Required interoperability fixtures: a header split 2+2 bytes and a body split
+across reads; two concatenated frames; interleaved IDs 17/19 with independent
+sequences; oversized frames; duplicate IDs; cancel admitted before completion
+(`cancelled`); completion before cancel (`ok`, then `already_terminal`); cancel
+during noncancellable commit; and disconnect during an authored-state save.
 
 ### 9.3 Contract points
 
 - **One operation catalogue.** The CLI is generated from the same catalogue the
   API publishes (DSN-CLI-010). A capability cannot become GUI-only by omission,
   because there is no place to add one that the CLI does not see.
-- **`cli_equivalent` on every response.** This is what makes the console pane of
+- **`cli_equivalent` on every operational response.** Bootstrap hello is
+  connection setup and has no CLI command. This is what makes the console pane of
   TOOL-UIX-240 and the GUI/CLI round-trip guarantee of TOOL-UIX-330 fall out of
   the design rather than needing separate work per operation.
 - **Progress and cancellation are protocol-level**, backed by the cancellation
@@ -377,11 +499,12 @@ security analysis rather than widening S6.
 
 ## 10. S7 — Extension points
 
-**Requirements:** TOOL-PLG-010..090, but only four of those live in `CMP-PLG`
+**Requirements:** TOOL-PLG-010..100, but only four of those live in `CMP-PLG`
 (TOOL-PLG-010/070/080/090 → DSN-PLG-010..040). The rest are discharged at the
 extension point itself, which is the design: TOOL-PLG-020 → DSN-TCH-010,
 TOOL-PLG-030 → DSN-GEN-040, TOOL-PLG-040 → DSN-EXT-010, TOOL-PLG-050 →
-DSN-REP-010, TOOL-PLG-060 → DSN-API-020. `CMP-PLG` publishes and loads; it does
+DSN-REP-010, TOOL-PLG-060 → DSN-API-020; TOOL-PLG-100 defines the
+AI-provider point below (AIF-050/230/250/260). `CMP-PLG` publishes and loads; it does
 not implement the points.
 
 | Extension point | Contribution | Declarative only | Requirements |
@@ -390,11 +513,12 @@ not implement the points.
 | Test framework back-end | Templates + descriptor (assertion macros, runner entry, result form) | Yes | TOOL-HAR-070, TOOL-PLG-030 |
 | Target execution method | `flash` / `run` / `collect` behind a documented interface | Script permitted | TOOL-TGT-120, TOOL-PLG-040 |
 | Report format | Renderer over the S5 report model | Script permitted | TOOL-REP-090, TOOL-PLG-050 |
+| AI provider | Generation and/or typed structured validation through role capabilities | Adapter code permitted | TOOL-PLG-100, TOOL-AIF-050/230/250/260 |
 
-Two rules govern all four:
+Two rules govern all five:
 
 1. **Built-ins use the public interface.** Every shipped compiler
-   configuration, framework back-end, and report format is implemented through
+   configuration, framework back-end, report format, and AI provider is implemented through
    the same extension point offered to users, with no private path
    (DSN-PLG-040, TOOL-PLG-090). This is the only mechanism that reliably keeps
    an extension interface sufficient — an interface with a private bypass
@@ -415,6 +539,101 @@ artifact's model identifier and review state (DSN-AIF-110), the corresponding
 marking must appear in the rendered output. A renderer that silently drops an
 advisory produces a report that overclaims, which is the one defect class this
 design spends the most structure preventing.
+
+### 10.1 AI-provider contract
+
+`CMP-AIF` owns role routing and validation; `CMP-PLG` loads adapters. All AI
+features use this point exclusively, including later features. Vendor SDKs and
+protocol details remain inside adapters. Generation and structured-validation
+role bindings are independent configuration entries; one adapter may implement
+either or both. A configuration default (including Jev when explicitly enabled)
+is not a code dependency or authorization grant (ADR-008).
+
+Adapter discovery returns `interface_versions`, stable adapter ID/version,
+local/self-hosted/remote execution class, endpoint/recipient identity,
+model ID/version (and artifact digest for local models), roles, supported input
+and result schemas, optional confidence capability, and time/token/cancellation
+limits. Binding selects an exact common version and verifies required role and
+schema capabilities before sending data; missing capability is an error.
+
+Requests contain `interface_version`, request ID, role, operation kind, immutable
+input/context references with digests, input-schema version, output schema,
+model selection, sampling parameters/seed, deadline, token budget, and
+cancellation token. Generation accepts prompt/context and returns a candidate
+text/code/test artifact for normal validation. Structured validation accepts a
+discrete question and explicit schema: a choice with allowed labels, a boolean,
+or a score with declared finite range and units. Its result is typed data,
+never free text requiring caller parsing. `confidence` is optional, nullable
+only if the schema permits, and in [0,1] when supplied; absence is unknown and
+must not be fabricated or interpreted as certainty. If a caller requires it,
+capability negotiation must reject an adapter that cannot supply it.
+
+For example, the role-independent envelope for a validation call is:
+
+```jsonc
+{ "interface_version": "1.0", "request_id": "ai.17",
+  "role": "structured_validation", "operation": "classify_result",
+  "input_schema": "result-context/1.0",
+  "input": { "artifact_ref": "local:context.17", "digest": "sha256:..." },
+  "output_schema": { "kind": "choice", "allowed": ["review", "prioritize"],
+                     "confidence_required": false },
+  "model": { "id": "configured-model", "version": "pinned-version" },
+  "parameters": { "temperature": 0, "seed": 42 },
+  "deadline": "2026-10-17T12:00:00Z", "max_tokens": 512,
+  "cancellation_token": "cancel.ai.17" }
+// Successful typed body; common response provenance fields are mandatory too.
+{ "kind": "choice", "value": "review" } // confidence intentionally absent
+// Other negotiated result bodies:
+{ "kind": "boolean", "value": true, "confidence": 0.8 }
+{ "kind": "score", "value": 0.6, "units": "priority_fraction" }
+// Generation body: returned text is an artifact, not a parsed decision.
+{ "kind": "artifact", "artifact_kind": "stub_code", "text": "return 0;" }
+```
+
+The common response envelope contains `interface_version`, `request_id`,
+`status`, and either `result` plus `provenance`, or `error` plus available
+provenance. Schema validation rejects unexpected required semantics. Input
+references are readable only within the central gate's approved scope; an
+adapter does not receive arbitrary filesystem authority from a reference.
+
+An adapter response is untrusted until `CMP-AIF` validates exact negotiated
+schema, types, allowed choices, finite numeric bounds and provenance. Only the
+validated typed result reaches the feature. Invalid/missing fields, unknown
+semantic enums or out-of-range values yield `invalid_response`; there is no
+coercion, free-text fallback, or default successful judgment. AI judgments remain
+suggestions and cannot override measured execution/coverage or human review.
+
+Successful results retain request/input digest, adapter/model identity/version,
+parameters/seed, generation timestamp, prompt or controlled audit reference,
+usage, response digest and validation disposition. Generated candidates pass
+P1 build/execute/coverage validation before acceptance or are visibly rejected;
+rejections are recorded (AIF-070/210). Accepted artifacts keep AI origin and
+identified review history; a provider cannot mark them reviewed.
+
+Errors use a typed envelope with request ID, adapter/model identity, code,
+message and retryability. Codes include `disabled`, `unauthorized`,
+`unsupported_capability`, `invalid_request`, `invalid_response`, `unavailable`,
+`budget_exceeded`, `timeout`, `cancelled`, and `provider_failure`. A deadline or
+cancellation prevents late responses from being applied; cleanup is bounded and
+the surrounding non-AI workflow continues. Retries require a fresh bounded
+attempt with preserved correlation/provenance; there is no automatic fallback
+to another endpoint or remote provider.
+
+AI starts disabled. Local execution uses no network; self-hosted endpoints
+outside the local machine count as remote for authorization. Before dispatch,
+the central gate checks session-specific authorization for the exact recipient,
+role and disclosed data categories, after showing what data goes to whom.
+Changing recipient or expanding data scope requires renewed authorization;
+revocation cancels pending dispatches and discards late results. Credentials
+remain outside prompts, persisted artifacts and error details. No provider or
+feature can bypass this gate (AIF-010..040/260).
+
+Conformance requires two different adapters (including local and authorized
+remote/self-hosted validation) to satisfy the same caller fixtures without
+caller edits. Fixtures cover independently bound roles, confidence absent,
+invalid enum/type/range, disabled/unauthorized denial before transmission,
+revocation, budget/timeout/cancel races and late responses. These are required
+acceptance tests; this draft does not assert they currently pass.
 
 ---
 

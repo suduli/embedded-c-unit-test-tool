@@ -1,0 +1,31 @@
+{
+  "review_date": "2026-10-15",
+  "head": "b5786e020c34ebaf182b48e72c730c461d03c679",
+  "finding_counts": {
+    "HIGH": 16,
+    "MEDIUM": 15,
+    "LOW": 1
+  },
+  "findings": 32,
+  "report_link_errors": [],
+  "reviewed_documents_modified_relative_to_HEAD": [],
+  "sha256": {
+    "SRS-001-requirements.md": "068e70af8c44827d77c2ec4c460c195b9218bd6021edceb88fb78251b10313a9",
+    "PLAN-001-specification-analysis-and-work-breakdown.md": "583268aff6c82df93733a744d17c33b6211f1e893714e1a1ba061efb0d3b1d1c",
+    "design/SDD-001-architecture.md": "af096ef479c4c6e6348cc8ee04df700b6039158f987a9f2329221a258752c7d4",
+    "design/SDD-002-interfaces.md": "55260357b5451a24249ade4c5f6bee462ac58a2041f812821c91eb10a249c67b",
+    "design/SDD-003-data-model.md": "9f66de371dfa6bc21ec9f45d9cc0bc51bc499831170ca3e6a0aa905772e8e36d",
+    "design/SDD-004-traceability-architecture.md": "cbcb1bdfcb3e388e011f757b88c29f9faa88122f9297ade194ae7862aa2ee396",
+    "design/SDD-005-external-integration.md": "2c5d687c273cd9370f7ec7077861993d1152253a04436f14a1dc7463ac4da1b8",
+    "ADR-001-architecture-decisions.md": "a88c3d722d7f5fdb6dd7655f0b438a04330831da88d59c4cdc3235e5de766651",
+    "ADR-002-project-data-format.md": "b54288ce10a309893a67130ebc0e40961be0c4e0ec517f5ffec23ec19f8572ba",
+    "ADR-006-fork-or-build-fresh.md": "bfea1d338bea44a0531f53068ee5f144cf59c85d7aed368e3eda431255cfb708",
+    "ADR-008-ai-structured-decision-provider.md": "8b028f7e11191782b94c1d0d55ca23ab38718778c7e1398f2b59f9dfd42b0a21"
+  },
+  "traceability": {
+    "command": ".\\.venv\\Scripts\\python.exe design\\trace\\trace_check.py --check-diagrams design\\diagrams",
+    "exit_code": 1,
+    "stdout": "\nRequirement allocation\n  SRS requirements            328\n  out of v1.0 scope (F)       2\n  in scope                    326\n  allocated                   321\n  UNALLOCATED                 5\n  design elements             239\n  derived (no requirement)    2\n  components                  24\n\n  By priority\n    M      199 / 201  GAP\n    S      107 / 109  GAP\n    C       15 / 16   GAP\n\n  By phase\n    P1      35 / 35   ok\n    P2     146 / 146  ok\n    P3     100 / 104  GAP\n    P4      40 / 41   GAP\n\n  By category\n    AIF     21 / 26   GAP\n    ATG     11 / 11   ok\n    CBT      8 / 8    ok\n    CIC      8 / 8    ok\n    COV     17 / 17   ok\n    EXE      9 / 9    ok\n    HAR     13 / 13   ok\n    ING     19 / 19   ok\n    INS     11 / 11   ok\n    LIC      7 / 7    ok\n    MIG     10 / 10   ok\n    NFR     19 / 19   ok\n    PAR     13 / 13   ok\n    PLG      9 / 9    ok\n    PRJ     11 / 11   ok\n    QUA     10 / 10   ok\n    REP     15 / 15   ok\n    SEC     12 / 12   ok\n    STB     14 / 14   ok\n    TCD     14 / 14   ok\n    TCH     10 / 10   ok\n    TGT     12 / 12   ok\n    TRC     10 / 10   ok\n    UIX     38 / 38   ok\n\n",
+    "stderr": "error: SRS-001-requirements.md:868: duplicate requirement id TOOL-PLG-080 (first seen at line 866)\nerror: SRS-001: register declares 323 requirements but 328 were parsed. Either the SRS changed and the declared count needs updating, or requirements were lost.\nerror: DSN-PLG-030: declares verification ['D'] but allocates requirements verified by ['A'] (TOOL-PLG-080)\nerror: TOOL-AIF-220 (S, P3) is not allocated to any design element\nerror: TOOL-AIF-230 (S, P3) is not allocated to any design element\nerror: TOOL-AIF-240 (C, P4) is not allocated to any design element\nerror: TOOL-AIF-250 (M, P3) is not allocated to any design element\nerror: TOOL-AIF-260 (M, P3) is not allocated to any design element\n\nFAIL: 8 error(s)\n"
+  }
+}

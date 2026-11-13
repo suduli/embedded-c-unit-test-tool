@@ -2,7 +2,9 @@
 
 **Document ID:** ADR-008
 **Status:** **Accepted, 2026-09-19** — default provider and modular contract recorded; provider behavior not yet independently exercised (see §7)
-**Relates to:** SRS-001 §18 AIF (`TOOL-AIF-220` through `TOOL-AIF-260`), §25 PLG (`TOOL-PLG-080`), A-08, K-04
+**Relates to:** SRS-001 §18 AIF (`TOOL-AIF-220` through `TOOL-AIF-260`), §25 PLG (`TOOL-PLG-100`), A-08, K-04
+
+**Correction note, 2026-10-17:** DR-30–32 correct configurable evidence exclusion, mandatory boundary validation, optional confidence and adapter substitution cost. AI-provider extensibility is TOOL-PLG-100; TOOL-PLG-080 retains load-failure handling. The 2026-09-19 acceptance is historical; no integration/evaluation result or new approval is asserted.
 
 ---
 
@@ -31,10 +33,9 @@ Two requests extended that section:
    `TOOL-AIF-090`) rather than the free-text *generation* the section already
    covered (`TOOL-AIF-060`/`110`/`120`). The two are different shapes of
    problem. Generation produces an artifact a human reviews. Validation
-   produces a value the tool's own control flow branches on — which means the
-   free-text path's usual shape (prompt an LLM, parse its text back into
-   something code can use) is exactly the mismatch this role should avoid, not
-   repeat.
+   produces typed advice usable for review routing only after adapter validation.
+   The raw deterministic test result remains authoritative; AI advice cannot
+   silently replace pass/fail, coverage measurements or evidence acceptance.
 2. **A named default for that role** — TypeSafe AI's **Jev** model — and an
    explicit instruction that the door stay open for "supplementary local or
    enterprise-level models" later. A follow-up request generalized that
@@ -48,20 +49,7 @@ architecture.
 
 ### 1.1 What was checked before writing this
 
-TypeSafe AI's own introduction page (`docs.typesafe.ai/introduction`, retrieved
-2026-09-19) was read before treating the request as more than a name. It
-describes **Jev**, "TypeSafe's flagship model and the first System One model,"
-built to evaluate typed questions against a state and return typed answers —
-three primitives (**Choice**, **Score**, **Noul**, the last a 0–1 truth value),
-each returning a value plus a probability/confidence, evaluated in parallel and
-in isolation so that "adding questions barely changes the response time" and
-"does not create context-rot." The vendor's own framing — "fast, structured
-decisions" a program can "branch on, sort by, and route with," as opposed to
-text generation coerced into structure — matches the shape of `TOOL-AIF-220`
-closely enough that it is worth treating as a genuine architectural fit, not
-just a name a stakeholder supplied. That match is a documentation claim,
-however, not a result this project has reproduced; §7 states that limit
-directly.
+The [TypeSafe introduction](https://docs.typesafe.ai/introduction) was initially read on 2026-09-19 and rechecked on 2026-10-17. It documents Choice and Score results with probability/confidence fields, and Noul as a value in [0,1]; the Noul value is not itself a separate confidence estimate. It describes parallel, isolated evaluation of questions. These are vendor documentation claims, not measured behavior, calibration or task accuracy in this project. Typed output is a reason to evaluate the fit, not a substitute for the boundary validation in §3.1.
 
 ---
 
@@ -74,27 +62,37 @@ directly.
    structured-decision role**, used only when a user has explicitly enabled a
    remote provider per `TOOL-AIF-030`. This satisfies `TOOL-AIF-240`.
 3. **The default is a configuration value, not a code dependency.** It is
-   reached through the AI-provider extension point defined in `TOOL-PLG-080`,
+   reached through the AI-provider extension point defined in `TOOL-PLG-100`,
    the same mechanism every AI-assisted capability uses — present ones
    (`TOOL-AIF-060`/`110`/`120`/`220`) and any added after this specification is
    baselined (`TOOL-AIF-260`). No feature code calls TypeSafe's or any other
    vendor's SDK directly.
-4. **"Any type of AI model" is read literally, not just as "any vendor of the
-   same kind."** The extension point does not assume every future provider
-   returns a `(choice, probability, confidence)` triple the way Jev does; a
-   provider adapter is responsible for mapping its own native output shape
-   — free-text, embedding, classification label, ranked list, or something this
-   project has no name for yet — onto the typed contract a calling feature
-   expects. This is what makes the contract survive a model *type* it was not
-   written against, which is the specific thing requested, not merely a second
-   vendor of today's type.
+4. **Extensibility covers differing model types through adapters and role capabilities.** An adapter maps native outputs into a supported typed feature contract and advertises compatible schema versions and capabilities. A generation-only or embedding provider does not automatically implement structured decisions. An unknown provider/model type requires adapter implementation, capability mapping, authorization review and evaluation before use. Selecting an installed, compatible, evaluated adapter can be a configuration change; adding support for a new type is engineering work.
 
 ---
 
 ## 3. Why Jev fits the validation role specifically
 
-| Property needed by `TOOL-AIF-220` | Free-text LLM prompted for JSON | TypeSafe Jev (per vendor docs) |
+| Property needed by TOOL-AIF-220 | General-purpose model with structured output | TypeSafe Jev (vendor claims) |
 |---|---|---|
+| Typed output | Available through an adapter/schema; transport and schema validation remain required | Typed primitives reduce text extraction work; adapter validation remains required |
+| Several independent questions | Cost/interference depends on provider and request design; evaluate on project fixtures | Vendor describes isolated parallel evaluation; project latency/accuracy not measured |
+| Probability/confidence | Optional capability, with provider-specific semantics | Choice/Score expose these fields; Noul is a [0,1] value, not separate calibrated confidence |
+| Auditability (AIF-160) | Record request, model, parameters and validated result | Same requirement; vendor typing creates no exemption |
+
+This motivates a default profile, not exclusive support or demonstrated suitability. §7 retains the outstanding terms, local-candidate and behavioral evaluation gates.
+
+### 3.1 Mandatory validation and advisory boundary
+
+Every adapter, including a typed vendor SDK adapter, must validate the negotiated schema/version, role capability, required fields, expected choice membership, numeric range/finite values and declared probability/confidence semantics. Validate transport status and response correlation before producing a normalized result; do not branch on raw vendor values. A schema-valid response can still be wrong: project evaluation and human review remain required.
+
+The normalized outcome is either `ok` with a validated typed value and provenance, `abstain` with a reason (including unsupported capability or a required confidence signal being absent), or an explicit `error` such as malformed output, unsupported schema, transport failure or timeout. Cancellation follows SDD-002 and never creates a fabricated decision. An absent optional confidence value remains absent, never zero or a guessed score. Feature policies state whether confidence is required and how any threshold was established.
+
+Record provider/adapter/model versions, request and input identity, relevant parameters, authorization context, raw-response reference/hash and validation outcome under the central provenance contract. A valid result may route review priority or present advice; it must not overwrite the original deterministic test verdict, instrumentation data or coverage independence evidence. Invalid, abstaining, failed or cancelled results leave that evidence intact and available for human review.
+
+Acceptance remains pending: independently exercise malformed/missing/out-of-range responses, unknown choices/versions, missing capabilities, absent confidence, transport failure, timeout/cancellation and two different adapters before claiming interchangeability or validation coverage.
+
+---|---|---|
 | Output the caller can branch on without a parse/validate step | No — text is generated, then parsed, then validated against a schema; malformed output is a real failure mode at this boundary | Yes, by the vendor's own description — typed values returned directly |
 | Cost of asking several independent questions per decision | Grows with prompt size and is subject to context interference between questions | Documented as evaluated "in parallel and in isolation," with each addition described as not creating "context-rot" |
 | A confidence/probability signal the tool can threshold on | Not native; would require a second call or a heuristic over token probabilities | Native to all three primitives |
@@ -111,12 +109,8 @@ research providers first — subject to §5's local-substitution requirement.
 **A. Reuse the existing generation provider (`TOOL-AIF-050`) for validation
 too, prompting it for JSON output.**
 Rejected as the *default*, not removed as an *option* — a general-purpose LLM
-remains reachable through the same `TOOL-PLG-080` contract and satisfies
-`TOOL-AIF-250` like any other provider. Rejected as the default because it
-reproduces the exact mismatch `TOOL-AIF-220` exists to avoid: text generated,
-then parsed back into something code depends on. Reliability of that parse
-degrades as more independent judgments are folded into one call, which is the
-opposite of Jev's documented per-question isolation.
+remains reachable through the same `TOOL-PLG-100` contract and satisfies
+`TOOL-AIF-250` like any other provider. Its text-to-schema adaptation cost is a reason to evaluate the typed provider first, not proof that it is less accurate or reliable. Provider-specific structured-output support may reduce that cost. Neither alternative has been behaviorally compared here, and both require §3.1 validation.
 
 **B. Classical ML or hand-written rule-based heuristics; no AI vendor at all.**
 Rejected as the *only* path, kept as a first-class **local** provider under
@@ -130,7 +124,7 @@ function needs neither.
 **C. Defer `TOOL-AIF-220` past v1.0 rather than pick a default now.**
 Rejected: the capability was already scoped at *(S, P3)* in SRS-001; deferring
 the *requirement* is a product-scope decision this ADR does not have standing
-to make. Building the modular contract (`TOOL-PLG-080`) now costs the same
+to make. Building the modular contract (`TOOL-PLG-100`) now costs the same
 whether it initially serves one AI role or several — deferring the default
 does not defer that cost, it just leaves the role's provider unspecified.
 
@@ -148,30 +142,28 @@ instruction was written to prevent.
 
 **Accepted.**
 
-- `TOOL-AIF-220`–`260` and `TOOL-PLG-080` are satisfied by one adapter
+- `TOOL-AIF-220`–`260` and `TOOL-PLG-100` are designed to be served by one adapter
   contract shared with the tool's other extension points (`TOOL-PLG-010`
   already lists compiler configurations, test-framework back-ends, target
   execution, and report formats as siblings), rather than a second, divergent
   extensibility mechanism built just for AI.
-- TypeSafe AI ships as the out-of-box remote default for the validation role,
-  giving typed answers without a parsing layer, for users who opt in.
-- Local, self-hosted, or enterprise-operated substitution is a configuration
-  change (`TOOL-AIF-250`), including for a provider or model type this project
-  does not know about yet — that is the point of §2.4's literal reading of
-  "any type."
-- Every AI-assisted capability, current and future, becomes discoverable and
-  addable the same way a new report format already is.
+- TypeSafe AI is the configured remote default profile for the validation role, activated only after opt-in and subject to the pre-shipping gates in §7. Typed values still require §3.1 validation.
+- Selecting an already installed compatible adapter is configuration-only. A new local, self-hosted or enterprise provider needs an implemented adapter, capability/schema checks and evaluation; none is inferred from the phrase “any type.”
+- AI-assisted capabilities use the shared extension mechanism with explicit role/version/capability discovery. Discoverability is a design obligation, not implemented proof.
+
+### 5.1 Configurable certification-evidence mode
+
+AIF-100 supplies a **configurable exclusion mode**, not a universal ban on all AI-associated outputs. In normal mode, labelled AI advice/artifacts may be retained with provenance. Enabling certification-evidence mode excludes AI-generated and AI-adjudicated artifacts, including evidence derived from either, from the certification-evidence selection/export path. The export records the selected mode and exclusions; if origin is unknown, that mode excludes the item until provenance is resolved.
+
+Persist distinct origins for deterministic observations, AI-generated artifacts, AI adjudications and human-authored/reviewed records, with references to their inputs. Human review records author/outcome separately and does not erase AI origin. Preserve deterministic results separately from AI advice. An AI-adjudicated result remains AI-origin even when the underlying execution was deterministic; the original execution record remains available and is assessed independently.
+
+The exclusion is enforced by evidence selection/export, not merely a UI label. Certification-evidence export selects the exclusion mode by default; other normal-mode exports explicitly record their mode and must not imply qualification. This policy requires the corresponding AIF-100 wording, data provenance and export validation. It does not certify any retained result or assert the implementation already enforces these rules.
 
 **Rejected — what is given up.**
 
-- No commitment to TypeSafe AI beyond a swappable default. If its terms,
-  availability, or behavior change unfavorably, the cost of leaving is the cost
-  of changing one configuration value — that is the contract working as
-  designed, not a gap in it.
-- No qualification or certification claims attach to TypeSafe AI's output.
-  `TOOL-AIF-100` continues to exclude every AI-generated or AI-adjudicated
-  result from certification evidence, regardless of which provider produced
-  it.
+- No commitment to TypeSafe AI beyond a swappable default. Leaving for an installed compatible adapter can require only configuration; supporting an unknown replacement requires implementation and evaluation.
+- No qualification or certification claim attaches to TypeSafe AI output. AIF-100 exclusion applies when its mode is enabled, with generated/adjudicated provenance and human review handled as in §5.1.
+
 - A small amount of near-term design cost: the structured-decision role
   (`TOOL-AIF-230`) is a second AI-provider surface alongside generation
   (`TOOL-AIF-050`), each needing its own adapter contract even though both
@@ -188,7 +180,7 @@ instruction was written to prevent.
    `TOOL-AIF-220`'s use cases need. This reopens the *default* only; §2's
    contract is unaffected because no feature code depends on Jev directly.
 2. **If `TOOL-AIF-220` is deprioritized below P3/S before construction begins.**
-   The validation role is dropped; `TOOL-PLG-080` remains in place for the
+   The validation role is dropped; `TOOL-PLG-100` remains in place for the
    generation role and for whatever AI-assisted capability is proposed next.
 3. **If a locally-runnable structured-decision model reaches comparable fit**
    for a user base where A-08 (air-gapped operation) is the common case rather
@@ -210,7 +202,7 @@ commit history, and the GitHub API. Following the practice ADR-006 §9.2 set:
 
 | Claim | Quality |
 |---|---|
-| Jev's three primitives, parallel/isolated evaluation, and "no text generation, no parsing" positioning | **Verified as a documentation claim** — `docs.typesafe.ai/introduction`, read 2026-09-19 — not independently exercised |
+| Jev primitives, optional confidence fields and parallel/isolated positioning | **Verified only as vendor documentation claims** — [introduction](https://docs.typesafe.ai/introduction), read 2026-09-19 and rechecked 2026-10-17; no project behavioral evaluation |
 | Fit for `TOOL-AIF-220`'s specific use cases (flaky-test flagging, review triage) | **Judgement**, drawn from the primitives' stated shape, not from a trial against this tool's actual test-result data |
 | Pricing, rate limits, data-retention terms, and whether "state" submitted to Jev is retained | **Not checked.** Material to `TOOL-AIF-030`'s transmission-disclosure requirement and to `TOOL-AIF-040`; must be established before this default ships, not assumed from the introduction page |
 | Availability of a locally-executable structured-decision model meeting `TOOL-AIF-020`/`250` today | **Not surveyed.** This ADR requires the *capability* to substitute one; it does not yet name a specific local candidate |
@@ -227,9 +219,9 @@ retention/local-candidate gaps above are closed, which should happen before
 
 | | |
 |---|---|
-| **Decision** | Structured-decision AI role, separate from generation; default provider TypeSafe AI (Jev), opt-in remote only; both roles — and any future AI role — integrate through one documented extension point (`TOOL-PLG-080`) |
+| **Decision** | Structured-decision AI role, separate from generation; default provider TypeSafe AI (Jev), opt-in remote only; both roles — and any future AI role — integrate through one documented extension point (`TOOL-PLG-100`) |
 | **Confidence** | **Medium** — architecture (modular contract) is high-confidence; the named default is a documentation-only claim, not yet independently verified |
-| **Strongest evidence for** | Jev's typed, parallel, isolated-evaluation primitives match `TOOL-AIF-220`'s shape more directly than prompting a free-text model for JSON and parsing the result |
+| **Strongest evidence for** | Jev's typed, parallel, isolated-evaluation primitives motivate evaluating its fit for `TOOL-AIF-220`; all adapters still validate output and project accuracy remains unmeasured |
 | **Strongest evidence against** | Vendor terms, data-retention behavior, and production reliability are unverified; local-provider parity for air-gapped users (A-08) is not yet demonstrated with a named candidate |
 | **Discharges** | The open question of what backs `TOOL-AIF-220`, and how "any type of AI model" is architecturally honored rather than left as a slogan |
 | **Feeds** | SDD-002 (interface contract for the AI-provider extension point), SDD-005 (if a specific local structured-decision model is later adopted as an OSS/vendored dependency) |

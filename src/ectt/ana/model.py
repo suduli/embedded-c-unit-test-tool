@@ -1,7 +1,7 @@
 # implements: DSN-ANA-090, DSN-ANA-020
 """Data model for translation units, function interfaces, and type graphs.
 
-Satisfies: TOOL-PAR-010, TOOL-PAR-020, TOOL-PAR-030, TOOL-PAR-040, TOOL-PAR-050, DSN-ANA-090, DSN-ANA-020.
+Satisfies: TOOL-PAR-010, TOOL-PAR-020, TOOL-PAR-030, TOOL-PAR-040, TOOL-PAR-050, TOOL-PAR-140, TOOL-PAR-150, TOOL-PAR-160, DSN-ANA-090, DSN-ANA-020, DSN-ANA-100, DSN-ANA-110, DSN-ANA-120.
 """
 
 from __future__ import annotations
@@ -17,17 +17,95 @@ __all__ = [
     "ParsedTranslationUnit",
     "ParseResult",
     "SourceLocation",
+    "RangeModel",
+    "DimensionModel",
     "ParameterModel",
     "GlobalAccessModel",
     "FunctionModel",
     "StructMemberModel",
     "EnumeratorModel",
     "TypeModel",
+    "UnsupportedConstructModel",
+    "DecisionInventoryModel",
     "AnalysisUnit",
     "InputFileModel",
     "ProvenanceModel",
     "AnalysisModel",
 ]
+
+
+@dataclass(frozen=True)
+class RangeModel:
+    """Optional value-range constraint on a parameter, field, or type (TOOL-PAR-160).
+
+    Bounds are strings because ranges may span integers, enumeration names, or
+    character literals; their semantics belong to the consumer (bounded
+    generation). The analyzer never manufactures ranges from C source — they
+    are authored data the model round-trips losslessly.
+    """
+
+    low: str | None = None
+    high: str | None = None
+    detail: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation; absent bounds are omitted."""
+        res: dict[str, Any] = {}
+        if self.low is not None:
+            res["low"] = self.low
+        if self.high is not None:
+            res["high"] = self.high
+        if self.detail is not None:
+            res["detail"] = self.detail
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> RangeModel:
+        """Create RangeModel from dictionary representation."""
+        if not isinstance(data, dict):
+            data = {}
+        return cls(low=data.get("low"), high=data.get("high"), detail=data.get("detail"))
+
+
+@dataclass(frozen=True)
+class DimensionModel:
+    """Optional array dimension metadata (TOOL-PAR-160).
+
+    ``size`` mirrors the outer bound when numeric; ``low``/``high`` are
+    authored size bounds and ``index_type`` a ``ref:type.<id>`` reference for
+    bounded generation. Nested array element chains remain the primary shape
+    encoding; dimensions add authored generation metadata.
+    """
+
+    size: int | None = None
+    low: str | None = None
+    high: str | None = None
+    index_type: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation; absent fields are omitted."""
+        res: dict[str, Any] = {}
+        if self.size is not None:
+            res["size"] = self.size
+        if self.low is not None:
+            res["low"] = self.low
+        if self.high is not None:
+            res["high"] = self.high
+        if self.index_type is not None:
+            res["index_type"] = self.index_type
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> DimensionModel:
+        """Create DimensionModel from dictionary representation."""
+        if not isinstance(data, dict):
+            data = {}
+        return cls(
+            size=data.get("size"),
+            low=data.get("low"),
+            high=data.get("high"),
+            index_type=data.get("index_type"),
+        )
 
 
 @dataclass(frozen=True)
@@ -200,14 +278,18 @@ class ParameterModel:
     name: str
     type: str
     direction: str = "unknown"  # "in" | "unknown" (SDD-002 §4.1)
+    value_range: RangeModel | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation."""
-        return {
+        res: dict[str, Any] = {
             "name": self.name,
             "type": self.type,
             "direction": self.direction,
         }
+        if self.value_range is not None:
+            res["value_range"] = self.value_range.to_dict()
+        return res
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ParameterModel:
@@ -216,6 +298,9 @@ class ParameterModel:
             name=data.get("name", ""),
             type=data.get("type", ""),
             direction=data.get("direction", "unknown"),
+            value_range=RangeModel.from_dict(data["value_range"])
+            if isinstance(data.get("value_range"), dict)
+            else None,
         )
 
 
@@ -292,12 +377,15 @@ class StructMemberModel:
     name: str
     type: str  # "ref:type.<id>"
     bit_width: int | None = None
+    value_range: RangeModel | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation."""
         res: dict[str, Any] = {"name": self.name, "type": self.type}
         if self.bit_width is not None:
             res["bit_width"] = self.bit_width
+        if self.value_range is not None:
+            res["value_range"] = self.value_range.to_dict()
         return res
 
     @classmethod
@@ -307,6 +395,9 @@ class StructMemberModel:
             name=data.get("name", ""),
             type=data.get("type", ""),
             bit_width=data.get("bit_width"),
+            value_range=RangeModel.from_dict(data["value_range"])
+            if isinstance(data.get("value_range"), dict)
+            else None,
         )
 
 
@@ -350,6 +441,8 @@ class TypeModel:
     members: tuple[StructMemberModel, ...] = field(default_factory=tuple)
     enumerators: tuple[EnumeratorModel, ...] = field(default_factory=tuple)
     is_anonymous: bool = False
+    value_range: RangeModel | None = None
+    dimensions: tuple[DimensionModel, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation conforming to SDD-002 §4.1."""
@@ -360,6 +453,8 @@ class TypeModel:
             res["location"] = self.location.to_dict()
         if self.is_anonymous:
             res["is_anonymous"] = True
+        if self.value_range is not None:
+            res["value_range"] = self.value_range.to_dict()
 
         if self.kind in ("struct", "union"):
             res["members"] = [m.to_dict() for m in self.members]
@@ -383,6 +478,8 @@ class TypeModel:
             if self.element_type is not None:
                 res["element_type"] = self.element_type
             res["size"] = self.size
+            if self.dimensions:
+                res["dimensions"] = [d.to_dict() for d in self.dimensions]
         elif self.kind == "builtin":
             if self.name is not None:
                 res["name"] = self.name
@@ -408,6 +505,75 @@ class TypeModel:
             members=tuple(StructMemberModel.from_dict(m) for m in data.get("members", [])),
             enumerators=tuple(EnumeratorModel.from_dict(e) for e in data.get("enumerators", [])),
             is_anonymous=bool(data.get("is_anonymous", False)),
+            value_range=RangeModel.from_dict(data["value_range"])
+            if isinstance(data.get("value_range"), dict)
+            else None,
+            dimensions=tuple(
+                DimensionModel.from_dict(d) for d in data.get("dimensions", [])
+            ),
+        )
+
+
+@dataclass(frozen=True)
+class UnsupportedConstructModel:
+    """One recorded construct the analyzer does not support (TOOL-PAR-140).
+
+    ``count`` groups repeated occurrences of the same kind; ``location`` is
+    the first occurrence when known.
+    """
+
+    kind: str
+    count: int = 1
+    detail: str | None = None
+    location: SourceLocation | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {"kind": self.kind, "count": self.count}
+        if self.detail is not None:
+            res["detail"] = self.detail
+        if self.location is not None:
+            res["location"] = self.location.to_dict()
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> UnsupportedConstructModel:
+        """Create UnsupportedConstructModel from dictionary representation."""
+        loc = data.get("location")
+        return cls(
+            kind=data.get("kind", ""),
+            count=int(data.get("count", 1)),
+            detail=data.get("detail"),
+            location=SourceLocation.from_dict(loc) if isinstance(loc, dict) else None,
+        )
+
+
+@dataclass(frozen=True)
+class DecisionInventoryModel:
+    """Explicit decision inventory with recorded completeness (TOOL-PAR-150).
+
+    ``status`` is fail-closed on read: "not_extracted" | "partial" |
+    "complete"; anything else is rejected by the reader (SDD-002 §3).
+    """
+
+    status: str = "not_extracted"
+    detail: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {"status": self.status}
+        if self.detail is not None:
+            res["detail"] = self.detail
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> DecisionInventoryModel:
+        """Create DecisionInventoryModel from dictionary representation."""
+        if not isinstance(data, dict):
+            data = {}
+        return cls(
+            status=data.get("status", "not_extracted"),
+            detail=data.get("detail"),
         )
 
 
@@ -423,6 +589,7 @@ class AnalysisUnit:
     diagnostics: tuple[Diagnostic, ...] = field(default_factory=tuple)
     functions: tuple[FunctionModel, ...] = field(default_factory=tuple)
     types: dict[str, TypeModel] = field(default_factory=dict)
+    unsupported_constructs: tuple[UnsupportedConstructModel, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1 unit shape."""
@@ -432,6 +599,7 @@ class AnalysisUnit:
             "diagnostics": [d.to_dict() for d in self.diagnostics],
             "functions": [f.to_dict() for f in self.functions],
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
+            "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
         }
 
     def to_dict_without_types(self) -> dict[str, Any]:
@@ -441,6 +609,7 @@ class AnalysisUnit:
             "status": self.status,
             "diagnostics": [d.to_dict() for d in self.diagnostics],
             "functions": [f.to_dict() for f in self.functions],
+            "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
             "cfg": None,
         }
 
@@ -458,6 +627,9 @@ class AnalysisUnit:
             diagnostics=tuple(Diagnostic.from_dict(d) for d in data.get("diagnostics", [])),
             functions=tuple(FunctionModel.from_dict(f) for f in data.get("functions", [])),
             types={k: TypeModel.from_dict(v) for k, v in types_raw.items()} if isinstance(types_raw, dict) else {},
+            unsupported_constructs=tuple(
+                UnsupportedConstructModel.from_dict(u) for u in data.get("unsupported_constructs", [])
+            ),
         )
 
 
@@ -512,14 +684,15 @@ class AnalysisModel:
     """Top-level S1 Analysis Model document.
 
     Implements: SDD-002 §4.1, DSN-ANA-070.
-    Satisfies: TOOL-PAR-100, TOOL-PAR-110.
+    Satisfies: TOOL-PAR-100, TOOL-PAR-110, TOOL-PAR-150.
     """
 
     provenance: ProvenanceModel
     units: tuple[AnalysisUnit, ...] = field(default_factory=tuple)
     types: dict[str, TypeModel] = field(default_factory=dict)
-    schema_version: str = "1.0"
+    schema_version: str = "1.2"
     capabilities: dict[str, bool] = field(default_factory=lambda: {"cfg": False})
+    decision_inventory: DecisionInventoryModel = field(default_factory=DecisionInventoryModel)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation conforming to SDD-002 §4.1."""
@@ -529,6 +702,7 @@ class AnalysisModel:
             "units": [u.to_dict_without_types() for u in self.units],
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
             "capabilities": dict(self.capabilities),
+            "decision_inventory": self.decision_inventory.to_dict(),
         }
 
     def to_json(self, *, indent: int | None = 2) -> str:
@@ -552,9 +726,10 @@ class AnalysisModel:
         prov = data.get("provenance", {})
         types_raw = data.get("types", {})
         return cls(
-            schema_version=data.get("schema_version", "1.0"),
+            schema_version=data.get("schema_version", "1.2"),
             provenance=ProvenanceModel.from_dict(prov) if isinstance(prov, dict) else ProvenanceModel("", "", ""),
             units=tuple(AnalysisUnit.from_dict(u) for u in data.get("units", [])),
             types={k: TypeModel.from_dict(v) for k, v in types_raw.items()} if isinstance(types_raw, dict) else {},
             capabilities=dict(data.get("capabilities", {"cfg": False})),
+            decision_inventory=DecisionInventoryModel.from_dict(data.get("decision_inventory", {})),
         )

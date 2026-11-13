@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Subsystem Work Map — ectt Review Follow-Up",
+    "output": "subsystem-workmap.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "viewBox": [1065, 470]
+  },
+  "components": [
+    { "id": "l6", "type": "security", "label": "L6 Assurance & Ecosystem", "sublabel": "QUA · SEC · PKG · PLG · MIG · AIF", "tag": "2 reqs · 2 tasks", "pos": [30, 70], "size": [225, 80] },
+    { "id": "l5", "type": "frontend", "label": "L5 Interfaces", "sublabel": "API · CLI · GUI", "tag": "1 req · via T-16", "pos": [290, 70], "size": [225, 80] },
+    { "id": "l4", "type": "backend", "label": "L4 Evidence", "sublabel": "COV · REP · TRC · CBT", "tag": "6 reqs · 5 tasks", "pos": [550, 70], "size": [225, 80] },
+    { "id": "l3", "type": "backend", "label": "L3 Realization", "sublabel": "BLD · EXH · EXT", "tag": "4 reqs · 2 tasks", "pos": [810, 70], "size": [225, 80] },
+    { "id": "l2", "type": "backend", "label": "L2 Synthesis", "sublabel": "GEN · TCM · ATG", "tag": "2 reqs · 1 task", "pos": [290, 340], "size": [225, 80] },
+    { "id": "l1", "type": "backend", "label": "L1 Comprehension", "sublabel": "ING · ANA · TCH", "tag": "8 reqs · 6 tasks", "pos": [550, 340], "size": [225, 80] },
+    { "id": "l0", "type": "database", "label": "L0 Platform & Persistence", "sublabel": "CORE · PRJ", "tag": "1 req · 1 task", "pos": [810, 340], "size": [225, 80] }
+  ],
+  "connections": [
+    { "id": "l4-to-l3", "from": "l4", "to": "l3", "label": "4", "fromSide": "right", "toSide": "left" },
+    { "id": "l3-to-l2", "from": "l3", "to": "l2", "label": "3", "fromSide": "bottom", "toSide": "top" },
+    { "id": "l2-to-l1", "from": "l2", "to": "l1", "label": "3", "fromSide": "right", "toSide": "left" },
+    { "id": "l1-to-l0", "from": "l1", "to": "l0", "label": "4", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Reading the map",
+      "items": [
+        "Nodes are the seven subsystem groups of the 24-component register; tags count review-derived requirements and tasks",
+        "Edge labels count cross-layer dependency edges declared in the design register",
+        "Aggregates (L4→L1/L2/L0, L3→L0/L1, L2→L0, L5→L0, L6→L0/L2/L4) are omitted here — the full map is design/diagrams/layer-map.html"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Governance workstreams (outside the nodes)",
+      "items": [
+        "T-01..T-02: ADR-005 licence decision + no-import rule for vcast-findings assets (P0)",
+        "T-03: SRS change request — TOOL-EXE-040 timeout distinct from fail (P0)",
+        "T-04/T-05: identity-model and platform-order decisions; T-14 is blocked by T-04"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Where the work concentrates",
+      "items": [
+        "L1 Comprehension carries the largest share: LinkPlan, ing context, S1 schema mandates, ranges, eligibility gate",
+        "L4 Evidence: coverage completeness state, MC/DC probes + corpus, verdict denominators",
+        "P0 items gate WP-BLD-01/WP-EXH-01; all items await the SRS/plan change process"
+      ]
+    }
+  ]
+}

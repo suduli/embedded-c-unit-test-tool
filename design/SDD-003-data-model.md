@@ -5,6 +5,11 @@
 **Status:** Draft — tracks SRS-001 v0.1
 **Upstream:** SDD-001, SDD-002, SRS-001 §26 (PRJ)
 
+**Revision note — 2026-10-17:** Draft corrections for DR-15–18 and DR-13: separate
+write boundaries, persistent audit facts and user fragments, explicit version
+acceptance, and record/replay archive closure. These contracts require future
+implementation and acceptance evidence; they do not claim delivered behavior.
+
 ---
 
 <!-- nav:start -->
@@ -40,24 +45,41 @@ rather than as items on a list:
 
 ## 2. The two trees
 
-Everything on disk belongs to exactly one of two trees, and the distinction is
-the mechanism behind TOOL-NFR-080 and TOOL-PRJ-080.
+Tool-managed state belongs to the two trees below. UUT sources and third-party
+artifacts remain outside these write authorities. The distinction implements
+TOOL-NFR-080 and TOOL-PRJ-080.
 
 | | **Project tree** | **Output tree** |
 |---|---|---|
-| Contains | Authored state: scopes, environments, test cases, justifications, configuration | Derived state: generated code, build artifacts, results, coverage, reports |
+| Contains | Authored state: scopes, environments, test cases, justifications, configuration, canonical user-code fragments and audit facts | Derived state: generated code, build artifacts, results, coverage, reports |
 | Version controlled | Yes — this is the point | No — `.gitignore`d by default |
-| Survives deletion | No, it is the source of truth | Yes, fully regenerable from the project tree plus user source |
-| Written by | User edits and tool operations alike | Tool only |
+| Deletion consequence | Loses authored source of truth unless backed up | Generated code can be rebuilt after fragment import; run observations require an archive |
+| Written by | User edits and authorized project operations | Tool generation; designated editable regions permit user edits pending import |
 | Requirements | TOOL-PRJ-010, TOOL-UIX-320, TOOL-CIC-080 | TOOL-NFR-080, TOOL-PRJ-080 |
 
-The output root is resolved once at startup and every write is confined to it
-by the path guard of DSN-CORE-060. User source paths are opened through a
-read-only guard, so a write attempt raises rather than succeeding — TOOL-NFR-070
-is enforced structurally rather than by care.
+There are two explicit write authorities: project operations may update the
+project root; generation/build/run/report operations may update the output root.
+The roots are resolved and validated at project open. An output root nested in
+the project (the default) is a separately classified excluded subtree, never
+an authored-state destination. Writes require an operation-specific authority,
+not a global output-only rule (DSN-CORE-060). The UUT/source tree is read-only;
+project/output destinations overlapping source files or third-party artifacts
+are rejected. Coexistence (TOOL-MIG-070) protects existing artifacts in both roots.
 
-This split is also what delivers coexistence (TOOL-MIG-070): another tool's
-artifacts are outside the output root, so the tool cannot disturb them.
+Both guards reject path traversal and resolve symlinks/junctions/reparse points
+against the intended root before opening and again at replacement; an escape or
+changed target fails the operation. Creation validates the nearest existing
+ancestor. Project updates stage and validate content, check the original
+revision/digest for concurrent edits, then atomically replace files. Multi-file
+updates use a journal/commit marker with recovery so readers see one committed
+revision; cancellation rolls back uncommitted state. Conflicts preserve both
+versions and require resolution. UUT sources are never written through either
+authority (TOOL-NFR-070).
+
+Output is not a backup: old execution observations, diagnostics and coverage may
+be irreproducible. Archive them before cleanup when needed as evidence. User
+fragments must be imported successfully before generated editable files can be
+regenerated or removed (§3.1).
 
 ### 2.1 Layout
 
@@ -75,15 +97,20 @@ artifacts are outside the output root, so the tool cannot disturb them.
       adc_read.tests               # test cases grouped per unit    (TOOL-PRJ-060)
       adc_calibrate.tests
     src/adc/adc_custom.c           # C-authored tests, user-owned
+  fragments/                       # canonical authored harness/stub regions
+    adc_read.stub.c                 # stable region ID + signature/source binding
+  audit/
+    ai-artifacts.yaml              # origin, model/prompt references, review history
   coverage/
     justifications.yaml            # coverage-by-analysis records   (TOOL-COV-140)
   requirements/
     imported.reqs                  # requirement nodes + digests    (TOOL-TRC-050/060)
   toolchains/                      # project-local compiler configs (TOOL-PLG-020)
+  link-plans/                      # authored per-scope link plans (TOOL-ING-200)
   archive/
     2026-08-07T09-14-22Z/          # exported verification records  (TOOL-PRJ-100)
 
-<output-root>/                     # default: build/ectt/, always ignorable
+<output-root>/                     # default: build/ectt/, excluded from VCS
   <environment>/
     generated/                     # harness + stubs                (TOOL-HAR-090)
     build/                         # objects, binaries, per toolchain
@@ -92,7 +119,7 @@ artifacts are outside the output root, so the tool cannot disturb them.
   cache/                           # content-addressed analysis models (TOOL-CIC-070)
 ```
 
-File extensions are indicative; the surface syntax is ADR-002 and is confined
+File extensions are indicative; the surface syntax follows ADR-002 and is confined
 to one serialisation adapter (DSN-PRJ-010, DSN-TCM-020).
 
 ---
@@ -118,6 +145,31 @@ tools in this space and a frequent complaint about them.
 Within a `.tests` file, cases are emitted in stable id order, and each occupies
 a contiguous block. Adding a case inserts a block; it never reflows the file.
 
+### 3.1 Canonical editable code and regeneration
+
+`fragments/` stores user-authored stub bodies and harness regions with stable
+region ID, owning symbol, signature/source digest and exact code text. Generated
+files embed region IDs plus the digest of the last emitted fragment, allowing
+three-way comparison of canonical project text, last-emitted text, and current
+output text. Direct edits in designated generated regions are supported, but
+must first be imported transactionally into this canonical store (HAR-100,
+STB-110/120). A clean output directory is regenerable only after that import.
+
+Before regeneration, export, or tool-managed cleanup, scan all editable regions.
+A single changed side is imported/emitted; concurrent distinct edits, missing
+markers, deleted regions or incompatible signature changes stop the operation,
+retain original files and both versions, and report the exact region conflict.
+Changes outside editable regions also stop replacement until explicitly resolved
+or preserved; they are never silently thrown away. No delete/regenerate action
+may proceed while import/conflict handling is pending. The UI/CLI must expose
+this status before offering cleanup. Manual external deletion before import can
+lose pending edits and is not a supported recovery workflow.
+
+Acceptance requires nontrivial harness and stub changes, import, output deletion,
+and byte-equivalent fragment recovery on regeneration; plus simultaneous edits,
+signature changes and damaged marker fixtures that prove conflict preservation.
+This is a design acceptance obligation, not a claim of current recovery support.
+
 ---
 
 ## 4. Diff stability
@@ -130,7 +182,7 @@ file. Enforced by DSN-PRJ-030 and DSN-CORE-010 together:
 | Keys emitted in a defined canonical order, never hash or insertion order | Every serialised object |
 | Collections sorted by a declared key (test id, unit path, symbol name) | Every list where order is not semantic |
 | Default values omitted, never written out explicitly | Every optional field |
-| No timestamps, machine names, absolute paths, or user names in project files | Whole project tree |
+| No incidental save timestamps, host names, or serializer user names; required authored audit fields are retained | Authored project records |
 | Line endings and trailing whitespace normalised on write | Whole project tree |
 | Floating-point values round-tripped through a canonical shortest form | Test case values |
 
@@ -139,24 +191,44 @@ become `0.10000000000000001` on rewrite. Test data is dense with float
 literals, and unstable float formatting produces enormous phantom diffs that
 train reviewers to skim.
 
-Provenance and timestamps live in the **output tree** and in exported archives,
-never in the project tree, which is what allows a project file to be
-byte-stable across runs while reports remain fully stamped (TOOL-REP-070).
+Meaningful audit facts are canonical authored state: justification author/date/
+rationale/source digest (COV-150), AI model identity/generation timestamp/input
+references and review history (AIF-080/090/180/190), and identified review acts
+are retained in project records. They change only when that authored event
+occurs, never on an unrelated save. Execution timestamps and host observations
+live in results/output and archives (REP-070). Canonical determinism compares
+identical logical records including their audit facts; a new execution or
+review is a new input, not a serialization-only rewrite. Archival snapshots and
+migration backups retain their recorded provenance unchanged.
 
 ---
 
 ## 5. Schema versioning and migration
 
-Every project file carries `schema_version` as its first key (TOOL-PRJ-020,
-DSN-PRJ-010). Readers dispatch on it. There is no inference from file shape.
+Every structured project record carries `schema_version` as its first key
+(TOOL-PRJ-020, DSN-PRJ-010). Raw C-authored tests and code fragments have a
+schema-versioned sidecar containing their region identity, ownership and digests;
+C source text is not prefixed with a serialization field. The project manifest
+inventories those payloads and sidecars. Readers dispatch on the record version;
+there is no inference from file shape.
 
 ```
 read(file):
   v = file.schema_version                 # absent -> refuse, do not guess
   if v > reader.max          -> refuse, name both versions, name the tool version needed
   if v < reader.min          -> report the migration required; perform nothing
-  if v in reader.supported   -> read
+  if v not in reader.supported -> refuse, report supported versions
+  otherwise -> validate and read; preserve supported optional extension fields
 ```
+
+This is the authored-state policy of SDD-002 §3, including newer minor versions:
+there is no automatic forward acceptance. Version comparison is numeric
+major/minor, not lexical. Unknown semantic enum values are rejected. Accepted
+optional extension fields round-trip unchanged; if the writer cannot preserve
+them, it refuses to save. No ignored field may be silently dropped. Read-only
+report consumers follow their separate seam policy, not this writable rule.
+Fixtures cover too-new minor/major versions, unsupported intermediate versions,
+unknown review states and preservation/refused saves.
 
 Migration (DSN-PRJ-020, TOOL-PRJ-040) is:
 
@@ -222,34 +294,67 @@ one.
 
 ## 8. Archived verification records
 
-TOOL-PRJ-100 requires exporting a complete, self-contained record of a
-verification run. `archive/<timestamp>/` contains:
+TOOL-PRJ-100 requires a complete self-contained verification record. The manifest
+states `archive_kind: record` or `replay`, with completeness status and any
+missing dependency. A `record` preserves evidence and report re-rendering; it
+must not claim executable replay. A `replay` adds the complete offline execution
+closure below. These are distinct capabilities, not an inference from a compiler
+name/version. If closure cannot be included, export remains explicitly a record
+and reports why replay is unavailable.
 
 ```
-manifest.json        # schema + format versions, digests of every file in the archive
-provenance.json      # tool version, build id, compiler, target, configuration digest
-configuration/       # the resolved configuration, not a reference to it
-tests/               # the test cases as executed
-report-model.json    # S5 — sufficient to re-render every format (TOOL-REP-150)
-reports/            # the formats rendered at the time
+manifest.json        # archive kind, schema/format versions, file sizes + SHA-256 digests
+provenance.json      # tool/build/adapter identity, observed times, seeds, environment
+configuration/       # resolved configuration, ordered commands/flags and working paths
+tests/               # exact executed test cases and canonical user-code fragments
+results/             # normalized S3 + raw runner observations and diagnostics
+coverage/            # S4 + raw backend evidence, attribution and MC/DC proof locators
+report-model.json    # S5 and referenced traceability/justification/provenance data
+reports/             # original rendered outputs
+schemas/             # published model/format definitions used by this archive
+rendering/           # exact offline renderer/release + dependencies, templates/fonts
+# Additional mandatory closure for archive_kind: replay:
+sources/             # UUT sources, transitive headers, generated inputs and fragments
+build-inputs/        # compilation database, scripts, linker files, libraries, resources
+tools/               # exact release, extensions, toolchain/sysroot/runtime artifacts
+replay.json          # logical path map, commands, environment, closure inventory/limits
 ```
 
-Two properties make this an archive rather than a copy:
+Every embedded reference resolves inside the archive; original workspace paths
+and endpoint identities may be recorded as inert provenance strings, never as
+runtime dependencies. External symlinks are materialized safely or rejected.
+Export freezes one coherent input/run snapshot and verifies all sizes/digests.
+User fragment import/conflicts (§3.1) must be resolved before claiming closure.
+No required renderer, template, schema, source include, link library, script,
+binary or toolchain artifact is satisfied by a network URL or version label.
+Copies of the exact offline release and toolchain artifacts are embedded with
+checksums; a local install may be used only after matching those identities.
+Distribution restrictions or unavailable artifacts make the archive `record`
+with a precise missing-closure diagnostic rather than a false replay guarantee.
 
-- **No outward references.** Nothing in it points into the working tree, the
-  installation, or a network location — it is readable from a tape. That is the
-  self-contained half of TOOL-PRJ-100; its counterpart is TOOL-INS-040, which
-  makes the *release* that produced it equally archivable, since a record you
-  can read but not re-execute is only half an answer to an auditor.
-- **Self-describing.** It carries its own schema and format versions, so a
-  future tool can interpret it against a published definition rather than
-  guessing (TOOL-REP-130).
+AI-backed re-render/replay uses captured provider responses, model identity,
+parameters and input/response digests; it does not contact a live provider.
+A fresh generation is a new operation requiring authorization and cannot be
+claimed byte-identical to the recorded response. Ordered execution seeds and
+replay-relevant environment variables are inputs. Credentials are never archived;
+if an execution needs a secret-dependent input that cannot be included, record
+that replay limitation without the secret.
 
-Verification (TOOL-PRJ-110, DSN-PRJ-070) checks an archive against the current
-installation and reports whether it can be reproduced, and if not, whether it is
-the tool version, the toolchain, or the configuration that differs. Answering
-*which* is the useful part; answering only "no" leaves an auditor with nothing
-to act on.
+Record verification checks evidence integrity, internal reference closure and
+offline report re-rendering. Replay verification additionally checks every
+build dependency, the release/toolchain identities and target prerequisites,
+then rebuilds/runs using only archived inputs. Report separately whether the
+record is intact, reports are reproducible, the build is reproducible and the
+execution is reproducible; identify the exact differing/missing dependency
+(TOOL-PRJ-110, DSN-PRJ-070). Target hardware, device state or simulator licenses
+may limit execution replay even with a closed build snapshot; state those
+prerequisites explicitly instead of promising hardware can be archived.
+
+Acceptance hides the original workspace and network, uses a fresh extraction,
+verifies report re-rendering for a record and build/execution for an eligible
+replay archive, then alters/removes one dependency to prove a precise failure.
+Archived compiler/release availability is checked, not assumed. These tests are
+required future evidence; this draft does not assert current implementation.
 
 ---
 

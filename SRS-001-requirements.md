@@ -5,6 +5,8 @@
 **Date:** 2026-07-30
 **Status:** Draft — not yet baselined
 
+> **Correction note, 2026-11-07:** TOOL-EXE-040 reworded so a timeout is a distinct outcome — never a failure — aligning with SDD-002 §6.1 (review finding RV-02 F-11). The AI-provider extension point is renumbered TOOL-PLG-080 → TOOL-PLG-100 per the ADR-008 correction note of 2026-10-17 (TOOL-PLG-080 retains load-failure handling; DSN-PLG-050 added to the design register), and TOOL-COV-150 moves to P4 per the recorded F-05 resolution. These repair the three `plan_check.py` gate failures (duplicate identifier, PLG-100 allocation, COV-09 deadline).
+
 ---
 
 <!-- nav:start -->
@@ -137,7 +139,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-ING-090** *(S, P2, T)* — The tool shall persist the ingested project model to a version-controllable text format so ingestion need not be repeated on every invocation.
 
-**TOOL-ING-100** *(S, P2, T)* — The tool shall detect that the ingested project model is stale relative to the build system and re-ingest or warn.
+**TOOL-ING-100** *(S, P2, T)* — The tool shall detect that the ingested project model is stale relative to the build system and shall force re-ingestion before any downstream use; a stale ingested model shall never be consumed with only a warning. Staleness shall be judged content-based: a changed source file, a changed response file, a changed ingested configuration definition, and changes to the include surface — including a newly created header that shadows an earlier resolution, or one whose appearance or removal alters `__has_include` outcomes — shall all mark the model stale.
 
 **TOOL-ING-110** *(C, P3, T)* — The tool shall support ingestion of projects that build with more than one toolchain, retaining per-toolchain flags.
 
@@ -156,6 +158,12 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-ING-180** *(S, P2, T)* — The tool shall report, for a given test scope, the complete list of external dependencies requiring stubs, before harness generation is performed.
 
 **TOOL-ING-190** *(S, P2, I)* — Test scope definitions shall be stored in a plain-text, version-controllable file.
+
+**TOOL-ING-200** *(M, P2, T)* — The tool shall require, before any test-harness build, an explicit authored link plan for the scope that enumerates the ordered link inputs (objects, archives and libraries) with their resolved identities, the linker and runtime identities, and the effective link command; an input that cannot be resolved shall block the build with a diagnostic naming the unresolved entry, and a compilation database alone shall not be treated as sufficient to define the link.
+
+**TOOL-ING-210** *(M, P2, T)* — The tool shall expand response-file references (`@file`) in ingested compile commands: the referenced file shall be resolved relative to the entry's working directory, parsed into arguments under documented quoting rules in which quoted sections remain whole, and recursion into nested response files shall be depth-bounded; the raw, unexpanded invocation shall be preserved on the entry, and a response file that is missing, unreadable, or over the documented size limit shall produce a named diagnostic rather than a silent guess.
+
+**TOOL-ING-220** *(M, P2, T)* — The tool shall capture per entry the build-context identity derivable from the invocation — the compiler executable path, the target triple when specified (`--target`, `-target`, `-mtriple`), and the sysroot when specified (`--sysroot`, `-isysroot`) — and shall attach an explicit caller-supplied build tag to each ingested configuration set; entries differing in any captured identity field shall remain distinct configurations.
 
 ---
 
@@ -186,6 +194,14 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-PAR-120** *(C, P3, T)* — The tool shall compute cyclomatic complexity per function and expose it in the model.
 
 **TOOL-PAR-130** *(S, P2, T)* — The tool shall continue analysis and report partial results when a subset of translation units fails to parse.
+
+**TOOL-PAR-140** *(S, P2, T)* — The analysis model shall carry, per translation unit, a machine-checkable inventory of constructs the analyzer does not support — each recorded with a kind, a count, an optional detail, and a source location where known — and the inventory shall be emitted even when empty, so downstream capabilities fail closed on unsupported input instead of discovering it in prose.
+
+**TOOL-PAR-150** *(M, P2, T)* — The analysis model shall carry an explicit decision inventory whose completeness is recorded as data (`not_extracted`, `partial`, or `complete`); the inventory cannot be omitted from a schema-valid model, and a decision-inventory status unknown to the reader shall fail closed with a named error.
+
+**TOOL-PAR-160** *(S, P2, T)* — The analysis model shall support optional value-range constraints (lower and upper bounds) on parameters, struct/union fields, and type definitions, and optional array dimension metadata (size bounds and index type) on array types, as first-class data that bounded generation consumes as model input; the model shall round-trip such constraints losslessly, and their absence shall remain explicitly optional.
+
+**TOOL-PAR-170** *(S, P2, T)* — The tool shall provide an eligibility and observability gate over the analysis model that evaluates each discovered function against declared capability flags, recording per function the observable channels (parameters, return value, global accesses) and machine-readable reasons when a function is not eligible — for example a static function without opt-in exposure, or a function with no observable channel. Discovery shall not imply eligibility, and requested-but-inaccessible state shall be reported explicitly as gate reasons rather than silently dropped.
 
 ---
 
@@ -341,7 +357,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-EXE-030** *(M, P1, T)* — The tool shall isolate test execution such that a crash, hang, or abort in one test case does not prevent the remaining test cases from executing.
 
-**TOOL-EXE-040** *(M, P1, T)* — The tool shall enforce a configurable per-test timeout and report timed-out tests as failures.
+**TOOL-EXE-040** *(M, P1, T)* — The tool shall enforce a configurable per-test timeout and report a timeout as a distinct outcome — neither pass nor fail — and the process exit status shall be non-zero when any test case timed out or failed (TOOL-EXE-060).
 
 **TOOL-EXE-050** *(S, P1, T)* — The tool shall execute independent test executables in parallel, with configurable concurrency.
 
@@ -413,11 +429,13 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-COV-140** *(S, P4, T)* — The tool shall support coverage-by-analysis: recording a user-supplied justification for code that cannot be covered by test, and reflecting it in reports as justified rather than covered.
 
-**TOOL-COV-150** *(M, P3, I)* — Justifications under TOOL-COV-140 shall record author, date, and rationale, and shall be invalidated when the associated source changes.
+**TOOL-COV-150** *(M, P4, I)* — Justifications under TOOL-COV-140 shall record author, date, and rationale, and shall be invalidated when the associated source changes.
 
 **TOOL-COV-160** *(S, P3, T)* — The tool shall report coverage of the unit under test separately from coverage of harness, stub, and framework code.
 
 **TOOL-COV-170** *(S, P4, T)* — The tool shall support control coupling and data coupling analysis between integrated units.
+
+**TOOL-COV-180** *(M, P1, T)* — The tool shall record a completeness state for every coverage artifact — `complete`, `truncated`, or `missing` — and a truncated or missing artifact shall force the decisions and constructs it would have measured to `unmeasured`, with an advisory carried into the report; the completeness state shall be surfaced through the CLI and UI exactly as recorded, without relabeling.
 
 ---
 
@@ -673,7 +691,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-AIF-250** *(M, P3, A)* — The structured-decision provider interface (TOOL-AIF-230) shall accept a locally-executed or self-hosted enterprise model as a drop-in substitute for any remote structured-decision provider, satisfying TOOL-AIF-020's local-execution requirement independently of which provider is configured as default.
 
-**TOOL-AIF-260** *(M, P3, A)* — Every AI-assisted capability in this section — including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined — shall integrate exclusively through the extension point defined in TOOL-PLG-080. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.
+**TOOL-AIF-260** *(M, P3, A)* — Every AI-assisted capability in this section — including generation (TOOL-AIF-060), stub synthesis (TOOL-AIF-110), failure explanation (TOOL-AIF-120), structured-decision validation (TOOL-AIF-220), and any AI-assisted capability added after this specification is baselined — shall integrate exclusively through the extension point defined in TOOL-PLG-100. No AI-assisted feature shall call a specific vendor SDK or API directly from its own code; the model or provider behind any role shall be replaceable, including with a model type not yet supported at the time that role was written, without modifying the calling feature.
 
 ---
 
@@ -813,6 +831,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-MIG-090** *(C, P4, T)* — The tool shall provide a migration assessment mode that analyses an existing project and reports the expected fidelity and manual effort of migration before migration is attempted.
 
+**TOOL-MIG-110** *(S, P3, T)* — When imported or assessed legacy material contains compound or iterative test structures — slots, slot iterations, or per-slot histories — the tool shall report each such structure explicitly as deferred, with its location, rather than silently flattening, dropping, or emulating it; the set of deferred structures shall be machine-checkable so migration scope is auditable. Compound and iterative test authoring is explicitly deferred in the initial release (decision recorded 2026-11-07, review finding RV-03 F-03).
+
 **TOOL-MIG-100** *(M, P2, I)* — All interchange formats the tool consumes or produces shall be documented to a level permitting independent implementation.
 
 ---
@@ -863,11 +883,11 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-PLG-070** *(S, P3, T)* — The tool shall discover and load user-supplied extensions from a documented location without requiring reinstallation.
 
-**TOOL-PLG-080** *(M, P2, A)* — The tool shall define a documented AI-provider extension point (§18 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability — present or future, generative or structured-decision, local or remote, from any vendor or model architecture — is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.
-
 **TOOL-PLG-080** *(M, P3, D)* — The tool shall report clearly when an extension fails to load or is incompatible, and shall continue operating with the remaining functionality.
 
 **TOOL-PLG-090** *(S, P3, I)* — The tool's own built-in compiler configurations, framework back-ends, and report formats shall be implemented through the same public extension points available to users, so those interfaces are proven by use.
+
+**TOOL-PLG-100** *(M, P2, A)* — The tool shall define a documented AI-provider extension point (§18 AIF), distinct from and structured like the compiler, test-framework, and report-format extension points above, so that any AI-assisted capability — present or future, generative or structured-decision, local or remote, from any vendor or model architecture — is integrated by implementing that interface rather than by modifying tool source. This is the mechanism TOOL-AIF-050, TOOL-AIF-230, TOOL-AIF-250, and TOOL-AIF-260 rely on.
 
 ---
 

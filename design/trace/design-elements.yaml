@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 323
+      requirement_count: 338
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -400,12 +400,20 @@ components:
         satisfies: [TOOL-ING-070]
         verification: T
       - id: DSN-ING-060
-        title: Persisted project model with staleness detection
+        title: Persisted project model with fail-closed staleness detection
         statement: >
-          The ingested model is written to the project store with the digest
-          and mtime of every input it was derived from. A cheap staleness check
-          compares those on each invocation and either re-ingests or warns,
-          so ingestion is not repeated needlessly and is never silently stale.
+          The ingested model records a content fingerprint of every input it
+          was derived from: the compilation database itself, each source file,
+          each response file, and the include surface of every include
+          directory (the headers visible per directory, in resolution order).
+          A cheap digest comparison on each invocation marks the model stale on
+          any change — including a newly created header that shadows an
+          earlier resolution, or one whose appearance or removal changes
+          __has_include outcomes — and a stale model forces re-ingestion
+          before downstream use; consuming a stale model with only a warning
+          is not an available behavior. When the include surface cannot be
+          enumerated within documented bounds, completeness is unknown and the
+          model is treated as stale (unknown completeness forces rebuild).
         satisfies: [TOOL-ING-090, TOOL-ING-100]
         verification: T
       - id: DSN-ING-070
@@ -452,6 +460,43 @@ components:
           as part of an integration set in another — with per-scope generated
           artifacts kept in per-scope output directories.
         satisfies: [TOOL-ING-170]
+        verification: T
+      - id: DSN-ING-120
+        title: Authored link plan validation
+        statement: >
+          Every test scope carries an explicit, version-controlled link plan:
+          ordered link inputs with resolved identities, linker and runtime
+          identity, and the effective link command. Validation fails closed —
+          an input that cannot be resolved blocks the build with a diagnostic
+          naming the entry, and the compilation database is never treated as
+          sufficient to define the link. The plan is authored intent; the
+          harness link-closure check (DSN-GEN-090) is the computed fact that
+          confirms it before the build runs.
+        satisfies: [TOOL-ING-200]
+        verification: T
+      - id: DSN-ING-130
+        title: Response-file expansion
+        statement: >
+          Compile-command tokens of the form @file are expanded at ingestion:
+          the referenced file is resolved against the entry's working
+          directory, parsed into arguments with the same quoting rules as the
+          command form, and nested response files are expanded recursively
+          under a documented depth bound. The raw, unexpanded invocation is
+          preserved alongside the expansion, and a missing, unreadable or
+          oversized response file fails ingestion with a named diagnostic
+          instead of a silent guess.
+        satisfies: [TOOL-ING-210]
+        verification: T
+      - id: DSN-ING-140
+        title: Build-context identity and build tag
+        statement: >
+          Each ingested entry captures the build-context identity derivable
+          from its invocation — compiler executable path, target triple, and
+          sysroot when specified — and each ingested configuration set carries
+          an explicit caller-supplied build tag. Entries differing in any
+          captured identity field remain distinct configurations; identity
+          capture is what keeps multiple configurations of one source honest.
+        satisfies: [TOOL-ING-220]
         verification: T
 
   - id: CMP-ANA
@@ -555,6 +600,53 @@ components:
           and reported. Downstream stages see an explicitly incomplete model
           rather than a silently smaller one.
         satisfies: [TOOL-PAR-130]
+        verification: T
+      - id: DSN-ANA-100
+        title: Unsupported-construct inventory
+        statement: >
+          Every translation unit entry carries a machine-checkable inventory of
+          constructs the analyzer does not support — kind, count, optional
+          detail, and source location where known — emitted even when empty, so
+          downstream capabilities fail closed on unsupported input instead of
+          discovering it in prose.
+        satisfies: [TOOL-PAR-140]
+        verification: T
+      - id: DSN-ANA-110
+        title: Decision inventory with recorded completeness
+        statement: >
+          The model carries an explicit decision inventory whose completeness
+          is data — not_extracted, partial, or complete — and the inventory
+          cannot be omitted from a schema-valid model. A reader that meets an
+          unknown inventory status fails closed with a named error, so the
+          coverage reconciliation (DSN-COV-040) can trust what the model
+          claims.
+        satisfies: [TOOL-PAR-150]
+        verification: T
+      - id: DSN-ANA-120
+        title: Value ranges and array dimensions as model data
+        statement: >
+          Parameters, struct/union fields and type definitions carry optional
+          value-range constraints (lower and upper bounds), and array types
+          carry optional dimension metadata (size bounds and index type), as
+          first-class model data. The model round-trips such constraints
+          losslessly and their absence is explicitly optional — bounded
+          generation (CMP-ATG) consumes them as model input rather than
+          per-case data, and no C source construct manufactures them.
+        satisfies: [TOOL-PAR-160]
+        verification: T
+      - id: DSN-ANA-130
+        title: Eligibility and observability gate
+        statement: >
+          A gate over the analysis model evaluates each discovered function
+          against declared capability flags and records per function the
+          observable channels — parameters, return value, global accesses —
+          and machine-readable reasons when the function is not eligible, such
+          as a static function without opt-in exposure or a function with no
+          observable channel. Discovery does not imply eligibility;
+          requested-but-inaccessible state is reported as gate reasons rather
+          than silently dropped. CMP-ATG consumes the gate records as
+          S1-adjacent derived data, deterministic and libclang-free.
+        satisfies: [TOOL-PAR-170]
         verification: T
 
   - id: CMP-TCH
@@ -1363,6 +1455,18 @@ components:
           as coverage of the coupling set.
         satisfies: [TOOL-COV-170]
         verification: T
+      - id: DSN-COV-110
+        title: Coverage-artifact completeness state
+        statement: >
+          Every coverage artifact carries a completeness state — complete,
+          truncated, or missing — recorded at collection time. A truncated or
+          missing artifact forces the decisions and constructs it would have
+          measured to unmeasured and emits an advisory into the report model;
+          the state is surfaced through CLI and UI exactly as recorded, without
+          relabeling. This closes the last open overclaim channel: a latched or
+          lost coverage sink can never read as a full score.
+        satisfies: [TOOL-COV-180]
+        verification: T
 
   - id: CMP-CBT
     name: Change Impact and Regression
@@ -2073,6 +2177,30 @@ components:
           returning control to the surrounding workflow rather than failing it.
         satisfies: [TOOL-AIF-150]
         verification: T
+      - id: DSN-AIF-140
+        title: Structured-decision validation role
+        statement: >
+          A second AI role evaluates discrete testing decisions — pass/fail
+          classification of ambiguous results, flaky-test flagging, priority
+          triage — and returns typed, code-consumable output rather than free
+          text. Its provider is configured independently of the generation
+          provider, accepts a local or self-hosted model as a drop-in
+          substitute, and the role's default provider profile is expressed
+          purely as configuration. The role integrates only through the
+          AI-provider extension point (TOOL-PLG-100), never a vendor SDK, and
+          its output is advisory: deterministic checks and human oracles stay
+          authoritative (ADR-008).
+        satisfies: [TOOL-AIF-220, TOOL-AIF-230, TOOL-AIF-250, TOOL-AIF-260]
+        verification: A
+      - id: DSN-AIF-150
+        title: Default validation provider is configuration
+        statement: >
+          The default provider profile for the structured-decision validation
+          role is a documented configuration value (TypeSafe AI (Jev) where a
+          remote provider is explicitly enabled), carrying no code-level
+          dependency that would block substituting any other provider (ADR-008).
+        satisfies: [TOOL-AIF-240]
+        verification: D
 
   - id: CMP-PLG
     name: Extension Framework
@@ -2117,6 +2245,18 @@ components:
           mechanism that reliably keeps those interfaces sufficient.
         satisfies: [TOOL-PLG-090]
         verification: I
+      - id: DSN-PLG-050
+        title: AI provider extension point
+        statement: >
+          A dedicated extension point, structured like the compiler,
+          test-framework and report-format extension points, through which
+          every AI-assisted capability — generative or structured-decision,
+          local or remote, from any vendor or model architecture — integrates
+          by implementing the interface rather than by modifying tool source,
+          so the provider behind any role is replaceable without modifying
+          calling features (ADR-008).
+        satisfies: [TOOL-PLG-100]
+        verification: A
 
   - id: CMP-SEC
     name: Security and Integrity Services
@@ -2475,6 +2615,17 @@ components:
           path a genuine exit rather than a gesture.
         satisfies: [TOOL-MIG-100]
         verification: I
+      - id: DSN-MIG-090
+        title: Deferred-structure reporting
+        statement: >
+          Legacy material containing compound or iterative test structures —
+          slots, slot iterations, per-slot histories — has every such structure
+          reported explicitly as deferred, with its location, and recorded in a
+          machine-checkable set so migration scope is auditable. Flattening,
+          dropping and silent emulation are all non-behaviors: the initial
+          release defers compound authoring by decision, not by omission.
+        satisfies: [TOOL-MIG-110]
+        verification: T
 
 # Requirements deliberately not allocated: TOOL-UIX-390 and TOOL-UIX-400 carry
 # priority F (Future) and are outside v1.0 scope per SRS-001 §2.2. The checker

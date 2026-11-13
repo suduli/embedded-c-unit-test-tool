@@ -1,7 +1,8 @@
-# implements: DSN-ING-010
+# implements: DSN-ING-010, DSN-ING-130, DSN-ING-140
 """Tests for compilation database adapter and parser.
 
-Verifies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030, DSN-ING-010.
+Verifies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030, TOOL-ING-210,
+TOOL-ING-220, DSN-ING-010, DSN-ING-130, DSN-ING-140.
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from ectt.ing.errors import (
     CompilationDatabaseNotFoundError,
     MissingCommandOrArgumentsError,
     MissingEntryKeyError,
+    ResponseFileError,
 )
 from ectt.prj.errors import InvalidRelativePathError, ProjectConfinementError
 
@@ -481,3 +483,194 @@ def test_extract_compiler_flags_empty() -> None:
     assert inv.arguments == ()
     assert out is None
 
+
+
+# ---------------------------------------------------------------------------
+# Response-file expansion (TOOL-ING-210, DSN-ING-130)
+
+
+def _write_response_file(tmp_path: Path, name: str, content: str) -> None:
+    (tmp_path / name).write_text(content, encoding="utf-8")
+
+
+def test_response_file_expansion_arguments_form(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210, DSN-ING-130"""
+    _write_response_file(tmp_path, "flags.rsp", "-I./include -DVERSION=2 -Wall\n")
+    json_data = [
+        {
+            "directory": str(tmp_path),
+            "file": "src/adc.c",
+            "arguments": ["clang", "@flags.rsp", "-c", "src/adc.c", "-o", "adc.o"],
+        }
+    ]
+    db = parse_compdb(json.dumps(json_data))
+
+    tu = db[0]
+    assert "@flags.rsp" not in tu.arguments
+    assert tu.include_paths == ("./include",)
+    assert tu.preprocessor_definitions == ("VERSION=2",)
+    assert "-Wall" in tu.residual_flags
+    assert tu.response_files == ((tmp_path / "flags.rsp").as_posix(),)
+    assert tu.compiler_invocation.raw_arguments == (
+        "clang",
+        "@flags.rsp",
+        "-c",
+        "src/adc.c",
+        "-o",
+        "adc.o",
+    )
+    assert tu.compiler_invocation.raw_arguments != tu.compiler_invocation.arguments
+
+
+def test_response_file_command_form_quotes(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210 — quoted paths inside response files parse with
+    the command-form quoting rules."""
+    _write_response_file(tmp_path, "opts.rsp", '-I"/path with spaces/inc" -O2')
+    json_data = [
+        {
+            "directory": str(tmp_path),
+            "file": "src/adc.c",
+            "command": "clang @opts.rsp -c ../src/adc.c",
+        }
+    ]
+    db = parse_compdb(json.dumps(json_data))
+    tu = db[0]
+    assert "/path with spaces/inc" in tu.include_paths
+    assert "-O2" in tu.residual_flags
+
+
+def test_response_file_resolved_relative_to_entry_directory(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210 — the response file resolves against the entry's
+    working directory, not the process working directory."""
+    subdir = tmp_path / "build"
+    subdir.mkdir()
+    (subdir / "nested.rsp").write_text("-DRESOLVED=1", encoding="utf-8")
+    json_data = [
+        {
+            "directory": str(subdir),
+            "file": "src/adc.c",
+            "arguments": ["gcc", "@nested.rsp", "-c", "src/adc.c"],
+        }
+    ]
+    db = parse_compdb(json.dumps(json_data))
+    assert db[0].definitions_map["RESOLVED"] == "1"
+
+
+def test_response_file_missing_fails_named(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210 — a missing response file is a named diagnostic."""
+    json_data = [
+        {
+            "directory": str(tmp_path),
+            "file": "src/adc.c",
+            "arguments": ["gcc", "@missing.rsp", "-c", "src/adc.c"],
+        }
+    ]
+    with pytest.raises(ResponseFileError) as excinfo:
+        parse_compdb(json.dumps(json_data))
+    assert excinfo.value.reason == "response_file_not_found"
+    assert excinfo.value.response_file == "missing.rsp"
+
+
+def test_response_file_depth_limit(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210 — nesting beyond the depth bound fails named."""
+    _write_response_file(tmp_path, "a.rsp", "@b.rsp")
+    _write_response_file(tmp_path, "b.rsp", "@c.rsp")
+    _write_response_file(tmp_path, "c.rsp", "@a.rsp")
+    json_data = [
+        {
+            "directory": str(tmp_path),
+            "file": "src/adc.c",
+            "arguments": ["gcc", "@a.rsp", "-c", "src/adc.c"],
+        }
+    ]
+    with pytest.raises(ResponseFileError) as excinfo:
+        parse_compdb(json.dumps(json_data))
+    assert excinfo.value.reason == "response_file_depth_exceeded"
+
+
+def test_response_file_no_expansion_keeps_raw_empty(tmp_path: Path) -> None:
+    """verifies: TOOL-ING-210 — without response files raw_arguments stays
+    empty and response_files is empty."""
+    json_data = [
+        {
+            "directory": str(tmp_path),
+            "file": "src/adc.c",
+            "arguments": ["gcc", "-c", "src/adc.c"],
+        }
+    ]
+    db = parse_compdb(json.dumps(json_data))
+    assert db[0].response_files == ()
+    assert db[0].compiler_invocation.raw_arguments == ()
+
+
+# ---------------------------------------------------------------------------
+# Build-context identity and build tag (TOOL-ING-220, DSN-ING-140)
+
+
+def test_target_and_sysroot_capture() -> None:
+    """verifies: TOOL-ING-220, DSN-ING-140 — equals-form flags are captured as
+    identity and removed from residual flags."""
+    json_data = [
+        {
+            "directory": "/home/developer/project/build",
+            "file": "src/adc.c",
+            "arguments": [
+                "clang",
+                "--target=arm-none-eabi",
+                "--sysroot=/opt/sdk/sysroot",
+                "-c",
+                "src/adc.c",
+            ],
+        }
+    ]
+    db = parse_compdb(json.dumps(json_data))
+    tu = db[0]
+    assert tu.target_triple == "arm-none-eabi"
+    assert tu.sysroot == "/opt/sdk/sysroot"
+    assert "--target=arm-none-eabi" not in tu.residual_flags
+    assert "--sysroot=/opt/sdk/sysroot" not in tu.residual_flags
+    assert tu.compiler_invocation.to_dict()["target_triple"] == "arm-none-eabi"
+    assert tu.compiler_invocation.to_dict()["sysroot"] == "/opt/sdk/sysroot"
+
+
+def test_target_and_sysroot_separate_flag_forms() -> None:
+    """verifies: TOOL-ING-220 — separate-token forms (-target <t>, -isysroot
+    <t>) are captured too."""
+    args = ["clang", "-target", "thumbv7m-none-eabi", "-isysroot", "/sdk/root", "-c", "x.c"]
+    _, _, _, inv, _ = extract_compiler_flags(args)
+    assert inv.target_triple == "thumbv7m-none-eabi"
+    assert inv.sysroot == "/sdk/root"
+
+
+def test_no_identity_flags_leaves_none() -> None:
+    """verifies: TOOL-ING-220 — absent identity flags leave the fields None."""
+    _, _, _, inv, _ = extract_compiler_flags(["gcc", "-c", "x.c"])
+    assert inv.target_triple is None
+    assert inv.sysroot is None
+
+
+def test_build_tag_attached_and_distinct() -> None:
+    """verifies: TOOL-ING-220 — the explicit build tag travels on the ingested
+    set and distinct configurations stay distinct."""
+    entry = {
+        "directory": "/home/developer/project/build",
+        "file": "src/adc.c",
+        "arguments": ["gcc", "-c", "src/adc.c"],
+    }
+    db1 = parse_compdb(json.dumps([entry]), build_tag="build-2026-11-07-a")
+    db2 = parse_compdb(
+        json.dumps([{**entry, "arguments": ["gcc", "-O2", "-c", "src/adc.c"]}]),
+        build_tag="build-2026-11-07-b",
+    )
+    assert db1.build_tag == "build-2026-11-07-a"
+    assert db2.build_tag == "build-2026-11-07-b"
+    assert db1.to_dict()["build_tag"] == "build-2026-11-07-a"
+    assert db1[0].arguments != db2[0].arguments
+
+
+def test_build_tag_default_none_and_stripped() -> None:
+    """verifies: TOOL-ING-220 — no tag means None; a padded tag is stripped."""
+    entry = {"directory": "/b", "file": "x.c", "arguments": ["gcc", "-c", "x.c"]}
+    assert parse_compdb(json.dumps([entry])).build_tag is None
+    db = parse_compdb(json.dumps([entry]), build_tag="  tag-1  ")
+    assert db.build_tag == "tag-1"

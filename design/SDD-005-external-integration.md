@@ -3,8 +3,10 @@
 **Document ID:** SDD-005
 **Version:** 0.1 (draft for review)
 **Status:** Draft — tracks SRS-001 v0.1, which is not yet baselined
-**Upstream:** SRS-001 v0.1, ADR-001 (analysis, no decision recorded)
+**Upstream:** SRS-001 v0.1, ADR-001 (accepted 2026-09-19; corrections dated 2026-10-17), ADR-006, ADR-008
 **Constrains:** ADR-003 (symbolic execution engine), ADR-004 (coverage backend), ADR-005 (license selection), ADR-007 (distribution and packaging)
+
+**Correction note, 2026-10-17:** Responds to DR-21–23: LibTooling isolation, dependency facts, and artifact-specific licensing/runtime eligibility. The project license conflict in §3.2 remains unresolved pending the owner decision. Historical acceptance dates and dated observations remain history; these edits correct the document baseline and do not assert implementation or new approval.
 
 ---
 
@@ -101,13 +103,15 @@ This single requirement does most of the architectural work in this document,
 because it converts a licensing question into a **structural** one. The relevant
 distinction is not "is this GPL?" but "how is it attached?":
 
-| Mechanism | Licence propagates to the tool? | Consequence |
-|---|---|---|
-| **Vendored source** | Yes — the code is in the tree | Permissive only |
-| **Linked library** | Yes — for copyleft licences, this is the trigger | Permissive only |
-| **Subprocess / CLI** | No — separate program, arm's-length invocation | **Strong copyleft is acceptable here** |
-| **Generated code links against** | Into the *user's* test binary, not the tool | See §3.1 — different question entirely |
-| **File format only** | No code dependency at all | No licence hazard whatsoever |
+| Mechanism | Eligibility and distribution obligations |
+|---|---|
+| **Vendored source** | Review the exact artifact license, notices, modifications and distribution terms; permissive source is the default policy, with any exception explicitly assessed. |
+| **Linked library** | Strong-copyleft linkage is prohibited by LIC-020. Permissive libraries are candidates; accepted PySide6/Qt LGPL components require dynamic linking, library replaceability and the applicable license/source/notice obligations described in ADR-001 §3.4. |
+| **Subprocess / CLI** | Separate invocation is the LIC-020 mechanism for strong-copyleft tools; bundling still requires license and redistribution review. A process boundary alone does not erase license obligations. |
+| **Generated code links against** | Review obligations in the user's test binary, separately from the tool, under LIC-040. |
+| **File format only** | No implementation is copied merely by exchanging the format; bundled schemas, templates or example code need their own review. |
+
+Python/PySide6 remains the accepted stack. INS-030 and K-04/K-05 prohibit requiring a user-installed interpreter or network/admin installation; they do not prohibit a bundled, offline runtime. An additional Ruby/JVM exclusion below is a project packaging choice to limit runtime/SBOM/support cost, not a consequence of those requirements alone.
 
 The practical effect is that several of the most valuable dependencies in this
 document — the ones under GPL — are perfectly usable, *provided the architecture
@@ -225,7 +229,7 @@ recorded.
 |---|---|---|---|---|---|
 | **Unity** (ThrowTheSwitch) | MIT | vendored source | v2.5.2; pin **v2.6.0**+ | **Yes** — best in class | **ADOPT** (mandated) |
 | **cmocka** | Apache-2.0 | vendored source | 1.1.5; pin **1.1.7**+ | **Host only** — needs heap | **ADOPT, host-side** (mandated) |
-| **GoogleTest** + GoogleMock | BSD-3-Clause | generated code links against | **1.14.0** (last C++14) / **1.15.0**+ (C++17) | **No** | **ADOPT-OPTIONAL**, host-only |
+| **GoogleTest** + GoogleMock | BSD-3-Clause | generated code links against | **1.16.x** (last C++14 line) / **1.17.0**+ (C++17) | **No** | **ADOPT-OPTIONAL**, host-only |
 | greatest | ISC | vendored source | v1.4.0 | **Yes** | ADOPT-OPTIONAL |
 | CppUTest / CppUMock | BSD-3-Clause | generated code links against | v4.0 | Marginal (C++) | ADAPTER-ONLY |
 | Catch2 | BSL-1.0 | format only | v2 header / **v3.0.1** compiled lib | No | ADAPTER-ONLY |
@@ -257,8 +261,8 @@ regardless of whether the tool ever generates a GoogleTest harness.
 tool that produces certification evidence; the back-end must pin a release tag,
 keep Abseil and RE2 disabled, and stay separable per TOOL-LIC-070. The C++
 standard steps are the load-bearing version facts: **1.12.1** was the last C++11
-line, **1.13.0** moved to C++14, **1.14.0** is the last C++14 release, and
-**1.15.0** raised the floor to **C++17**.
+line, **1.13.0** moved to C++14, **1.16.x** is the last C++14 release line, and
+**1.17.0** raised the floor to **C++17**. The official [1.16 release](https://github.com/google/googletest/releases/tag/v1.16.0) and [1.17 release](https://github.com/google/googletest/releases/tag/v1.17.0) establish this boundary (checked 2026-10-17); the eventual shipped tag and build settings still require verification.
 
 #### 5.1.2 Unity is the target back-end; cmocka is the host back-end
 
@@ -368,14 +372,14 @@ unusually clear-cut.
 | Project | Licence | Mechanism | Floor | Verdict |
 |---|---|---|---|---|
 | **libclang** (C API, `clang-c/Index.h`) | **Apache-2.0 WITH LLVM-exception** | linked library | **LLVM 18.1** | **ADOPT** |
-| Clang LibTooling / `clangAST` (C++ libs) | Apache-2.0 WITH LLVM-exception | linked library | *no usable floor exists* | **REJECT** |
+| Clang LibTooling / `clangAST` (C++ libs) | Apache-2.0 WITH LLVM-exception | in-process linkage / isolated executable | pinned LLVM build for executable | **REJECT in-process; ALLOW isolated fallback** per ADR-001 §2.4 |
 | tree-sitter + tree-sitter-c | MIT | vendored source | core ≥ 0.22, ABI 14 | ADOPT-OPTIONAL |
 | pycparser | BSD-3-Clause | vendored source | — | **REJECT** |
 | CIL / goblint-cil, Coccinelle | BSD-3-Clause / GPL-2.0-only | subprocess | — | **REJECT** |
 | clang-tidy | Apache-2.0 WITH LLVM-exception | subprocess | same major as libclang | ADOPT-OPTIONAL |
 | cppcheck | **GPL-3.0-or-later** | subprocess | *unverified:* 2.11 | ADAPTER-ONLY |
 
-**libclang is the only viable choice**, for three reasons that compound. It is
+**libclang is the selected in-process parser interface**, for three reasons that compound. It is
 the only Clang interface with an **ABI stability commitment**; it is the only one
 shippable as a **prebuilt binary** that survives whatever compiler and standard
 library the user has; and its licence exception is precisely what keeps LLVM
@@ -387,13 +391,7 @@ LLVM exception removes them for code compiled with or linked against LLVM
 runtime components. Recording this matters because a licence scanner that sees
 bare "Apache-2.0" will raise a NOTICE-file obligation that does not in fact apply.
 
-**LibTooling is rejected on ABI, not on capability.** Clang's C++ libraries carry
-*no* source or binary compatibility guarantee; the AST and Tooling APIs change
-every six-month release, and the C++ ABI additionally depends on libstdc++ vs
-libc++ and on `_GLIBCXX_USE_CXX11_ABI`. A binary built against 18.1 will not load
-against 19. That would force the user's C++ toolchain to match the tool's, which
-is unacceptable for a tool that must install without admin rights into arbitrary
-environments.
+**LibTooling in-process linkage is rejected on compatibility, not capability.** Clang's C++ APIs do not promise source/binary compatibility across releases. This does not reject ADR-001 §2.4's focused C++ analyzer executable. That fallback may bundle a mutually compatible, pinned LLVM/LibTooling build and emit the same versioned PAR-100 JSON model. It must record executable/toolchain/dependency hashes, build flags and license notices, distribute offline binaries per supported host, and pass the same parser-model fixtures before substitution. It must not load against arbitrary user LLVM libraries. The executable owns its internal ABI; downstream callers own only the JSON contract. Its build, packaging and regression work remains required if the fallback is pursued.
 
 **Why the floor is LLVM 18.1 and not lower.** Parsing alone would work on
 something older. The floor is set by *coverage*: A-05 and TOOL-COV-050 need
@@ -461,7 +459,7 @@ number changes a design decision rather than a footnote.
 | LLVM `compiler-rt` profile buffer API | Apache-2.0 WITH LLVM-exception | generated code links against | Clang 18.1 for MC/DC counters | ADOPT-OPTIONAL |
 | gcovr | BSD-3-Clause | subprocess | **8.0**; prefer **8.2** | ADAPTER-ONLY |
 | lcov / genhtml + `.info` | GPL-2.0-or-later | subprocess | *unverified:* 2.1–2.3 for MC/DC | ADAPTER-ONLY |
-| grcov | MPL-2.0 | subprocess | *no version reads MC/DC* | **REJECT** |
+| grcov | MPL-2.0 | subprocess | branch coverage documented; MC/DC not demonstrated | **REJECT as primary MC/DC reader**; reassess for branch-only interchange if needed |
 | kcov | GPL-2.0-only | subprocess | — | **REJECT** — line coverage only |
 | BullseyeCoverage | **Proprietary** | subprocess | — | **REJECT** — fails K-06 |
 
@@ -545,17 +543,12 @@ never bundle GPL binaries*, and the real risks become operational.
 | **pyOCD** | Apache-2.0 | subprocess | **0.36.0**, **Python ≥ 3.9** | **ADOPT** (TOOL-TGT-040) |
 | probe-rs | Apache-2.0 OR MIT | subprocess | *unverified:* 0.24; prefer 0.27 | ADOPT-OPTIONAL |
 | **J-Link** (`JLinkExe`, `JLinkGDBServer`) | **Proprietary** — SEGGER EULA | subprocess, user-installed | *unverified:* pack 7.80 | **ADAPTER-ONLY** — never bundle |
-| **SEGGER RTT** target source | **Proprietary** — grant conditioned on use with a SEGGER probe | — | — | **REJECT for generated code** |
+| **SEGGER RTT** target source | permissive source grant; retain copyright/condition/disclaimer | optional target-source integration | exact shipped revision not selected | **CANDIDATE, opt-in**; no probe restriction established by target-source license |
 | Semihosting + UART (pySerial) | protocol is an open Arm spec; pySerial BSD-3-Clause | vendored / tool-authored stub | pySerial 3.5 | **ADOPT** — the mandatory floor |
 
 **Three findings worth calling out.**
 
-**SEGGER RTT must never be emitted into generated harnesses.** Its target-side
-source is licensed for use only with SEGGER J-Link probes. Emitting it into the
-user's harness would impose a probe-vendor restriction on the user's own code,
-which directly violates TOOL-LIC-040. Semihosting plus a user-ported UART writer
-must be the mandatory transports (as TOOL-TGT-050 already requires); RTT is
-strictly opt-in and user-supplied.
+**SEGGER RTT source and J-Link software have different licenses.** The [official RTT target-source license](https://github.com/SEGGERMicro/RTT/blob/main/LICENSE.md), checked 2026-10-17, permits redistribution and modification with its stated notice condition; it does not impose a SEGGER-probe restriction. The previous rejection on that ground is withdrawn. RTT is an optional candidate, not a selected mandatory transport: the exact revision, copied notices, target footprint and interoperability still need assessment before bundling/emission. Semihosting and UART remain the mandatory transports under TOOL-TGT-050. J-Link host tools remain subject to their separate proprietary EULA.
 
 **J-Link is proprietary and must not be listed as open source.** TOOL-TGT-040
 names it alongside OpenOCD and pyOCD, so the tool must drive it — but by
@@ -710,7 +703,7 @@ a flat "GPL-2.0-only" would wrongly forbid that.
 | **pyOCD** | **0.36.0**, **Python >= 3.9** | Below 3.9 the wheel chain falls back to source builds needing a C toolchain and Rust — an air-gap installability failure, not a functional one |
 | **OpenOCD** | **0.12.0** | No `rtt setup/start` commands; incomplete `SYS_EXIT` handling, so a target run cannot report pass/fail |
 | **cosign** | **2.0** | v1 keyless flow and bundle layout removed; verification commands changed incompatibly |
-| **GoogleTest** | **1.14.0** (C++14) or **1.15.0** (C++17) | The C++ standard step is the real boundary, not the tag number |
+| **GoogleTest** | **1.16.x** (last C++14 line) or **1.17.0** (C++17) | The C++ standard step is the real boundary, not the tag number |
 | **Unity** | **2.5.2**, pin **2.6.0**+ | Below 2.5.2, no supported CMake/Meson build files, forcing a hand-rolled build fragment |
 | **cmocka** | **1.1.5**, pin **1.1.7**+ | No `cmocka_set_test_filter()` — per-test isolation and per-test coverage attribution both become unimplementable |
 | **gcovr** | **8.0**, prefer **8.2** | Condition-coverage data silently dropped; 8.0/8.1 throw on real GCC 14 output |
@@ -732,7 +725,7 @@ LLVM versions. That is an input to ADR-003, not an implementation detail.
 
 **3. The libclang ABI boundary — CMP-ANA.** Not a floor but a *contract choice*:
 the C API carries a stability commitment and the C++ libraries carry none. This
-is why 5.3 rejects LibTooling on ABI rather than on capability.
+is why §5.3 rejects in-process LibTooling linkage while allowing a pinned JSON-emitting executable.
 
 ### 6.3 Capability probing beats version pinning
 
@@ -794,27 +787,14 @@ tricks that do not survive SDCC or avr-gcc, both named in TOOL-TCH-050.
 Header-only C++ is still C++; TOOL-HAR-060 forbids it in the mandatory back-ends,
 and v1.0 excludes C++ support outright.
 
-**Rejected on ABI or API instability.** Clang LibTooling (no compatibility
-guarantee at all, §5.3) and Mimick (pre-1.0, and it rewrites instructions at
-runtime — which additionally destroys the argument that the code under test is
-the code that ships, the one claim a qualification case cannot give up).
+**Rejected on ABI or API instability.** In-process Clang LibTooling linkage is rejected; the isolated, pinned JSON executable remains an allowed fallback (§5.3). Mimick is rejected because of its pre-1.0 API and runtime instruction rewriting concerns.
 
-**Rejected on fidelity.** pycparser cannot parse real embedded C. CIL and
-Coccinelle rewrite the source, destroying the location mapping TOOL-COV-070
-needs. grcov and kcov cannot read MC/DC or branch data at all — for grcov, *the
-floor that matters does not exist*.
+**Rejected on fidelity.** pycparser cannot cover the selected embedded-C analysis surface. CIL/Coccinelle source rewriting complicates the location mapping required by TOOL-COV-070. [grcov documents branch coverage](https://github.com/mozilla/grcov#usage) (`--branch`, checked 2026-10-17), but this project has no demonstrated MC/DC independence-evidence path through it; that is the reason it is not the primary MC/DC reader. kcov's line-oriented path likewise does not establish the required MC/DC evidence.
 
-**Rejected on runtime footprint of the toolchain, not the target.** Asciidoctor
-and the CMock/Ceedling stack each require a language interpreter the user may not
-have and the tool may not install (K-04, K-05). OSLC/Eclipse Lyo needs a JVM and
-a network.
+**Rejected as additional bundled runtimes by project policy.** Asciidoctor and CMock/Ceedling introduce Ruby packaging/support work; OSLC/Eclipse Lyo introduces a JVM and service integration. Offline/non-admin installation does not itself exclude these runtimes: bundling is possible, as the accepted Python runtime shows. Their exclusion is a scope/support-cost choice, revisitable with offline distribution and license evidence.
 
-**Rejected on licence.** SymCC (GPL-3.0 in a position where it would contaminate
-the user's built artefacts) and BullseyeCoverage (proprietary, fails K-06).
-**SEGGER RTT target source** is rejected specifically for *generated code*: its
-grant is conditioned on use with a SEGGER probe, so emitting it into a user's
-harness would impose a probe-vendor restriction on the user's own code, violating
-TOOL-LIC-040.
+**Rejected on licence.** SymCC requires artifact-specific review before generated/built user artifacts could be eligible under LIC-040; BullseyeCoverage is proprietary and fails K-06's selected open-source dependency policy. RTT target source is no longer rejected on the unsupported probe-restricted-license assertion; see §5.6 for its optional-candidate status and the distinct J-Link EULA.
+
 
 One rejection is recorded here with a **corrected rationale**, because the
 original reasoning was wrong in a way that would not have survived review.
@@ -838,9 +818,9 @@ external project the **mechanism** and the **licence** — because §3 establish
 that those two together, not the licence alone, decide the outcome. Three bands
 of meaning are encoded in the node subtitles:
 
-- **LINKED** — into the tool binary. Permissive licences only. Exactly one entry: libclang.
+- **LINKED** — into the tool process. The integration map lists libclang; it is not a complete GUI/runtime SBOM. Actual artifact licenses govern eligibility, including accepted dynamic LGPL PySide6/Qt obligations (§3).
 - **HARNESS LINK** — into the *user's* test binary. The licence flows to the user, not to this project.
-- **SUBPROCESS** — a separate program. Strong copyleft is safe here, which is why the GPL entries sit in this band.
+- **SUBPROCESS** — a separate program, the selected LIC-020 boundary for strong-copyleft tools; redistribution obligations still apply.
 
 ### 9.1 Why this diagram is not machine-checked, unlike the other nine
 
@@ -882,7 +862,7 @@ This document does not decide anything. It does narrow four open decisions:
 | **ADR-003** — symbolic execution engine | KLEE forces a **second LLVM** (13–14) alongside CMP-ANA's 18.1. CBMC does not. That packaging cost, not raw capability, should drive the choice (§5.7, §6.2) |
 | **ADR-004** — coverage backend | Both open-source MC/DC sources give **masking** MC/DC, and each has a different silent-failure mode: Clang's 6-condition default and GCC's version-locked data files (§5.5) |
 | **ADR-005** — licence selection | The repository's AGPL-3.0 `LICENSE` contradicts TOOL-LIC-010. **This should be settled before the dependency set is frozen** (§3.2) |
-| **ADR-007** — distribution and packaging | TOOL-INS-030 plus K-04/K-05 rule out every interpreter-based dependency and every build tool the user must install. Vendored Ninja is the consequence (§5.4) |
+| **ADR-007** — distribution and packaging | TOOL-INS-030 plus K-04/K-05 rule out user-installed runtime/build prerequisites, not bundled offline runtimes. Python is accepted; additional runtimes require packaging/license assessment. Vendored Ninja is the selected build-tool packaging choice (§5.4) |
 
 ### 10.2 Version claims that must be re-verified before baseline
 
@@ -894,7 +874,7 @@ ordered by how much a wrong value would cost.
 1. **GCC's condition-coverage term limit and its exact masking-MC/DC wording.** Read the GCC 14/15 `gcov` manual node directly and put the wording into the CMP-QUA evidence template — TOOL-COV-060 requires the report to state it.
 2. **LLVM's `-fmcdc-max-conditions` default, whether it exists in 18 or only 19, and the true test-vector cap.** Take these from the pinned `clang -cc1 --help`, not from prose.
 3. **lcov's actual `--mcdc-coverage` release** (stated as 2.3; likely earlier in the 2.x line).
-4. **GoogleTest's `CMakeLists.txt` minimum at the exact pinned tag** (stated as 3.16 at 1.15.0; likely ~3.13).
+4. **GoogleTest's `CMakeLists.txt` minimum at the exact pinned tag** (the chosen tag remains to be selected; language-standard support does not establish the CMake minimum).
 5. **QEMU semihosting exit-code behaviour** — probe per machine model rather than pinning a version (§6.3).
 6. **SPDX identifiers** for Bear, cppcheck and Valgrind — the *or-later* distinction is the first thing an auditor checks, and TOOL-LIC-030 requires the SBOM to be machine-checkable.
 7. Feature-to-release attributions for Unity, cmocka, greatest, doctest, FFF and CMock.
@@ -904,7 +884,7 @@ The following **were** confirmed and are safe to baseline as stated: Clang
 `gcov --conditions` first shipped in **GCC 14**; `gcov --json-format` from **GCC 9**;
 `-fprofile-info-section` from **GCC 11**; `__gcov_info_to_gcda()` from **GCC 12**;
 `libgcov` covered by the **GCC Runtime Library Exception**; the GoogleTest C++
-steps (1.12.1 last C++11, 1.13.0 → C++14, 1.14.0 last C++14, 1.15.0 → C++17);
+steps (1.12.1 last C++11, 1.13.0 → C++14, 1.16.x last C++14 line, 1.17.0 → C++17; corrected 2026-10-17 against the official release notes linked in §5.1.1);
 CMake `-S`/`-B` at 3.13 and presets v1/v2/v3 at 3.19/3.20/3.21; Ninja `compdb`
 without rule names and dyndep at 1.10; OpenOCD 0.12.0; the Jinja2 CVE chain
 through 3.1.6; SARIF 2.1.0; CycloneDX 1.6 = ECMA-424; SPDX 2.2.1 = ISO/IEC

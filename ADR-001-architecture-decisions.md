@@ -4,6 +4,8 @@
 **Status:** **Accepted, 2026-09-19** — validation spikes (§4.2) complete, all three recommendations in §4 stand at high confidence, and ADR-006 (§5) — the one remaining condition — resolved as "build fresh," discharging it without overturning any recommendation here
 **Relates to:** SRS-001 open questions 1, 4, 5
 
+**Correction note, 2026-10-17:** DR-24–26 and related DR-10/21 correct qualification releases, unresolved editor-widget selection, call-wrapping limits and IPC/LibTooling rationale. Python/PySide6 remains selected; the project license remains unresolved (LIC-010 versus repository AGPL-3.0), with no change to LICENSE. The 2026-09-19 acceptance is historical; these corrections do not assert new approval or implementation validation.
+
 ---
 
 <!-- nav:start -->
@@ -17,7 +19,7 @@ Architecture diagrams: [specifications](design/diagrams) · published at [the do
 
 They are not independent:
 
-- **Language constrains GUI.** A Python core pairs naturally with Qt (in-process, no IPC). A Rust core pairs naturally with Tauri. A C++ core pairs with Qt but at high build cost. Choosing the GUI first and the language second usually produces an awkward IPC layer that exists only because the two halves were chosen separately.
+- **Language constrains GUI integration and packaging.** Python pairs naturally with PySide6, but does not remove the mandatory engine JSON IPC contract (SDD-002 S6). CLI and GUI use that transport; optional in-process domain internals behind the same operation ports do not replace it. A Rust or C++ core has different binding and distribution costs.
 - **Qualification scope constrains language.** If v1.0 must produce certification evidence, determinism, auditability, and long-term reproducibility of the toolchain itself become hard requirements — which disfavours a dynamic runtime with a large transitive dependency tree.
 - **Qualification scope constrains what v1.0 *is*.** If qualification is deferred, v1.0's target user changes from "verification engineer producing ASIL-D evidence" to "embedded developer doing TDD," and the front-end priorities shift accordingly.
 
@@ -64,10 +66,22 @@ That is a large market and it does not require beating Cantata at certification.
 
 ### 1.6 SRS impact
 
-- QUA-010 through QUA-060: keep in v1.0, re-phase to **P1/P2** where they are discipline rather than documentation. Reproducibility and version identification must be designed in from the first commit.
-- QUA-070, QUA-080, QUA-100: re-phase to **P4 / v1.1**.
-- QUA-090 (do not overclaim) becomes the most important requirement in the section, not a footnote.
-- Add: a requirement that the project publish its own development process, CI results, and defect history publicly — this is the open-source substitute for a certification kit, and it is free.
+The release definition is explicit: **v1.0 comprises P1–P3 discipline and usable workflows; v1.1 adds the P4 qualification documentation/support package.** P4 is the phase assigned to that release, rather than a synonym for every future release. Each QUA obligation maps as follows:
+
+| Requirement | Obligation | Phase / release |
+|---|---|---|
+| TOOL-QUA-010 | Tool classification analysis (TI/TD/TCL) | P4 / v1.1 |
+| TOOL-QUA-020 | Tool Operational Requirements document | P4 / v1.1 |
+| TOOL-QUA-030 | User-executable validation suite against those operational requirements | P4 / v1.1; ordinary regression testing starts earlier |
+| TOOL-QUA-040 | Per-release known errors and workarounds | P1 / v1.0; maintained for every later release |
+| TOOL-QUA-050 | Unique, archived, reproducible release identity | P1 / v1.0; maintained for every later release |
+| TOOL-QUA-060 | Reproduction information in every generated artifact | P1 / v1.0 contract; each artifact owner implements it when its artifact first ships in P1–P3 |
+| TOOL-QUA-070 | Qualification-facing development/change/defect process documentation | P4 / v1.1; ordinary process records begin in P1 |
+| TOOL-QUA-080 | Standards verification-objective mapping | P4 / v1.1 |
+| TOOL-QUA-090 | No unsupported certification/qualification claims; user responsibility disclosure | P1 / v1.0, enforced from the first public documentation |
+| TOOL-QUA-100 | User qualification-artifact templates | P4 / v1.1 |
+
+This replaces the prior blanket QUA-010–060-in-v1.0 statement: classification and operational-requirements validation are documentation-package deliverables, while release/provenance/no-overclaim discipline starts in v1.0. SRS and PLAN allocations must carry this same mapping. No certification or qualification is claimed by this ADR.
 
 ---
 
@@ -91,10 +105,12 @@ Now check what the SRS actually needs:
 | PAR-120 (cyclomatic complexity) | No | `lizard` computes this without a CFG |
 | COV-010–080 (all coverage incl. MC/DC) | **No** | gcov/llvm-cov instrument at compile time; the tool consumes their JSON output |
 | ATG-020 (symbolic execution) | **No** | KLEE operates on LLVM bitcode and does its own analysis |
-| STB-090 (call wrapping) | Probably not | Achievable via linker `--wrap`, as cmocka does |
+| STB-090 (call wrapping) | Not for external unresolved calls | GNU ld `--wrap` applies to undefined references; it does not intercept same-translation-unit/static/inlined calls. Those require a separately validated source/compile seam or an explicit unsupported diagnostic. |
 | UIX-270 (graphical control flow view) | **Yes** | But this is a *(S, P3)* nice-to-have |
 
-**Conclusion: the CFG is needed only for PAR-070 and the optional flow-graph view.** Coverage comes from the compiler. Test generation comes from KLEE. Complexity comes from lizard. The deep-analysis case for C++ is much weaker than it first appears.
+Per the [GNU ld wrapping contract](https://sourceware.org/binutils/docs/ld/Options.html), wrapping is not a complete STB-090 solution. Before claiming support, validate the selected compiler/linker, optimization/LTO and external versus same-unit call fixtures; no such verification is asserted here.
+
+**Conclusion: the explicit CFG consumers here are PAR-070 and the optional flow-graph view.** Coverage comes from the compiler. Test generation comes from KLEE. Complexity comes from lizard. The deep-analysis case for C++ is much weaker than it first appears.
 
 This means **Python is viable**, and PAR-100 — which already mandates a JSON model as the sole interface between parsing and generation — was written to permit swapping in a C++ analyzer later without disturbing anything downstream.
 
@@ -131,7 +147,7 @@ A PyInstaller bundle of PySide6 + libclang together built cleanly on the first a
 Concretely:
 1. Build the parsing layer against libclang's Python bindings, emitting the JSON model required by PAR-100.
 2. **Treat that JSON model as an inviolable interface.** Nothing downstream may call libclang directly.
-3. If and when CFG access proves necessary (PAR-070, UIX-270), write one focused C++ LibTooling binary that emits the same JSON model, and swap it in. Nothing else changes.
+3. If CFG access proves necessary (PAR-070, UIX-270), implement a focused, isolated C++ LibTooling executable emitting the same versioned JSON model. Pin its LLVM build and dependencies, provide offline host binaries and provenance, and verify model-equivalent fixtures before substitution (SDD-005 §5.3). This avoids exposing an unstable C++ ABI to the main application; adapter/build work is still required.
 
 This is UTBotCpp's client-server insight — isolate the toolchain-version-sensitive component — applied without inheriting its Ubuntu-resident server (Docker is merely how UTBotCpp makes that Ubuntu assumption portable to other hosts, not a separate requirement of its own — see [ADR-006](ADR-006-fork-or-build-fresh.md) §3.1).
 
@@ -169,7 +185,7 @@ Qt provides both nearly free (`QTreeView` + `QAbstractItemModel` handles nested-
 | License | **LGPL** (PySide6) — dynamic linking required | MIT/Apache-2.0 | MIT | N/A |
 | Native file dialogs, menus | Yes | Yes | Yes | **No** |
 | Debugger integration (UIX-230) | Straightforward | Workable | Workable | **Awkward** |
-| Code view with coverage overlay | QScintilla | Monaco | Monaco | Monaco |
+| Code view with coverage overlay | Editor widget selection pending PySide6 compatibility, license and overlay evidence | Monaco | Monaco | Monaco |
 | Offline / no-network (UIX-050, 350) | Trivially | Trivially | Trivially | Opens a localhost port |
 | Front-end contributor pool | Moderate | **Large** (web devs) | **Large** | Large |
 | Feels like a product to a conservative embedded engineer | **Yes** | Yes | Yes | **No** |
@@ -185,20 +201,15 @@ Both objections disappear if the browser UI is an *additional* interface for tea
 
 ### 3.4 The Qt licensing question, answered plainly
 
-PySide6 is LGPL. LGPL permits use in a permissively-licensed application provided Qt is **dynamically linked** and the user retains the ability to replace the Qt libraries. This is compatible with LIC-010 and LIC-020 — but it must be handled deliberately:
+PySide6/Qt remains the accepted stack, subject to review of the exact shipped modules and licenses. Dynamic LGPL distribution must preserve library replaceability and applicable source, license and notice obligations; each artifact belongs in the SBOM. The PyInstaller/Nuitka bundle must demonstrate those properties before release. This does not settle the separate LIC-010/repository-license conflict.
 
-- Dynamically link Qt; never statically link it
-- Record Qt and PySide6 in the SBOM (LIC-030) with license text
-- Verify that the chosen bundler (PyInstaller/Nuitka) preserves dynamic linking and library replaceability
-- Note that **PyQt** is GPL/commercial and is **not** suitable — use PySide6, which is the Qt Company's own LGPL binding
-
-This is a documentation obligation, not a blocker. But it is the one place where this recommendation carries genuine legal homework, and it should be reviewed by counsel before release rather than after.
+The source/coverage editor widget is **unselected**. [Riverbank's QScintilla description](https://www.riverbankcomputing.com/software/qscintilla/intro) identifies PyQt bindings and GPL/commercial licensing; selecting PySide6 does not establish a compatible or permitted QScintilla arrangement. A candidate must demonstrate binding compatibility, license/distribution eligibility under LIC-020, and coverage overlays with representative files. No replacement dependency is selected by this correction. The existing type-aware-editor spike does not validate a source-editor dependency.
 
 ### 3.5 Recommendation
 
 **PySide6 (Qt) if the core is Python — which is the recommendation in §2.4.**
 
-Rationale, in order of weight: the two hardest widgets come free and virtualized; in-process with a Python core eliminates an entire IPC layer and its failure modes; the result looks and behaves like the commercial tools your users already know; and Qt's multi-decade stability suits a tool whose users may need to reproduce a build a decade from now.
+Rationale: Qt provides native virtualized views and the type-aware-editor spike supports the chosen stack. Shared Python domain code reduces binding complexity, while CLI and GUI retain the mandatory JSON engine IPC, including its framing, cancellation and failure behavior in SDD-002 S6. In-process calls inside the engine are implementation details behind operation ports. The source-editor widget and complete offline distribution remain separate acceptance work; Qt stability is a maintainability consideration, not proof of future reproducibility.
 
 **Choose Tauri if** you choose Rust in §2, or if binary size and installation friction turn out to dominate user feedback.
 
@@ -268,7 +279,7 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 **Question:** whether to fork UnitTestBot/UTBotCpp as a foundation.
 **Why it matters:** it is the closest existing open-source analog and it solves real problems — KLEE integration, stub synthesis with symbolic return values, automatic project configuration. But it is host-Linux-oriented, C++-implemented, and generates GoogleTest output — all three of which conflict with the recommendations in §2 and §3 and with SRS HAR-060.
 **Bearing on other decisions:** decisive. A fork settles the language question as C++ and reopens the GUI and framework decisions. This should be resolved before ADR-001's recommendations are accepted, not after.
-**Resolved — Accepted, 2026-09-19: build fresh, do not fork.** Recorded in full in [`ADR-006-fork-or-build-fresh.md`](ADR-006-fork-or-build-fresh.md), which is a direct evaluation of `UnitTestBot/UTBotCpp` against this specification (GitHub API, wiki, and repository, independently verified) — not the viability check the §4.2 spikes ran. Headline finding: UTBotCpp's Apache-2.0 license removes what usually kills a fork decision, but the fork collides with this specification on eight points — no target execution at all, line-coverage-only, an LLVM-14 pin four majors behind SDD-005's required floor on the API SDD-005 already rejects as unstable, an Ubuntu-resident server, C++ GoogleTest output that violates `TOOL-HAR-060`, a test-generation support matrix that excludes `void*`/variadics/external-state — exactly what embedded HAL code is made of — no standalone GUI, and a two-year-dormant upstream with no one to share the maintenance burden. Its one real asset, working KLEE-based test generation, serves `ATG-020`/`030`, which this specification files at *(S/C, P3)* — the lowest-priority band in the document. Four design ideas are harvested without forking (§5 of that document): the client-server split (already credited above), the `KLEE_MODE` symbolic-stub duality, `link_commands.json`'s link-closure insight, and the `c-syntax` support matrix as a ready-made risk list — all feeding `WP-GEN-05`/`06`/`07` and ADR-003. This discharges §4's outstanding condition without changing any recommendation in this document.
+**Resolved — Accepted, 2026-09-19: build fresh, do not fork.** Recorded in full in [`ADR-006-fork-or-build-fresh.md`](ADR-006-fork-or-build-fresh.md), which is a direct evaluation of `UnitTestBot/UTBotCpp` against this specification (GitHub API, wiki, and repository, independently verified) — not the viability check the §4.2 spikes ran. Headline finding: UTBotCpp's Apache-2.0 license removes what usually kills a fork decision, but the fork collides with this specification on eight points — no target execution at all, line-coverage-only, an LLVM-14 pin four majors behind SDD-005's required floor on the C++ API whose in-process linkage SDD-005 rejects as unstable (an isolated pinned executable remains allowed), an Ubuntu-resident server, C++ GoogleTest output that violates `TOOL-HAR-060`, a test-generation support matrix that excludes `void*`/variadics/external-state — exactly what embedded HAL code is made of — no standalone GUI, and a two-year-dormant upstream with no one to share the maintenance burden. Its one real asset, working KLEE-based test generation, serves `ATG-020`/`030`, which this specification files at *(S/C, P3)* — the lowest-priority band in the document. Four design ideas are harvested without forking (§5 of that document): the client-server split (already credited above), the `KLEE_MODE` symbolic-stub duality, `link_commands.json`'s link-closure insight, and the `c-syntax` support matrix as a ready-made risk list — all feeding `WP-GEN-05`/`06`/`07` and ADR-003. This discharges §4's outstanding condition without changing any recommendation in this document.
 
 ### ADR-007 — Distribution and packaging
 **Question:** the concrete packaging mechanism per platform, given INS-010 through INS-050.

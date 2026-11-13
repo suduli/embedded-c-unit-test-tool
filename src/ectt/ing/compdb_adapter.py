@@ -1,9 +1,9 @@
-# implements: DSN-ING-010
+# implements: DSN-ING-010, DSN-ING-130, DSN-ING-140
 """Compilation database adapter and parser.
 
 Reads, normalizes, and extracts translation units from compile_commands.json.
 
-Satisfies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030.
+Satisfies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030, TOOL-ING-210, TOOL-ING-220.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ import json
 import os
 import shlex
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,7 @@ from ectt.ing.errors import (
     CompilationDatabaseNotFoundError,
     MissingCommandOrArgumentsError,
     MissingEntryKeyError,
+    ResponseFileError,
 )
 from ectt.ing.model import (
     CompilationDatabase,
@@ -33,11 +35,18 @@ from ectt.prj.paths import normalize_posix_path, validate_project_path
 
 __all__ = [
     "parse_command_to_arguments",
+    "expand_response_files",
     "extract_compiler_flags",
     "CompDbAdapter",
     "load_compdb",
     "parse_compdb",
 ]
+
+# Response-file expansion bounds (TOOL-ING-210). A response file larger than
+# _MAX_RESPONSE_FILE_BYTES or nested deeper than _MAX_RESPONSE_FILE_DEPTH fails
+# ingestion with a named diagnostic instead of being guessed at.
+_MAX_RESPONSE_FILE_BYTES = 4 * 1024 * 1024
+_MAX_RESPONSE_FILE_DEPTH = 8
 
 
 def parse_command_to_arguments(command_str: str, *, posix: bool | None = None) -> list[str]:
@@ -105,6 +114,75 @@ def parse_command_to_arguments(command_str: str, *, posix: bool | None = None) -
     return raw_tokens
 
 
+def expand_response_files(
+    args: Sequence[str],
+    *,
+    directory: str | None = None,
+    depth_limit: int = _MAX_RESPONSE_FILE_DEPTH,
+) -> tuple[list[str], list[str]]:
+    """Expand ``@file`` response-file references in an argument sequence.
+
+    Satisfies: TOOL-ING-210. Each token starting with ``@`` is treated as a
+    response-file reference, resolved relative to ``directory`` (the entry's
+    working directory), parsed into arguments under quoting rules in which quoted
+    sections remain whole (the documented response-file semantics), and
+    expanded recursively up to ``depth_limit`` levels.
+
+    Returns the expanded argument list and the response-file paths actually
+    read, in encounter order.
+
+    Raises:
+        ResponseFileError: If a response file is missing, unreadable, over the
+            documented size limit, or the nesting depth limit is exceeded.
+    """
+    expanded: list[str] = []
+    used: list[str] = []
+
+    def _expand(tokens: list[str], depth: int) -> None:
+        if depth > depth_limit:
+            raise ResponseFileError(
+                f"Response-file nesting exceeds the depth limit of {depth_limit}",
+                reason="response_file_depth_exceeded",
+                depth=depth,
+            )
+        for tok in tokens:
+            if not tok.startswith("@") or len(tok) < 2:
+                expanded.append(tok)
+                continue
+            ref = tok[1:]
+            rsp_path = Path(ref)
+            if not rsp_path.is_absolute() and directory:
+                rsp_path = Path(directory) / rsp_path
+            if not rsp_path.is_file():
+                raise ResponseFileError(
+                    f"Response file '{ref}' does not exist (resolved to '{rsp_path}')",
+                    reason="response_file_not_found",
+                    response_file=ref,
+                    depth=depth,
+                )
+            try:
+                if rsp_path.stat().st_size > _MAX_RESPONSE_FILE_BYTES:
+                    raise ResponseFileError(
+                        f"Response file '{ref}' exceeds the size limit of {_MAX_RESPONSE_FILE_BYTES} bytes",
+                        reason="response_file_too_large",
+                        response_file=ref,
+                        depth=depth,
+                    )
+                content = rsp_path.read_text(encoding="utf-8")
+            except OSError as exc:
+                raise ResponseFileError(
+                    f"Response file '{ref}' cannot be read: {exc}",
+                    reason="response_file_unreadable",
+                    response_file=ref,
+                    depth=depth,
+                ) from exc
+            used.append(rsp_path.as_posix())
+            _expand(parse_command_to_arguments(content, posix=True), depth + 1)
+
+    _expand(list(args), 0)
+    return expanded, used
+
+
 def extract_compiler_flags(
     args: Sequence[str],
     *,
@@ -134,6 +212,8 @@ def extract_compiler_flags(
     language_standard: str | None = None
     output_file: str | None = None
     residual_flags: list[str] = []
+    target_triple: str | None = None
+    sysroot: str | None = None
 
     norm_source_hint = source_hint.replace("\\", "/") if source_hint else None
     source_stem_or_name = Path(norm_source_hint).name if norm_source_hint else None
@@ -218,6 +298,36 @@ def extract_compiler_flags(
             idx += 1
             continue
 
+        # 4b. Build-context identity: target triple and sysroot (TOOL-ING-220)
+        if tok in ("-target", "--target", "-mtriple", "--sysroot"):
+            if idx + 1 < num_tokens:
+                idx += 1
+                val = tokens[idx].strip("\"'")
+                if tok == "--sysroot":
+                    sysroot = _normalize_path_token(val, directory, project_root)
+                else:
+                    target_triple = val
+            idx += 1
+            continue
+        elif tok.startswith(("--target=", "-mtriple=")) and len(tok) > len("--target="):
+            target_triple = tok.split("=", 1)[1].strip("\"'")
+            idx += 1
+            continue
+        elif tok.startswith("--sysroot=") and len(tok) > len("--sysroot="):
+            sysroot = _normalize_path_token(tok.split("=", 1)[1].strip("\"'"), directory, project_root)
+            idx += 1
+            continue
+        elif tok == "-isysroot":
+            if idx + 1 < num_tokens:
+                idx += 1
+                sysroot = _normalize_path_token(tokens[idx].strip("\"'"), directory, project_root)
+            idx += 1
+            continue
+        elif tok.startswith("-isysroot=") and len(tok) > len("-isysroot="):
+            sysroot = _normalize_path_token(tok.split("=", 1)[1].strip("\"'"), directory, project_root)
+            idx += 1
+            continue
+
         # 5. Check if token is the source file argument itself
         tok_norm = tok.replace("\\", "/")
         if norm_source_hint is not None and (
@@ -237,6 +347,8 @@ def extract_compiler_flags(
         executable=executable,
         arguments=tuple(args),
         residual_flags=tuple(residual_flags),
+        target_triple=target_triple,
+        sysroot=sysroot,
     )
 
     norm_output = (
@@ -301,6 +413,7 @@ class CompDbAdapter:
         path: Path | str,
         *,
         project_root: Path | str | None = None,
+        build_tag: str | None = None,
     ) -> CompilationDatabase:
         """Load and parse compile_commands.json from the filesystem.
 
@@ -327,7 +440,12 @@ class CompDbAdapter:
                 reason="compdb_read_error",
             ) from exc
 
-        return self.loads(content, project_root=project_root, source_name=str(path))
+        return self.loads(
+            content,
+            project_root=project_root,
+            source_name=str(path),
+            build_tag=build_tag,
+        )
 
     def loads(
         self,
@@ -335,6 +453,7 @@ class CompDbAdapter:
         *,
         project_root: Path | str | None = None,
         source_name: str | None = None,
+        build_tag: str | None = None,
     ) -> CompilationDatabase:
         """Parse compile_commands.json content from a string."""
         raw_text = content.strip()
@@ -377,7 +496,11 @@ class CompDbAdapter:
             )
             translation_units.append(tu)
 
-        return CompilationDatabase(translation_units=tuple(translation_units))
+        normalized_tag = build_tag.strip() if isinstance(build_tag, str) else None
+        return CompilationDatabase(
+            translation_units=tuple(translation_units),
+            build_tag=normalized_tag or None,
+        )
 
     def _normalize_entry(
         self,
@@ -487,6 +610,21 @@ class CompDbAdapter:
                     reason="empty_command_tokens",
                 )
 
+        # Response-file expansion (TOOL-ING-210). The raw, unexpanded
+        # invocation is preserved on the entry when expansion occurred.
+        reference_args = tuple(raw_args)
+        raw_args, response_files = expand_response_files(
+            raw_args, directory=raw_dir
+        )
+        if not raw_args:
+            raise MissingCommandOrArgumentsError(
+                f"Entry at index {entry_index} ('{raw_file}') expanded to no arguments",
+                path=source_name,
+                entry_index=entry_index,
+                entry_file=raw_file,
+                reason="empty_expanded_arguments",
+            )
+
         # Normalize source path and directory
         norm_source_path = _normalize_source_path(
             raw_file,
@@ -519,6 +657,9 @@ class CompDbAdapter:
                 project_root,
             )
 
+        if response_files:
+            invocation = replace(invocation, raw_arguments=reference_args)
+
         return TranslationUnit(
             source_path=norm_source_path,
             working_directory=norm_working_directory,
@@ -527,6 +668,7 @@ class CompDbAdapter:
             compiler_invocation=invocation,
             language_standard=language_standard,
             output_file=output_file,
+            response_files=tuple(response_files),
         )
 
 
@@ -565,10 +707,11 @@ def load_compdb(
     path: Path | str,
     *,
     project_root: Path | str | None = None,
+    build_tag: str | None = None,
 ) -> CompilationDatabase:
     """Convenience function to load a compilation database from file."""
     adapter = CompDbAdapter(project_root=project_root)
-    return adapter.load(path)
+    return adapter.load(path, build_tag=build_tag)
 
 
 def parse_compdb(
@@ -576,7 +719,8 @@ def parse_compdb(
     *,
     project_root: Path | str | None = None,
     source_name: str | None = None,
+    build_tag: str | None = None,
 ) -> CompilationDatabase:
     """Convenience function to parse a compilation database from JSON string."""
     adapter = CompDbAdapter(project_root=project_root)
-    return adapter.loads(content, source_name=source_name)
+    return adapter.loads(content, source_name=source_name, build_tag=build_tag)
