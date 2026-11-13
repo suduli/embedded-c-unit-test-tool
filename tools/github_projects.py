@@ -61,6 +61,10 @@ STATUS_OPTIONS = [
 ]
 INITIAL_STATUS = "Needs reconciliation"
 PHASE_OPTIONS = ["P0", "P1", "P2", "P3", "P4"]
+# GitHub rejects single-select option inputs with null color/description
+# even though the schema marks them optional — always supply both. The
+# runtime color enum is narrower than the schema suggests: only these eight.
+OPTION_COLORS = ["GRAY", "BLUE", "GREEN", "YELLOW", "ORANGE", "RED", "PINK", "PURPLE"]
 FIELD_WORK_PACKAGE = "Work Package"
 FIELD_COMPONENT = "Component"
 FIELD_PHASE = "Phase"
@@ -78,13 +82,13 @@ TITLE_RE = re.compile(r"^\[(WP-[A-Z]+-\d+)\] (.+)$")
 SHORT_REQ_RE = re.compile(r"[A-Z]{3}-\d{3}")
 SRS_REQ_RE = re.compile(r"^\*\*(TOOL-[A-Z]{3}-\d{3})\*\* \*\(([MSCF]), (P[1-4]|—), ([TADI]|—)\)\*", re.M)
 VIEW_SPECS = [
-    {"name": "Reconciliation", "layout": "TABLE", "filter": f'Status:"{INITIAL_STATUS}"',
+    {"name": "Reconciliation", "layout": "TABLE_LAYOUT", "filter": f'Status:"{INITIAL_STATUS}"',
      "manual": "visible fields: Title, Status, Work Package, Component, Phase"},
-    {"name": "Delivery", "layout": "BOARD", "filter": f'-Status:"{INITIAL_STATUS}"',
+    {"name": "Delivery", "layout": "BOARD_LAYOUT", "filter": f'-Status:"{INITIAL_STATUS}"',
      "manual": "group by Status"},
-    {"name": "Subsystems", "layout": "TABLE", "filter": "",
+    {"name": "Subsystems", "layout": "TABLE_LAYOUT", "filter": "",
      "manual": "group by Component"},
-    {"name": "Phase planning", "layout": "TABLE", "filter": "",
+    {"name": "Phase planning", "layout": "TABLE_LAYOUT", "filter": "",
      "manual": "group by Phase; visible fields: Effort, Depends on, Work Package"},
 ]
 BODY_TEMPLATE_VERSION = 1
@@ -576,7 +580,7 @@ class RemoteProjectState:
 
 PROJECT_FIELDS_FRAGMENT = """
 fields(first:100){nodes{
-  ... on ProjectV2SingleSelectField { name id dataType options{id name} }
+  ... on ProjectV2SingleSelectField { name id dataType options{id name color description} }
   ... on ProjectV2Field { name id dataType }
   ... on ProjectV2IterationField { name id dataType }
 }}
@@ -1151,13 +1155,36 @@ def _resolve_project(gh: Gh, repo: str, owner: str, project_id: str) -> str:
     return created["id"]
 
 
+def option_payload(existing: list[dict], wanted: list[str]) -> list[dict]:
+    """Build ProjectV2SingleSelectFieldOptionInput entries.
+
+    GitHub rejects option objects with null color or description even though
+    the schema marks them optional, so every entry carries both; options that
+    already exist keep their id, color and description untouched."""
+    by_name = {o["name"]: o for o in existing}
+    fresh = 0
+    payload: list[dict] = []
+    for name in wanted:
+        e = by_name.get(name)
+        if e is not None:
+            entry = {"name": name, "color": e.get("color") or OPTION_COLORS[0],
+                     "description": e.get("description") or ""}
+            if e.get("id"):
+                entry["id"] = e["id"]
+            payload.append(entry)
+        else:
+            payload.append({"name": name, "color": OPTION_COLORS[fresh % len(OPTION_COLORS)],
+                            "description": ""})
+            fresh += 1
+    return payload
+
+
 def ensure_field(gh: Gh, repo: str, owner: str, project_id: str, op: dict, notes: list[str]) -> str:
     project_id = _resolve_project(gh, repo, owner, project_id)
     fields = fetch_project_fields(gh, project_id)
     node = fields.get(op["name"])
     if node is None:
-        options = [{"name": o} for o in op.get("options", [])]
-        if options:
+        if op.get("options"):
             gh.graphql(
                 """mutation($projectId:ID!,$name:String!,$dataType:ProjectV2CustomFieldType!,
                             $options:[ProjectV2SingleSelectFieldOptionInput!]){
@@ -1166,7 +1193,8 @@ def ensure_field(gh: Gh, repo: str, owner: str, project_id: str, op: dict, notes
                        projectV2Field{... on ProjectV2Field{name} ... on ProjectV2SingleSelectField{name id options{name}}}
                      }
                    }""",
-                {"projectId": project_id, "name": op["name"], "dataType": op["dataType"], "options": options},
+                {"projectId": project_id, "name": op["name"], "dataType": op["dataType"],
+                 "options": option_payload([], op["options"])},
             )
         else:
             gh.graphql(
@@ -1183,9 +1211,7 @@ def ensure_field(gh: Gh, repo: str, owner: str, project_id: str, op: dict, notes
         have = {o["name"] for o in node["options"]}
         missing = [o for o in op.get("options", []) if o not in have]
         if missing:
-            id_by_name = {o["name"]: o["id"] for o in node["options"]}
-            payload = [{"id": id_by_name[o], "name": o} if o in id_by_name else {"name": o}
-                       for o in sorted(have | set(missing))]
+            payload = option_payload(node["options"], sorted(have | set(missing)))
             _update_single_select_options(gh, node["id"], payload)
             notes.append(f"added options to '{op['name']}': {', '.join(missing)}")
     return project_id
@@ -1197,12 +1223,12 @@ def ensure_status_options(gh: Gh, repo: str, owner: str, project_id: str, op: di
     status = fields.get("Status")
     if status is None:
         raise ProjectsError("the project has no built-in Status field — unexpected; report this")
-    have = {o["name"]: o["id"] for o in status["options"]}
+    have = {o["name"] for o in status["options"]}
     wanted = op["options"]
     if set(have) == set(wanted):
         notes.append("Status options already match")
         return
-    payload = [{"id": have[name], "name": name} if name in have else {"name": name} for name in wanted]
+    payload = option_payload(status["options"], wanted)
     _update_single_select_options(gh, status["id"], payload)
     notes.append(f"Status options set to: {' → '.join(wanted)}")
 
@@ -1225,7 +1251,7 @@ def ensure_view(gh: Gh, repo: str, owner: str, project_id: str, op: dict, notes:
             {"projectId": project_id, "name": op["name"], "layout": op["layout"]},
         )["createProjectV2View"]["projectV2View"]
         node = {"id": created["id"], "name": created["name"], "layout": created["layout"], "filter": ""}
-        notes.append(f"created view '{op['name']}' ({op['layout'].lower()})")
+        notes.append(f"created view '{op['name']}' ({op['layout'].removesuffix('_LAYOUT').lower()})")
     if (node.get("filter") or "") != op.get("filter", ""):
         gh.graphql(
             """mutation($viewId:ID!,$filter:String!){
@@ -1257,8 +1283,9 @@ def _update_single_select_options(gh: Gh, field_id: str, payload: list[dict]) ->
     """Rewrite a single-select field's options, preserving ids where names match.
 
     Preserving ids keeps existing items' selections intact when bootstrap is
-    re-run after items have been imported."""
-    options = [{"id": o["id"], "name": o["name"]} if o.get("id") else {"name": o["name"]} for o in payload]
+    re-run after items have been imported. Entries come from option_payload,
+    which guarantees non-null color/description and preserves ids."""
+    options = [dict(o) for o in payload]
     gh.graphql(
         """mutation($fieldId:ID!,$options:[ProjectV2SingleSelectFieldOptionInput!]){
              updateProjectV2Field(input:{fieldId:$fieldId, singleSelectOptions:$options}){

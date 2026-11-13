@@ -146,7 +146,9 @@ class FakeGh:
     def _field_node(self, name: str, meta: dict) -> dict:
         node = {"name": name, "id": meta["id"], "dataType": meta["dataType"]}
         if meta["dataType"] == "SINGLE_SELECT":
-            node["options"] = [{"id": o["id"], "name": o["name"]} for o in meta["options"]]
+            node["options"] = [{"id": o["id"], "name": o["name"],
+                                "color": o.get("color", "GRAY"),
+                                "description": o.get("description", "")} for o in meta["options"]]
         return node
 
     def _q_project(self, query: str, variables: dict) -> dict:
@@ -208,7 +210,8 @@ class FakeGh:
     def _m_createProjectV2Field(self, query, variables):
         self._field_seq += 1
         fid = f"FIELD_{self._field_seq}"
-        options = [{"id": f"OPT_{self._field_seq}_{i}", "name": o["name"]}
+        options = [{"id": f"OPT_{self._field_seq}_{i}", "name": o["name"],
+                    "color": o.get("color", "GRAY"), "description": o.get("description", "")}
                    for i, o in enumerate(variables.get("options") or [])]
         self.fields[variables["name"]] = {"id": fid, "dataType": variables["dataType"], "options": options}
         return {"createProjectV2Field": {"projectV2Field": {"name": variables["name"], "id": fid}}}
@@ -217,16 +220,21 @@ class FakeGh:
         fid = variables["fieldId"]
         target = next((n for n, f in self.fields.items() if f["id"] == fid), None)
         assert target is not None, f"updateProjectV2Field: unknown field id {fid}"
-        preserved = {o["id"]: o["name"] for o in self.fields[target]["options"]}
+        existing = {o["id"]: o for o in self.fields[target]["options"]}
+        by_name = {o["name"]: o for o in self.fields[target]["options"]}
         new_options = []
         for o in variables["options"]:
             oid = o.get("id")
-            if oid is None:
-                oid = next((k for k, v in preserved.items() if v == o["name"]), None)
+            prior = existing.get(oid) or by_name.get(o["name"])
+            if oid is None and prior is not None:
+                oid = prior["id"]
             if oid is None:
                 self._field_seq += 1
                 oid = f"OPT_{self._field_seq}"
-            new_options.append({"id": oid, "name": o["name"]})
+            new_options.append({"id": oid, "name": o["name"],
+                                "color": o.get("color") or (prior or {}).get("color", "GRAY"),
+                                "description": o.get("description", "") if prior is None
+                                               else (prior.get("description", ""))})
         self.fields[target]["options"] = new_options
         return {"updateProjectV2Field": {"projectV2Field": {"id": fid, "options": new_options}}}
 
@@ -282,13 +290,13 @@ def seeded_project(fake: FakeGh) -> FakeGh:
     fake.project = {"id": "PROJ_1", "number": 1, "title": gp.PROJECT_TITLE,
                     "resourcePath": f"/users/{OWNER}/projects/1"}
     fake.fields["Status"] = {"id": "FIELD_STATUS", "dataType": "SINGLE_SELECT",
-                             "options": [{"id": f"OPT_S{i}", "name": o} for i, o in enumerate(gp.STATUS_OPTIONS)]}
+                             "options": [{"id": f"OPT_S{i}", "name": o, "color": "GRAY", "description": ""} for i, o in enumerate(gp.STATUS_OPTIONS)]}
     fake.fields[gp.FIELD_WORK_PACKAGE] = {"id": "FIELD_WP", "dataType": "TEXT", "options": []}
     fake.fields[gp.FIELD_COMPONENT] = {"id": "FIELD_COMP", "dataType": "SINGLE_SELECT",
-                                       "options": [{"id": f"OPT_C{i}", "name": o}
+                                       "options": [{"id": f"OPT_C{i}", "name": o, "color": "BLUE", "description": ""}
                                                    for i, o in enumerate(register_components())]}
     fake.fields[gp.FIELD_PHASE] = {"id": "FIELD_PHASE", "dataType": "SINGLE_SELECT",
-                                   "options": [{"id": f"OPT_P{i}", "name": o} for i, o in enumerate(gp.PHASE_OPTIONS)]}
+                                   "options": [{"id": f"OPT_P{i}", "name": o, "color": "GREEN", "description": ""} for i, o in enumerate(gp.PHASE_OPTIONS)]}
     fake.fields[gp.FIELD_EFFORT] = {"id": "FIELD_EFF", "dataType": "NUMBER", "options": []}
     fake.fields[gp.FIELD_DEPENDS_ON] = {"id": "FIELD_DEP", "dataType": "TEXT", "options": []}
     for spec in gp.VIEW_SPECS:
