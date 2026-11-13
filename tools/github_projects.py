@@ -136,8 +136,9 @@ class Gh:
     Tests replace this object with an in-memory fake exposing the same methods.
     """
 
-    def __init__(self, gh_path: str = "gh"):
+    def __init__(self, gh_path: str = "gh", timeout: int = 600):
         self.gh_path = gh_path
+        self.timeout = timeout
 
     def _run(self, args: list[str], stdin: str | None = None) -> str:
         try:
@@ -147,11 +148,18 @@ class Gh:
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
+                timeout=self.timeout,
             )
         except FileNotFoundError as exc:
             raise GhError(
                 f"GitHub CLI ({self.gh_path}) not found. Install it and authenticate with "
                 "'gh auth login', or provide a token via the ECTT_PROJECTS_TOKEN environment variable."
+            ) from exc
+        except subprocess.TimeoutExpired as exc:
+            raise GhError(
+                f"github CLI call ({' '.join(args[:3])}…) exceeded {self.timeout}s and was aborted. "
+                "gh retries silently while GitHub throttles bursts of writes; wait a few minutes and "
+                "rerun — completed operations are rediscovered, never duplicated."
             ) from exc
         if proc.returncode != 0:
             detail = (proc.stderr or proc.stdout or "").strip()
@@ -1353,6 +1361,7 @@ def source_revision(root: Path) -> str:
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, encoding="utf-8",
+            timeout=30,
         )
         if proc.returncode == 0:
             return proc.stdout.strip()
@@ -1380,7 +1389,7 @@ def run_source_gates(root: Path, python: str | None = None) -> list[str]:
         cmd = [interpreter, str(script)]
         if "trace_check" in gate:
             cmd += ["--check-diagrams", str(root / "design/diagrams")]
-        proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, encoding="utf-8")
+        proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, encoding="utf-8", timeout=300)
         if proc.returncode != 0:
             raise ProjectsError(
                 f"source gate {gate} failed — the importer will not propose writes.\n"
@@ -1461,6 +1470,8 @@ def build_parser() -> argparse.ArgumentParser:
     common.add_argument("--repo", help="owner/name (default: origin remote or GITHUB_REPOSITORY)")
     common.add_argument("--root", help="repository root (default: cwd)")
     common.add_argument("--gh-path", default=os.environ.get("GH_PATH", "gh"), help="GitHub CLI executable")
+    common.add_argument("--gh-timeout", type=int, default=int(os.environ.get("GH_TIMEOUT", "600")),
+                        help="seconds before an unresponsive gh call is aborted (default 600)")
     common.add_argument("--owner", help="project owner (default: repo owner; user-owned projects)")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -1493,7 +1504,7 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.root) if args.root else repo_root()
     repo = resolve_repo(args.repo)
     owner = args.owner or repo.split("/")[0]
-    gh = Gh(args.gh_path)
+    gh = Gh(args.gh_path, timeout=args.gh_timeout)
     try:
         if args.command == "bootstrap":
             ops, notes = bootstrap(gh, root, repo, owner, args.project_number, args.apply)

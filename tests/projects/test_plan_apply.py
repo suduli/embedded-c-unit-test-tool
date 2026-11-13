@@ -439,7 +439,7 @@ def test_passing_gates_allow_the_plan_to_reach_source_parsing(tmp_path, capsys):
 
 
 def test_cli_plan_writes_preview_file(bootstrapped, tmp_path, capsys, monkeypatch):
-    monkeypatch.setattr(gp, "Gh", lambda path: bootstrapped)  # never touch the real API from tests
+    monkeypatch.setattr(gp, "Gh", lambda *a, **k: bootstrapped)  # never touch the real API from tests
     out = tmp_path / "preview.json"
     code = gp.main(["plan", "--repo", REPO, "--project-number", "1",
                     "--root", str(REPO_ROOT), "--skip-gates", "--output", str(out)])
