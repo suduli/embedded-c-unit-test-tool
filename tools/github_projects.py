@@ -598,11 +598,14 @@ fields(first:100){nodes{
 
 # `field` is the ProjectV2FieldConfiguration union: selections need inline
 # fragments on its member types (GitHub rejects direct selections on unions).
+# Small pages keep each read below GitHub's threshold for expensive-query
+    # 502s and gh's retry-crash under sustained throttling; the pagination loop
+    # assembles the full set either way.
 PROJECT_ITEMS_FRAGMENT = """
-items(first:100,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
+items(first:50,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
   id
   content{... on Issue{number title state}}
-  fieldValues(first:50){nodes{
+  fieldValues(first:25){nodes{
     ... on ProjectV2ItemFieldSingleSelectValue{
       field{... on ProjectV2SingleSelectField{name}}
       name optionId
