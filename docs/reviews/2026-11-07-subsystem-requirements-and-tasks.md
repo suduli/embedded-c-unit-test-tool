@@ -3,7 +3,7 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status (updated 2026-11-17):** 14 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17..T-21 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 344 requirements / 342 allocations / 191 packages; trace_check exit 0: 342/342 allocated); baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining task T-22 is doc-only and needs no decisions. Landing anything else requires the change process and approval
+- **Status (updated 2026-11-17):** 15 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17..T-22 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 345 requirements / 343 allocations / 191 packages; trace_check exit 0: 343/343 allocated); baseline merged to `main` via PR #7. **All implementation-eligible review tasks are landed.** Four user decisions pending — see the [Decision queue](#decision-queue-awaiting-user); T-14 remains blocked by D-02 (identity model) and T-01/T-02 by D-01 (licence). Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
 - **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
@@ -416,14 +416,14 @@
 | ID | Requirement (proposed) | Baseline | Source | Priority |
 |---|---|---|---|:--:|
 | NR-28 | Generated-harness results agree with independently written reference tests — landed 2026-11-17 (TOOL-QUA-110, DSN-QUA-090, PLAN §5.4/§6.4) | WP-QUA-03 | RV-06 F-02 | P2 |
-| NR-29 | Packaging gated on clean-machine endpoint acceptance (ADR-007) | WP-PKG-07 | RV-01 F-17 | P2 |
+| NR-29 | Packaging gated on clean-machine endpoint acceptance (ADR-007) — landed 2026-11-17 as TOOL-INS-120 in WP-PKG-01 (the installation package owns the gate, not the licence-policy package) + ADR-007 exit criterion | WP-PKG-07 | RV-01 F-17 | P2 |
 
 ### Review-derived tasks
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
 | T-21 | Harness-vs-reference agreement check in WP-QUA-03 | NR-28 | RV-06 F-02 | P2 | **Complete** | — |
-| T-22 | Clean-machine endpoint gate in WP-PKG (ADR-007) | NR-29 | RV-01 F-17 | P2 | Not Started | — |
+| T-22 | Clean-machine endpoint gate in WP-PKG (ADR-007) | NR-29 | RV-01 F-17 | P2 | **Complete** | — |
 
 ## Governance & cross-cutting decisions (gates everything)
 
@@ -569,6 +569,14 @@
 - **PLAN-001:** QUA-110 allocated to WP-QUA-03; §5.4 adds the WP-QUA-03 exit-criterion example; §6.4 adds the harness-vs-reference agreement paragraph — golden files prove determinism, not generated semantics; the metamorphic check is the cheapest strong oracle for WP-GEN-01/02. Derived tables regenerated.
 - **Design register:** DSN-QUA-090 (Harness-vs-reference agreement) added; requirement_count 344.
 - **Gates:** plan_check exit 0 — 344 requirements, 342 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 342/342 allocated, 257 elements.
+
+### T-22 evidence (landed 2026-11-17 — L6 Assurance)
+
+- **SRS-001:** TOOL-INS-120 (M, P2, T) — no release package ships before it passes a clean-machine endpoint acceptance test: install and run on a machine with no development toolchain, under default endpoint-security policy (AV/SmartScreen or platform equivalent), without administrative privileges and without network access; security-policy interactions recorded per release.
+- **PLAN-001:** INS-120 allocated to WP-PKG-01 (offline, non-admin installation — the package the gate tests; the register's WP-PKG-07 baseline was the licence-policy package, and the gate belongs with the installation package); §5.4 adds the WP-PKG-01 exit criterion. Derived tables regenerated.
+- **Design register:** DSN-PKG-140 (Clean-machine endpoint acceptance gate) added; requirement_count 345.
+- **ADR-001 §ADR-007:** the gate recorded as ADR-007's exit criterion — the signing + SBOM pipeline (SDD-005 §5.9) is the mechanism; the ADR stays open for the per-platform installer/signing choice, which is entangled with the licence decision (D-01/T-01).
+- **Gates:** plan_check exit 0 — 345 requirements, 343 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 343/343 allocated, 258 elements.
 
 ## Decision queue (awaiting user)
 

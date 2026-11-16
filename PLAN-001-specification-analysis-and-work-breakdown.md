@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 344 SRS-001 requirements
+**Covers:** all 345 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-344 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+345 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 213 · S 113 · C 16 · F 2 |
-| Phase | P1 38 · P2 154 · P3 107 · P4 43 · — 2 |
-| Verification | T 246 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 214 · S 113 · C 16 · F 2 |
+| Phase | P1 38 · P2 155 · P3 107 · P4 43 · — 2 |
+| Verification | T 247 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -53,7 +53,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | EXE | 9 | 5 | 4 | 0 | 0 | 7 | 2 | 0 | 0 | 9 | 0 | 0 | 0 |
 | HAR | 13 | 9 | 3 | 1 | 0 | 0 | 12 | 1 | 0 | 11 | 1 | 0 | 1 |
 | ING | 22 | 11 | 9 | 2 | 0 | 4 | 17 | 1 | 0 | 19 | 1 | 2 | 0 |
-| INS | 11 | 9 | 2 | 0 | 0 | 0 | 10 | 1 | 0 | 4 | 1 | 6 | 0 |
+| INS | 12 | 10 | 2 | 0 | 0 | 0 | 11 | 1 | 0 | 5 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 11 | 4 | 6 | 1 | 0 | 0 | 4 | 5 | 2 | 10 | 1 | 0 | 0 |
 | NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
@@ -208,10 +208,10 @@ Three rules were applied and are worth stating because they are where a work bre
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 69 | 88 | 46 |
-| P2 | 69 | 134 | 228 | 48 |
+| P2 | 69 | 135 | 228 | 48 |
 | P3 | 65 | 103 | 230 | 52 |
 | P4 | 26 | 36 | 92 | 52 |
-| Total | 191 | 342 | 642 | 52 |
+| Total | 191 | 343 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -255,6 +255,7 @@ the foundation and the certification-critical packages:
 | `WP-AIF-14` | Valid typed decisions pass schema/domain validation; invalid, unsupported, failed and timed-out provider responses produce recorded rejection and no altered measured result |
 | `WP-AIF-15` | Exercise remote and local/self-hosted adapters through the same extension contract for each role; deny unsupported capabilities explicitly and verify no calling feature imports a vendor SDK |
 | `WP-PLG-04` | A third-party provider registers via the public extension API, negotiates capabilities and version compatibility, and an incompatible provider is rejected without loading it into a feature |
+| `WP-PKG-01` | The release package installs and runs on a clean machine with no development toolchain under default endpoint-security policy, without administrative privileges and without network access; the endpoint-security interactions are recorded per release |
 | `WP-QUA-03` | For each harness-agreement fixture, the generated-harness outcome equals the hand-written reference-test outcome on the same inputs — including one failing case and one stubbed-dependency case; any disagreement is reported as a harness-generation defect |
 | `WP-TRC-01` | A requirement linked by two association rows to the same test aggregates to one counted pair and one worst-outcome verdict — never a 2/1 numerator-over-denominator — and a requirement linked to no executed test is reported unverified |
 | `WP-QUA-07` | Documentation states, in one place, what qualification evidence is provided and what remains the user's responsibility, and no other document claims more |
@@ -454,7 +455,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L6 — Assurance and Ecosystem
 
-53 work packages · 79 requirements · 164 person-weeks
+53 work packages · 80 requirements · 164 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -481,7 +482,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-MIG-05` | Import fidelity reporting | CMP-MIG | P3 | 3w | MIG-040 MIG-110 | MIG-04 |  |
 | `WP-MIG-06` | Coexistence with another tool on one project | CMP-MIG | P3 | 3w | MIG-070 | CORE-01 PRJ-01 |  |
 | `WP-MIG-07` | Migration assessment mode | CMP-MIG | P4 | 4w | MIG-090 | MIG-05 |  |
-| `WP-PKG-01` | Offline, non-admin, runtime-free installation | CMP-PKG | P2 | 6w | INS-010 INS-020 INS-030 | SPIKE-03 CORE-03 | ● |
+| `WP-PKG-01` | Offline, non-admin, runtime-free installation | CMP-PKG | P2 | 6w | INS-010 INS-020 INS-030 INS-120 | SPIKE-03 CORE-03 | ● |
 | `WP-PKG-02` | Self-contained archivable release identity | CMP-PKG | P2 | 3w | INS-040 QUA-050 | PKG-01 CORE-04 |  |
 | `WP-PKG-03` | Side-by-side versions and confirmed upgrade | CMP-PKG | P2 | 4w | INS-050 INS-060 | PKG-01 PRJ-03 |  |
 | `WP-PKG-04` | Documented uninstallation | CMP-PKG | P2 | 1w | INS-070 | PKG-01 |  |
@@ -541,16 +542,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 152 | 44.2% |
+| EQUIVALENCE PARTITIONING | 153 | 44.3% |
 | INSPECTION CHECKLIST | 52 | 15.1% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.1% |
-| DECISION TABLE | 25 | 7.3% |
-| SCENARIO (demonstration) | 25 | 7.3% |
+| DECISION TABLE | 25 | 7.2% |
+| SCENARIO (demonstration) | 25 | 7.2% |
 | PAIRWISE | 21 | 6.1% |
 | STATE TRANSITION | 20 | 5.8% |
 | ANALYSIS ARGUMENT | 19 | 5.5% |
 | — (deferred) | 2 | 0.6% |
-| Total | 344 | 100% |
+| Total | 345 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -560,7 +561,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 246 |
+| T | 247 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -656,10 +657,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 344 |
-| Non-Future IDs | 342 |
-| Primary allocation entries | 342 |
-| Distinct allocated IDs | 342 |
+| SRS unique IDs | 345 |
+| Non-Future IDs | 343 |
+| Primary allocation entries | 343 |
+| Distinct allocated IDs | 343 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -688,11 +689,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 36 | 105 | 51 | 21 | 0 | 213 |
+| M | 36 | 106 | 51 | 21 | 0 | 214 |
 | S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 38 | 154 | 107 | 43 | 2 | 344 |
+| Total | 38 | 155 | 107 | 43 | 2 | 345 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -867,6 +868,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-INS-090` | S | P2 | D | `WP-PKG-05` | SCENARIO (demonstration) |
 | `TOOL-INS-100` | S | P3 | D | `WP-PKG-06` | SCENARIO (demonstration) |
 | `TOOL-INS-110` | M | P2 | T | `WP-CORE-04` | EQUIVALENCE PARTITIONING |
+| `TOOL-INS-120` | M | P2 | T | `WP-PKG-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-LIC-010` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |
 | `TOOL-LIC-020` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |
 | `TOOL-LIC-030` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |

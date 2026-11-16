@@ -875,6 +875,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-INS-110** *(M, P2, T)* — The tool shall report its version, build identifier, and the versions of its principal dependencies on request.
 
+**TOOL-INS-120** *(M, P2, T)* — No release package shall ship before it passes a clean-machine endpoint acceptance test: the package installs and runs on a machine with no development toolchain installed, under default endpoint-security policy (antivirus, SmartScreen, or the platform equivalent), without administrative privileges and without network access; endpoint-security interactions shall be recorded per release.
+
 ---
 
 ## 25. Extensibility (PLG)

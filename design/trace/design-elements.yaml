@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 344
+      requirement_count: 345
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -2530,6 +2530,19 @@ components:
           feature set.
         satisfies: [TOOL-LIC-070]
         verification: I
+      - id: DSN-PKG-140
+        title: Clean-machine endpoint acceptance gate
+        statement: >
+          No release package ships before it passes a clean-machine endpoint
+          acceptance test: the package installs and runs on a machine with no
+          development toolchain installed, under default endpoint-security
+          policy (antivirus, SmartScreen, or the platform equivalent),
+          without administrative privileges and without network access, with
+          the security-policy interactions recorded per release. This is
+          ADR-007's exit criterion; the signing and SBOM pipeline from
+          SDD-005 §5.9 is the mechanism.
+        satisfies: [TOOL-INS-120]
+        verification: T
 
   - id: CMP-QUA
     name: Qualification Evidence
