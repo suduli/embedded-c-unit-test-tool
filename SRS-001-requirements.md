@@ -487,6 +487,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-TRC-100** *(C, P4, T)* — The tool shall interoperate with an established open-source traceability tool rather than requiring its own requirements database.
 
+**TOOL-TRC-110** *(M, P4, T)* — Requirement-level verdict figures shall be computed by deduplicating association rows to unique (requirement, test) pairs; a requirement's verdict shall be the worst outcome among its linked executed tests, with unreviewed-origin tests counted as unverified per TOOL-ATG-080; every requirement-level percentage shall label its denominator; and a requirement linked to no executed test shall be reported `unverified`, never inferred from coverage.
+
 ---
 
 ## 15. Reporting (REP)

@@ -392,6 +392,17 @@ obligations. A renderer that ignores it produces a report that overclaims, so
 the renderer conformance test (§10) asserts that every advisory present in the
 model appears in the output.
 
+Requirement-level figures in `traceability` are aggregation-controlled
+(TOOL-TRC-110, DSN-TRC-090): association rows deduplicate to unique
+(requirement, test) pairs before any count; a requirement's verdict is the
+worst outcome among its linked executed tests, with unreviewed-origin tests
+counted as unverified per TOOL-ATG-080; every requirement-level percentage
+labels its denominator; and a requirement linked to no executed test is
+`unverified`, never inferred from coverage. The acceptance fixtures reproduce
+the two-associations-for-one-requirement anomaly — two association rows, one
+requirement — which must aggregate to one counted pair and one verdict, never
+a 2/1 numerator-over-denominator.
+
 `format_version` is separate from `schema_version` because TOOL-REP-130 requires
 archived evidence to stay interpretable: the model may evolve while a given
 rendered format's definition stays pinned and published.

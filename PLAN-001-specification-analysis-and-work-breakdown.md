@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 341 SRS-001 requirements
+**Covers:** all 342 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-341 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+342 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 210 · S 113 · C 16 · F 2 |
-| Phase | P1 37 · P2 153 · P3 107 · P4 42 · — 2 |
-| Verification | T 243 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 211 · S 113 · C 16 · F 2 |
+| Phase | P1 37 · P2 153 · P3 107 · P4 43 · — 2 |
+| Verification | T 244 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -67,7 +67,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | TCD | 14 | 8 | 5 | 1 | 0 | 1 | 11 | 2 | 0 | 12 | 1 | 0 | 1 |
 | TCH | 10 | 5 | 4 | 1 | 0 | 2 | 0 | 8 | 0 | 8 | 1 | 1 | 0 |
 | TGT | 12 | 8 | 3 | 1 | 0 | 0 | 0 | 12 | 0 | 9 | 0 | 1 | 2 |
-| TRC | 10 | 4 | 5 | 1 | 0 | 0 | 0 | 0 | 10 | 10 | 0 | 0 | 0 |
+| TRC | 11 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | 11 | 11 | 0 | 0 | 0 |
 | UIX | 40 | 27 | 10 | 1 | 2 | 2 | 22 | 10 | 4 | 31 | 3 | 2 | 2 |
 
 ## 3. Layer 1 — Specification analysis
@@ -210,8 +210,8 @@ Three rules were applied and are worth stating because they are where a work bre
 | P1 | 28 | 68 | 88 | 46 |
 | P2 | 69 | 133 | 228 | 48 |
 | P3 | 65 | 103 | 230 | 52 |
-| P4 | 26 | 35 | 92 | 52 |
-| Total | 191 | 339 | 642 | 52 |
+| P4 | 26 | 36 | 92 | 52 |
+| Total | 191 | 340 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -254,6 +254,7 @@ the foundation and the certification-critical packages:
 | `WP-AIF-14` | Valid typed decisions pass schema/domain validation; invalid, unsupported, failed and timed-out provider responses produce recorded rejection and no altered measured result |
 | `WP-AIF-15` | Exercise remote and local/self-hosted adapters through the same extension contract for each role; deny unsupported capabilities explicitly and verify no calling feature imports a vendor SDK |
 | `WP-PLG-04` | A third-party provider registers via the public extension API, negotiates capabilities and version compatibility, and an incompatible provider is rejected without loading it into a feature |
+| `WP-TRC-01` | A requirement linked by two association rows to the same test aggregates to one counted pair and one worst-outcome verdict — never a 2/1 numerator-over-denominator — and a requirement linked to no executed test is reported unverified |
 | `WP-QUA-07` | Documentation states, in one place, what qualification evidence is provided and what remains the user's responsibility, and no other document claims more |
 
 ### 5.5 The work package register
@@ -374,7 +375,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L4 — Evidence
 
-32 work packages · 56 requirements · 115 person-weeks
+32 work packages · 57 requirements · 115 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -404,7 +405,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-REP-09` | Report generation from archived result data | CMP-REP | P4 | 3w | REP-150 | REP-01 PRJ-05 |  |
 | `WP-REP-10` | Coverage interchange import and export | CMP-REP | P4 | 3w | MIG-080 | REP-01 COV-02 |  |
 | `WP-REP-11` | Report format extension point | CMP-REP | P3 | 2w | PLG-050 | REP-01 PLG-01 |  |
-| `WP-TRC-01` | Requirement association and bidirectional matrix | CMP-TRC | P4 | 4w | TRC-010 TRC-020 TRC-030 | TCM-02 REP-01 |  |
+| `WP-TRC-01` | Requirement association and bidirectional matrix | CMP-TRC | P4 | 4w | TRC-010 TRC-020 TRC-030 TRC-110 | TCM-02 REP-01 |  |
 | `WP-TRC-02` | Unlinked requirement and unlinked test reporting | CMP-TRC | P4 | 2w | TRC-040 | TRC-01 |  |
 | `WP-TRC-03` | Requirement import from ReqIF, CSV and plain text | CMP-TRC | P4 | 4w | TRC-050 TRC-060 | TRC-01 |  |
 | `WP-TRC-04` | ReqIF export and external traceability tool interop | CMP-TRC | P4 | 4w | TRC-070 TRC-100 | TRC-03 |  |
@@ -538,16 +539,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 149 | 43.7% |
+| EQUIVALENCE PARTITIONING | 150 | 43.9% |
 | INSPECTION CHECKLIST | 52 | 15.2% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.2% |
 | DECISION TABLE | 25 | 7.3% |
 | SCENARIO (demonstration) | 25 | 7.3% |
-| PAIRWISE | 21 | 6.2% |
-| STATE TRANSITION | 20 | 5.9% |
+| PAIRWISE | 21 | 6.1% |
+| STATE TRANSITION | 20 | 5.8% |
 | ANALYSIS ARGUMENT | 19 | 5.6% |
 | — (deferred) | 2 | 0.6% |
-| Total | 341 | 100% |
+| Total | 342 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -557,7 +558,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 243 |
+| T | 244 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -646,10 +647,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 341 |
-| Non-Future IDs | 339 |
-| Primary allocation entries | 339 |
-| Distinct allocated IDs | 339 |
+| SRS unique IDs | 342 |
+| Non-Future IDs | 340 |
+| Primary allocation entries | 340 |
+| Distinct allocated IDs | 340 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -678,11 +679,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 35 | 104 | 51 | 20 | 0 | 210 |
+| M | 35 | 104 | 51 | 21 | 0 | 211 |
 | S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 37 | 153 | 107 | 42 | 2 | 341 |
+| Total | 37 | 153 | 107 | 43 | 2 | 342 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -1028,6 +1029,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-TRC-080` | S | P4 | T | `WP-TRC-05` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-090` | S | P4 | T | `WP-TRC-05` | STATE TRANSITION |
 | `TOOL-TRC-100` | C | P4 | T | `WP-TRC-04` | DECISION TABLE |
+| `TOOL-TRC-110` | M | P4 | T | `WP-TRC-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-UIX-010` | M | P1 | A | `WP-API-01` | ANALYSIS ARGUMENT |
 | `TOOL-UIX-020` | M | P2 | A | `WP-API-01` | ANALYSIS ARGUMENT |
 | `TOOL-UIX-030` | M | P2 | D | `WP-GUI-01` | SCENARIO (demonstration) |

@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 341
+      requirement_count: 342
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1630,6 +1630,19 @@ components:
           tool where the user has one (StrictDoc, OpenFastTrace), rather than
           insisting on being the system of record.
         satisfies: [TOOL-TRC-100]
+        verification: T
+      - id: DSN-TRC-090
+        title: Requirement-verdict aggregation
+        statement: >
+          Requirement-level figures deduplicate association rows to unique
+          (requirement, test) pairs before any count; a requirement's verdict
+          is the worst outcome among its linked executed tests, with
+          unreviewed-origin tests counted as unverified; every percentage
+          labels its denominator; and a requirement linked to no executed
+          test is unverified, never inferred from coverage. The acceptance
+          fixtures reproduce the two-associations-for-one-requirement anomaly
+          and assert one counted pair and one verdict — never a 2/1 figure.
+        satisfies: [TOOL-TRC-110]
         verification: T
 
   - id: CMP-REP
