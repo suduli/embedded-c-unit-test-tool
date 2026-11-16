@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 343
+      requirement_count: 344
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -2565,6 +2565,18 @@ components:
           argument has to hold.
         satisfies: [TOOL-QUA-030]
         verification: I
+      - id: DSN-QUA-090
+        title: Harness-vs-reference agreement
+        statement: >
+          Inside the validation suite, a harness-agreement fixture set runs
+          each case twice — once through the generated pipeline and once as
+          an independently hand-written reference test of the same case and
+          inputs — and requires the outcomes to agree, including one
+          deliberately failing case and one stubbed-dependency case. Any
+          disagreement is reported as a harness-generation defect, making
+          this the cheapest strong oracle for harness-generation semantics.
+        satisfies: [TOOL-QUA-110]
+        verification: T
       - id: DSN-QUA-040
         title: Known error list
         statement: >

@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 343 SRS-001 requirements
+**Covers:** all 344 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-343 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+344 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 212 · S 113 · C 16 · F 2 |
-| Phase | P1 38 · P2 153 · P3 107 · P4 43 · — 2 |
-| Verification | T 245 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 213 · S 113 · C 16 · F 2 |
+| Phase | P1 38 · P2 154 · P3 107 · P4 43 · — 2 |
+| Verification | T 246 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -60,7 +60,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | PAR | 17 | 8 | 8 | 1 | 0 | 0 | 16 | 1 | 0 | 16 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | PRJ | 11 | 9 | 2 | 0 | 0 | 0 | 8 | 1 | 2 | 7 | 4 | 0 | 0 |
-| QUA | 10 | 7 | 2 | 1 | 0 | 0 | 0 | 0 | 10 | 1 | 9 | 0 | 0 |
+| QUA | 11 | 8 | 2 | 1 | 0 | 0 | 1 | 0 | 10 | 2 | 9 | 0 | 0 |
 | REP | 15 | 11 | 4 | 0 | 0 | 3 | 3 | 2 | 7 | 12 | 2 | 0 | 1 |
 | SEC | 12 | 10 | 2 | 0 | 0 | 0 | 8 | 4 | 0 | 5 | 5 | 2 | 0 |
 | STB | 14 | 9 | 5 | 0 | 0 | 0 | 13 | 1 | 0 | 14 | 0 | 0 | 0 |
@@ -208,10 +208,10 @@ Three rules were applied and are worth stating because they are where a work bre
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 69 | 88 | 46 |
-| P2 | 69 | 133 | 228 | 48 |
+| P2 | 69 | 134 | 228 | 48 |
 | P3 | 65 | 103 | 230 | 52 |
 | P4 | 26 | 36 | 92 | 52 |
-| Total | 191 | 341 | 642 | 52 |
+| Total | 191 | 342 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -255,6 +255,7 @@ the foundation and the certification-critical packages:
 | `WP-AIF-14` | Valid typed decisions pass schema/domain validation; invalid, unsupported, failed and timed-out provider responses produce recorded rejection and no altered measured result |
 | `WP-AIF-15` | Exercise remote and local/self-hosted adapters through the same extension contract for each role; deny unsupported capabilities explicitly and verify no calling feature imports a vendor SDK |
 | `WP-PLG-04` | A third-party provider registers via the public extension API, negotiates capabilities and version compatibility, and an incompatible provider is rejected without loading it into a feature |
+| `WP-QUA-03` | For each harness-agreement fixture, the generated-harness outcome equals the hand-written reference-test outcome on the same inputs — including one failing case and one stubbed-dependency case; any disagreement is reported as a harness-generation defect |
 | `WP-TRC-01` | A requirement linked by two association rows to the same test aggregates to one counted pair and one worst-outcome verdict — never a 2/1 numerator-over-denominator — and a requirement linked to no executed test is reported unverified |
 | `WP-QUA-07` | Documentation states, in one place, what qualification evidence is provided and what remains the user's responsibility, and no other document claims more |
 
@@ -453,7 +454,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L6 — Assurance and Ecosystem
 
-53 work packages · 78 requirements · 164 person-weeks
+53 work packages · 79 requirements · 164 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -495,7 +496,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-PLG-04` | AI provider extension protocol, registration and capability negotiation | CMP-PLG | P2 | 3w | PLG-100 | PLG-01 |  |
 | `WP-QUA-01` | Tool classification analysis and confidence level | CMP-QUA | P4 | 3w | QUA-010 | CORE-04 | ● |
 | `WP-QUA-02` | Tool operational requirements specification | CMP-QUA | P2 | 4w | QUA-020 | CORE-04 | ● |
-| `WP-QUA-03` | User-executable validation suite | CMP-QUA | P2 | 6w | QUA-030 | QUA-02 CORE-08 | ● |
+| `WP-QUA-03` | User-executable validation suite | CMP-QUA | P2 | 6w | QUA-030 QUA-110 | QUA-02 CORE-08 | ● |
 | `WP-QUA-04` | Known error list maintained per release | CMP-QUA | P2 | 2w | QUA-040 | PKG-02 |  |
 | `WP-QUA-05` | Development process and change control documentation | CMP-QUA | P4 | 3w | QUA-070 | — |  |
 | `WP-QUA-06` | Standards objective mapping | CMP-QUA | P4 | 4w | QUA-080 | QUA-02 | ● |
@@ -540,16 +541,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 151 | 44.0% |
-| INSPECTION CHECKLIST | 52 | 15.2% |
-| BOUNDARY VALUE ANALYSIS | 28 | 8.2% |
+| EQUIVALENCE PARTITIONING | 152 | 44.2% |
+| INSPECTION CHECKLIST | 52 | 15.1% |
+| BOUNDARY VALUE ANALYSIS | 28 | 8.1% |
 | DECISION TABLE | 25 | 7.3% |
 | SCENARIO (demonstration) | 25 | 7.3% |
 | PAIRWISE | 21 | 6.1% |
 | STATE TRANSITION | 20 | 5.8% |
 | ANALYSIS ARGUMENT | 19 | 5.5% |
 | — (deferred) | 2 | 0.6% |
-| Total | 343 | 100% |
+| Total | 344 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -559,7 +560,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 245 |
+| T | 246 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -606,6 +607,13 @@ test is mechanical: run twice, on two machines, and diff. Extend it to the case 
 a semantically null edit (reordering a test case, reopening and resaving a project) must produce **no diff at
 all**, not merely a valid file.
 
+**Harness-vs-reference agreement.** Golden-file testing proves determinism, not correctness of generated
+semantics. Inside `WP-QUA-03`'s known-answer suite, a fixture set runs each case twice — once through the
+generated pipeline and once as a hand-written Unity/cmocka reference test of the same case and inputs — and
+requires the two outcomes to agree, including one deliberately failing case and one stubbed-dependency case
+(`QUA-110`). Any disagreement is a harness-generation defect; this is the cheapest strong oracle for
+`WP-GEN-01`/`WP-GEN-02` semantics.
+
 **Cross-toolchain matrix, reduced pairwise.** `TCH-050` commits to six shipped configurations; `PAR-020` to
 five dialects; `TGT-020` through `TGT-040` to two simulators and three probes. The full cross-product is not
 runnable on every change. Pairwise reduction over (toolchain x dialect x coverage kind x target) keeps it
@@ -648,10 +656,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 343 |
-| Non-Future IDs | 341 |
-| Primary allocation entries | 341 |
-| Distinct allocated IDs | 341 |
+| SRS unique IDs | 344 |
+| Non-Future IDs | 342 |
+| Primary allocation entries | 342 |
+| Distinct allocated IDs | 342 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -680,11 +688,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 36 | 104 | 51 | 21 | 0 | 212 |
+| M | 36 | 105 | 51 | 21 | 0 | 213 |
 | S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 38 | 153 | 107 | 43 | 2 | 343 |
+| Total | 38 | 154 | 107 | 43 | 2 | 344 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -944,6 +952,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-QUA-080` | S | P4 | I | `WP-QUA-06` | INSPECTION CHECKLIST |
 | `TOOL-QUA-090` | M | P4 | I | `WP-QUA-07` | INSPECTION CHECKLIST |
 | `TOOL-QUA-100` | C | P4 | I | `WP-QUA-08` | INSPECTION CHECKLIST |
+| `TOOL-QUA-110` | M | P2 | T | `WP-QUA-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-REP-010` | M | P1 | T | `WP-REP-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-REP-020` | M | P1 | T | `WP-REP-02` | PAIRWISE |
 | `TOOL-REP-030` | M | P1 | T | `WP-REP-03` | EQUIVALENCE PARTITIONING |

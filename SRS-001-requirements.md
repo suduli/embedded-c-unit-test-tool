@@ -727,6 +727,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-QUA-100** *(C, P4, I)* — The tool shall provide templates for the user's own tool qualification artifacts.
 
+**TOOL-QUA-110** *(M, P2, T)* — The validation suite shall include a harness-agreement fixture set: for each fixture, the outcome of the generated harness executing hand-authored inputs shall equal the outcome of an independently hand-written reference test of the same case, including at least one deliberately failing case and one stubbed-dependency case; any disagreement shall be reported as a harness-generation defect.
+
 ---
 
 ## 20. Non-Functional Requirements (NFR)
