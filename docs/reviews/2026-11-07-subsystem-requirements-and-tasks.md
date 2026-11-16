@@ -3,7 +3,7 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status (updated 2026-11-17):** 15 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17..T-22 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 345 requirements / 343 allocations / 191 packages; trace_check exit 0: 343/343 allocated); baseline merged to `main` via PR #7. **All implementation-eligible review tasks are landed.** Four user decisions pending — see the [Decision queue](#decision-queue-awaiting-user); T-14 remains blocked by D-02 (identity model) and T-01/T-02 by D-01 (licence). Landing anything else requires the change process and approval
+- **Status (updated 2026-11-17):** 16 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-15, T-17..T-22 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 346 requirements / 344 allocations / 191 packages; trace_check exit 0: 344/344 allocated); baseline merged to `main` via PR #7. **All decision-free review tasks are landed.** Four user decisions pending — see the [Decision queue](#decision-queue-awaiting-user); T-14 is blocked by D-02 (identity model), T-01 by D-01 (licence), and T-02 waits on ADR-005 (the no-import rule is its consequence). Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
 - **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
@@ -196,14 +196,14 @@
 | NR-17 | RunAttempt allocated before build; build failure is a first-class attempt record | S3, WP-CORE-04 | RV-06 F-12 | P1 |
 | NR-18 | Pass requires finalized per-attempt result record; exit(0) alone is abnormal | S3, TOOL-EXE-030/060 | RV-06 F-19 | P1 |
 | NR-19 | Exact artifact↔test-revision binding checked before every run | HAR-090/110, CBT-070 | RV-06 F-11 | P1 |
-| NR-20 | HostProfile records target→host derivations and ABI gaps | TOOL-TGT-070 | RV-02 F-04 | P2 |
+| NR-20 | HostProfile records target→host derivations and ABI gaps — landed 2026-11-17 as TOOL-TGT-130 (DSN-EXT-110, WP-EXT-04, SDD-002 §6.1) | TOOL-TGT-070 | RV-02 F-04 | P2 |
 
 ### Review-derived tasks
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
 | T-14 | Run-integrity acceptance into WP-EXH-01/02 + WP-CBT-01 | NR-17..19 | RV-06 F-11/12/19 | P1 | Not Started | T-04 |
-| T-15 | HostProfile/ABI-divergence record section | NR-20 | RV-02 F-04 | P2 | Not Started | — |
+| T-15 | HostProfile/ABI-divergence record section | NR-20 | RV-02 F-04 | P2 | **Complete** | — |
 
 ## L4 — Evidence
 
@@ -577,6 +577,14 @@
 - **Design register:** DSN-PKG-140 (Clean-machine endpoint acceptance gate) added; requirement_count 345.
 - **ADR-001 §ADR-007:** the gate recorded as ADR-007's exit criterion — the signing + SBOM pipeline (SDD-005 §5.9) is the mechanism; the ADR stays open for the per-platform installer/signing choice, which is entangled with the licence decision (D-01/T-01).
 - **Gates:** plan_check exit 0 — 345 requirements, 343 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 343/343 allocated, 258 elements.
+
+### T-15 evidence (landed 2026-11-17 — L3 Realization)
+
+- **SRS-001:** TOOL-TGT-130 (M, P3, T) — host executions on behalf of a target build are governed by a versioned host profile recording the target→host derivation (triples, flag/define changes, substituted platform headers, unavailable hardware behavior) and its known ABI differences — widths, alignment, packing, endianness, signedness — with unmeasured differences explicitly unknown; every host-executed result is labeled with its execution profile, and host success never establishes target behavior.
+- **PLAN-001:** TGT-130 allocated to WP-EXT-04 (host and target test parity — TOOL-TGT-070's owner, so parity is established and recorded rather than presumed); §5.4 adds the WP-EXT-04 exit criterion. Derived tables regenerated.
+- **Design register:** DSN-EXT-110 (HostProfile derivation and ABI record) added; requirement_count 346.
+- **SDD-002 §6.1:** contract point added — `execution` names the versioned host profile; host success never establishes target behavior.
+- **Gates:** plan_check exit 0 — 346 requirements, 344 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 344/344 allocated, 259 elements.
 
 ## Decision queue (awaiting user)
 

@@ -256,6 +256,12 @@ that information is present as metadata, but no logic branches on it.
 - `timeout` is a distinct outcome from `fail`, since the diagnosis differs.
 - `order_seed` is recorded so a randomised-order failure is reproducible
   (DSN-TCM-060).
+- **Host executions on behalf of a target carry a host profile.** `execution`
+  names the versioned host profile (TOOL-TGT-130, DSN-EXT-110): the recorded
+  target→host derivation — triples, flag/define changes, substituted platform
+  headers, unavailable hardware behavior — with its known ABI differences;
+  unmeasured differences stay unknown, and host success never establishes
+  target behavior.
 
 ---
 

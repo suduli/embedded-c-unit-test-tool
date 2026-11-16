@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 345 SRS-001 requirements
+**Covers:** all 346 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-345 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+346 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 214 · S 113 · C 16 · F 2 |
-| Phase | P1 38 · P2 155 · P3 107 · P4 43 · — 2 |
-| Verification | T 247 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 215 · S 113 · C 16 · F 2 |
+| Phase | P1 38 · P2 155 · P3 108 · P4 43 · — 2 |
+| Verification | T 248 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -66,7 +66,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | STB | 14 | 9 | 5 | 0 | 0 | 0 | 13 | 1 | 0 | 14 | 0 | 0 | 0 |
 | TCD | 14 | 8 | 5 | 1 | 0 | 1 | 11 | 2 | 0 | 12 | 1 | 0 | 1 |
 | TCH | 10 | 5 | 4 | 1 | 0 | 2 | 0 | 8 | 0 | 8 | 1 | 1 | 0 |
-| TGT | 12 | 8 | 3 | 1 | 0 | 0 | 0 | 12 | 0 | 9 | 0 | 1 | 2 |
+| TGT | 13 | 9 | 3 | 1 | 0 | 0 | 0 | 13 | 0 | 10 | 0 | 1 | 2 |
 | TRC | 11 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | 11 | 11 | 0 | 0 | 0 |
 | UIX | 40 | 27 | 10 | 1 | 2 | 2 | 22 | 10 | 4 | 31 | 3 | 2 | 2 |
 
@@ -209,9 +209,9 @@ Three rules were applied and are worth stating because they are where a work bre
 | P0 | 3 | 0 | 4 | 2 |
 | P1 | 28 | 69 | 88 | 46 |
 | P2 | 69 | 135 | 228 | 48 |
-| P3 | 65 | 103 | 230 | 52 |
+| P3 | 65 | 104 | 230 | 52 |
 | P4 | 26 | 36 | 92 | 52 |
-| Total | 191 | 343 | 642 | 52 |
+| Total | 191 | 344 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -250,6 +250,7 @@ the foundation and the certification-critical packages:
 | `WP-COV-02` | A profile flushed by a run that then crashes is retained but excluded from the aggregate until explicitly admitted per run; the aggregate figure never includes quarantined data, and per-run provenance still shows it |
 | `WP-COV-09` | Editing a source line under an accepted justification invalidates that justification, and the next report shows the construct as uncovered rather than justified |
 | `WP-EXH-02` | A test case that segfaults, one that hangs past the timeout, and one that calls `abort()` are each reported as a failure with the remaining cases still executed |
+| `WP-EXT-04` | A host-executed result carries a versioned host profile naming the target→host derivation and its known ABI differences, with unmeasured differences shown as unknown; host success is never displayed as target behavior |
 | `WP-REP-01` | Two different renderers over one persisted report model cannot disagree on any test's status or any coverage figure; re-running the renderer produces byte-identical output excluding timestamps |
 | `WP-REP-12` | Export passing, failing, crashed, timed-out and partial-run cases plus result identities, expected/actual values, diagnostics and provenance; an independent reader reconstructs the test cases from TCM-06 and complete results without a private project database. Publish the versioned JSON interchange schema, examples and explicit loss/error handling; coverage export remains REP-10/P4 |
 | `WP-AIF-14` | Valid typed decisions pass schema/domain validation; invalid, unsupported, failed and timed-out provider responses produce recorded rejection and no altered measured result |
@@ -357,7 +358,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L3 — Realization
 
-14 work packages · 22 requirements · 51 person-weeks
+14 work packages · 23 requirements · 51 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -371,7 +372,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-EXT-01` | Simulator execution: QEMU and Renode | CMP-EXT | P3 | 5w | TGT-020 | BLD-03 |  |
 | `WP-EXT-02` | Hardware execution and flashing via debug probe | CMP-EXT | P3 | 6w | TGT-030 TGT-040 | BLD-03 |  |
 | `WP-EXT-03` | Target result retrieval channels and protocol | CMP-EXT | P3 | 4w | TGT-050 TGT-060 | EXT-01 SEC-07 |  |
-| `WP-EXT-04` | Host and target test parity | CMP-EXT | P3 | 3w | TGT-070 | EXT-03 EXH-01 |  |
+| `WP-EXT-04` | Host and target test parity | CMP-EXT | P3 | 3w | TGT-070 TGT-130 | EXT-03 EXH-01 |  |
 | `WP-EXT-05` | Hardware inventory and target failure classification | CMP-EXT | P3 | 4w | TGT-080 TGT-090 | EXT-02 |  |
 | `WP-EXT-06` | Suite splitting and on-target footprint documentation | CMP-EXT | P3 | 4w | TGT-100 TGT-110 | EXT-02 |  |
 | `WP-EXT-07` | User-supplied target execution methods | CMP-EXT | P3 | 3w | TGT-120 PLG-040 | EXT-02 PLG-01 |  |
@@ -542,8 +543,8 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 153 | 44.3% |
-| INSPECTION CHECKLIST | 52 | 15.1% |
+| EQUIVALENCE PARTITIONING | 154 | 44.5% |
+| INSPECTION CHECKLIST | 52 | 15.0% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.1% |
 | DECISION TABLE | 25 | 7.2% |
 | SCENARIO (demonstration) | 25 | 7.2% |
@@ -551,7 +552,7 @@ method, with authored technique choices for test requirements where the rule wou
 | STATE TRANSITION | 20 | 5.8% |
 | ANALYSIS ARGUMENT | 19 | 5.5% |
 | — (deferred) | 2 | 0.6% |
-| Total | 345 | 100% |
+| Total | 346 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -561,7 +562,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 247 |
+| T | 248 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -657,10 +658,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 345 |
-| Non-Future IDs | 343 |
-| Primary allocation entries | 343 |
-| Distinct allocated IDs | 343 |
+| SRS unique IDs | 346 |
+| Non-Future IDs | 344 |
+| Primary allocation entries | 344 |
+| Distinct allocated IDs | 344 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -689,11 +690,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 36 | 106 | 51 | 21 | 0 | 214 |
+| M | 36 | 106 | 52 | 21 | 0 | 215 |
 | S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 38 | 155 | 107 | 43 | 2 | 345 |
+| Total | 38 | 155 | 108 | 43 | 2 | 346 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -1032,6 +1033,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-TGT-100` | S | P3 | T | `WP-EXT-06` | BOUNDARY VALUE ANALYSIS |
 | `TOOL-TGT-110` | M | P3 | A | `WP-EXT-06` | ANALYSIS ARGUMENT |
 | `TOOL-TGT-120` | C | P3 | T | `WP-EXT-07` | EQUIVALENCE PARTITIONING |
+| `TOOL-TGT-130` | M | P3 | T | `WP-EXT-04` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-010` | M | P4 | T | `WP-TRC-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-020` | M | P4 | T | `WP-TRC-01` | PAIRWISE |
 | `TOOL-TRC-030` | M | P4 | T | `WP-TRC-01` | STATE TRANSITION |

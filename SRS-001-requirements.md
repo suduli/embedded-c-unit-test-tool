@@ -397,6 +397,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-TGT-120** *(C, P3, T)* — The tool shall support execution on targets without a debug probe via a user-supplied flashing and communication script.
 
+**TOOL-TGT-130** *(M, P3, T)* — Executing a test on the host on behalf of a target build shall be governed by a versioned host profile recording the target-to-host derivation — target and host triples, flag and define changes, substituted platform headers, and unavailable hardware behavior — and its known ABI differences (widths, alignment, packing, endianness, signedness); unmeasured differences shall remain explicitly unknown; every host-executed result shall be labeled with its execution profile, and host success shall never establish target behavior.
+
 ---
 
 ## 12. Code Coverage (COV)

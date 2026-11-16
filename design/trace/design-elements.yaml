@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 345
+      requirement_count: 346
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1345,6 +1345,20 @@ components:
           Targets without a supported probe are driven by a user-supplied
           flashing and communication script conforming to the runner interface.
         satisfies: [TOOL-TGT-120]
+        verification: T
+      - id: DSN-EXT-110
+        title: HostProfile derivation and ABI record
+        statement: >
+          Executing a test on the host on behalf of a target build is
+          governed by a versioned host profile recording the target-to-host
+          derivation — triples, flag and define changes, substituted platform
+          headers, unavailable hardware behavior — and its known ABI
+          differences (widths, alignment, packing, endianness, signedness),
+          with unmeasured differences explicitly unknown. Every
+          host-executed result is labeled with its execution profile, and
+          host success never establishes target behavior, so TOOL-TGT-070's
+          parity claim is established and recorded rather than presumed.
+        satisfies: [TOOL-TGT-130]
         verification: T
 
   # ---------------------------------------------------------------- L4 --------
