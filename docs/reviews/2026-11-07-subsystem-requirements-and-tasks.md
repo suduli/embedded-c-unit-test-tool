@@ -3,9 +3,9 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
+- **Status (updated 2026-11-16):** 9 of 22 review tasks **landed 2026-11-07** (T-03, T-07..T-13, T-16 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 338 requirements / 336 allocations / 191 packages; trace_check exit 0: 336/336 allocated); tests 154 passed, 1 skipped; baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining tasks T-17..T-22 are doc-only and need no decisions. Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
-- **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision)
+- **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
 ## L0 — Platform & Persistence
 
@@ -42,7 +42,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-06 | DR-06 NFR calibration plan + fixtures; provisional NFRs marked | NR-06 | RV-06 F-07/F-24 | P2 | Not Started | — |
+| T-06 | DR-06 NFR calibration plan + fixtures; provisional NFRs marked | NR-06 | RV-06 F-07/F-24 | P2 | Awaiting decision | — |
 
 ## L1 — Comprehension
 
@@ -157,7 +157,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-13 | Compound-test defer decision + migration flag | NR-15 | RV-03 F-03 | P1 | Not Started | — |
+| T-13 | Compound-test defer decision + migration flag | NR-15 | RV-03 F-03 | P1 | **Complete** | — |
 
 ## L3 — Realization
 
@@ -441,11 +441,11 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-01 | Convene ADR-005 licence decision; update LICENSE/LIC-010; re-run gates | NR-01 | RV-06 F-27 | P0 | Not Started | — |
+| T-01 | Convene ADR-005 licence decision; update LICENSE/LIC-010; re-run gates | NR-01 | RV-06 F-27 | P0 | Awaiting decision | — |
 | T-02 | Write the no-import/provenance rule for vcast-findings assets | NR-02 | RV-06 F-27 | P0 | Not Started | — |
 | T-03 | SRS change: TOOL-EXE-040 timeout distinct from fail + gate repair (PLG-080/100, COV-150, AIF allocations) | NR-03 | RV-02 F-11 | P0 | **Complete** | — |
-| T-04 | Decide and record the identity model (SDD-003 §6/§7) — memo prepared, decision pending | NR-04 | RV-05 F-05 | P0 | Not Started | — |
-| T-05 | Decide and record platform order | NR-05 | RV-05 F-06 | P1 | Not Started | — |
+| T-04 | Decide and record the identity model (SDD-003 §6/§7) — memo prepared, decision pending | NR-04 | RV-05 F-05 | P0 | Awaiting decision | — |
+| T-05 | Decide and record platform order | NR-05 | RV-05 F-06 | P1 | Awaiting decision | — |
 
 ### T-03 evidence (landed 2026-11-07)
 
@@ -530,6 +530,63 @@
 - **Design register:** DSN-COV-110 added — closes the last open overclaim channel: a latched or lost coverage sink can never read as a full score; requirement_count 338.
 - **SDD-002 amendments:** §6.1 — coverage.completeness is a field on every artifact reference; §7.2 — truncated forces unmeasured with the completeness state as the reason and an advisory emitted; §8 — the S5 advisories example gains the coverage_truncated kind.
 - **Gates:** plan_check exit 0 — 338 requirements, 336 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 336/336 allocated, 246 elements. Count reconciled: HEAD SRS had 337 lines, +TOOL-COV-180 = 338.
+
+## Decision queue (awaiting user)
+
+Recorded 2026-11-16. Four decisions block P0/P1 work; answer inline here (or state the choice in chat) and each lands through the change process noted at the bottom. The [HTML tracker](2026-11-07-subsystem-task-tracker.html) §1 carries the same queue.
+
+### D-01 · Licence posture — T-01 / NR-01 / ADR-005 (P0)
+
+**Question:** which licence does the project ship under? The repo is already public at `github.com/suduli/embedded-c-unit-test-tool` showing AGPL-3.0, but SRS LIC-010 requires a permissive licence — one of the two must move.
+
+| Option | Consequence |
+|---|---|
+| a) Keep AGPL-3.0 | Amend LIC-010 to require AGPL-3.0. No relicense churn (repo already public under it); strong copyleft keeps forks open; deters commercial/embedding use. |
+| b) Apache-2.0 | Satisfies LIC-010 as written. Permissive + explicit patent grant; feasible as sole author; requires repo licence change. |
+| c) MIT | Simplest permissive option satisfying LIC-010; no patent grant. |
+| d) Proprietary / closed | Repo goes private, AGPL dropped, LIC-010 becomes proprietary. Loses public visibility. |
+
+**Gates:** publicizing the repo / contributor solicitation; WP-PKG-07 (LIC-010..060); T-02 no-import rule (cites ADR-005 as its consequence anchor); NR-01 is P0 — before further implementation.
+**Answer:** _awaiting decision —_
+
+### D-02 · Identity model — T-04 / NR-04 (P0)
+
+**Question:** stable ids + content digests vs revision entities? The T-04 memo above recommends stable ids + digests.
+
+| Option | Consequence |
+|---|---|
+| a) Stable ids + digests (memo recommendation) | SDD-003 §6/§7 amendment + one sentence in SDD-002 S2/S3; WP-TCM-02 implements digest binding; **unblocks T-14** (run-integrity four-pack, which also needs NR-17..19 wording). |
+| b) Revision entities | Heavier model and schema churn; conflicts with the accepted stable-id + digest staleness model (RV-05 F-05). |
+| c) Defer | T-14 stays blocked; revisit after T-17..T-22. |
+
+**Answer:** _awaiting decision —_
+
+### D-03 · Platform order — T-05 / NR-05 (P1)
+
+**Question:** Windows pilot first or Linux-first (NFR-010/020)?
+
+| Option | Consequence |
+|---|---|
+| a) Windows pilot first | Matches the current dev platform; WP-SPIKE-03 (PyInstaller onto clean Windows) already complete; Linux CI kept green in parallel as a compat check. |
+| b) Linux-first | Matches typical embedded toolchains/CI; Windows compatibility tracked as secondary. |
+| c) Both in parallel | Equal co-pilots from day one; highest setup and test-matrix cost. |
+
+**Gates:** NFR-010/020 wording; WP-CORE-03 (platform baseline) and WP-GUI-01 platform-support planning.
+**Answer:** _awaiting decision —_
+
+### D-04 · DR-06 NFR calibration — T-06 / NR-06 (P2)
+
+**Question:** how should DR-06 NFR calibration be handled before pilot data exists?
+
+| Option | Consequence |
+|---|---|
+| a) Defer to post-pilot | Provisional NFRs stay explicitly marked; calibrate from measured baselines before WP-CORE-05 exits P2 (already mandated by NR-06). |
+| b) Calibrate now | Set provisional targets from current analysis runs; revisit post-pilot. |
+| c) Drop DR-06 | Remove the requirement if no longer meaningful. |
+
+**Answer:** _awaiting decision —_
+
+**How answers land:** D-01 → ADR-005 recorded + LICENSE/LIC-010 updated + gates re-run (T-01); D-02 → SDD-003 §6/§7 amendment (T-04, then WP-TCM-02 unblocks T-14); D-03 → NFR-010/020 wording note (T-05); D-04 → NR-06 disposition recorded on T-06. Each answer also flips the task status here and in the HTML tracker.
 
 ## Validation spikes (complete — ADR-001)
 
