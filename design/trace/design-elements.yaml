@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 338
+      requirement_count: 340
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1466,6 +1466,28 @@ components:
           relabeling. This closes the last open overclaim channel: a latched or
           lost coverage sink can never read as a full score.
         satisfies: [TOOL-COV-180]
+        verification: T
+      - id: DSN-COV-120
+        title: MC/DC condition-limit probing
+        statement: >
+          Per pinned backend configuration, the tool probes and records the
+          effective maximum decision condition count and the availability of
+          limit-tuning options (for example clang's -fmcdc-max-conditions) as
+          run evidence, never as a documentation claim. A decision exceeding
+          the recorded maximum is unmeasured with the recorded limit in its
+          reason, so an exceeded decision cannot cite a prose-derived limit.
+        satisfies: [TOOL-COV-190]
+        verification: T
+      - id: DSN-COV-130
+        title: Macro-variant merge incompatibility
+        statement: >
+          Records whose source or expression identity differs only by macro
+          expansion or another preprocessing variant are merge-incompatible:
+          they remain separate with a diagnostic naming the variant mismatch,
+          with the variant difference carried in the record identity so the
+          diagnostic can point at it. Silently merging variant-differing
+          records is a non-behavior.
+        satisfies: [TOOL-COV-200]
         verification: T
 
   - id: CMP-CBT

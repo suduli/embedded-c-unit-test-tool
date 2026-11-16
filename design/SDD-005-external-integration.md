@@ -488,7 +488,9 @@ whether that option shipped with the original LLVM 18 implementation or arrived
 in 19 — treat the availability as needing confirmation against the pinned
 `clang -cc1 --help`, not prose.) TOOL-COV-080 already requires reporting
 expressions the compiler could not instrument; **this is the mechanism that makes
-that requirement non-optional.**
+that requirement non-optional.** TOOL-COV-190 turns that confirmation into
+mandatory run evidence: the probe records the effective maximum and
+limit-option availability per pinned backend (DSN-COV-120).
 
 **`-fcoverage-mcdc` alone does nothing.** It is only meaningful with frontend
 instrumentation — the full triple is
@@ -735,6 +737,7 @@ Three cases resist version constraints entirely, and CMP-TCH should treat them a
 - **QEMU semihosting exit-code propagation** varies per machine model, not per release (§5.6).
 - **Sanitizer and profile runtime availability** (`libclang_rt.*`, `libasan`) varies per cross target, not per compiler version (§5.9.1).
 - **Link-seam mechanism** varies per toolchain vendor — `--wrap`, `$Sub$$`, `--redirect`, or object exclusion (§5.2.1).
+- **MC/DC condition-limit availability** — the effective maximum conditions per decision and the limit-tuning options (for example `-fmcdc-max-conditions`) belong to the pinned backend build, not the release line (§5.5.1); probed and recorded per TOOL-COV-190, with boundary behavior at any tunable threshold settled by fixture, never prose.
 
 This generalises a rule the SRS already states for coverage in TOOL-TCH-060: the
 toolchain declares what it can do, and the tool refuses what it cannot. The same

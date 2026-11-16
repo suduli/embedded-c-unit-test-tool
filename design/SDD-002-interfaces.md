@@ -317,14 +317,20 @@ Recompute independence from compatible evidence or union traceable backend
 assertions whose documented merge semantics support it. Never OR ordinary
 outcome flags into independence. Cross-run witness pairing is allowed only when
 full compatible vectors prove the selected form; otherwise preserve separate
-run evidence. Incompatible records remain separate with a diagnostic. Missing
+run evidence. Incompatible records remain separate with a diagnostic. A source or
+expression identity that differs only by macro expansion or another
+preprocessing variant is itself an incompatibility — the macro-variant case is
+never silently ignored, and the variant difference is carried in the record
+identity so the diagnostic can name it (DSN-COV-130). Missing
 measurement stays visible in per-run provenance; an aggregate demonstrated
 status requires at least one valid proof. Justifications remain separate and
 expire on source-digest mismatch.
 
 Acceptance fixtures must include equal true/false outcome flags with different
 independence results, short-circuit/masking pairs, missing backend evidence,
-incompatible merges, and zero/unsupported denominators.
+incompatible merges, zero/unsupported denominators, records differing only by
+macro/preprocessing variant, and backend-boundary cases at the probed condition
+maximum and one above it.
 
 ### 7.2 Contract points
 

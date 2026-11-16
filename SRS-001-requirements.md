@@ -437,6 +437,10 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-COV-180** *(M, P1, T)* — The tool shall record a completeness state for every coverage artifact — `complete`, `truncated`, or `missing` — and a truncated or missing artifact shall force the decisions and constructs it would have measured to `unmeasured`, with an advisory carried into the report; the completeness state shall be surfaced through the CLI and UI exactly as recorded, without relabeling.
 
+**TOOL-COV-190** *(M, P3, T)* — The tool shall probe and record, per pinned backend configuration, the effective maximum decision condition count and the availability of limit-tuning options (such as clang's `-fmcdc-max-conditions`) as run evidence; a decision exceeding the recorded maximum shall be reported `unmeasured` with the recorded limit cited in its reason, and a documentation-derived limit shall not be substituted for the probed value.
+
+**TOOL-COV-200** *(M, P1, T)* — Coverage records whose source or expression identity differs only by macro expansion or another preprocessing variant shall be merge-incompatible: such records remain separate with a diagnostic naming the variant mismatch, and silently merging variant-differing records is a non-behavior.
+
 ---
 
 ## 13. Change-Based and Regression Testing (CBT)
