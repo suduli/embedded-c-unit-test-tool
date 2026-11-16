@@ -3,7 +3,7 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status (updated 2026-11-17):** 10 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 340 requirements / 338 allocations / 191 packages; trace_check exit 0: 338/338 allocated); baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining tasks T-18..T-22 are doc-only and need no decisions. Landing anything else requires the change process and approval
+- **Status (updated 2026-11-17):** 11 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17, T-18 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 341 requirements / 339 allocations / 191 packages; trace_check exit 0: 339/339 allocated); baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining tasks T-19..T-22 are doc-only and need no decisions. Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
 - **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
@@ -263,7 +263,7 @@
 |---|---|---|---|:--:|
 | NR-21 | Coverage completeness state complete|truncated|missing; truncated → unmeasured + advisory | S3/S4, S5 | RV-04 F-06 | P1 |
 | NR-22 | MC/DC condition-limit probing per backend + boundary fixtures — landed 2026-11-17 (TOOL-COV-190, DSN-COV-120, PLAN §5.4/§6.4) | SDD-005 §6.3/§6.4 | RV-04 F-04/F-05 | P1 |
-| NR-23 | Known-answer MC/DC corpus mandated before WP-COV-05 | PLAN §6.4 | RV-04 F-10 | P1 |
+| NR-23 | Known-answer MC/DC corpus mandated before WP-COV-05 — landed 2026-11-17 (TOOL-COV-210, DSN-COV-140, PLAN §6.4 gate) | PLAN §6.4 | RV-04 F-10 | P1 |
 | NR-24 | Macro/source-variant divergence merge-incompatible — landed 2026-11-17 (TOOL-COV-200, DSN-COV-130, SDD-002 §7.1) | S4 merge rules | RV-04 F-03 | P1 |
 | NR-25 | Crashed-run coverage quarantined unless validated | WP-COV-02 | RV-06 F-18 | P1 |
 | NR-26 | Per-requirement verdicts deduplicated, worst outcome, labeled denominators | SDD-002 §8 | RV-03 F-08 | P1 |
@@ -274,7 +274,7 @@
 |---|---|---|---|:--:|---|---|
 | T-16 | Coverage completeness state: TOOL-COV-180 + SDD-002 §6.1/§7.2/§8 amendments + DSN-COV-110 | NR-21, NR-27 | RV-04 F-06 | P1 | **Complete** | — |
 | T-17 | MC/DC limit probing + boundary fixtures + macro-variant merge rule | NR-22, NR-24 | RV-04 F-03..05 | P1 | **Complete** | — |
-| T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | Not Started | — |
+| T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | **Complete** | — |
 | T-19 | Verdict dedup + labeled denominators + 2/1 anomaly fixture | NR-26 | RV-03 F-08 | P1 | Not Started | — |
 | T-20 | Crashed-run coverage admission rule | NR-25 | RV-06 F-18 | P1 | Not Started | — |
 
@@ -539,6 +539,13 @@
 - **SDD-002 §7.1:** the macro-variant case named as an explicit merge incompatibility, with the variant difference carried in the record identity; fixture list extended with variant-differing records and backend-boundary cases.
 - **SDD-005 §5.5.1/§6.3:** the Clang `-fmcdc-max-conditions` trap tied to TOOL-COV-190 as mandatory run evidence; MC/DC condition-limit availability added to §6.3's probed-capability list.
 - **Gates:** plan_check exit 0 — 340 requirements, 338 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 338/338 allocated, 253 elements.
+
+### T-18 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-210 (M, P3, T) — the tool's own validation suite includes a known-answer MC/DC corpus with hand-computed expected results: the minimal `a && b` independence matrix, nested decisions, repeated and coupled operands, a side-effecting operand that must not be evaluated, a macro-expanded condition, a constant or never-taken decision, and a masking-versus-unique-cause divergent case per TOOL-COV-090; each case asserts the resulting statuses (`demonstrated`, `not_demonstrated`, `unmeasured`) and the witness pair.
+- **PLAN-001:** COV-210 allocated to WP-COV-05; WP-COV-05's §5.4 exit criterion gains the known-answer corpus clause; §6.4 adds the corpus mandate paragraph — the differential oracle is self-blind (two agreeing readings can both be wrong), so masking semantics are pinned by known cases, not by backend agreement. Derived tables regenerated.
+- **Design register:** DSN-COV-140 (Known-answer MC/DC corpus) added; requirement_count 341.
+- **Gates:** plan_check exit 0 — 341 requirements, 339 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 339/339 allocated, 254 elements.
 
 ## Decision queue (awaiting user)
 

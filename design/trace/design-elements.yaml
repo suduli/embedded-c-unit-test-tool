@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 340
+      requirement_count: 341
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1488,6 +1488,21 @@ components:
           diagnostic can point at it. Silently merging variant-differing
           records is a non-behavior.
         satisfies: [TOOL-COV-200]
+        verification: T
+      - id: DSN-COV-140
+        title: Known-answer MC/DC corpus
+        statement: >
+          The validation suite carries a known-answer MC/DC corpus whose
+          cases have hand-computed expected results: the minimal a && b
+          matrix, nested decisions, repeated and coupled operands, a
+          side-effecting operand that must not be evaluated, a macro-expanded
+          condition, a constant or never-taken decision, and a
+          masking-versus-unique-cause divergent case per TOOL-COV-090. Each
+          case asserts the resulting statuses (demonstrated,
+          not_demonstrated, unmeasured) and the witness pair, so masking
+          semantics are pinned by known cases rather than by agreement with
+          whichever backend produced the data.
+        satisfies: [TOOL-COV-210]
         verification: T
 
   - id: CMP-CBT
