@@ -180,6 +180,7 @@ tests, the templates, the workflow itself, the plan, the SRS or `docs/projects/`
 
 - **Interrupted apply:** rerun `plan` + `apply`. Created issues are rediscovered
   by marker; item-adds and field writes complete; nothing duplicates.
+- **Transient API failures:** every gh call is a fresh, short-lived process that retries itself on transient errors (HTTP 502/503/504, connection resets, throttling) up to `--gh-attempts` times (default 4, gaps of 5/15/30s) before failing visibly with exit code 3. Auth and validation failures are never retried. This deliberately avoids gh's internal retry loop, which holds one long-lived connection open for minutes — the pattern that gets aborted by intermediate firewalls.
 - **Stale preview (exit 2):** source-owned state changed between plan and
   apply. Regenerate the preview; there is no partial application to clean up
   (stale previews are rejected before the first write).

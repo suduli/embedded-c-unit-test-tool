@@ -38,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.parse
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -130,43 +131,75 @@ class GhError(ProjectsError):
 # ---------------------------------------------------------------------------
 
 
+# Transient-failure handling. gh's own retry loop holds one process (and its
+# TCP connection) open for many minutes, which is exactly what gets aborted by
+# intermediate firewalls and crashes gh under sustained throttling. Instead,
+# each attempt is a fresh short-lived process (fresh connection, fresh auth)
+# and the Python layer retries a bounded number of times with short gaps.
+# Auth and 4xx validation failures are never retried.
+RETRY_DELAYS = (5, 15, 30)
+_RETRYABLE_MARKERS = (
+    "http 502", "http 503", "http 504", "502", "503", "504",
+    "wsarecv", "connection", "aborted", "reset", "eof", "timed out",
+    "throttl", "secondary rate", "temporarily unavailable",
+)
+
+
+def _retryable(detail: str) -> bool:
+    lowered = detail.lower()
+    return any(marker in lowered for marker in _RETRYABLE_MARKERS)
+
+
 class Gh:
     """Thin subprocess wrapper over the GitHub CLI (authentication is gh's job).
 
     Tests replace this object with an in-memory fake exposing the same methods.
     """
 
-    def __init__(self, gh_path: str = "gh", timeout: int = 600):
+    def __init__(self, gh_path: str = "gh", timeout: int = 90, attempts: int = 4):
         self.gh_path = gh_path
         self.timeout = timeout
+        self.attempts = max(1, attempts)
 
     def _run(self, args: list[str], stdin: str | None = None) -> str:
-        try:
-            proc = subprocess.run(
-                [self.gh_path, *args],
-                input=stdin,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                timeout=self.timeout,
-            )
-        except FileNotFoundError as exc:
-            raise GhError(
-                f"GitHub CLI ({self.gh_path}) not found. Install it and authenticate with "
-                "'gh auth login', or provide a token via the ECTT_PROJECTS_TOKEN environment variable."
-            ) from exc
-        except subprocess.TimeoutExpired as exc:
-            raise GhError(
-                f"github CLI call ({' '.join(args[:3])}…) exceeded {self.timeout}s and was aborted. "
-                "gh retries silently while GitHub throttles bursts of writes; wait a few minutes and "
-                "rerun — completed operations are rediscovered, never duplicated."
-            ) from exc
-        if proc.returncode != 0:
+        last_error: GhError | None = None
+        for attempt in range(self.attempts):
+            if attempt:
+                time.sleep(RETRY_DELAYS[min(attempt - 1, len(RETRY_DELAYS) - 1)])
+            try:
+                proc = subprocess.run(
+                    [self.gh_path, *args],
+                    input=stdin,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=self.timeout,
+                )
+            except FileNotFoundError as exc:
+                raise GhError(
+                    f"GitHub CLI ({self.gh_path}) not found. Install it and authenticate with "
+                    "'gh auth login', or provide a token via the ECTT_PROJECTS_TOKEN environment variable."
+                ) from exc
+            except subprocess.TimeoutExpired as exc:
+                last_error = GhError(
+                    f"github CLI call ({' '.join(args[:3])}…) exceeded {self.timeout}s and was aborted "
+                    f"(attempt {attempt + 1}/{self.attempts})."
+                )
+                continue
+            if proc.returncode == 0:
+                return proc.stdout
             detail = (proc.stderr or proc.stdout or "").strip()
             if "gh auth" in detail or "authentication" in detail.lower() or proc.returncode == 4:
-                detail += "\nAuthenticate with 'gh auth login' or set ECTT_PROJECTS_TOKEN."
-            raise GhError(f"github CLI failed ({' '.join(args[:3])}…): {detail}")
-        return proc.stdout
+                raise GhError(
+                    f"github CLI failed ({' '.join(args[:3])}…): {detail}\n"
+                    "Authenticate with 'gh auth login' or set ECTT_PROJECTS_TOKEN."
+                )
+            if not _retryable(detail):
+                raise GhError(f"github CLI failed ({' '.join(args[:3])}…): {detail}")
+            last_error = GhError(
+                f"github CLI failed ({' '.join(args[:3])}…, attempt {attempt + 1}/{self.attempts}): {detail[:300]}"
+            )
+        raise last_error or GhError("github CLI call failed without a diagnostic")
 
     def graphql(self, query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
         payload = json.dumps({"query": query, "variables": variables or {}})
@@ -602,7 +635,7 @@ fields(first:100){nodes{
     # 502s and gh's retry-crash under sustained throttling; the pagination loop
     # assembles the full set either way.
 PROJECT_ITEMS_FRAGMENT = """
-items(first:50,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
+items(first:25,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
   id
   content{... on Issue{number title state}}
   fieldValues(first:25){nodes{
@@ -1473,8 +1506,10 @@ def build_parser() -> argparse.ArgumentParser:
     common.add_argument("--repo", help="owner/name (default: origin remote or GITHUB_REPOSITORY)")
     common.add_argument("--root", help="repository root (default: cwd)")
     common.add_argument("--gh-path", default=os.environ.get("GH_PATH", "gh"), help="GitHub CLI executable")
-    common.add_argument("--gh-timeout", type=int, default=int(os.environ.get("GH_TIMEOUT", "600")),
-                        help="seconds before an unresponsive gh call is aborted (default 600)")
+    common.add_argument("--gh-timeout", type=int, default=int(os.environ.get("GH_TIMEOUT", "90")),
+                        help="seconds before a gh attempt is aborted (default 90; each call retries as a fresh process)")
+    common.add_argument("--gh-attempts", type=int, default=int(os.environ.get("GH_ATTEMPTS", "4")),
+                        help="fresh-process attempts per gh call before failing visibly (default 4)")
     common.add_argument("--owner", help="project owner (default: repo owner; user-owned projects)")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -1507,7 +1542,7 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.root) if args.root else repo_root()
     repo = resolve_repo(args.repo)
     owner = args.owner or repo.split("/")[0]
-    gh = Gh(args.gh_path, timeout=args.gh_timeout)
+    gh = Gh(args.gh_path, timeout=args.gh_timeout, attempts=args.gh_attempts)
     try:
         if args.command == "bootstrap":
             ops, notes = bootstrap(gh, root, repo, owner, args.project_number, args.apply)
