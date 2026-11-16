@@ -63,6 +63,17 @@ class FakeGh:
                 return getattr(self, f"_m_{name}")(query, variables)
         if "{user(login:$login){id}}" in query or "{organization(login:$login){id}}" in query:
             return {"user": {"id": "USER_NODE_1"}}
+        if query.startswith("query{") and ": node(id:" in query:
+            import re
+            result = {}
+            for alias, nid in re.findall(r'(\w+): node\(id:"([^"]+)"\)', query):
+                item = self.items.get(nid)
+                if item is None:
+                    result[alias] = None
+                    continue
+                result[alias] = {"id": nid, "content": {"number": item["issue_number"]},
+                                 "fieldValues": {"nodes": self._fv_nodes(item["field_values"])}}
+            return result
         if "projectV2(number:" in query:
             self._check_fail("fetch_project")
             return self._q_project(query, variables)
@@ -143,6 +154,20 @@ class FakeGh:
 
     # -- GraphQL model ---------------------------------------------------------
 
+    def _fv_nodes(self, field_values: dict) -> list:
+        fv_nodes = []
+        for fname, value in field_values.items():
+            meta = self.fields.get(fname)
+            if meta is None:
+                continue
+            if meta["dataType"] == "SINGLE_SELECT":
+                fv_nodes.append({"field": {"name": fname}, "name": value})
+            elif meta["dataType"] == "NUMBER":
+                fv_nodes.append({"field": {"name": fname}, "number": value})
+            else:
+                fv_nodes.append({"field": {"name": fname}, "text": value})
+        return fv_nodes
+
     def _field_node(self, name: str, meta: dict) -> dict:
         node = {"name": name, "id": meta["id"], "dataType": meta["dataType"]}
         if meta["dataType"] == "SINGLE_SELECT":
@@ -159,20 +184,9 @@ class FakeGh:
             issue = next((i for i in self.issues if i["number"] == item["issue_number"]), None)
             if issue is None:
                 continue
-            fv_nodes = []
-            for fname, value in item["field_values"].items():
-                meta = self.fields.get(fname)
-                if meta is None:
-                    continue
-                if meta["dataType"] == "SINGLE_SELECT":
-                    fv_nodes.append({"field": {"name": fname}, "name": value})
-                elif meta["dataType"] == "NUMBER":
-                    fv_nodes.append({"field": {"name": fname}, "number": value})
-                else:
-                    fv_nodes.append({"field": {"name": fname}, "text": value})
             item_nodes.append({"id": item_id, "content": {"number": issue["number"], "title": issue["title"],
                                                           "state": issue["state"]},
-                               "fieldValues": {"nodes": fv_nodes}})
+                               "fieldValues": {"nodes": self._fv_nodes(item["field_values"])}})
         root = "organization" if query.count("organization") else "user"
         return {root: {"projectV2": {
             "id": self.project["id"], "title": self.project["title"],

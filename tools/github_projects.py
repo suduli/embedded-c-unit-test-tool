@@ -38,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.parse
 from dataclasses import dataclass, field
@@ -201,9 +202,30 @@ class Gh:
             )
         raise last_error or GhError("github CLI call failed without a diagnostic")
 
+    def _payload_file(self, payload: str) -> str:
+        """Write a JSON payload to a temp file and return its path.
+
+        gh reads the payload from the file instead of a pipe: on Windows the
+        stdin pipe + capture_output combination proved flaky exactly while the
+        network route was degraded, and a real file removes that interaction
+        entirely."""
+        handle = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8")
+        try:
+            handle.write(payload)
+        finally:
+            handle.close()
+        return handle.name
+
     def graphql(self, query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
         payload = json.dumps({"query": query, "variables": variables or {}})
-        out = self._run(["api", "graphql", "--input", "-"], stdin=payload)
+        path = self._payload_file(payload)
+        try:
+            out = self._run(["api", "graphql", "--input", path])
+        finally:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
         data = json.loads(out)
         if data.get("errors"):
             raise GhError(f"GraphQL error: {json.dumps(data['errors'])[:400]}")
@@ -219,8 +241,15 @@ class Gh:
         if method != "GET":
             args += ["--method", method]
         if body is not None:
-            args += ["--input", "-"]
-            out = self._run(args, stdin=json.dumps(body))
+            path = self._payload_file(json.dumps(body))
+            args += ["--input", path]
+            try:
+                out = self._run(args)
+            finally:
+                try:
+                    os.unlink(path)
+                except OSError:
+                    pass
         else:
             out = self._run(args)
         if not out.strip():
@@ -631,88 +660,128 @@ fields(first:100){nodes{
 
 # `field` is the ProjectV2FieldConfiguration union: selections need inline
 # fragments on its member types (GitHub rejects direct selections on unions).
-# Small pages keep each read below GitHub's threshold for expensive-query
-    # 502s and gh's retry-crash under sustained throttling; the pagination loop
-    # assembles the full set either way.
-PROJECT_ITEMS_FRAGMENT = """
-items(first:25,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
+#
+# The project state is read in four phases of small, independent requests —
+# the shape proven reliable under throttling and flaky routes. A single
+# all-in-one read (items x fieldValues in one query) intermittently 502s,
+# hangs gh's retry loop for minutes, or crashes gh outright once the board
+# holds hundreds of items, while each small request keeps succeeding.
+ITEM_IDS_FRAGMENT = """
+items(first:100,after:$cursor){pageInfo{hasNextPage endCursor}nodes{
   id
-  content{... on Issue{number title state}}
-  fieldValues(first:25){nodes{
-    ... on ProjectV2ItemFieldSingleSelectValue{
-      field{... on ProjectV2SingleSelectField{name}}
-      name optionId
-    }
-    ... on ProjectV2ItemFieldTextValue{
-      field{... on ProjectV2Field{name}}
-      text
-    }
-    ... on ProjectV2ItemFieldNumberValue{
-      field{... on ProjectV2Field{name}}
-      number
-    }
-    ... on ProjectV2ItemFieldDateValue{
-      field{... on ProjectV2Field{name}}
-      date
-    }
-  }}
+  content{... on Issue{number}}
 }}
 """
 
+ITEM_FIELD_VALUES_FRAGMENT = """
+fieldValues(first:25){nodes{
+  ... on ProjectV2ItemFieldSingleSelectValue{
+    field{... on ProjectV2SingleSelectField{name}}
+    name
+  }
+  ... on ProjectV2ItemFieldTextValue{
+    field{... on ProjectV2Field{name}}
+    text
+  }
+  ... on ProjectV2ItemFieldNumberValue{
+    field{... on ProjectV2Field{name}}
+    number
+  }
+  ... on ProjectV2ItemFieldDateValue{
+    field{... on ProjectV2Field{name}}
+    date
+  }
+}}
+"""
+
+# Field values come back in aliased node batches: one small request per
+# NODE_BATCH items instead of one enormous nested read.
+NODE_BATCH = 20
+
 
 def fetch_project(gh: Gh, owner: str, number: int) -> RemoteProjectState:
-    """Fetch project, fields, items (paginated) and views — user or org owned."""
+    """Fetch project state in four phases of small, independent requests.
+
+    Phase 1: header, fields, views.  Phase 2: item ids + issue numbers.
+    Phase 3: field values in aliased node batches.  User or org owned."""
     owner_type = gh.rest(f"users/{owner}").get("type")
     root = "organization" if owner_type == "Organization" else "user"
-    query = f"""query($login:String!,$number:Int!,$cursor:String){{
-      {root}(login:$login){{
-        projectV2(number:$number){{
-          id title number resourcePath
-          {PROJECT_FIELDS_FRAGMENT}
-          {PROJECT_ITEMS_FRAGMENT}
-          views(first:50){{nodes{{id name layout filter}}}}
-        }}
-      }}
-    }}"""
-    variables: dict[str, Any] = {"login": owner, "number": number, "cursor": None}
-    project = gh.graphql(query, variables)[root]["projectV2"]
-    if project is None:
+
+    header = gh.graphql(
+        f"""query($login:String!,$number:Int!){{
+          {root}(login:$login){{
+            projectV2(number:$number){{
+              id title number resourcePath
+              {PROJECT_FIELDS_FRAGMENT}
+              views(first:50){{nodes{{id name layout filter}}}}
+            }}
+          }}
+        }}""",
+        {"login": owner, "number": number},
+    )[root]["projectV2"]
+    if header is None:
         raise ProjectsError(
             f"Project #{number} not found for owner '{owner}'. Run 'bootstrap' first, or pass the right --project-number."
         )
-    item_nodes = {n["id"]: n for n in project["items"]["nodes"]}
-    while project["items"]["pageInfo"]["hasNextPage"]:
-        variables["cursor"] = project["items"]["pageInfo"]["endCursor"]
-        page = gh.graphql(query, variables)[root]["projectV2"]["items"]
-        for n in page["nodes"]:
-            item_nodes[n["id"]] = n
     fields: dict[str, dict] = {}
-    for node in project["fields"]["nodes"]:
+    for node in header["fields"]["nodes"]:
         entry: dict[str, Any] = {"id": node.get("id"), "dataType": node.get("dataType"), "options": {}}
         for opt in node.get("options") or []:
             entry["options"][opt["name"]] = opt["id"]
         fields[node["name"]] = entry
-    parsed_items: dict[int, RemoteItem] = {}
-    for node in item_nodes.values():
-        content = node.get("content") or {}
-        if content.get("number") is None:   # draft items have no Issue content
-            continue
-        values: dict[str, Any] = {}
-        for fv in node["fieldValues"]["nodes"]:
-            fname = (fv.get("field") or {}).get("name")
-            if fname is None:
-                continue
-            for key in ("name", "text", "number", "date"):
-                if key != "field" and fv.get(key) is not None:
-                    values[fname] = fv[key]
-                    break
-        parsed_items[content["number"]] = RemoteItem(node["id"], content["number"], values)
     views = {
         v["name"]: {"id": v["id"], "layout": v["layout"], "filter": v.get("filter") or ""}
-        for v in project["views"]["nodes"]
+        for v in header["views"]["nodes"]
     }
+
+    item_pairs: list[tuple[str, int]] = []
+    cursor: str | None = None
+    while True:
+        page = gh.graphql(
+            f"""query($login:String!,$number:Int!,$cursor:String){{
+              {root}(login:$login){{
+                projectV2(number:$number){{
+                  {ITEM_IDS_FRAGMENT}
+                }}
+              }}
+            }}""",
+            {"login": owner, "number": number, "cursor": cursor},
+        )[root]["projectV2"]["items"]
+        for n in page["nodes"]:
+            content = n.get("content") or {}
+            if content.get("number") is not None:   # draft items have no Issue content
+                item_pairs.append((n["id"], content["number"]))
+        if not page["pageInfo"]["hasNextPage"]:
+            break
+        cursor = page["pageInfo"]["endCursor"]
+
+    parsed_items: dict[int, RemoteItem] = {}
+    for start in range(0, len(item_pairs), NODE_BATCH):
+        chunk = item_pairs[start:start + NODE_BATCH]
+        aliases = " ".join(
+            f'a{i}: node(id:"{iid}"){{ ... on ProjectV2Item{{ id content{{... on Issue{{number}}}} {ITEM_FIELD_VALUES_FRAGMENT} }}}}'
+            for i, (iid, _num) in enumerate(chunk)
+        )
+        batch = gh.graphql("query{" + aliases + "}", {})
+        for node in batch.values():
+            if not node:
+                continue
+            content = node.get("content") or {}
+            if content.get("number") is None:
+                continue
+            values: dict[str, Any] = {}
+            for fv in node["fieldValues"]["nodes"]:
+                fname = (fv.get("field") or {}).get("name")
+                if fname is None:
+                    continue
+                for key in ("name", "text", "number", "date"):
+                    if key != "field" and fv.get(key) is not None:
+                        values[fname] = fv[key]
+                        break
+            parsed_items[content["number"]] = RemoteItem(node["id"], content["number"], values)
+
     return RemoteProjectState(
-        project["id"], project["title"], project["number"], project.get("resourcePath") or "",
+        header["id"], header["title"], header["number"], header.get("resourcePath") or "",
         fields, parsed_items, views,
     )
 
