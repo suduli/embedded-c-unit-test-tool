@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 342
+      requirement_count: 343
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -1503,6 +1503,17 @@ components:
           semantics are pinned by known cases rather than by agreement with
           whichever backend produced the data.
         satisfies: [TOOL-COV-210]
+        verification: T
+      - id: DSN-COV-150
+        title: Crashed-run coverage admission
+        statement: >
+          Coverage artifacts from runs whose outcome is error, timeout, or a
+          crash are retained but excluded from aggregate merges unless
+          explicitly admitted by a recorded per-run decision. Quarantined
+          artifacts stay visible in per-run provenance and never contribute
+          to an aggregate coverage figure, so a partial profile flushed
+          before a crash cannot read as measured coverage.
+        satisfies: [TOOL-COV-220]
         verification: T
 
   - id: CMP-CBT

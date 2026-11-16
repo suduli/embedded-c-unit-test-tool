@@ -3,7 +3,7 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status (updated 2026-11-17):** 12 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17..T-19 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 342 requirements / 340 allocations / 191 packages; trace_check exit 0: 340/340 allocated); baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining tasks T-20..T-22 are doc-only and need no decisions. Landing anything else requires the change process and approval
+- **Status (updated 2026-11-17):** 13 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-17..T-20 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 343 requirements / 341 allocations / 191 packages; trace_check exit 0: 341/341 allocated); baseline merged to `main` via PR #7. **Four user decisions pending** — see the [Decision queue](#decision-queue-awaiting-user). Remaining tasks T-21..T-22 are doc-only and need no decisions. Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
 - **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
@@ -265,7 +265,7 @@
 | NR-22 | MC/DC condition-limit probing per backend + boundary fixtures — landed 2026-11-17 (TOOL-COV-190, DSN-COV-120, PLAN §5.4/§6.4) | SDD-005 §6.3/§6.4 | RV-04 F-04/F-05 | P1 |
 | NR-23 | Known-answer MC/DC corpus mandated before WP-COV-05 — landed 2026-11-17 (TOOL-COV-210, DSN-COV-140, PLAN §6.4 gate) | PLAN §6.4 | RV-04 F-10 | P1 |
 | NR-24 | Macro/source-variant divergence merge-incompatible — landed 2026-11-17 (TOOL-COV-200, DSN-COV-130, SDD-002 §7.1) | S4 merge rules | RV-04 F-03 | P1 |
-| NR-25 | Crashed-run coverage quarantined unless validated | WP-COV-02 | RV-06 F-18 | P1 |
+| NR-25 | Crashed-run coverage quarantined unless validated — landed 2026-11-17 (TOOL-COV-220, DSN-COV-150, SDD-002 §7.1 admission rule) | WP-COV-02 | RV-06 F-18 | P1 |
 | NR-26 | Per-requirement verdicts deduplicated, worst outcome, labeled denominators — landed 2026-11-17 (TOOL-TRC-110, DSN-TRC-090, SDD-002 §8 + 2/1 anomaly fixture) | SDD-002 §8 | RV-03 F-08 | P1 |
 
 ### Review-derived tasks
@@ -276,7 +276,7 @@
 | T-17 | MC/DC limit probing + boundary fixtures + macro-variant merge rule | NR-22, NR-24 | RV-04 F-03..05 | P1 | **Complete** | — |
 | T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | **Complete** | — |
 | T-19 | Verdict dedup + labeled denominators + 2/1 anomaly fixture | NR-26 | RV-03 F-08 | P1 | **Complete** | — |
-| T-20 | Crashed-run coverage admission rule | NR-25 | RV-06 F-18 | P1 | Not Started | — |
+| T-20 | Crashed-run coverage admission rule | NR-25 | RV-06 F-18 | P1 | **Complete** | — |
 
 ## L5 — Interfaces
 
@@ -554,6 +554,14 @@
 - **Design register:** DSN-TRC-090 (Requirement-verdict aggregation) added, including the two-associations-for-one-requirement acceptance fixture; requirement_count 342.
 - **SDD-002 §8:** the `traceability` block is now aggregation-controlled — dedup to unique pairs, worst-outcome verdict, labeled denominators, unverified-never-coverage-inferred, and the 2/1 anomaly fixture mandated.
 - **Gates:** plan_check exit 0 — 342 requirements, 340 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 340/340 allocated, 255 elements.
+
+### T-20 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-220 (M, P1, T) — coverage artifacts from runs whose outcome is `error`, `timeout`, or a crash are retained but excluded from aggregate merges unless explicitly admitted by a recorded per-run decision; quarantined artifacts stay visible in per-run provenance and never contribute to an aggregate coverage figure.
+- **PLAN-001:** COV-220 allocated to WP-COV-02; §5.4 adds the WP-COV-02 exit-criterion example — a profile flushed by a run that then crashes is retained but excluded from the aggregate until explicitly admitted; the aggregate never includes quarantined data. Derived tables regenerated.
+- **Design register:** DSN-COV-150 (Crashed-run coverage admission) added; requirement_count 343.
+- **SDD-002 §7.1:** the merge contract now carries the admission rule, consistent with "missing measurement stays visible in per-run provenance" — the optimistic merge of partial crash profiles is a non-behavior.
+- **Gates:** plan_check exit 0 — 343 requirements, 341 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 341/341 allocated, 256 elements.
 
 ## Decision queue (awaiting user)
 

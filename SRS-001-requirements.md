@@ -443,6 +443,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-COV-210** *(M, P3, T)* — The tool's own validation suite shall include a known-answer MC/DC corpus whose cases carry hand-computed expected results: the minimal `a && b` independence matrix, nested decisions, repeated and coupled operands, a side-effecting operand that must not be evaluated, a macro-expanded condition, a constant or never-taken decision, and a masking-versus-unique-cause divergent case documenting the expected difference per TOOL-COV-090; each case asserts the resulting statuses (`demonstrated`, `not_demonstrated`, `unmeasured`) and the witness pair.
 
+**TOOL-COV-220** *(M, P1, T)* — Coverage artifacts collected from runs whose outcome is `error`, `timeout`, or a crash shall be retained but excluded from aggregate merges unless explicitly admitted by a recorded per-run decision; quarantined artifacts shall remain visible in per-run provenance without contributing to any aggregate coverage figure.
+
 ---
 
 ## 13. Change-Based and Regression Testing (CBT)

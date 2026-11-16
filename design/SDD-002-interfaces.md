@@ -324,7 +324,11 @@ never silently ignored, and the variant difference is carried in the record
 identity so the diagnostic can name it (DSN-COV-130). Missing
 measurement stays visible in per-run provenance; an aggregate demonstrated
 status requires at least one valid proof. Justifications remain separate and
-expire on source-digest mismatch.
+expire on source-digest mismatch. Coverage artifacts from runs whose outcome
+is `error`, `timeout`, or a crash are retained but excluded from aggregate
+merges unless explicitly admitted by a recorded per-run decision; quarantined
+artifacts stay visible in per-run provenance and never contribute to an
+aggregate coverage figure (TOOL-COV-220, DSN-COV-150).
 
 Acceptance fixtures must include equal true/false outcome flags with different
 independence results, short-circuit/masking pairs, missing backend evidence,
