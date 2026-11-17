@@ -40,17 +40,17 @@ from ectt.ing.errors import (
     ResponseFileError,
     StalenessError,
 )
+from ectt.ing.model import (
+    CompilationDatabase,
+    CompilerInvocation,
+    TranslationUnit,
+)
 from ectt.ing.staleness import (
     StalenessInputs,
     StalenessReport,
     assert_fresh,
     capture_staleness_inputs,
     check_staleness,
-)
-from ectt.ing.model import (
-    CompilationDatabase,
-    CompilerInvocation,
-    TranslationUnit,
 )
 
 __all__ = [

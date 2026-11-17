@@ -15,13 +15,13 @@ Satisfies: TOOL-NFR-070, TOOL-NFR-080, TOOL-PRJ-050, TOOL-PRJ-080.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
-import io
 import os
 import tempfile
 from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Any
+from typing import IO, Any
 
 from ectt.core.determinism import CoreError, canonical_json, canonical_text
 
@@ -201,10 +201,8 @@ class OutputRoot:
             os.replace(temp_path, file_path)
         except Exception:
             if temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
     def resolve_path(self, rel_path: Path | str) -> Path:
@@ -297,10 +295,8 @@ class OutputRoot:
             os.replace(temp_path, target_path)
         except Exception:
             if temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
         return target_path
@@ -443,7 +439,7 @@ class SourceTree:
         mode: str = "r",
         encoding: str | None = None,
         errors: str | None = None,
-    ) -> io.IOBase:
+    ) -> IO[Any]:
         """Open a source file for reading only. Any mutating mode raises SourceMutationError."""
         for mutating_char in ("w", "a", "+", "x"):
             if mutating_char in mode:

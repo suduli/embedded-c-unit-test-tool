@@ -6,7 +6,7 @@ Satisfies: TOOL-ING-010, TOOL-ING-020, TOOL-ING-030.
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Any
 

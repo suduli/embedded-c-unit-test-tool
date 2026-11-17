@@ -6,11 +6,11 @@ Satisfies: TOOL-PAR-030, TOOL-PAR-050, DSN-ANA-020.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-import clang.cindex  # type: ignore[import-not-found,import-untyped]
-from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
+from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind  # type: ignore[import-untyped]
 
 from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import normalize_path, resolve_source_location_path
@@ -65,12 +65,9 @@ def _is_global_or_file_static(cursor: Any) -> bool:
     if cursor.kind != CursorKind.VAR_DECL:
         return False
     sem_parent = cursor.semantic_parent
-    if sem_parent is not None and sem_parent.kind == CursorKind.TRANSLATION_UNIT:
-        return True
-    if cursor.linkage in (LinkageKind.EXTERNAL, LinkageKind.INTERNAL, LinkageKind.UNIQUE_EXTERNAL):
-        if sem_parent is None or sem_parent.kind == CursorKind.TRANSLATION_UNIT:
-            return True
-    return False
+    tu_parent = sem_parent is not None and sem_parent.kind == CursorKind.TRANSLATION_UNIT
+    linkage_ok = cursor.linkage in (LinkageKind.EXTERNAL, LinkageKind.INTERNAL, LinkageKind.UNIQUE_EXTERNAL)
+    return tu_parent or (linkage_ok and (sem_parent is None or sem_parent.kind == CursorKind.TRANSLATION_UNIT))
 
 
 def _determine_global_access(cursor: Any, ancestors: tuple[Any, ...], target_var: Any) -> str:
@@ -136,9 +133,8 @@ def _determine_global_access(cursor: Any, ancestors: tuple[Any, ...], target_var
                 all_tokens = [t.spelling for t in op_parent.get_tokens()]
                 if len(all_tokens) > len(lhs_tokens):
                     op = all_tokens[len(lhs_tokens)]
-                    if op == "=":
-                        if lhs == curr:
-                            return "w"
+                    if op == "=" and lhs == curr:
+                        return "w"
             return "r"
 
     return "r"
@@ -162,7 +158,7 @@ def _extract_globals(func_cursor: Any) -> tuple[GlobalAccessModel, ...]:
                         accesses[name] = "rw"
 
         for child in cursor.get_children():
-            walk(child, ancestors + (cursor,))
+            walk(child, (*ancestors, cursor))
 
     walk(func_cursor)
 

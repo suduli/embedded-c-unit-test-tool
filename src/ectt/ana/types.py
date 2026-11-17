@@ -7,11 +7,11 @@ Satisfies: TOOL-PAR-040, DSN-ANA-020.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-import clang.cindex  # type: ignore[import-not-found,import-untyped]
-from clang.cindex import CursorKind, TypeKind
+from clang.cindex import CursorKind, TypeKind  # type: ignore[import-untyped]
 
 from ectt.ana.frontend import normalize_path, resolve_source_location_path
 from ectt.ana.model import (
@@ -180,10 +180,7 @@ class TypeGraphBuilder:
         target_ref = self.resolve_type(pointee, context=context)
         target_id = target_ref.removeprefix("ref:type.")
 
-        if is_const:
-            ptr_id = f"ptr.const_{target_id}"
-        else:
-            ptr_id = f"ptr.{target_id}"
+        ptr_id = f"ptr.const_{target_id}" if is_const else f"ptr.{target_id}"
 
         key = f"type.{ptr_id}"
         if key not in self._types:
@@ -224,9 +221,9 @@ class TypeGraphBuilder:
         arg_types = list(proto_type.argument_types())
         param_names: list[str] = []
         if cursor is not None:
-            for child in cursor.get_children():
-                if child.kind == CursorKind.PARM_DECL:
-                    param_names.append(child.spelling)
+            param_names.extend(
+                child.spelling for child in cursor.get_children() if child.kind == CursorKind.PARM_DECL
+            )
 
         for idx, arg_t in enumerate(arg_types):
             p_name = param_names[idx] if idx < len(param_names) else ""
@@ -436,14 +433,11 @@ class TypeGraphBuilder:
         target_decl = defn if defn is not None and defn.is_definition() else decl
 
         enumerators: list[EnumeratorModel] = []
-        for child in target_decl.get_children():
-            if child.kind == CursorKind.ENUM_CONSTANT_DECL:
-                enumerators.append(
-                    EnumeratorModel(
-                        name=child.spelling,
-                        value=child.enum_value,
-                    )
-                )
+        enumerators.extend(
+            EnumeratorModel(name=child.spelling, value=child.enum_value)
+            for child in target_decl.get_children()
+            if child.kind == CursorKind.ENUM_CONSTANT_DECL
+        )
 
         underlying_ref: str | None = None
         if hasattr(target_decl, "enum_type") and target_decl.enum_type.kind != TypeKind.INVALID:
@@ -473,9 +467,8 @@ class TypeGraphBuilder:
         tokens = list(cursor.get_tokens())
         if tokens:
             first_tok = tokens[0].spelling
-            if first_tok in ("struct", "union", "enum") and len(tokens) > 1:
-                if tokens[1].spelling == "{":
-                    return True
+            if first_tok in ("struct", "union", "enum") and len(tokens) > 1 and tokens[1].spelling == "{":
+                return True
         return False
 
     def _build_anonymous_id(self, kind_name: str, context: str | None, cursor: Any) -> str:
@@ -526,6 +519,4 @@ class TypeGraphBuilder:
             TypeKind.DEPENDENTSIZEDARRAY,
         ):
             return False
-        if canonical.kind in (TypeKind.FUNCTIONPROTO, TypeKind.FUNCTIONNOPROTO):
-            return False
-        return True
+        return canonical.kind not in (TypeKind.FUNCTIONPROTO, TypeKind.FUNCTIONNOPROTO)

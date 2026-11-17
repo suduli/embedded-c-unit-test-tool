@@ -17,6 +17,9 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "jsonschema>=4.20",
+    "ruff>=0.17",
+    "mypy>=2.4",
+    "types-PyYAML>=6.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -28,3 +31,62 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+# ---------------------------------------------------------------- linter ----
+# Scoped to the directories this project's tasks own. The excluded paths are:
+#   spikes/, vcast-findings/, aidlc/, .claude/ - read-only or do-not-touch
+#     surfaces (EXEC-PLAN-001 §1 item 4, §5.7 item 3);
+#   design/ - hand-authored trace tooling owned by other tasks (its known
+#     findings are recorded in docs/glm-night/lint-baseline.md);
+#   docs/, assets/, .github/ - no first-party Python that this gate owns.
+[tool.ruff]
+target-version = "py311"
+extend-exclude = [
+    "spikes",
+    "vcast-findings",
+    "aidlc",
+    "design",
+    "docs",
+    "assets",
+]
+
+[tool.ruff.lint]
+# Error classes + high-signal style/perf families. E501 (line length) is
+# deliberately not selected: the codebase predates a uniform line budget.
+select = [
+    "E4",   # pycodestyle imports
+    "E7",   # pycodestyle statements
+    "E9",   # pycodestyle runtime errors
+    "F",    # pyflakes: real bugs (F821 undefined name, F601 duplicate key)
+    "B",    # flake8-bugbear: real hazard patterns
+    "I",    # isort: deterministic import order (TOOL-NFR-060 spirit)
+    "UP",   # pyupgrade: modern syntax equivalents
+    "SIM",  # flake8-simplify
+    "C4",   # flake8-comprehensions
+    "RUF",  # ruff-specific
+    "PERF", # perflint
+    "PIE",  # flake8-pie
+    "FURB", # refurb
+    "PLW",  # pylint warnings only (not the full pylint surface)
+    "BLE",  # blind except
+]
+ignore = [
+    # RUF022: __all__ ordering is kept in the repository's semantic grouping
+    # (reader constants first, then callables) rather than isort-style natural
+    # order; reordering 19 modules is churn with no defect signal.
+    "RUF022",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ modules intentionally import names to re-export them;
+# the stable public surface is the __all__ in each module.
+"**/__init__.py" = ["F401"]
+# Tests deliberately exercise broad failure paths: asserting on generic
+# exceptions raised by misbehaving code under test is the point.
+"tests/**" = ["BLE001"]
+
+# ------------------------------------------------------------- type check ---
+[tool.mypy]
+python_version = "3.11"
+# Incremental cache lives in .venv; keep repo tree clean.
+cache_dir = ".venv/.mypy_cache"

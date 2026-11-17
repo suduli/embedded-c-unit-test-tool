@@ -480,9 +480,8 @@ class TypeModel:
             res["size"] = self.size
             if self.dimensions:
                 res["dimensions"] = [d.to_dict() for d in self.dimensions]
-        elif self.kind == "builtin":
-            if self.name is not None:
-                res["name"] = self.name
+        elif self.kind == "builtin" and self.name is not None:
+            res["name"] = self.name
 
         return res
 

@@ -13,7 +13,7 @@ import pytest
 from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import parse
 from ectt.ana.interface import extract, extract_interfaces
-from ectt.ana.model import AnalysisUnit, FunctionModel
+from ectt.ana.model import AnalysisUnit
 
 
 def test_function_storage_class_and_linkage() -> None:

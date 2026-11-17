@@ -28,7 +28,6 @@ from ectt.ana.interface import extract_interfaces
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
-    Diagnostic,
     FunctionModel,
     SourceLocation,
     TypeModel,
@@ -39,7 +38,6 @@ from ectt.ana.persist import (
     SCHEMA_VERSION_CURRENT,
     assemble_analysis_model,
     compute_model_digest,
-    load_analysis_model,
     read_analysis_model,
     write_analysis_model,
 )
@@ -521,6 +519,7 @@ assert not loaded_clang_modules, f"Seam violation: clang modules loaded: {loaded
         [sys.executable, "-c", check_code],
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert result.returncode == 0, f"Subprocess failed:\nSTDOUT: {result.stdout}\nSTDERR: {result.stderr}"
 

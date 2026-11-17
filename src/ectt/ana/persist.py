@@ -29,8 +29,6 @@ from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
     DecisionInventoryModel,
-    Diagnostic,
-    FunctionModel,
     InputFileModel,
     ParsedTranslationUnit,
     ProvenanceModel,

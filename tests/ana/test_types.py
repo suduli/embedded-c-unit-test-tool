@@ -11,7 +11,6 @@ from pathlib import Path
 
 from ectt.ana.frontend import parse
 from ectt.ana.interface import extract_interfaces
-from ectt.ana.model import AnalysisUnit
 
 
 def test_anonymous_typedef_struct_extraction() -> None:

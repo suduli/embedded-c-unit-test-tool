@@ -12,12 +12,10 @@ from unittest.mock import patch
 import pytest
 
 from ectt.ana.errors import (
-    FrontendParseError,
     LibclangVersionError,
     SourceFileNotFoundError,
 )
 from ectt.ana.frontend import (
-    ClangFrontend,
     check_libclang_version_floor,
     get_libclang_version,
     get_libclang_version_tuple,
@@ -36,7 +34,7 @@ def test_libclang_version_floor_and_query() -> None:
 
     ver_tuple = get_libclang_version_tuple()
     assert len(ver_tuple) == 3
-    major, minor, patch_num = ver_tuple
+    major, minor, _ = ver_tuple
     assert (major, minor) >= (18, 1)
 
     # Floor check succeeds with active version

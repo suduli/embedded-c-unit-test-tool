@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `aaf88a1` on `glm-night/20261117` (13 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `35487c4` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -607,7 +607,7 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 - **SRS requirements:** —
 - **Work packages:** — · **Related:** `WP-CORE-08`, `PR#6`
 - **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
+- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `35487c4`
 - **Files likely touched:** `.github/workflows/tests.yml (new; traceability.yml untouched)`
 - **Acceptance criteria:**
   1. workflow runs pytest + both design gates on ubuntu-latest and windows-latest, Python 3.11, pinned actions, permissions: contents: read
@@ -633,11 +633,11 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
   2. mypy runs; remaining errors listed in lint-baseline.md with counts per rule
   3. no sweeping reformat in git diff --stat
   4. full gate green
-- **Verification** (pending):
+- **Verification** (pass):
   - `.venv/Scripts/python -m ruff check .`
   - `.venv/Scripts/python -m mypy src`
   - full gate **G-FULL** (see §5.4)
-- **Notes:** PR#6 edits pyproject.toml ([tool.pytest] pythonpath) — adjacent-section edit, expect an easy merge.
+- **Notes:** PR#6 edits pyproject.toml ([tool.pytest] pythonpath) — adjacent-section edit, expect an easy merge. Landed 2026-11-18. ruff 0.17.5 + mypy 2.4.1 + types-PyYAML added to dev extras (dev-only deps allowed in TASK-003/004). Config in pyproject: [tool.ruff] scoped to owned paths (spikes/vcast-findings/aidlc/design/docs/assets excluded - do-not-touch or out-of-scope), explicit select (E4/E7/E9,F,B,I,UP,SIM,C4,RUF,PERF,PIE,FURB,PLW,BLE), reasoned ignores (RUF022 semantic __all__ grouping; F401 in __init__ re-exports; BLE001 in tests); [tool.mypy] python_version 3.11. Result: ruff check . exit 0 (baseline 118 in scope: 65 auto-fixes + 39 hand fixes incl. 3 real F821 missing imports shared with mypy; noqa'd 1 PLW0603 singleton + 2 deliberate BLE001 fallbacks with reasons); mypy src exit 0 (baseline 11 -> 0; 2 yaml Event attr-defined errors surfaced only after stubs installed, fixed with commented inline ignores). Suite 237 passed / 1 skipped unchanged. Full triage with per-rule counts + excluded-path findings recorded in docs/glm-night/lint-baseline.md. No sweeping reformat (34 files, +167/-152). Landing sha backfilled at the next tracker-touching commit.
 
 ### TASK-004 — Coverage baseline and gap-filling tests (≥80% on core/prj/ing)
 

@@ -13,10 +13,8 @@ from pathlib import Path
 import pytest
 
 from ectt.ing.compdb_adapter import (
-    CompDbAdapter,
     extract_compiler_flags,
     load_compdb,
-    parse_command_to_arguments,
     parse_compdb,
 )
 from ectt.ing.errors import (

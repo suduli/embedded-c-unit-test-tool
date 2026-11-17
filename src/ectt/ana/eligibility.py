@@ -95,8 +95,7 @@ def assess_eligibility(
             continue
         for fn in unit.functions:
             return_ref = fn.return_type
-            if return_ref.startswith("ref:"):
-                return_ref = return_ref[4:]
+            return_ref = return_ref.removeprefix("ref:")
             channels: list[str] = []
             if fn.parameters:
                 channels.append("parameters")

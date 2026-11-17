@@ -15,7 +15,6 @@ from ectt.prj.errors import (
     UnsupportedSchemaVersionError,
 )
 from ectt.prj.model import (
-    DEFAULT_KIND_REGISTRY,
     PROJECT_KIND,
     FileKind,
     KindRegistry,

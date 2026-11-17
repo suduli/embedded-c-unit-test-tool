@@ -6,6 +6,7 @@ Satisfies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-050, TOOL-PRJ-070, TOOL-UIX-320,
 
 from __future__ import annotations
 
+import contextlib
 import os
 import tempfile
 from collections.abc import Mapping, Sequence
@@ -26,7 +27,10 @@ from ectt.prj.model import (
     ProjectDocument,
     dispatch_schema_version,
 )
-from ectt.prj.paths import normalize_posix_path, resolve_project_path, validate_project_path
+from ectt.prj.paths import (
+    resolve_project_path,
+    validate_project_path,
+)
 from ectt.prj.yaml_adapter import (
     RestrictedYamlAdapter,
     SerializationAdapter,
@@ -323,10 +327,8 @@ class Project:
             os.replace(temp_path, target_path)
         except Exception:
             if temp_path is not None and temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
         return target_path
