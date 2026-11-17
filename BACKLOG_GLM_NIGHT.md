@@ -1,307 +1,295 @@
-# BACKLOG_GLM_NIGHT — unattended overnight backlog for the GLM agent
+# BACKLOG_GLM_NIGHT — unattended overnight backlog for the GLM agent (ECTT, the Embedded-C Unit Test Tool)
 
-Generated 2026-11-17. Budget: ~3,000,000 tokens. Core queue ≈ 2.9M; reserve queue ≈ 1.1M (only start when core is done and budget remains).
+Repo: `E:\projects\UDS_Simulator\Unit` (GitHub `suduli/embedded-c-unit-test-tool`). Python package `ectt`, tests in `tests/`, specs in `SRS-001`, `PLAN-001`, `design/`.
+Generated 2026-11-17. Budget ≈ 3,000,000 tokens. Core queue ≈ 2.85M. Reserve queue ≈ 1.25M (only when core is finished).
 
-Repos: **SIM** = `E:\projects\UDS_Simulator\UDS-SIMULATION` (site, docs-site, mcp-server). **UNIT** = `E:\projects\UDS_Simulator\Unit` (ECTT test tool).
-Most tasks are SIM. Only TASK-024 touches UNIT (docs only).
+> Replaces an earlier version of this file that wrongly targeted the UDS-SIMULATION website repo.
 
 ---
 
-## 1. Summary of areas covered
+## 1. What was found (discovery summary)
 
-| Area | Tasks | Source of the work |
-|---|---|---|
-| Setup / baseline | 000 | needed for safe overnight run |
-| SEO | 001–006 | `SEO/ACTION-PLAN.md` (P0-1, P0-3, P1-1, P1-3, P2-2, P2-3), `docs/seo/AI-VISIBILITY-PLAN.md` §1.1 |
-| SID test cases / test health | 007–009 | `tests/test-data/sid-*/…report.json`, `scripts/orchestrate-sid-test-reviews.mjs`, `docs-site/__tests__/sid-schemas.test.ts`, GH #391 (failing scheduled regression) |
-| docs-site update | 010–012 | GH #228–232 (SID 0x10 page), #112, #119 |
-| UI redesign | 013–014 | `docs/admin-redesign/PLAN.md` (visual baselines unchecked), GH #150 |
-| MCP | 015–016 | `openspec/changes/add-user-aware-uds-mcp` (24 open), `docs/mcp/*` |
-| Post marketing | 017–019 | `daily-uds-linkedin-post/`, GH #310 #151 |
-| New planning | 020–021 | GH #184 (public roadmap), UNIT `PLAN-001` status vs. commits |
-| Other gaps | 022–024 | dependency audit, broken links, `SequenceEngine.ts` TODO |
-| Final report | 025 | morning review pack |
+State at HEAD `71e9811` on branch `docs/pending-decisions` (21 commits ahead of local `main`; T-15…T-22 only exist on this branch):
 
-Not planned (deliberately excluded, see §4): payments/RLS/migrations, deployments, social account creation, publishing anything, closing issues, MCP gated work packages WP17–WP20 / G6–G8 (they need owner gates and real credentials).
+- **Implemented:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01/02/04 (+ T-07…T-13, T-15…T-22 review tasks, mostly spec/gate work). Spikes 01–03 done.
+- **Baseline tests (`.venv`):** 234 pass, 1 skipped, **3 FAIL** — all in `tests/ana/test_persist.py` (`test_real_extraction_assemble_write_read_roundtrip`, `test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored`, `test_assemble_emits_1_1_with_not_extracted_inventory`). Cause visible: tests assert schema `1.0`, emitter now produces `1.2` (drift after T-09/T-10). System Python lacks `clang`; use `.venv`.
+- **Design gates green:** `design/trace/plan_check.py` and `trace_check.py` pass (346 reqs, 191 packages).
+- **CI gap:** only `.github/workflows/traceability.yml` exists. No pytest, lint, type-check or coverage in CI; no `ruff`/`mypy` configured (pyproject has only pytest + jsonschema in dev extras).
+- **Pending WPs** (PLAN-001 §5.5, all "Planned"): P1 packages not yet built include WP-CORE-02/03, WP-ANA-03/07, WP-ING-07, TCH-01/02, GEN-01, BLD-01, EXH-01…03, COV-01…03, REP-01…03. Decision-free, bounded ones are queued below.
+- **Blocked by owner decisions (do NOT decide them):** D-01 licence (T-01, ADR-005), D-02 identity model (T-04, unblocks T-14), D-03 platform order (T-05), D-04 NFR calibration (T-06). T-02 (no-import/provenance rule for `vcast-findings/`) is "Not Started" but cites ADR-005.
+- **GitHub:** no open issues; open PRs #6 (GitHub Projects workflow, `codex/github-projects-workflow`) and #4 (ADR-008 allocation, `fix/aif-provider-traceability`); stale local branches exist.
+- **Docs:** static HTML in `docs/` (index, components, doc-map, oss-integration, reviews trackers) — this repo's "docs site".
+
+### Mapping of your requested areas to this repo
+
+| Requested area | Applies here as |
+|---|---|
+| SEO improvement | N/A (no public website). Closest: docs HTML metadata/readability → TASK-018 |
+| UI redesign | N/A in code (GUI is WP-GUI-*, not started, ADR-001 spike only). Static docs pages only → TASK-018 |
+| MCP work | N/A (no MCP server in this repo) |
+| Post marketing | N/A and blocked by D-01 (don't publicize before licence). README/dev guide only → TASK-019 |
+| docs-site update | TASK-017 (trackers/verification), TASK-018 (docs HTML), TASK-019 (README) |
+| Test "SID" test cases | N/A (UDS SIDs belong to the other repo). Equivalent here: missing/failing tests → TASK-001, 004, 005 and the per-WP tests |
+| New planning | TASK-014 (decision memos), TASK-015, TASK-023 |
+| GitHub backlog | TASK-021 (read-only audit of PRs/branches) |
+| Other gaps | TASK-002, 003, 007, 008, 019, 020, 022 |
+
+---
 
 ## 2. Token estimate
 
 | Queue | Tasks | Est. tokens |
 |---|---|---|
-| Core | TASK-000 … TASK-025 | **2,900,000** (sum in the table in §5) |
-| Reserve | TASK-101 … TASK-107 | 1,130,000 |
-| Hard stop | — | stop starting new tasks at ~2.85M used; leave 150k for TASK-025 |
+| Core | TASK-000 … TASK-024 | **2,850,000** (table §5) |
+| Reserve | TASK-101 … TASK-108 | 1,250,000 |
+| Stop rule | stop starting new tasks at ≈2.8M used; keep ≈150k for TASK-024 | |
 
-Estimates are rough (±40%). The agent must track its own running total in the log (see §3.6).
+Estimates are rough (±40%). Track a running total in the log.
 
 ---
 
 ## 3. Agent instructions (READ FIRST, FOLLOW EXACTLY)
 
-You are an unattended executor. No human will answer questions. When something is ambiguous, pick the most conservative reading, record the assumption in the log, and continue.
+You are an unattended executor. No human will answer. Ambiguity → choose the most conservative reading, record the assumption in the log, continue.
 
-### 3.1 Branch and isolation (SIM has uncommitted human work — do not disturb it)
+### 3.1 Branch and isolation
 
-`E:\projects\UDS_Simulator\UDS-SIMULATION` currently has a dirty working tree on branch `chore/mcp-use-adoption-plan` (modified `mcp-server/src/http/start.ts`, `src/App.tsx`, `src/utils/redirect.ts`, a security test, `.claude/settings.local.json`). **Never edit, stash, reset, checkout over, or commit those.** Work in a separate worktree:
+Do not work on `main` or on `docs/pending-decisions` directly. Use a sibling worktree based on the current tip of `docs/pending-decisions` (it contains T-15…T-22; `main` does not):
 
 ```bash
-cd /e/projects/UDS_Simulator/UDS-SIMULATION
-git fetch origin
-git worktree add ../wt-glm-night -b glm-night/20261117 origin/main
-cd ../wt-glm-night
-npm ci && (cd docs-site && npm ci) && (cd mcp-server && npm ci)
+cd /e/projects/UDS_Simulator/Unit
+git worktree add ../wt-unit-glm-night -b glm-night/20261117 docs/pending-decisions
+cd ../wt-unit-glm-night
+py -3.11 -m venv .venv          # or: python -m venv .venv
+.venv/Scripts/python -m pip install -e ".[dev]"
 ```
 
-All SIM work happens in `E:\projects\UDS_Simulator\wt-glm-night` on branch `glm-night/20261117`. If `origin/main` is not available, branch from local `main`. Never work on `main`.
-For UNIT (TASK-024 only): `git -C /e/projects/UDS_Simulator/Unit worktree add ../wt-unit-glm-night -b glm-night/20261117 main`.
+All work happens in `E:\projects\UDS_Simulator\wt-unit-glm-night` on `glm-night/20261117`. Do NOT use the main checkout's `.venv` (an editable install there would import the wrong `src`). If `libclang` fails to install, mark clang-dependent tasks BLOCKED and continue with the rest.
 
 ### 3.2 Commit workflow
 
-- One commit per task (a small number of extra commits is fine for a large task). Stage only the files the task touches (`git add <paths>`, never `git add -A`).
-- Commit message format, exactly:
-  `[GLM-NIGHT] TASK-012: <imperative summary under 70 chars>`
-  body: what changed, why, how verified (commands + result), and `Files:` list. End with `Co-Authored-By: GLM Agent <noreply@example.com>`.
-- Marker for non-task commits: `[GLM-NIGHT] LOG: …`. Morning filter: `git log --grep='\[GLM-NIGHT\]' --oneline`.
-- Only commit when the task's acceptance criteria pass and its verification commands are green (or the failure is pre-existing — see 3.4). Never commit with failing tests that you introduced.
-- Never: `git push --force`, `git reset --hard` on shared refs, `git rebase` of pushed work, `--no-verify`, amending previous task commits.
-- Push the branch to origin at the end of each phase with plain `git push -u origin glm-night/20261117` (never to `main`, never force). If push fails, continue and note it.
+- One commit per task (extra commits allowed for big tasks). Stage only the paths you touched (`git add <paths>`, never `git add -A`).
+- Message format, exactly: `[GLM-NIGHT] TASK-012: <imperative summary, ≤70 chars>`. Body: what, why, how verified (commands + result), `Files:`. End with `Co-Authored-By: GLM Agent <noreply@example.com>`.
+- Non-task commits: `[GLM-NIGHT] LOG: …`. Morning filter: `git log --grep='\[GLM-NIGHT\]' --oneline`.
+- Commit only when acceptance criteria pass and the **full gate** (§3.5) is green, apart from failures already in the baseline (§3.4).
+- Never: force-push, `git reset --hard` on shared refs, rebase pushed work, `--no-verify`, amend earlier task commits.
+- After each phase run `git push -u origin glm-night/20261117` (plain push, never to `main`). If push fails, continue and note it.
 
 ### 3.3 Safety rules (hard)
 
-1. Do NOT deploy, run `vercel`, change Vercel/Cloudflare/Supabase/Razorpay/PostHog/Resend settings, or touch production URLs except read-only `GET`s (e.g. `curl` of public pages).
-2. Do NOT apply migrations or run SQL against any database. Writing a migration *file* is out of scope for this backlog.
-3. Do NOT read, print, or commit secrets (`.env*`, keys, tokens). Do not paste credentials into logs.
-4. Do NOT send emails, post to social networks, create accounts, open/close/comment on GitHub issues or PRs, or merge anything.
-5. Do NOT delete files except ones the task explicitly names, and never delete tests to make them pass. Never weaken an assertion or coverage threshold to get green.
-6. Do NOT touch payment, billing, RLS, auth, or `openspec/changes/harden-*` code.
-7. Do NOT upgrade major dependency versions. TASK-022 is report-only.
-8. No file in the repo may contain placeholder testimonials, fake logos, or invented metrics.
-9. If a command would run longer than 15 minutes or needs interactive input, kill it and mark the task BLOCKED.
+1. Never make an owner decision. D-01…D-04, ADR-003/004/005/007 stay **Open**. Do not edit ADR files, change a decision-register state, change LICENSE/LICENSEES, or flip any "Awaiting decision" status. Memos and proposals go in `docs/proposals/` as drafts.
+2. Do not edit accepted requirements text in `SRS-001` or accepted ADRs. You may allocate work and update derived tables only through the repo's own tool: `python design/trace/plan_check.py --write` and only in tasks that say so.
+3. Do not touch `aidlc/` state or audit files, `.claude/`, `.agents/`, `.agy-staff/`, `.zcode/`, `vcast-findings/` (read-only reference; see TASK-015 for the no-import rule), or `spikes/`.
+4. Never copy code, schema, strings or identifiers out of `vcast-findings/` into `src/`. `src/` is a fresh build (ADR-006).
+5. Do not open, comment on, merge or close PRs/issues; do not delete branches; do not publish or post anything; no network calls from product code or tests (also a requirement, TASK-007).
+6. No secrets in code or logs. No new runtime dependencies. Dev-only deps (ruff, mypy, pytest-cov) may be added to `[project.optional-dependencies].dev` in TASK-003/004 only.
+7. Never delete or weaken tests, thresholds or gates to get green. A real failing test you cannot fix → `xfail(strict=True, reason=...)` plus a log entry, not removal.
+8. Never delete files unless the task names them. Leave the stray `NUL` file alone.
+9. Commands expected to exceed 15 minutes, or needing interaction → kill, mark BLOCKED.
+10. Determinism is a product requirement (WP-CORE-01): new code must not use wall-clock time, random values or unordered iteration in outputs; use `ectt.core.determinism` helpers.
 
 ### 3.4 Failure handling — never stop the run
 
-For each task: do the work → run the verification commands → commit. If it cannot be completed:
-- Spend at most **1.5× the task's token estimate**. At that point stop work on it.
-- `git stash` nothing; instead discard only your own uncommitted changes for that task (`git restore` the paths you edited) so the next task starts clean.
-- Set the task's status to `BLOCKED` or `FAILED` in the log with a one-paragraph reason (command, error excerpt, what you tried).
-- Move on to the next task whose dependencies are not blocked. A task depending on a BLOCKED task becomes `SKIPPED (dep)`.
-- Pre-existing failures: before TASK-001, TASK-000 records a baseline. A test that fails in the baseline and still fails the same way is not your regression; note it and do not fix it unless the task says so.
+Per task: implement → verify → commit. If it can't be completed:
+- Cap effort at **1.5× the estimate**, then stop.
+- `git restore` only the paths you edited for that task (leave the tree clean).
+- Log it `BLOCKED` or `FAILED` with one paragraph (command, error excerpt, what you tried).
+- Continue with the next task whose dependencies are not blocked. Dependents become `SKIPPED (dep)`.
+- Baseline: TASK-000 records the failing tests. Anything failing identically in the baseline is not yours (TASK-001 fixes the three known ones).
 
-### 3.5 Verification defaults
+### 3.5 Verification (the "full gate")
 
-- SIM root: `npx tsc -b`, `npx eslint <touched files>`, `npx vitest run <touched test paths>`.
-- docs-site: `cd docs-site && npx eslint <files> && npx vitest run && node --test __tests__/docs-baseline.test.mjs`. Run `npm run build` (in docs-site) only when a task says so; it is slow.
-- mcp-server: `cd mcp-server && npm run build && npm run test:<suite>` for the touched area.
-- Run the narrowest check first, the full suite once at the end of each phase.
+```bash
+.venv/Scripts/python -m pytest -q -p no:cacheprovider
+.venv/Scripts/python design/trace/plan_check.py
+.venv/Scripts/python design/trace/trace_check.py
+```
+Run the narrow test file first, the full gate before every commit. Tasks that add code also add tests (org rule: tests are a first-class deliverable; each new module needs the happy path and at least two error/edge cases; no always-passing tests).
 
-### 3.6 Logging (the morning review reads this)
+### 3.6 Logging
 
-Maintain `docs/glm-night/GLM_NIGHT_LOG.md` in the worktree (create in TASK-000). After every task append one row and commit it together with the task:
+Maintain `docs/glm-night/GLM_NIGHT_LOG.md` (created in TASK-000). After each task append and commit with the task:
+`| TASK-id | DONE/PARTIAL/BLOCKED/FAILED/SKIPPED | commit sha | tokens (est.) | cumulative | notes/assumptions/follow-ups |`
+Also keep sections "Decisions & assumptions" and "Ideas not done". At cumulative ≥ 2.8M jump to TASK-024.
 
-`| TASK-id | DONE/PARTIAL/BLOCKED/FAILED/SKIPPED | commit sha | tokens used (est.) | cumulative | notes / assumptions / follow-ups |`
+### 3.7 Order
 
-Also keep a section "Decisions & assumptions" and a section "Ideas not done". When cumulative tokens ≥ 2.85M, jump to TASK-025.
-
-### 3.7 Order of execution
-
-Run Core in numeric order (dependencies are already respected). After TASK-025 is committed, if budget remains, run Reserve tasks in order, committing a refreshed TASK-025 report afterwards (`[GLM-NIGHT] TASK-025: refresh report`).
+Core in numeric order. After TASK-024 is committed, if budget remains run Reserve in order, then refresh TASK-024 (`[GLM-NIGHT] TASK-024: refresh report`).
 
 ---
 
-## 4. Do-not-touch list (noted from discovery)
+## 4. Do-not-touch list
 
-- `openspec/changes/harden-payment-replay-atomicity` (15 open) and `harden-database-rls-performance` (4 open): payments/RLS.
-- `openspec/changes/2026-01-09-add-sandbox-execution` (127 open): large, needs design decisions; only R-reserve may do a read-only triage.
-- GH #291–306 "Review Branch" issues and #357–363 MCP gates: owner review/credential gated.
-- GH #310–313 social account/automation: accounts cannot be created unattended (TASK-018 only writes a design doc).
-- PostHog/GA/Clarity dashboards, live site, Supabase production.
-- The dirty files listed in §3.1.
+- Everything in §3.3 items 1–4.
+- Open PRs #4 and #6 and their branches.
+- GUI, MCP, packaging release work, anything needing a debug probe, simulator, hardware or network.
+- WPs that depend on open ADRs: ATG-02/03 (ADR-003), COV-01 integration (ADR-004), PKG-01 integration (ADR-007), COV-05 acceptance (SRS §27 q2), EXH-04 (SRS §27 q9), T-14 (needs D-02).
 
 ---
 
 ## 5. Core queue
 
-Size key: S ≤ 80k, M 80–150k, L 150–250k.
-
-| ID | Title | Area | Est. tokens | Depends |
+| ID | Title | Area | Est. | Depends |
 |---|---|---|---|---|
-| TASK-000 | Worktree, baseline, log file | setup | 30k | — |
-| TASK-001 | Fix 7 sitemap URLs serving the homepage shell | SEO | 120k | 000 |
-| TASK-002 | Rewrite titles/meta where pages already rank | SEO | 100k | 000 |
-| TASK-003 | Build NRC reference page in docs-site | SEO | 150k | 000 |
-| TASK-004 | Image alt text + LCP-friendly loading | SEO | 60k | 000 |
-| TASK-005 | Fix inverted internal linking + truthful `lastmod` | SEO | 80k | 001 |
-| TASK-006 | Question-phrased headings pilot (SID 0x27, 0x10) | SEO | 120k | 000 |
-| TASK-007 | SID test-data integrity audit (all 19 SIDs) | SID tests | 100k | 000 |
-| TASK-008 | Vitest schema tests for all 19 SID reports | SID tests | 150k | 007 |
-| TASK-009 | Diagnose scheduled-regression failure (GH #391) | SID tests | 180k | 000 |
-| TASK-010 | SID 0x10 docs page cleanup (GH #228–232) | docs-site | 220k | 000 |
-| TASK-011 | Docs frontmatter/metadata contract check (GH #112) | docs-site | 100k | 000 |
-| TASK-012 | Docs shell static a11y fixes (GH #119) | docs-site | 100k | 010 |
-| TASK-013 | Admin redesign visual baselines 375/768/1440 | UI redesign | 120k | 000 |
-| TASK-014 | ECU response packet UI + timing panel (GH #150) | UI redesign | 250k | 000 |
-| TASK-015 | `add-user-aware-uds-mcp`: implement code-only open tasks | MCP | 250k | 000 |
-| TASK-016 | MCP docs consistency pass (guide, clients, status) | MCP | 80k | 015 |
-| TASK-017 | Draft 14 days of LinkedIn posts (drafts only) | marketing | 150k | 000 |
-| TASK-018 | Social post automation design doc (GH #310/#311) | marketing | 70k | — |
-| TASK-019 | Pre-launch verification matrix doc + script (GH #151) | marketing | 80k | 000 |
-| TASK-020 | Public ROADMAP.md draft (GH #184) | planning | 80k | 000 |
-| TASK-021 | Next-quarter feature plan from open issues | planning | 70k | 020 |
-| TASK-022 | Dependency audit report (report only) | gaps | 50k | 000 |
-| TASK-023 | Broken-link and dead-reference check across docs | gaps | 70k | 000 |
-| TASK-024 | UNIT: PLAN-001 progress vs. commits report | gaps/planning | 120k | — |
-| TASK-025 | Morning review pack | review | 150k | all |
+| TASK-000 | Worktree, venv, baseline, log | setup | 30k | — |
+| TASK-001 | Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift) | tests | 70k | 000 |
+| TASK-002 | CI workflow: pytest + design gates, Linux & Windows | gaps | 50k | 001 |
+| TASK-003 | Add ruff + mypy config and triage findings | gaps | 120k | 001 |
+| TASK-004 | Coverage baseline and gap-filling tests (≥80% on core/prj/ing) | tests | 200k | 001 |
+| TASK-005 | ADR-002 grammar: rejection and preservation test suite | tests | 150k | 001 |
+| TASK-006 | WP-CORE-02 structured error model, fail-safe, cancellation | impl | 220k | 004 |
+| TASK-007 | WP-CORE-03 platform baseline and offline guarantee | impl | 120k | 006 |
+| TASK-008 | WP-ANA-03 call graph and scope classification | impl | 250k | 006 |
+| TASK-009 | WP-ANA-07 partial-failure resilience | impl | 130k | 006 |
+| TASK-010 | WP-ING-07 authored link plan ingestion and validation | impl | 170k | 006 |
+| TASK-011 | WP-PRJ-04 dangling reference detection | impl | 100k | 006 |
+| TASK-012 | WP-PRJ-03 schema migration with explicit confirmation | impl | 200k | 006 |
+| TASK-013 | WP-CORE-04 provenance record and version identification | impl | 130k | 006 |
+| TASK-014 | Decision memos D-01…D-04 (decision-ready drafts) | planning | 120k | 000 |
+| TASK-015 | T-02 draft: no-import/provenance rule for `vcast-findings/` | planning | 70k | 014 |
+| TASK-016 | Verification analysis notes for landed WPs | docs | 90k | 013 |
+| TASK-017 | Refresh subsystem tracker (md + html) for what landed | docs | 100k | 016 |
+| TASK-018 | Docs HTML pages: status, metadata, links, a11y basics | docs-site | 100k | 017 |
+| TASK-019 | README and developer guide (setup, test, gates, layout) | docs | 60k | 002 |
+| TASK-020 | Trace/ID consistency checker beyond `plan_check` | gaps | 100k | 000 |
+| TASK-021 | Read-only audit: PRs #4/#6, stale branches, repo hygiene | GitHub | 70k | 000 |
+| TASK-022 | Dependency and licence audit (report only) | gaps | 40k | 000 |
+| TASK-023 | Next-phase plan from PLAN-001 critical path | planning | 100k | 017 |
+| TASK-024 | Morning review pack | review | 150k | all |
 
-Sum ≈ 2.9M (TASK-025 reserved last).
+Sum ≈ 2.85M (TASK-024 is run last regardless of numbering gaps).
 
-### TASK-000 — Worktree, baseline, log
-- Do: §3.1 setup. Run `npx tsc -b`, `npx vitest run` (root), `cd docs-site && npx vitest run`, `cd mcp-server && npm test` (skip suites needing DB/network; note them). Save results to `docs/glm-night/baseline.md` (pass/fail counts, failing test names, durations). Create `docs/glm-night/GLM_NIGHT_LOG.md` with the table header and the two extra sections.
-- Files: `docs/glm-night/*`.
-- Done when: both files exist, baseline lists every failing suite by name, commit `[GLM-NIGHT] TASK-000: …` exists.
+### TASK-000 — Worktree, venv, baseline, log
+- Do: §3.1 setup. Run the full gate, save to `docs/glm-night/baseline.md` (pass/fail/skip counts, every failing test id, `plan_check`/`trace_check` outputs, python/libclang versions). Create `docs/glm-night/GLM_NIGHT_LOG.md` with the table header and the two extra sections.
+- Done when: both files exist, baseline lists exactly the 3 known failures (or states the difference), commit exists.
 
-### TASK-001 — Seven sitemap URLs serve the homepage shell
-- Source: `SEO/ACTION-PLAN.md` P0-1. Routes: `/flashing /cluster /report /donate /refund-policy /acceptable-use /security-policy`.
-- Do: add `ROUTES` entries (title, desc, h1, lede, ~500+ chars real prose, sections) in `scripts/inject-metadata.cjs` for the 4 trust pages (`/donate`, `/refund-policy`, `/acceptable-use`, `/security-policy`) using wording consistent with the existing legal pages in `src/` (do not invent legal terms; summarize what the existing pages say). For `/flashing /cluster /report` add an above-the-fold explainer entry the same way. Mirror all seven in `scripts/prerender.cjs`. Do not touch `vercel.json` or `public/sitemap.xml` unless an entry has no honest content.
-- Verify: `node scripts/inject-metadata.cjs` passes the 500-char gate; each `dist/<route>/index.html` has a unique `<title>` and a self-canonical; `node scripts/validate-schema.cjs`.
-- Done when: after a local `npm run build` + inject, 0 of the 7 pages have canonical `https://udssimulator.com/` and 8 distinct titles exist across them and home. Record evidence in the commit body.
+### TASK-001 — Fix the 3 failing `test_persist` tests
+- Files: `tests/ana/test_persist.py`, possibly `src/ectt/ana/persist.py`. Read `docs/verification/WP-ANA-04-analysis.md`, schema files `1.0/1.1/1.2`, and the T-09/T-10 evidence in `docs/reviews/2026-11-07-subsystem-requirements-and-tasks.md`.
+- Decide per failure whether the test is stale (asserts `"1.0"` where the emitter intentionally emits the current version) or the code regressed. Fix tests to assert the current version via the module's own constant, not a new literal, and keep the compatibility-rule tests (older/newer minor, different major) meaningful. Do not change emitted schema semantics.
+- Done when: the 3 tests pass, no other test changed status, full gate green, commit body explains each failure's root cause.
 
-### TASK-002 — Rewrite snippets where ranking already exists
-- Source: ACTION-PLAN P0-3 (read the section for the exact page list and measured queries).
-- Do: edit the titles/descriptions in `src/components/layout/SEO.tsx` and `scripts/inject-metadata.cjs` for the pages listed; titles ≤ 60 chars, descriptions 140–160 chars, lead with the query term, no keyword stuffing, no unverifiable claims.
-- Verify: a small node script (add `scripts/check-seo-lengths.cjs`) that asserts the length limits for all routes; run it and `npx tsc -b`.
-- Done when: script passes and is referenced in the commit; no two routes share a title.
+### TASK-002 — CI workflow
+- Add `.github/workflows/tests.yml`: on push/PR, matrix `ubuntu-latest` + `windows-latest`, Python 3.11, `pip install -e ".[dev]"`, run pytest and both design gates; pinned action versions like `traceability.yml`; `permissions: contents: read`. Do not modify `traceability.yml`.
+- Verify: YAML parses (`python -c "import yaml…"`); the exact commands in the file succeed locally.
+- Done when: workflow file exists, commands verified locally, note in log that CI itself could not be run.
 
-### TASK-003 — NRC reference page (docs-site)
-- Source: ACTION-PLAN P1-1. Build `docs-site/app/docs/nrc-reference/page.mdx` (follow an existing `sid_0x*` page for layout components), with a table of every ISO 14229-1 NRC (code, name, meaning, typical services) drawn from existing repo content (`docs-site/data/`, `docs-site/learning/*`, the `sid_0x*` pages, `src/` NRC constants). Do not invent codes; if a value is not in the repo, mark it "see ISO 14229-1" rather than guessing.
-- Also: add to `_meta`/sidebar, add `TechArticle` metadata like sibling pages, link it from each `sid_0x*` page's NRC section (append a single link line only).
-- Verify: `cd docs-site && npm run build:md && npx vitest run && node --test __tests__/docs-baseline.test.mjs`.
-- Done when: page renders in `next build` (run once), appears in `lib/doc-meta.json`, passes baseline test.
+### TASK-003 — ruff + mypy
+- Add `ruff` and `mypy` to dev extras; add `[tool.ruff]` (line-length consistent with existing code, select a conservative rule set: E, F, I, B, UP) and `[tool.mypy]` (python 3.11, `ignore_missing_imports` only for `clang`). Run both; fix mechanical findings (imports, unused names) in small commits; do NOT mass-reformat. Remaining findings → `docs/glm-night/lint-baseline.md` with counts per rule.
+- Done when: ruff exits 0 or has a documented ignore list with reasons; mypy runs and its remaining errors (if any) are listed; full gate green; `git diff --stat` shows no sweeping reformat.
 
-### TASK-004 — Image alt text and LCP-friendly loading
-- Source: ACTION-PLAN P1-3. Do: add meaningful `alt`, `width/height`, `loading="lazy"` (not on the LCP image; that one gets `fetchpriority="high"`) across `src/` and `docs-site/` image usages named in the plan. Decorative images get `alt=""`.
-- Verify: eslint on touched files; `grep` shows no `<img` without `alt` in touched dirs; `npx tsc -b`.
-- Done when: before/after count of `<img>` without alt is in the commit body and is 0 for touched dirs.
+### TASK-004 — Coverage baseline and gap tests
+- Add `pytest-cov` to dev extras. Measure per package (`ectt.core`, `ectt.prj`, `ectt.ing`, `ectt.ana`); write `docs/glm-night/coverage-baseline.md`. Add tests to bring `core`, `prj`, `ing` to ≥ 80% line coverage (org floor) — real behaviour tests with ≥ 2 error/edge cases per uncovered function; no `assert True`, no `# pragma: no cover` additions. `ana` gaps: list only (needs libclang fixtures).
+- Done when: report shows before/after; ≥ 80% on the three packages; gate green.
 
-### TASK-005 — Internal linking and truthful lastmod
-- Source: ACTION-PLAN P2-2, P2-3. Do: fix link direction as described in the plan; make `public/sitemap.xml` generation use real git dates per URL (extend an existing script or add `scripts/generate-sitemap-lastmod.cjs`; do not hand-edit dates).
-- Verify: `node scripts/verify-sitemap-status.cjs --sitemap public/sitemap.xml` offline mode if available, else a unit check; ensure the 7 routes from TASK-001 are still present or intentionally removed with reason.
-- Done when: no `lastmod` is identical across all URLs; script is deterministic (two runs, same output).
+### TASK-005 — ADR-002 grammar tests
+- Read `ADR-002-project-data-format.md`, `src/ectt/prj/yaml_adapter.py`, existing `tests/prj/test_yaml_adapter.py`. Add a suite (`tests/prj/test_adr002_conformance.py`) covering the restricted-grammar rules the ADR names: each forbidden construct is rejected with a named error (anchors/aliases, tags, multi-document, implicit typing hazards such as `no`/`on`/`1e3`/octal-looking strings, duplicate keys, non-string keys — whichever the ADR lists), byte-stable round trip, key-order preservation, comment preservation if the ADR requires it. Derive the list from the ADR text; cite section numbers in test docstrings.
+- If a conformance test exposes a genuine adapter bug: fix minimally if clearly within ADR-002; otherwise `xfail(strict=True)` + log.
+- Done when: every grammar rule in the ADR maps to ≥ 1 test.
 
-### TASK-006 — Question-phrased headings pilot
-- Source: `docs/seo/AI-VISIBILITY-PLAN.md` §1.1: "Do one page (0x27) first." Do 0x27 and 0x10 only. Convert 2–4 `<DocSection title>` values per page to the question forms in the plan; keep short TOC labels (check `_meta` does not inherit long titles).
-- Verify: `npm run build:md` regenerates `.md` mirrors; docs-site vitest + baseline test.
-- Done when: pilot pages only; remaining 17 pages queued as R-103.
+### TASK-006 — WP-CORE-02 structured error model
+- Requirements: NFR-090, NFR-180 (`SRS-001`); exit criterion in PLAN-001; design in `design/SDD-001/002`. Create `src/ectt/core/errors.py`: a base `EcttError` with stable `code`, `category` (usage / input / environment / internal / cancelled), `reason`, `context` (deterministic dict), JSON-serialisable; a cancellation token (`threading.Event` based) and a fail-safe wrapper that guarantees no partial output is left in the confined output root (use `ectt.core.fs`). Make the existing `prj`, `ing`, `ana` error base classes inherit from it **without changing their public names, messages or `reason` values**.
+- Tests: serialisation determinism, category mapping, cancellation mid-operation leaves no partial files, existing error tests still pass unchanged.
+- Done when: gate green, all existing error classes derive from `EcttError`, `docs/verification/WP-CORE-02-analysis.md` drafted (format of the ANA-04 note).
 
-### TASK-007 — SID test-data integrity audit
-- Source: `tests/test-data/sid-*/SID*_TestCases_report.json`; `scripts/orchestrate-sid-test-reviews.mjs` (use `--dry-run`, NO API calls, NO network).
-- Do: run `node scripts/orchestrate-sid-test-reviews.mjs --dry-run`; write `docs/glm-night/sid-test-audit.md`: per SID — case count, pass/fail counts, duplicate IDs, cases lacking expected NRC/response, mismatches with the matching `docs-site/app/docs/sid_0x*` page. Do not edit test data in this task.
-- Done when: all 19 SIDs have a row; findings are specific (file + case id).
+### TASK-007 — WP-CORE-03 platform baseline and offline guarantee
+- Requirements NFR-010, NFR-020, NFR-100. Do NOT resolve D-03 (platform order). Implement `src/ectt/core/platform.py`: detect OS/arch/Python/libclang version, compare against the declared baseline (read the NFR text; encode both Windows and Linux as supported-in-parallel without ranking them), return a structured report. Add an **offline guard test**: import every `ectt` module with `socket.socket.connect`/`urllib` patched to fail, and assert no import-time or run-time network use across the existing pipeline fixture (`tests/core/fixture_pipeline.py`).
+- Done when: platform report test passes on this machine, offline guard test passes, note in log that Linux behaviour is untested here.
 
-### TASK-008 — Vitest schema tests for all 19 SID reports
-- Depends on 007. Extend `docs-site/__tests__/sid-schemas.test.ts` (or add `sid-reports.test.ts`) so every SID report: parses, has unique case IDs, every case has id/name/request/expected, and counts in the summary equal the actual counts. Known-bad data found in TASK-007 → mark with `it.todo` plus an entry in the log, not a weakened assertion.
-- Verify: `cd docs-site && npx vitest run`.
-- Done when: ≥ 19 × 4 assertions run; suite green apart from documented `todo`s.
+### TASK-008 — WP-ANA-03 call graph and scope classification (needs libclang)
+- Requirement PAR-060. Read `src/ectt/ana/interface.py`, `model.py`, schema 1.2, SDD-002 §3 for the model contract. Add call-graph extraction (direct calls; indirect calls through function pointers recorded as "unresolved indirect", never guessed) and classification of each callee as in-unit / external / library / unresolved. This adds model fields → **minor schema bump 1.3 additive** with a new `analysis-model-1.3.schema.json`; the 1.2 reader rules must keep working (add tests). Update the version constant and the TASK-001 tests accordingly.
+- Tests: fixtures in `tests/ana/` (small C sources, same style as `test_interface.py`): direct call, static function, recursion, function-pointer call, call to undeclared function, macro-wrapped call.
+- Done when: schema validates, determinism test (two runs byte-identical), gate green, `docs/verification/WP-ANA-03-analysis.md` drafted.
+- Blocked → mark BLOCKED if libclang unusable.
 
-### TASK-009 — Diagnose scheduled regression failure (GH #391)
-- Read the newest "Scheduled Full Regression Test Failed" issue body (read-only `gh issue view 391`, read-only). Reproduce locally with `npm run test:regression:quick` / `test:regression:sid` where possible (no network to prod).
-- Do: write `docs/glm-night/regression-391-diagnosis.md` (root cause, evidence, affected tests, proposed fix). If the cause is a test/fixture bug in a file under `tests/` or `scripts/` (not product/payment code), fix it with minimal change and add a regression guard; otherwise stop at the diagnosis.
-- Done when: a root-cause statement backed by log excerpts exists; any code fix has a failing-then-passing run recorded.
+### TASK-009 — WP-ANA-07 partial-failure resilience
+- Requirements PAR-130, PAR-140. A failure on one translation unit/function must not abort the run; the model records the failure with a named reason (use TASK-006's error model) and every other element is still produced. Add fixtures with a syntax error in one file among valid ones. Reader and eligibility gate (`eligibility.py`) must treat failed elements as unmeasurable with the recorded reason.
+- Done when: tests show the valid parts extracted, failure inventory present and deterministic.
 
-### TASK-010 — SID 0x10 docs page cleanup
-- Source: GH #228 (remove decorative KPI cards), #229 (remove Meteors/BorderBeam/RetroGrid), #231 (remove marketing CTA in Session Transition Logic), #230 (sticky sidebar TOC for 11 sections), #232 (visual hierarchy). Page: `docs-site/app/docs/sid_0x10/page.mdx`.
-- Do: apply in that order, one commit if small, else one per issue number (`TASK-010a…`). Respect `prefers-reduced-motion` for anything that remains. Reuse existing TOC component if one exists elsewhere in `docs-site/components`.
-- Verify: docs-site lint, vitest, `npm run build:md`, `next build` once; take screenshots only if a headless browser is available (`npm run test:sid-ui:browser`), else skip.
-- Done when: none of Meteors/BorderBeam/RetroGrid/KPI-card/CTA imports remain in the page; TOC links resolve to existing ids.
+### TASK-010 — WP-ING-07 authored link plan ingestion and validation
+- Requirement ING-200; T-12 landed the LinkPlan spec (SDD-002/003 amendments, `DSN-ING-120`). Implement `src/ectt/ing/linkplan.py` per that spec: parse the authored link plan from the project store, validate (missing objects, duplicates, unknown toolchain keys, absolute paths outside the project), report each violation with a named reason.
+- Done when: spec clauses map to tests; invalid plans never partially load; gate green.
 
-### TASK-011 — Docs frontmatter/metadata contract check (GH #112)
-- Do: define the schema (title, description, sid, since, dateModified) in `docs-site/lib/doc-contract.ts`; add `docs-site/scripts/check-doc-contract.mjs` that validates every `sid_0x*` page; wire into `docs-baseline.test.mjs` as a new test. Fix trivially fixable violations (missing description text taken from the page's existing intro paragraph); list the rest in the log.
-- Done when: the script runs in < 30s, new test passes, violations list is empty or logged.
+### TASK-011 — WP-PRJ-04 dangling reference detection
+- Requirement PRJ-090 (1w). Implement detection of references in the project store that point at missing ids (read `design/SDD-003-data-model.md` for reference kinds), returning a deterministic sorted list; integrate with `ectt.prj.project` load as a report, not an exception, unless the spec says otherwise.
+- Done when: tests for none/one/many/cyclic references pass.
 
-### TASK-012 — Docs shell static a11y fixes (GH #119)
-- Do: run `scripts/validate-accessibility.js` (existing) on built docs output if it supports a path, plus static checks: heading order, landmark roles, link names, focus-visible styles, `aria-label` on icon buttons, contrast of tokens in `docs-site/theme.config.jsx`/Tailwind config (compute ratios in a script; fix tokens only if the fix is ≥ AA and visually minimal).
-- Done when: report `docs/glm-night/a11y-docs-shell.md` with before/after counts; no regression in vitest.
+### TASK-012 — WP-PRJ-03 schema migration with explicit confirmation
+- Requirement PRJ-040. Implement migration framework: registry of migration steps between project schema versions, a plan/dry-run that lists changes, and an `apply` that requires an explicit confirmation token argument (no implicit migration on load; old version loads read-only or is refused per SDD). Writes are atomic and use the confined output helpers; a failed migration leaves the original untouched.
+- Done when: v(n)→v(n+1) example migration with tests (dry-run, confirmed, unconfirmed refused, failure leaves original byte-identical).
 
-### TASK-013 — Admin redesign visual baselines
-- Source: `docs/admin-redesign/PLAN.md` line 85 (unchecked "Visual baselines 375/768/1440 not added"). Use the existing admin test harness (`tests/admin/run-admin-suite.cjs`, `tests/theme/visual-diff.cjs`) to add baseline capture + diff for 375/768/1440. Run against a local dev server with mocked/fixture data only. If the harness needs live credentials, mark BLOCKED.
-- Done when: baseline images committed under `tests/admin/baselines/`, a diff run against themselves reports 0 diff, PLAN.md checkbox ticked.
+### TASK-013 — WP-CORE-04 provenance record and version identification
+- Requirements QUA-060, INS-110. Add `src/ectt/core/provenance.py`: a deterministic record (tool version from package metadata, schema versions, python/libclang versions, input digests via existing determinism helpers) with no wall-clock fields in the hashed portion. `ectt.__version__` exposure if missing.
+- Done when: record is reproducible in two runs; tests cover the changed-input digest case.
 
-### TASK-014 — ECU response packet UI + timing panel (GH #150)
-- Do: read the issue text (read-only) and the current response component(s) under `src/`; add a response packet breakdown (SID/NRC/data/payload bytes), a simulation log list and a timing panel (P2/P2* values from existing session timing constants — do not invent numbers). Keep it behind existing component structure; no new dependencies. Vitest + Testing Library tests for rendering, empty state, and NRC state. Dark/light via existing tokens, keyboard-focusable, aria-labelled.
-- Verify: `npx tsc -b`, eslint, `npx vitest run <new tests>`, `npm run test:theme:visibility` if runnable offline.
-- Done when: the three panels render for a positive and negative response in tests.
+### TASK-014 — Decision memos D-01…D-04
+- Source: "Decision queue" section of `docs/reviews/2026-11-07-subsystem-requirements-and-tasks.md`, ADR-005 context, SRS LIC-010…060, the T-04 memo.
+- Write `docs/proposals/decision-memos-20261117.md` (and update nothing else): per decision — question, options a–d with exact files that would change, the precise patch text to apply for each option (as fenced diffs, unapplied), risks, what unblocks, and your recommendation labelled as a recommendation. For D-01 include a plain comparison of AGPL-3.0 / Apache-2.0 / MIT / proprietary against LIC-010 as written.
+- Done when: four self-contained sections; nothing in the repo's decision state changed.
 
-### TASK-015 — `add-user-aware-uds-mcp` code-only open tasks
-- Source: `openspec/changes/add-user-aware-uds-mcp/tasks.md` (24 open / 55 done).
-- Do: classify each open item as CODE-ONLY / NEEDS-OWNER (credentials, hosted env, real clients, DB gates). Implement CODE-ONLY items in `mcp-server/src` with tests; tick boxes in `tasks.md` only for items finished and verified. Write the classification table into the log. Do not edit `mcp-server/src/http/start.ts` in the main checkout (it is dirty there; in the worktree it is clean — fine, but re-read it first).
-- Verify: `cd mcp-server && npm run build && npm run test:contracts test:runtime test:protocol test:docs` (the non-DB suites in `package.json`).
-- Done when: every ticked box has a test or command referenced in its line; NEEDS-OWNER items are untouched.
+### TASK-015 — T-02 draft: vcast-findings no-import rule
+- Write `docs/proposals/T-02-no-import-rule-draft.md`: draft requirement/ADR-addendum text, a proposed automated check design (a test that scans `src/` for byte-identical or near-identical copies of strings/identifiers listed in `vcast-findings/*-symbols.json`, `vcapplib-sql-strings.json`, `vcapplib-recovered-schema.sql`), and a **working prototype test** `tests/core/test_no_vcast_import.py` that passes today (and fails on a planted fixture in a temp dir). It must read vcast-findings only to build deny-lists in memory; do not copy any of its content into the repo.
+- Done when: prototype test passes and is deterministic; proposal states it depends on D-01 and is not adopted.
 
-### TASK-016 — MCP docs consistency pass
-- Do: compare `docs/mcp/user-guide.md`, `docs/mcp/clients/*.md`, `docs/mcp/remote-docs.md` against the tool list and options in `mcp-server/src` (names, flags, env vars, versions). Fix discrepancies in docs only. Run markdown link check from TASK-023's script once available (else a simple regex check).
-- Done when: a table of fixes is in the commit body; no tool name in docs that is absent from `mcp-server/src`.
+### TASK-016 — Verification analysis notes
+- Pattern: `docs/verification/WP-ANA-04-analysis.md`. Add notes for WP-CORE-01 and for every WP landed tonight (CORE-02/03/04, ANA-03/07, ING-07, PRJ-03/04) covering requirements verified by analysis (*A*): requirement id → implementation reference → argument → test evidence (real test names that exist; verify with `pytest --collect-only`).
+- Done when: every referenced test id exists.
 
-### TASK-017 — Draft 14 days of LinkedIn posts
-- Folder: `E:\projects\UDS_Simulator\daily-uds-linkedin-post` (separate from git repos — look at `GEMINI.md`, `config/`, `posts/tracker.csv` for format and voice). Create 14 draft files in `posts/drafts-GLM-NIGHT/`, one per day, each: hook, body (≤ 1,300 chars), 3–5 hashtags, link target on udssimulator.com, and a technical-accuracy source note (ISO 14229 SID reference from `docs-site/learning/*`). Topics: pick SIDs/NRCs not already in `tracker.csv`. No fabricated stats or testimonials. DO NOT edit `tracker.csv`, DO NOT post anything.
-- Since this folder may not be a git repo: if so, copy the drafts into the worktree under `marketing/linkedin-drafts/` and commit there instead.
-- Done when: 14 distinct drafts exist and a lint script (character limit, no duplicates against tracker) passes.
+### TASK-017 — Refresh subsystem tracker
+- Update `docs/reviews/2026-11-07-subsystem-requirements-and-tasks.md` (WP statuses → **Complete** only for WPs whose acceptance/exit criterion in PLAN-001 §5.4/§5.5 is actually met; "Partial — <what's missing>" otherwise; update the "Implemented at HEAD" line) and the HTML tracker `2026-11-07-subsystem-task-tracker.html` the same way (look at how it is built; if generated by a script run that script, otherwise edit the same strings). Run `plan_check.py --write` only if the PLAN-001 derived tables need regeneration, then the full gate. Do not change T-xx / D-xx statuses.
+- Done when: counts in header lines match the tables; gates green.
 
-### TASK-018 — Social post automation design doc
-- Source: GH #310/#311. Write `docs/marketing/social-automation-design.md`: architecture for scheduled posting (queue, approvals, per-platform adapters for Instagram/Facebook/X, rate limits, secrets handling, dry-run mode, audit log, kill switch). Explicitly state which parts need owner-created accounts/keys. No code, no accounts.
-- Done when: doc has data model, sequence diagram (mermaid, validated syntax), failure modes, and a phased rollout.
+### TASK-018 — Docs HTML pages
+- Files: `docs/index.html`, `components.html`, `doc-map.html`, `oss-integration.html` (and their `*.visual-check.*` fixtures only if a script regenerates them). Check: `<title>`, meta description, `lang`, heading order, `alt` on images, link targets resolve (relative links to files that exist), light/dark contrast of the CSS variables (compute WCAG ratios in a script; fix only tokens that fail AA with minimal change), no external network assets. Mind that `traceability.yml` triggers on changes to `docs/index.html` and `docs/components.html` — run the gates.
+- Done when: `docs/glm-night/docs-html-audit.md` lists before/after; gates green.
 
-### TASK-019 — Pre-launch verification matrix (GH #151)
-- Write `docs/launch/prelaunch-matrix.md` (device × browser × network × payment-test-mode × analytics-consent) with pass criteria, and `scripts/prelaunch-matrix-check.cjs` that executes the automatable rows against a given base URL using read-only GETs and the existing `scripts/page-health-crawler.cjs`. Default base URL = `http://localhost:5173`; do not run it against production.
-- Done when: script `--dry-run` lists all rows and exits 0; the manual rows are labelled MANUAL.
+### TASK-019 — README and developer guide
+- Update `README.md`: what ECTT is (from SRS intro, no claims beyond what exists), current status table (implemented WPs vs planned), quick start (`venv`, `pip install -e ".[dev]"`, test, gates), repo layout, how to read PLAN/SRS/SDD, contribution status (**do not** state a licence choice; link to LICENSE as-is and mention it is under review only if the file already says so). Add `docs/DEVELOPING.md` with the workflow (tests, gates, determinism rules, error model, how verification notes work).
+- Done when: every command in the docs was executed successfully in this worktree.
 
-### TASK-020 — Public ROADMAP.md draft (GH #184)
-- Build `ROADMAP.md` in the SIM worktree from: open GH issues (read-only list), `openspec` changes, `docs/mcp/progress/status.json`, `docs/seo/*`. Now/Next/Later, no dates the repo does not support, no promises for gated MCP items beyond "in progress".
-- Done when: every roadmap item cites an issue number or doc path.
+### TASK-020 — Trace/ID consistency checker
+- Add `design/trace/id_check.py` (stdlib only, runs in the CI environment with just PyYAML): verify that every `WP-*`, `TOOL-*`, `DSN-*`, `T-NN`, `NR-NN`, `ADR-NNN` id referenced anywhere in `*.md`/`*.html`/`design/**` exists in its defining register; report dangling and duplicate ids; exit non-zero on dangling. Do not wire into CI in this task; list pre-existing findings in `docs/glm-night/id-check-baseline.md` and fix only trivial typos.
+- Done when: script is deterministic and fast (< 20s) with tests in `tests/design/test_id_check.py`.
 
-### TASK-021 — Next-quarter feature plan
-- Using TASK-020 output, write `docs/planning/next-quarter-plan.md`: ranked themes, dependencies, risks, size (S/M/L), what can be done by an agent vs. needs the owner, and an explicit "not now" list (payment hardening, sandbox execution).
-- Done when: each theme links to issues/specs.
+### TASK-021 — Read-only repo/PR audit
+- Using `gh` read-only (`pr view`, `pr list`, `pr diff --stat`) and `git`: for PR #4 and #6 — what they change, conflicts with `docs/pending-decisions`, whether still wanted (e.g., is #4's allocation already in the 191-package register?), CI status. List local/remote branches: merged, stale, ahead/behind. Check tracked junk (`git ls-files` for `.venv`, `.pytest_cache`, `__pycache__`, large files > 1 MB). Write `docs/glm-night/repo-audit.md` with recommended actions as a checklist for the owner. Take no action.
+- Done when: every branch and both PRs have a row and a recommendation.
 
-### TASK-022 — Dependency audit (report only)
-- In root, docs-site, mcp-server: `npm outdated --json` and `npm audit --json` (read-only). Write `docs/glm-night/dependency-audit.md`: table of packages with current/wanted/latest, severity of advisories, and a recommended safe-upgrade batch (patch/minor only). Do NOT modify `package.json` or lockfiles.
-- Done when: three tables (one per package) and a prioritized upgrade list.
+### TASK-022 — Dependency and licence audit (report only)
+- `pip list --outdated`, `pip-audit` if installable offline-safe else note, licences of `PyYAML`, `libclang`, `jsonschema`, dev tools (from package metadata) vs. SRS licensing requirements. Note the `libclang>=18.1,<19` pin rationale (see spikes/ADR-001). No file changes besides the report `docs/glm-night/dependency-audit.md`.
+- Done when: table + recommendations; `pyproject.toml` untouched.
 
-### TASK-023 — Broken-link and dead-reference check
-- Add `scripts/check-doc-links.mjs` (no network): scans `docs/**/*.md`, `docs-site/**/*.md(x)`, `openspec/**`, root `*.md` for relative links and `#anchors` that do not resolve, and for referenced file paths that do not exist. Output a report `docs/glm-night/broken-links.md`. Fix only unambiguous cases (renamed file with a single obvious target); list the rest.
-- Done when: script is deterministic, report generated, count before/after in the commit body.
+### TASK-023 — Next-phase plan from PLAN-001 critical path
+- Using the tracker and register: write `docs/proposals/next-phase-plan-20261117.md`: the next 10 decision-free WPs ranked (critical path first: ANA-05/06, ING-02/03/04, TCH-01/02, GEN-01 …), for each: effort, prerequisites already satisfied, what ADR/decision it waits on, test strategy, and an "agent-ready? yes/no + why" column; list what is gated by D-01…D-04 and what each answer unlocks.
+- Done when: every WP id exists in the register; nothing outside `docs/proposals/` changed.
 
-### TASK-024 — UNIT: PLAN-001 progress report
-- Repo UNIT (worktree per §3.1). Compare the WP register in `PLAN-001-specification-analysis-and-work-breakdown.md` §5.5 with `git log` ("Implement T-NN"/WP ids), `src/`, `tests/` and `docs/verification`. Write `docs/reports/plan-001-progress-20261117.md`: per WP — status (done / partial / not started), evidence (commit/test path), next 5 packages on the critical path, and consistency notes (e.g., exit criteria in §5.4 with no matching test). Docs only; do not edit source, ADRs, SRS or the AIDLC state files.
-- Done when: every WP in the register has a status with evidence.
-
-### TASK-025 — Morning review pack
-- Create `docs/glm-night/MORNING_REVIEW.md`: table of all tasks with status/commit/tokens, `git log --grep='\[GLM-NIGHT\]' --stat` summary, list of BLOCKED/FAILED with reasons, assumptions needing owner decision, suggested review order (highest risk first: TASK-001, 010, 014, 015), and the exact commands to review, merge or discard the branch. Push the branch.
-- Done when: every task id from this file appears exactly once.
+### TASK-024 — Morning review pack
+- Create `docs/glm-night/MORNING_REVIEW.md`: all tasks with status/commit/tokens, `git log --grep='\[GLM-NIGHT\]' --stat` summary, final full-gate output, test count before/after (234+3 → ?), coverage before/after, BLOCKED/FAILED with reasons, assumptions needing owner input, suggested review order (highest risk first: TASK-008, 012, 006, 001), and exact commands to review/merge/discard. Push the branch.
+- Done when: each task id appears exactly once.
 
 ---
 
-## 6. Reserve queue (only after TASK-025; same rules)
+## 6. Reserve queue (after TASK-024; same rules)
 
 | ID | Title | Est. | Notes |
 |---|---|---|---|
-| TASK-101 | Onboarding tour auto-trigger for new users (GH #58) | 200k | frontend, with tests; no analytics changes |
-| TASK-102 | Strengthen weak MCP oracles (`docs/mcp/plans/weak_oracle_backlog_20261106.md`) | 180k | tests only |
-| TASK-103 | Question headings batch for remaining 17 SID pages (SEO §1.1) | 250k | only if TASK-006 was reviewed good — otherwise do 5 pages |
-| TASK-104 | `add-docs-ascii-diagrams` (23 open) — implement 5 diagrams | 150k | docs-site `check:diagrams` must pass |
-| TASK-105 | `add-cross-host-delegation` 4 open tasks: classify, docs-only items | 80k | |
-| TASK-106 | Expand thin docs pages that already rank (ACTION-PLAN P2-1) | 100k | real content from `docs-site/learning/*` only |
-| TASK-107 | SID negative-response test cases: add missing NRC cases for SIDs flagged in TASK-007 | 150k | tests/test-data only, keep schema from TASK-008 green |
-
-Also available as a read-only filler: triage `add-sandbox-execution` tasks into a Now/Later table (no code) — 60k.
+| TASK-101 | WP-ING-02 alternative ingestion paths | 150k | no D-gates; follow `compdb_adapter.py` pattern |
+| TASK-102 | WP-ING-03 ingestion diagnostics, persistence, staleness extension | 120k | builds on T-08 `staleness.py` |
+| TASK-103 | WP-ANA-06 static function testability and macro resolution | 200k | needs libclang |
+| TASK-104 | WP-PRJ-02 diff-stable sharded storage | 200k | |
+| TASK-105 | WP-CORE-06 logging and diagnostic bundle | 130k | depends on TASK-006 |
+| TASK-106 | WP-TCH-02 host compiler detection (GCC/Clang) — detection and version report only, no building | 150k | |
+| TASK-107 | Mutation-style test strengthening for `ectt.core` and `ectt.prj` (hand-written mutants, kill-rate report) | 150k | tests only |
+| TASK-108 | Property-based fuzz-style tests for the YAML adapter and schema reader using seeded `random` | 150k | deterministic seeds only |
 
 ---
 
 ## 7. Morning review commands
 
 ```bash
-cd /e/projects/UDS_Simulator/wt-glm-night
+cd /e/projects/UDS_Simulator/wt-unit-glm-night
 git log --grep='\[GLM-NIGHT\]' --oneline
-git log --grep='TASK-014' --stat
+git log --grep='TASK-008' --stat
 cat docs/glm-night/MORNING_REVIEW.md
-# accept:   open a PR glm-night/20261117 -> main (do not auto-merge)
-# discard:  git worktree remove ../wt-glm-night && git branch -D glm-night/20261117
+# accept:  open a PR glm-night/20261117 -> docs/pending-decisions (or main); do not auto-merge
+# discard: git worktree remove ../wt-unit-glm-night && git branch -D glm-night/20261117
 ```
