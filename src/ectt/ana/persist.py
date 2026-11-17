@@ -42,6 +42,7 @@ from ectt.core.fs import OutputRoot
 __all__ = [
     "READER_MAJOR",
     "READER_MIN_MINOR",
+    "SCHEMA_VERSION_CURRENT",
     "assemble_analysis_model",
     "write_analysis_model",
     "read_analysis_model",
@@ -51,6 +52,12 @@ __all__ = [
 
 READER_MAJOR: int = 1
 READER_MIN_MINOR: int = 0
+# The schema version assemble() emits for newly created models. Bumping this
+# is a schema-publishing event (src/ectt/ana/schema/analysis-model-<v>.schema.json)
+# and moves only this line; tests must assert this constant, never a literal,
+# so a bump cannot silently strand them (root cause of the 1.0 -> 1.1 -> 1.2
+# test drift fixed in TASK-001).
+SCHEMA_VERSION_CURRENT: str = "1.2"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
 
 
@@ -234,7 +241,7 @@ def assemble_analysis_model(
     )
 
     return AnalysisModel(
-        schema_version="1.2",
+        schema_version=SCHEMA_VERSION_CURRENT,
         provenance=provenance,
         units=tuple(final_units),
         types=merged_types,

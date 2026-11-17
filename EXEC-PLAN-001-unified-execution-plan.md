@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `26ff2d7` on `glm-night/20261117` (11 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `e58eac4` on `glm-night/20261117` (12 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -38,7 +38,7 @@
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 234 passed, 3 failed, 1 skipped. Failing: `tests/ana/test_persist.py::test_real_extraction_assemble_write_read_roundtrip`, `tests/ana/test_persist.py::test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored`, `tests/ana/test_persist.py::test_assemble_emits_1_1_with_not_extracted_inventory` (fixed by `TASK-001`).
+- **Tests at HEAD:** 237 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
 - **Startable right now:** `TASK-000` (dependencies met, not blocked).
 
@@ -566,7 +566,7 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 - **SRS requirements:** —
 - **Work packages:** — · **Related:** `WP-ANA-04`
 - **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
+- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `e58eac4`
 - **Files likely touched:** `docs/glm-night/baseline.md`, `docs/glm-night/GLM_NIGHT_LOG.md`, `../wt-unit-glm-night (worktree) + .venv`
 - **Acceptance criteria:**
   1. docs/glm-night/baseline.md and GLM_NIGHT_LOG.md exist
@@ -594,10 +594,10 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
   2. compatibility-rule tests (older/newer minor, different major) stay meaningful
   3. no other test changes status; suite ends 237 passed / 0 failed / 1 skipped
   4. commit body explains each failure's root cause
-- **Verification** (pending):
+- **Verification** (pass):
   - `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/ana/test_persist.py`
   - full gate **G-FULL** (see §5.4)
-- **Notes:** Baseline confirmed 2026-11-17: 3 failed / 234 passed / 1 skipped.
+- **Notes:** Landed 2026-11-18. Root causes: (1) test_real_extraction_assemble_write_read_roundtrip pinned the assembler's emitted version with '1.0' literals (3 sites) - written at WP-ANA-04 when 1.0 was current; the emitted version existed only as an inline literal in persist.py, so the 1.1 (T-09) and 1.2 (T-10) schema bumps stranded it. (2) test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored fed a 1.5 fixture lacking the inventories mandatory at >= 1.1 (TOOL-PAR-140/150, introduced by T-09), so the reader rejected it with missing_decision_inventory; fixture upgraded to a valid modern document, gate-rule intent (newer minor accepted, unknown fields ignored) preserved. (3) test_assemble_emits_1_1_with_not_extracted_inventory pinned the emitted version '1.1' (T-09 era); the 1.2 bump (T-10) moved assemble() to 1.2. Fix: exposed SCHEMA_VERSION_CURRENT in persist.py (assemble() now uses it; exported in __all__), tests assert the constant instead of literals; renamed test 3 to test_assemble_emits_current_version_with_not_extracted_inventory so the name no longer carries a version literal. Suite 237 passed / 0 failed / 1 skipped (criterion met); older/newer-minor and different-major gate rules untouched and still meaningful. Landing sha backfilled at the next tracker-touching commit.
 
 ### TASK-002 — CI workflow: pytest + design gates, Linux & Windows
 
