@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `e58eac4` on `glm-night/20261117` (12 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `aaf88a1` on `glm-night/20261117` (13 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -587,7 +587,7 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 - **SRS requirements:** `TOOL-PAR-100`, `TOOL-PAR-110`
 - **Work packages:** `WP-ANA-04` · **Related:** `T-09`, `T-10`
 - **ADRs:** `ADR-001` · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
+- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `aaf88a1`
 - **Files likely touched:** `tests/ana/test_persist.py`, `src/ectt/ana/persist.py (only if a real regression is found)`
 - **Acceptance criteria:**
   1. the 3 named test_persist tests pass (assert the module's own current-version constant, not a new literal)
@@ -613,10 +613,10 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
   1. workflow runs pytest + both design gates on ubuntu-latest and windows-latest, Python 3.11, pinned actions, permissions: contents: read
   2. YAML parses; the exact commands in it succeed locally
   3. log notes that CI itself could not be run
-- **Verification** (pending):
+- **Verification** (pass):
   - `.venv/Scripts/python -c "import yaml;yaml.safe_load(open('.github/workflows/tests.yml'))"`
   - full gate **G-FULL** (see §5.4)
-- **Notes:** Only .github/workflows/traceability.yml exists today; PR#6 adds project-sync.yml (different file).
+- **Notes:** Landed 2026-11-18: .github/workflows/tests.yml added - matrix ubuntu-latest/windows-latest, Python 3.11, actions/checkout@v4 + actions/setup-python@v5 (same major-tag pins as the existing traceability.yml house convention; full-commit-SHA pinning not applied), permissions: contents: read, workflow_dispatch included; runs the three G-FULL commands (pytest -q -p no:cacheprovider; python design/trace/plan_check.py; python design/trace/trace_check.py). YAML parses locally; each of the exact commands succeeds locally on Windows (237 passed / 1 skipped, both gates exit 0). CI itself could not be run: the branch is unpushed (push is owner-approved per EXEC-PLAN-001 5.5.4), so the workflow has never executed on GitHub runners - first run happens when the owner pushes or opens a PR. traceability.yml untouched; PR#6's project-sync.yml is a different file. Landing sha backfilled at the next tracker-touching commit.
 
 ### TASK-003 — Add ruff + mypy config and triage findings
 
