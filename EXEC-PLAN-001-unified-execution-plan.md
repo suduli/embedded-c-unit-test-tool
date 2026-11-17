@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-17** · HEAD `1d2addd` on `docs/pending-decisions` (10 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `26ff2d7` on `glm-night/20261117` (11 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -573,10 +573,11 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
   2. baseline lists exactly the 3 known failures: tests/ana/test_persist.py::test_real_extraction_assemble_write_read_roundtrip, ::test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored, ::test_assemble_emits_1_1_with_not_extracted_inventory (or states the difference)
   3. baseline counts recorded: 234 passed / 3 failed / 1 skipped, plan_check 346/344/191, trace_check 344/344
   4. commit exists
-- **Verification** (pending):
+- **Verification** (pass):
   - `git worktree list | grep wt-unit-glm-night`
   - `.venv/Scripts/python -m pytest -q -p no:cacheprovider (expect 3 failed, 234 passed, 1 skipped)`
   - full gate **G-FULL** (see §5.4)
+- **Notes:** Landed 2026-11-18: worktree glm-night/20261117 created from 26ff2d7; dedicated .venv (py3.13) + editable install OK; baseline 234 passed / 3 failed / 1 skipped (exactly the 3 documented test_persist failures), plan_check 346/344/191 exit 0, trace_check 344/344 exit 0, sync --check OK; baseline.md + GLM_NIGHT_LOG.md written. Landing sha backfilled at the next tracker-touching commit: a landing commit cannot contain its own sha (precedent: 26ff2d7 backfilled the T-15/T-17..T-22 shas).
 
 ### TASK-001 — Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift)
 
