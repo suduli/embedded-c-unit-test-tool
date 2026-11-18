@@ -26,3 +26,4 @@
 | WP-ANA-03 | DONE | cb092ac | callgraph 13 passed; suite 466/4 | PAR-060 fully evidenced; limits recorded |
 | WP-API-03 | PARTIAL | ae87cbd | 7 new roundtrip tests; suite 473/4 | engine leg done; GUI leg blocked (no GUI exists) |
 | WP-CLI-04 | PARTIAL | ba6042d | 6 new ci tests; suite 479/4 | templates+cache done; live CI demo + container (PKG-05) open |
+| WP-PRJ-02 | PARTIAL | 3ef91fc | 11 new shard tests; suite 490/4 | shard store done; Project.save integration deferred |
