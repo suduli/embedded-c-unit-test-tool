@@ -5,6 +5,10 @@ policy (WP-SEC-05) and the diagnostic content control surface (WP-SEC-04); the
 authoritative prose for the policy is in the WP-SEC-05 analysis note.
 """
 
+from ectt.sec.configuration_data import (
+    ConfigurationIsNotDataError,
+    validate_configuration_is_data,
+)
 from ectt.sec.diagnostics import (
     BUNDLE_ENTRIES,
     BUNDLE_EXCLUSIONS,
@@ -27,6 +31,13 @@ from ectt.sec.policy import (
     DisclosurePolicy,
     disclosure_policy,
 )
+from ectt.sec.trust import (
+    TRUST_RECORD_SCHEMA_VERSION,
+    TrustDecision,
+    TrustRecordError,
+    UntrustedProjectTracker,
+    warning_text,
+)
 
 __all__ = [
     # Diagnostic content control (WP-SEC-04)
@@ -39,6 +50,14 @@ __all__ = [
     "bundle_manifest",
     "location_reference",
     "assert_no_source_content",
+    # Configuration-is-data and trust gate (WP-SEC-03)
+    "ConfigurationIsNotDataError",
+    "validate_configuration_is_data",
+    "TRUST_RECORD_SCHEMA_VERSION",
+    "TrustDecision",
+    "TrustRecordError",
+    "UntrustedProjectTracker",
+    "warning_text",
     # Security policy (WP-SEC-05)
     "ACKNOWLEDGEMENT_COMMITMENT",
     "POLICY_STATE",
