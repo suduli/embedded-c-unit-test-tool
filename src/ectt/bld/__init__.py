@@ -8,6 +8,7 @@ from ectt.bld.errors import (
     BldError,
     DuplicateArtifactError,
     InvalidArtifactSpecError,
+    InvalidSanitizerModeError,
 )
 from ectt.bld.plan import (
     REASON_CONFIG_CHANGED,
@@ -18,6 +19,17 @@ from ectt.bld.plan import (
     BuildRecord,
     IncrementalPlanner,
     RebuildDecision,
+)
+from ectt.bld.sanitize import (
+    KNOWN_SANITIZER_MODES,
+    SANITIZER_ADDRESS,
+    SANITIZER_NONE,
+    SANITIZER_UNDEFINED,
+    SanitizerFinding,
+    SanitizerSettings,
+    classify_run_output,
+    sanitizer_compile_flags,
+    sanitizer_runtime_env,
 )
 
 __all__ = [
@@ -34,4 +46,15 @@ __all__ = [
     "BuildRecord",
     "RebuildDecision",
     "IncrementalPlanner",
+    # Sanitizer integration
+    "InvalidSanitizerModeError",
+    "SANITIZER_NONE",
+    "SANITIZER_ADDRESS",
+    "SANITIZER_UNDEFINED",
+    "KNOWN_SANITIZER_MODES",
+    "SanitizerSettings",
+    "SanitizerFinding",
+    "sanitizer_compile_flags",
+    "sanitizer_runtime_env",
+    "classify_run_output",
 ]

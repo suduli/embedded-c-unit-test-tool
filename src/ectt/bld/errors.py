@@ -14,6 +14,7 @@ __all__ = [
     "BldError",
     "DuplicateArtifactError",
     "InvalidArtifactSpecError",
+    "InvalidSanitizerModeError",
 ]
 
 
@@ -53,6 +54,19 @@ class InvalidArtifactSpecError(BldError):
         message: str,
         *,
         reason: str = "invalid_artifact_spec",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidSanitizerModeError(BldError):
+    """Raised when a requested sanitizer mode is unknown."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_sanitizer_mode",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
