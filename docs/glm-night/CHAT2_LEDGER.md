@@ -30,3 +30,4 @@
 | WP-PRJ-03 | DONE | 1f79d27 | migration 19 passed; suite 490/4 | TOOL-PRJ-040 fully evidenced |
 | WP-ANA-06 | PARTIAL | 9b87d1c | ana 128 passed; suite 490/4 | PAR-170 done; PAR-080 exposure open; PAR-090 unimplemented |
 | WP-QUA-02 | PARTIAL | 080dbc1 | 6 new qua tests; suite 496/4 | structure+evidence done; intended-use OPEN (WP-QUA-01) |
+| WP-ANA-05 | PARTIAL | f8231eb | 8 new cfg tests; suite 504/4 | complexity+capability landed; CFG construction = open ADR-001 2.4 |
