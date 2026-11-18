@@ -17,3 +17,4 @@
 | WP-SEC-03 | DONE | 490bd8c | 598 passed, 4 skipped | TOOL-SEC-050/070: persisted trust record + warning text, data-only config boundary; gates green (1 gate retry) |
 | WP-CORE-07 | PARTIAL | fbf995e | 612 passed, 4 skipped | NFR-190 catalog done; NFR-120 index done but docs/user/ pages are owner shared-file change; gates green (2 gate retries) |
 | WP-GEN-02 | DONE | 045dd87 | 622 passed, 4 skipped | HAR-060/070 PLG-030: descriptor-driven back-ends, unity+cmocka built-ins, C++-free render scan; 4 open ADR questions recorded (default framework, cmocka-stub binding, template distribution, engine); gates green (1 gate retry) |
+| WP-GEN-04 | DONE | 069e463 | 631 passed, 4 skipped | Board AC met: byte-for-byte region preservation, conflict reports write nothing (verified); HAR-090/100/110 + CBT-070 covered; gates green (1 gate retry) |
