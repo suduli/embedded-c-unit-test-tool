@@ -51,6 +51,14 @@ from ectt.gen.regen import (
     check_test_case_staleness,
     regenerate,
 )
+from ectt.gen.stubs import (
+    STUB_MARKER,
+    DuplicateStubError,
+    FunctionSignature,
+    Stub,
+    StubUnit,
+    generate_stubs,
+)
 
 __all__ = [
     # Errors
@@ -94,4 +102,11 @@ __all__ = [
     "IntegrationScopeTooSmallError",
     "generate_integration_harness",
     "generate_with_statics",
+    # Stub generation core (WP-GEN-06)
+    "STUB_MARKER",
+    "DuplicateStubError",
+    "FunctionSignature",
+    "Stub",
+    "StubUnit",
+    "generate_stubs",
 ]

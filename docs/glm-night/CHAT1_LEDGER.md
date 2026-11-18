@@ -20,3 +20,4 @@
 | WP-GEN-04 | DONE | 069e463 | 631 passed, 4 skipped | Board AC met: byte-for-byte region preservation, conflict reports write nothing (verified); HAR-090/100/110 + CBT-070 covered; gates green (1 gate retry) |
 | WP-ING-04 | DONE | a86fbb2 | 644 passed, 4 skipped | ING-120/130/140/150/190: named scopes, 4 membership modes, intra/external classification, JSON persistence; gates green (2 gate retries) |
 | WP-ING-05 | DONE | 8a67b1d | 653 passed, 4 skipped | ING-160/170/180: 3 conflict kinds, multi-scope membership, complete stub list; gates green (2 gate retries) |
+| WP-GEN-03 | DONE | 04ec302 | 660 passed, 4 skipped | HAR-030/080: optional statics via UUT-source include + markers, integration harness marks only external stubs; gates green (1 gate retry) |
