@@ -38,6 +38,13 @@ from ectt.sec.trust import (
     UntrustedProjectTracker,
     warning_text,
 )
+from ectt.sec.untrusted import (
+    RESULT_LINE_KINDS,
+    TargetResultLine,
+    UntrustedPayload,
+    mark_untrusted,
+    parse_target_output,
+)
 
 __all__ = [
     # Diagnostic content control (WP-SEC-04)
@@ -58,6 +65,12 @@ __all__ = [
     "TrustRecordError",
     "UntrustedProjectTracker",
     "warning_text",
+    # Untrusted target data (WP-SEC-07)
+    "RESULT_LINE_KINDS",
+    "UntrustedPayload",
+    "TargetResultLine",
+    "mark_untrusted",
+    "parse_target_output",
     # Security policy (WP-SEC-05)
     "ACKNOWLEDGEMENT_COMMITMENT",
     "POLICY_STATE",
