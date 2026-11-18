@@ -59,6 +59,7 @@ __all__ = [
     "CompilerConfig",
     "CompilerConfigRegistry",
     "load_compiler_config",
+    "load_compiler_config_text",
     "validate_compiler_config_document",
 ]
 
@@ -300,6 +301,27 @@ def validate_compiler_config_document(
     )
 
 
+def _load_compiler_config_text(text: str, *, path: Path | None) -> CompilerConfig:
+    try:
+        document = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise InvalidCompilerConfigError(
+            f"compiler configuration is not valid YAML: {exc}",
+            path=path,
+        ) from exc
+    if document is None:
+        raise InvalidCompilerConfigError(
+            "compiler configuration is empty",
+            path=path,
+        )
+    return validate_compiler_config_document(document, path=path)
+
+
+def load_compiler_config_text(text: str) -> CompilerConfig:
+    """Load and validate a compiler configuration from a YAML string."""
+    return _load_compiler_config_text(text, path=None)
+
+
 def load_compiler_config(path: Path | str) -> CompilerConfig:
     """Load and validate a compiler configuration from a YAML file."""
     file_path = Path(path)
@@ -310,19 +332,7 @@ def load_compiler_config(path: Path | str) -> CompilerConfig:
             f"cannot read compiler configuration file: {exc}",
             path=file_path,
         ) from exc
-    try:
-        document = yaml.safe_load(text)
-    except yaml.YAMLError as exc:
-        raise InvalidCompilerConfigError(
-            f"compiler configuration is not valid YAML: {exc}",
-            path=file_path,
-        ) from exc
-    if document is None:
-        raise InvalidCompilerConfigError(
-            "compiler configuration file is empty",
-            path=file_path,
-        )
-    return validate_compiler_config_document(document, path=file_path)
+    return _load_compiler_config_text(text, path=file_path)
 
 
 class CompilerConfigRegistry:
