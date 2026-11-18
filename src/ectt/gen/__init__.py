@@ -39,6 +39,15 @@ from ectt.gen.harness import (
     GeneratedHarness,
     HarnessGenerator,
 )
+from ectt.gen.linkclosure import (
+    RESOLVED_BY_STUB,
+    RESOLVED_BY_USER_LINKAGE,
+    LinkClosureReport,
+    LinkResolution,
+    UnresolvedReferenceError,
+    assert_closed,
+    resolve_link_closure,
+)
 from ectt.gen.regen import (
     STATUS_CONFLICT,
     STATUS_PRESERVED,
@@ -109,4 +118,12 @@ __all__ = [
     "Stub",
     "StubUnit",
     "generate_stubs",
+    # Link closure (WP-GEN-05)
+    "RESOLVED_BY_STUB",
+    "RESOLVED_BY_USER_LINKAGE",
+    "LinkClosureReport",
+    "LinkResolution",
+    "UnresolvedReferenceError",
+    "assert_closed",
+    "resolve_link_closure",
 ]

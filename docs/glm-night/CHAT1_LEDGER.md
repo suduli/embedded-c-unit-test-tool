@@ -21,3 +21,4 @@
 | WP-ING-04 | DONE | a86fbb2 | 644 passed, 4 skipped | ING-120/130/140/150/190: named scopes, 4 membership modes, intra/external classification, JSON persistence; gates green (2 gate retries) |
 | WP-ING-05 | DONE | 8a67b1d | 653 passed, 4 skipped | ING-160/170/180: 3 conflict kinds, multi-scope membership, complete stub list; gates green (2 gate retries) |
 | WP-GEN-03 | DONE | 04ec302 | 660 passed, 4 skipped | HAR-030/080: optional statics via UUT-source include + markers, integration harness marks only external stubs; gates green (1 gate retry) |
+| WP-GEN-06 | DONE | 385e9f2 | 671 passed, 4 skipped | STB-010/020/030: per-external stubs, identical signatures, collected type decls, stub marker; gates green (1 gate retry) |
