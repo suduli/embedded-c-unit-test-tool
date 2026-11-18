@@ -8,3 +8,4 @@
 | WP-BLD-01 | DONE | eba9d83 | 490 passed, 4 skipped | TOOL-EXE-080: digest-based incremental planner, exactly-affected rebuilds, 11 tests; gates green (1 gate retry: ruff) |
 | WP-SEC-05 | DONE | 582c080 | 498 passed, 4 skipped | TOOL-SEC-080 (method I): policy prose in analysis note + machine-readable ectt.sec.policy; OWNER-REVIEW draft, SECURITY.md promotion needed; gates green (1 gate retry) |
 | WP-BLD-02 | DONE | dacf04b | 509 passed, 4 skipped | TOOL-EXE-090: opt-in ASan/UBSan flags+env, output classifier; execution capture is EXH-01; gates green (2 gate retries) |
+| WP-SEC-04 | DONE | 0809946 | 520 passed, 4 skipped | TOOL-SEC-120: location-only diagnostics, verbatim-source guard (substring), exact bundle manifest; gates green (1 gate retry) |

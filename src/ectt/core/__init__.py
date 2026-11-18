@@ -31,6 +31,13 @@ from ectt.core.fs import (
     SourceTree,
     UnmarkedOutputRootError,
 )
+from ectt.core.logging import (
+    DiagnosticBundle,
+    EcttLogger,
+    LogRecord,
+    Verbosity,
+    build_diagnostic_bundle,
+)
 
 __all__ = [
     # Determinism
@@ -55,6 +62,12 @@ __all__ = [
     "PathConfinementError",
     "SourceMutationError",
     "UnmarkedOutputRootError",
+    # Logging & diagnostic bundle (WP-CORE-06)
+    "Verbosity",
+    "LogRecord",
+    "EcttLogger",
+    "DiagnosticBundle",
+    "build_diagnostic_bundle",
     "OutputRoot",
     "SourceTree",
 ]
