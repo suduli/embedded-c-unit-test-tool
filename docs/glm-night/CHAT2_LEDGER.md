@@ -16,3 +16,5 @@
 | WP-ANA-01 | DONE | 28427d2 | ana 128 passed/0 skip; suite 447/4 | PAR-010/020 evidenced vs real libclang |
 | WP-ANA-02 | DONE | 0a9dbfa | ana 128 passed/0 skip; suite 447/4 | PAR-030/040/050 evidenced incl closure termination |
 | WP-ANA-04 | DONE | 0ad9eba | persist+schema 41 passed; suite 447/4 | 5.4 criterion met in full; PAR-100 row added |
+| WP-ANA-08 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-150: inventory presence/status/fail-closed evidenced |
+| WP-ANA-09 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-160: round-trip + optional-absence evidenced |
