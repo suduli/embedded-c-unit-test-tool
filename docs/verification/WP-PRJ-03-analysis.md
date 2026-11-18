@@ -18,3 +18,11 @@ Analysis evidence for requirements verified under WP-PRJ-03. No change to the pu
 - **Why the version check uses a floor of zero.** `dispatch_schema_version` refuses versions below the minimum, which is the right behaviour for opening. Migration is the one place that must read such a file, so it reads with a floor of zero and still applies the upper bound.
 - **Why confirmation is `is True`.** A truthy value such as a non-empty string must not confirm a change to the user's data. Only the literal boolean does.
 - **Why the archive is written before the replace.** If the process stops between the two writes, the original still exists. Stopping after the replace leaves the archive as the recovery path.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suites on this worktree: `tests/prj/test_migration.py` → 19 passed;
+with `test_shards.py` → 26 passed, 0 skipped; full suite 490 passed / 4 skipped (baseline 4).
+TOOL-PRJ-040 (explicit, reversible-where-possible, never without user confirmation) is fully
+evidenced: exact-confirmation refusal, archive-and-revert, deterministic steps, failing-step
+safety, and the manifest's single-version no-op are all named tests. **DONE**.
