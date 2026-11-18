@@ -10,3 +10,4 @@
 | WP-BLD-02 | DONE | dacf04b | 509 passed, 4 skipped | TOOL-EXE-090: opt-in ASan/UBSan flags+env, output classifier; execution capture is EXH-01; gates green (2 gate retries) |
 | WP-SEC-04 | DONE | 0809946 | 520 passed, 4 skipped | TOOL-SEC-120: location-only diagnostics, verbatim-source guard (substring), exact bundle manifest; gates green (1 gate retry) |
 | WP-CORE-06 | DONE | 0cd11c6 | 533 passed, 4 skipped | TOOL-NFR-130/160: Verbosity logger, SEC-04 guard at record time, manifest-linked bundle; gates green (1 gate retry) |
+| WP-TCH-07 | DONE | 88ca73c | 547 passed, 4 skipped | TOOL-INS-080: injectable env verification (toolchain presence, feature availability), clear sorted report, first-run marker; gates green (1 gate retry) |
