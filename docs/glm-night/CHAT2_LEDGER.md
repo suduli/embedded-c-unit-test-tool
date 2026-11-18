@@ -34,3 +34,4 @@
 | WP-PRJ-04 | DONE | ba6302c | references 7 passed/2 skips; suite 504/4 | TOOL-PRJ-090 evidenced; skips privilege-gated |
 | WP-MIG-06 | DONE | e7b63b7 | 8 new mig tests; suite 512/4 | scan+snapshot contract; adapters = other MIG WPs |
 | WP-QUA-01 | BLOCKED | db1f031 | suite 512/4 | TI/TD/TCL = owner classification decision; no code written |
+| WP-QUA-05 | DONE | 67db638 | 6 new qua tests; suite 518/4 | three sections, all citations resolve |
