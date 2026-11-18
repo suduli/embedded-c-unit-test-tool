@@ -19,3 +19,13 @@ Analysis evidence for requirements verified under WP-ANA-07. Schema change: **1.
 - **Why a failed unit, not an exception.** TOOL-PAR-130 asks for partial results. A raised exception would stop the caller from producing the valid units and their model.
 - **Why the catch list is explicit.** Catching `Exception` would make a `KeyError` look like a failed unit. The narrow tuple keeps defects visible (NFR-090).
 - **Why the eligibility record has `kind`.** A unit-level record with an empty `function` must not look like a function record to CMP-ATG. `kind` makes the difference explicit.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suites on this worktree: `tests/ana` → 128 passed, 0 skipped; full suite
+447 passed / 4 skipped (baseline 4). The assessment stands unchanged: TOOL-PAR-130 evidence is
+complete; TOOL-PAR-140's inventory is carried through assembly and schema-gated but **not yet
+populated by extraction** (always `[]`), and the multi-file run driver that would own the per-unit
+isolation loop does not exist yet. **PARTIAL** — remaining: populate the unsupported-construct
+inventory during extraction (TOOL-PAR-080/090/170 territory, WP-ANA-06), and the multi-file
+analysis driver.
