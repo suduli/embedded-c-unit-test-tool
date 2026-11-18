@@ -4,6 +4,11 @@ Provides the incremental rebuild planner: content-based staleness decisions
 for build artifacts, with recorded reasons and deterministic output.
 """
 
+from ectt.bld.crossbuild import (
+    CrossBuildCommand,
+    CrossBuildPlan,
+    plan_cross_build,
+)
 from ectt.bld.errors import (
     BldError,
     DuplicateArtifactError,
@@ -57,4 +62,8 @@ __all__ = [
     "sanitizer_compile_flags",
     "sanitizer_runtime_env",
     "classify_run_output",
+    # Cross build planning (WP-BLD-03)
+    "CrossBuildCommand",
+    "CrossBuildPlan",
+    "plan_cross_build",
 ]
