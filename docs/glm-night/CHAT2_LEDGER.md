@@ -19,3 +19,4 @@
 | WP-ANA-08 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-150: inventory presence/status/fail-closed evidenced |
 | WP-ANA-09 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-160: round-trip + optional-absence evidenced |
 | WP-ANA-07 | PARTIAL | 2adfafd | ana 128 passed; suite 447/4 | PAR-130 done; PAR-140 inventory unpopulated + no multi-file driver |
+| WP-API-02 | DONE | 944c1cb | 12 new transport tests; suite 459/4 | framing fixtures + no-network guard; UDS alt-transport follow-up |
