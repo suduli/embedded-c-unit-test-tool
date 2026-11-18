@@ -24,15 +24,15 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `1689d08` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `c320746` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
 | PLAN-001 | 9 | · | · | 173 | 9 | 191 |
 | vcast-findings | · | 16 | · | · | 6 | 22 |
-| BACKLOG | · | 13 | · | 11 | 1 | 25 |
+| BACKLOG | · | 14 | · | 10 | 1 | 25 |
 | BACKLOG-RESERVE | · | · | · | 8 | · | 8 |
-| **Total** | 9 | 29 | · | 192 | 16 | 246 |
+| **Total** | 9 | 30 | · | 191 | 16 | 246 |
 
 - **Requirements:** 346 in SRS-001; 344 allocated to a work package; 2 Future (not allocated); 259 design elements. Allocated requirements by owning-WP status: Implemented 21, Planned 299, Blocked 24.
 - **Work packages:** 191 · 642 person-weeks.
@@ -40,7 +40,7 @@
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
 - **Tests at HEAD:** 395 passed, 0 failed, 3 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
-- **Startable right now:** `TASK-014`, `TASK-016`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
+- **Startable right now:** `TASK-015`, `TASK-016`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
 **Notes and discrepancies found while consolidating:**
 
@@ -197,8 +197,7 @@ A task is **startable** only when its status is Planned, it has no `blockedBy`, 
 <!-- BEGIN GENERATED: queue -->
 | Seq | ID | Title | Delivers WP | Est. | Depends on | Status | Startable now |
 |---|---|---|---|---|---|---|---|
-| 46 | `TASK-014` | Decision memos D-01…D-04 (decision-ready drafts) | — | 120k tokens | `TASK-000` | Planned | yes |
-| 47 | `TASK-015` | T-02 draft: no-import/provenance rule for `vcast-findings/` | — | 70k tokens | `TASK-014` | Planned | after deps |
+| 47 | `TASK-015` | T-02 draft: no-import/provenance rule for `vcast-findings/` | — | 70k tokens | `TASK-014` | Planned | yes |
 | 48 | `TASK-016` | Verification analysis notes for landed WPs | — | 90k tokens | `TASK-013` | Planned | yes |
 | 49 | `TASK-017` | Refresh subsystem tracker (md + html) for what landed | — | 100k tokens | `TASK-016` | Planned | after deps |
 | 50 | `TASK-018` | Docs HTML pages: status, metadata, links, a11y basics | — | 100k tokens | `TASK-017` | Planned | after deps |
@@ -318,7 +317,8 @@ Of these, **14** already have every hard dependency satisfied (candidates for `T
 | 38 | `TASK-010` | WP-ING-07 authored link plan ingestion and validation | Landed | `6230f2d` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 40 | `TASK-011` | WP-PRJ-04 dangling reference detection | Landed | `0856a2c` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 42 | `TASK-012` | WP-PRJ-03 schema migration with explicit confirmation | Landed | `1689d08` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
-| 44 | `TASK-013` | WP-CORE-04 provenance record and version identification | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 44 | `TASK-013` | WP-CORE-04 provenance record and version identification | Landed | `c320746` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 46 | `TASK-014` | Decision memos D-01…D-04 (decision-ready drafts) | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 <!-- END GENERATED: done -->
 
 ---
@@ -557,23 +557,6 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 
 <!-- BEGIN GENERATED: cards -->
 ## 7.1 Ready queue — core overnight backlog (BACKLOG TASK-000 … TASK-024)
-
-### TASK-014 — Decision memos D-01…D-04 (decision-ready drafts)
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 46 · **Source:** BACKLOG · **Area:** planning · **Est.:** 120k tokens
-- **Dependencies:** `TASK-000`
-- **Blocking decision / gate:** —
-- **SRS requirements:** —
-- **Work packages:** — · **Related:** `D-01`, `D-02`, `D-03`, `D-04`, `T-01`, `T-04`, `T-05`, `T-06`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
-- **Files likely touched:** `docs/proposals/decision-memos-20261117.md (new; nothing else changes)`
-- **Acceptance criteria:**
-  1. four self-contained sections (D-01..D-04): question, options a–d with exact files, unapplied fenced-diff patch text, risks, what unblocks, recommendation labelled as such
-  2. no decision state changed anywhere in the repo
-- **Verification** (pending):
-  - `git diff --stat (only docs/proposals/ changed)`
-  - full gate **G-FULL** (see §5.4)
 
 ### TASK-015 — T-02 draft: no-import/provenance rule for `vcast-findings/`
 
