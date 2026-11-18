@@ -15,3 +15,4 @@
 | WP-ING-03 | DONE | 6456992 | 569 passed, 4 skipped | ING-070/090 implemented; ING-100/220 claimed with pre-existing green evidence + fresh demo; gates green (1 gate retry) |
 | WP-PLG-04 | DONE | 3ccf23c | 581 passed, 4 skipped | TOOL-PLG-100 (board AC): ai_providers point via public surface, capability/version negotiation, rejection-before-loading proven; gates green (1 gate retry) |
 | WP-SEC-03 | DONE | 490bd8c | 598 passed, 4 skipped | TOOL-SEC-050/070: persisted trust record + warning text, data-only config boundary; gates green (1 gate retry) |
+| WP-CORE-07 | PARTIAL | fbf995e | 612 passed, 4 skipped | NFR-190 catalog done; NFR-120 index done but docs/user/ pages are owner shared-file change; gates green (2 gate retries) |
