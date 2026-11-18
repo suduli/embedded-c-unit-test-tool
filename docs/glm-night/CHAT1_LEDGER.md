@@ -29,3 +29,4 @@
 | WP-SEC-07 | DONE | 5505736 | 717 passed, 4 skipped | TOOL-SEC-090: frozen untrusted payload wrapper (no exec surface), data-only parsing, code-like content retained as data; gates green (1 gate retry) |
 | WP-GEN-10 | DONE | 0daabb5 | 724 passed, 4 skipped | TOOL-HAR-065: gtest descriptor opt-in, host-only flag, cpp_allowed scan exemption, builtins unchanged; gates green (2 gate retries) |
 | WP-GEN-11 | DONE | 111f825 | 731 passed, 4 skipped | TOOL-STB-090: internal-callee-validated wrap plans, generated #define seam (no user source changes); gates green (1 gate retry) |
+| WP-PLG-02 | DONE | 99221eb | 737 passed, 4 skipped | TOOL-PLG-070/080: dir discovery w/o reinstall, 4 failure kinds, isolation proven with 4 failing + 2 good extensions; trust-gate obligation recorded; gates green (2 gate retries) |

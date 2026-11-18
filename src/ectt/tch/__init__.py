@@ -40,6 +40,17 @@ from ectt.tch.errors import (
     UnknownCompilerConfigError,
     UnknownCoverageKindError,
 )
+from ectt.tch.gating import (
+    FEATURE_VERSION_REQUIREMENTS,
+    MetricGate,
+    UnknownFeatureError,
+    UnsupportedMetricError,
+    VersionGate,
+    VersionRequirementError,
+    check_version,
+    gate_metrics,
+    parse_compiler_version,
+)
 
 __all__ = [
     # Errors
@@ -74,4 +85,14 @@ __all__ = [
     "EnvironmentCheckResult",
     "verify_environment",
     "first_run_needed",
+    # Capability & version gating (WP-TCH-04)
+    "FEATURE_VERSION_REQUIREMENTS",
+    "MetricGate",
+    "VersionGate",
+    "UnsupportedMetricError",
+    "VersionRequirementError",
+    "UnknownFeatureError",
+    "gate_metrics",
+    "check_version",
+    "parse_compiler_version",
 ]
