@@ -27,3 +27,4 @@
 | WP-API-03 | PARTIAL | ae87cbd | 7 new roundtrip tests; suite 473/4 | engine leg done; GUI leg blocked (no GUI exists) |
 | WP-CLI-04 | PARTIAL | ba6042d | 6 new ci tests; suite 479/4 | templates+cache done; live CI demo + container (PKG-05) open |
 | WP-PRJ-02 | PARTIAL | 3ef91fc | 11 new shard tests; suite 490/4 | shard store done; Project.save integration deferred |
+| WP-PRJ-03 | DONE | 1f79d27 | migration 19 passed; suite 490/4 | TOOL-PRJ-040 fully evidenced |
