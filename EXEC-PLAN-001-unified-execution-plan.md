@@ -24,23 +24,23 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `35487c4` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `ea0a75f` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
 | PLAN-001 | 9 | · | · | 173 | 9 | 191 |
 | vcast-findings | · | 16 | · | · | 6 | 22 |
-| BACKLOG | · | · | · | 24 | 1 | 25 |
+| BACKLOG | · | 5 | · | 19 | 1 | 25 |
 | BACKLOG-RESERVE | · | · | · | 8 | · | 8 |
-| **Total** | 9 | 16 | · | 205 | 16 | 246 |
+| **Total** | 9 | 21 | · | 200 | 16 | 246 |
 
 - **Requirements:** 346 in SRS-001; 344 allocated to a work package; 2 Future (not allocated); 259 design elements. Allocated requirements by owning-WP status: Implemented 21, Planned 299, Blocked 24.
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 237 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
+- **Tests at HEAD:** 272 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
-- **Startable right now:** `TASK-000` (dependencies met, not blocked).
+- **Startable right now:** `TASK-005`, `TASK-006`, `TASK-014`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
 **Notes and discrepancies found while consolidating:**
 
@@ -197,28 +197,23 @@ A task is **startable** only when its status is Planned, it has no `blockedBy`, 
 <!-- BEGIN GENERATED: queue -->
 | Seq | ID | Title | Delivers WP | Est. | Depends on | Status | Startable now |
 |---|---|---|---|---|---|---|---|
-| 26 | `TASK-000` | Worktree, venv, baseline, log | — | 30k tokens | — | Planned | yes |
-| 27 | `TASK-001` | Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift) | `WP-ANA-04` | 70k tokens | `TASK-000` | Planned | after deps |
-| 28 | `TASK-002` | CI workflow: pytest + design gates, Linux & Windows | — | 50k tokens | `TASK-001` | Planned | after deps |
-| 29 | `TASK-003` | Add ruff + mypy config and triage findings | — | 120k tokens | `TASK-001` | Planned | after deps |
-| 30 | `TASK-004` | Coverage baseline and gap-filling tests (≥80% on core/prj/ing) | — | 200k tokens | `TASK-001` | Planned | after deps |
-| 31 | `TASK-005` | ADR-002 grammar: rejection and preservation test suite | `WP-PRJ-01` | 150k tokens | `TASK-001` | Planned | after deps |
-| 32 | `TASK-006` | WP-CORE-02 structured error model, fail-safe, cancellation | `WP-CORE-02` | 220k tokens | `TASK-004` | Planned | after deps |
+| 31 | `TASK-005` | ADR-002 grammar: rejection and preservation test suite | `WP-PRJ-01` | 150k tokens | `TASK-001` | Planned | yes |
+| 32 | `TASK-006` | WP-CORE-02 structured error model, fail-safe, cancellation | `WP-CORE-02` | 220k tokens | `TASK-004` | Planned | yes |
 | 34 | `TASK-008` | WP-ANA-03 call graph and scope classification | `WP-ANA-03` | 250k tokens | `TASK-006` | Planned | after deps |
 | 36 | `TASK-009` | WP-ANA-07 partial-failure resilience | `WP-ANA-07` | 130k tokens | `TASK-006` | Planned | after deps |
 | 38 | `TASK-010` | WP-ING-07 authored link plan ingestion and validation | `WP-ING-07` | 170k tokens | `TASK-006` | Planned | after deps |
 | 40 | `TASK-011` | WP-PRJ-04 dangling reference detection | `WP-PRJ-04` | 100k tokens | `TASK-006` | Planned | after deps |
 | 42 | `TASK-012` | WP-PRJ-03 schema migration with explicit confirmation | `WP-PRJ-03` | 200k tokens | `TASK-006` | Planned | after deps |
 | 44 | `TASK-013` | WP-CORE-04 provenance record and version identification | `WP-CORE-04` | 130k tokens | `TASK-006` | Planned | after deps |
-| 46 | `TASK-014` | Decision memos D-01…D-04 (decision-ready drafts) | — | 120k tokens | `TASK-000` | Planned | after deps |
+| 46 | `TASK-014` | Decision memos D-01…D-04 (decision-ready drafts) | — | 120k tokens | `TASK-000` | Planned | yes |
 | 47 | `TASK-015` | T-02 draft: no-import/provenance rule for `vcast-findings/` | — | 70k tokens | `TASK-014` | Planned | after deps |
 | 48 | `TASK-016` | Verification analysis notes for landed WPs | — | 90k tokens | `TASK-013` | Planned | after deps |
 | 49 | `TASK-017` | Refresh subsystem tracker (md + html) for what landed | — | 100k tokens | `TASK-016` | Planned | after deps |
 | 50 | `TASK-018` | Docs HTML pages: status, metadata, links, a11y basics | — | 100k tokens | `TASK-017` | Planned | after deps |
-| 51 | `TASK-019` | README and developer guide (setup, test, gates, layout) | — | 60k tokens | `TASK-002` | Planned | after deps |
-| 52 | `TASK-020` | Trace/ID consistency checker beyond `plan_check` | — | 100k tokens | `TASK-000` | Planned | after deps |
-| 53 | `TASK-021` | Read-only audit: PRs #4/#6, stale branches, repo hygiene | — | 70k tokens | `TASK-000` | Planned | after deps |
-| 54 | `TASK-022` | Dependency and licence audit (report only) | — | 40k tokens | `TASK-000` | Planned | after deps |
+| 51 | `TASK-019` | README and developer guide (setup, test, gates, layout) | — | 60k tokens | `TASK-002` | Planned | yes |
+| 52 | `TASK-020` | Trace/ID consistency checker beyond `plan_check` | — | 100k tokens | `TASK-000` | Planned | yes |
+| 53 | `TASK-021` | Read-only audit: PRs #4/#6, stale branches, repo hygiene | — | 70k tokens | `TASK-000` | Planned | yes |
+| 54 | `TASK-022` | Dependency and licence audit (report only) | — | 40k tokens | `TASK-000` | Planned | yes |
 | 55 | `TASK-023` | Next-phase plan from PLAN-001 critical path | — | 100k tokens | `TASK-017` | Planned | after deps |
 | 56 | `TASK-024` | Morning review pack | — | 150k tokens | `TASK-000`, `TASK-001`, `TASK-002`, `TASK-003`, `TASK-004`, `TASK-005`, `TASK-006`, `TASK-008`, `TASK-009`, `TASK-010`, `TASK-011`, `TASK-012`, `TASK-013`, `TASK-014`, `TASK-015`, `TASK-016`, `TASK-017`, `TASK-018`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022`, `TASK-023` | Planned | after deps |
 | 57 | `TASK-101` | WP-ING-02 alternative ingestion paths | `WP-ING-02` | 150k tokens | `TASK-024` | Planned | after deps |
@@ -319,6 +314,11 @@ Of these, **14** already have every hard dependency satisfied (candidates for `T
 | 23 | `T-21` | Harness-vs-reference agreement check in WP-QUA-03 | Landed | `0ae84c1` | docs/pending-decisions (unpushed) | pass |
 | 24 | `T-22` | Clean-machine endpoint gate in WP-PKG (ADR-007) | Landed | `f167005` | docs/pending-decisions (unpushed) | pass |
 | 25 | `T-15` | HostProfile/ABI-divergence record section | Landed | `a412112` | docs/pending-decisions (unpushed) | pass |
+| 26 | `TASK-000` | Worktree, venv, baseline, log | Landed | `e58eac4` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 27 | `TASK-001` | Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift) | Landed | `aaf88a1` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 28 | `TASK-002` | CI workflow: pytest + design gates, Linux & Windows | Landed | `35487c4` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 29 | `TASK-003` | Add ruff + mypy config and triage findings | Landed | `ea0a75f` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 30 | `TASK-004` | Coverage baseline and gap-filling tests (≥80% on core/prj/ing) | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 <!-- END GENERATED: done -->
 
 ---
@@ -557,106 +557,6 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 
 <!-- BEGIN GENERATED: cards -->
 ## 7.1 Ready queue — core overnight backlog (BACKLOG TASK-000 … TASK-024)
-
-### TASK-000 — Worktree, venv, baseline, log
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 26 · **Source:** BACKLOG · **Area:** setup · **Est.:** 30k tokens
-- **Dependencies:** —
-- **Blocking decision / gate:** —
-- **SRS requirements:** —
-- **Work packages:** — · **Related:** `WP-ANA-04`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `e58eac4`
-- **Files likely touched:** `docs/glm-night/baseline.md`, `docs/glm-night/GLM_NIGHT_LOG.md`, `../wt-unit-glm-night (worktree) + .venv`
-- **Acceptance criteria:**
-  1. docs/glm-night/baseline.md and GLM_NIGHT_LOG.md exist
-  2. baseline lists exactly the 3 known failures: tests/ana/test_persist.py::test_real_extraction_assemble_write_read_roundtrip, ::test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored, ::test_assemble_emits_1_1_with_not_extracted_inventory (or states the difference)
-  3. baseline counts recorded: 234 passed / 3 failed / 1 skipped, plan_check 346/344/191, trace_check 344/344
-  4. commit exists
-- **Verification** (pass):
-  - `git worktree list | grep wt-unit-glm-night`
-  - `.venv/Scripts/python -m pytest -q -p no:cacheprovider (expect 3 failed, 234 passed, 1 skipped)`
-  - full gate **G-FULL** (see §5.4)
-- **Notes:** Landed 2026-11-18: worktree glm-night/20261117 created from 26ff2d7; dedicated .venv (py3.13) + editable install OK; baseline 234 passed / 3 failed / 1 skipped (exactly the 3 documented test_persist failures), plan_check 346/344/191 exit 0, trace_check 344/344 exit 0, sync --check OK; baseline.md + GLM_NIGHT_LOG.md written. Landing sha backfilled at the next tracker-touching commit: a landing commit cannot contain its own sha (precedent: 26ff2d7 backfilled the T-15/T-17..T-22 shas).
-
-### TASK-001 — Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift)
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 27 · **Source:** BACKLOG · **Area:** tests · **Est.:** 70k tokens
-- **Dependencies:** `TASK-000`
-- **Blocking decision / gate:** —
-- **SRS requirements:** `TOOL-PAR-100`, `TOOL-PAR-110`
-- **Work packages:** `WP-ANA-04` · **Related:** `T-09`, `T-10`
-- **ADRs:** `ADR-001` · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `aaf88a1`
-- **Files likely touched:** `tests/ana/test_persist.py`, `src/ectt/ana/persist.py (only if a real regression is found)`
-- **Acceptance criteria:**
-  1. the 3 named test_persist tests pass (assert the module's own current-version constant, not a new literal)
-  2. compatibility-rule tests (older/newer minor, different major) stay meaningful
-  3. no other test changes status; suite ends 237 passed / 0 failed / 1 skipped
-  4. commit body explains each failure's root cause
-- **Verification** (pass):
-  - `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/ana/test_persist.py`
-  - full gate **G-FULL** (see §5.4)
-- **Notes:** Landed 2026-11-18. Root causes: (1) test_real_extraction_assemble_write_read_roundtrip pinned the assembler's emitted version with '1.0' literals (3 sites) - written at WP-ANA-04 when 1.0 was current; the emitted version existed only as an inline literal in persist.py, so the 1.1 (T-09) and 1.2 (T-10) schema bumps stranded it. (2) test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored fed a 1.5 fixture lacking the inventories mandatory at >= 1.1 (TOOL-PAR-140/150, introduced by T-09), so the reader rejected it with missing_decision_inventory; fixture upgraded to a valid modern document, gate-rule intent (newer minor accepted, unknown fields ignored) preserved. (3) test_assemble_emits_1_1_with_not_extracted_inventory pinned the emitted version '1.1' (T-09 era); the 1.2 bump (T-10) moved assemble() to 1.2. Fix: exposed SCHEMA_VERSION_CURRENT in persist.py (assemble() now uses it; exported in __all__), tests assert the constant instead of literals; renamed test 3 to test_assemble_emits_current_version_with_not_extracted_inventory so the name no longer carries a version literal. Suite 237 passed / 0 failed / 1 skipped (criterion met); older/newer-minor and different-major gate rules untouched and still meaningful. Landing sha backfilled at the next tracker-touching commit.
-
-### TASK-002 — CI workflow: pytest + design gates, Linux & Windows
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 28 · **Source:** BACKLOG · **Area:** gaps · **Est.:** 50k tokens
-- **Dependencies:** `TASK-001`
-- **Blocking decision / gate:** —
-- **SRS requirements:** —
-- **Work packages:** — · **Related:** `WP-CORE-08`, `PR#6`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)` · **Commit:** `35487c4`
-- **Files likely touched:** `.github/workflows/tests.yml (new; traceability.yml untouched)`
-- **Acceptance criteria:**
-  1. workflow runs pytest + both design gates on ubuntu-latest and windows-latest, Python 3.11, pinned actions, permissions: contents: read
-  2. YAML parses; the exact commands in it succeed locally
-  3. log notes that CI itself could not be run
-- **Verification** (pass):
-  - `.venv/Scripts/python -c "import yaml;yaml.safe_load(open('.github/workflows/tests.yml'))"`
-  - full gate **G-FULL** (see §5.4)
-- **Notes:** Landed 2026-11-18: .github/workflows/tests.yml added - matrix ubuntu-latest/windows-latest, Python 3.11, actions/checkout@v4 + actions/setup-python@v5 (same major-tag pins as the existing traceability.yml house convention; full-commit-SHA pinning not applied), permissions: contents: read, workflow_dispatch included; runs the three G-FULL commands (pytest -q -p no:cacheprovider; python design/trace/plan_check.py; python design/trace/trace_check.py). YAML parses locally; each of the exact commands succeeds locally on Windows (237 passed / 1 skipped, both gates exit 0). CI itself could not be run: the branch is unpushed (push is owner-approved per EXEC-PLAN-001 5.5.4), so the workflow has never executed on GitHub runners - first run happens when the owner pushes or opens a PR. traceability.yml untouched; PR#6's project-sync.yml is a different file. Landing sha backfilled at the next tracker-touching commit.
-
-### TASK-003 — Add ruff + mypy config and triage findings
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 29 · **Source:** BACKLOG · **Area:** gaps · **Est.:** 120k tokens
-- **Dependencies:** `TASK-001`
-- **Blocking decision / gate:** —
-- **SRS requirements:** —
-- **Work packages:** — · **Related:** `PR#6`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
-- **Files likely touched:** `pyproject.toml ([project.optional-dependencies].dev, [tool.ruff], [tool.mypy])`, `src/ (mechanical fixes only)`, `docs/glm-night/lint-baseline.md`
-- **Acceptance criteria:**
-  1. ruff exits 0 or has a documented ignore list with reasons
-  2. mypy runs; remaining errors listed in lint-baseline.md with counts per rule
-  3. no sweeping reformat in git diff --stat
-  4. full gate green
-- **Verification** (pass):
-  - `.venv/Scripts/python -m ruff check .`
-  - `.venv/Scripts/python -m mypy src`
-  - full gate **G-FULL** (see §5.4)
-- **Notes:** PR#6 edits pyproject.toml ([tool.pytest] pythonpath) — adjacent-section edit, expect an easy merge. Landed 2026-11-18. ruff 0.17.5 + mypy 2.4.1 + types-PyYAML added to dev extras (dev-only deps allowed in TASK-003/004). Config in pyproject: [tool.ruff] scoped to owned paths (spikes/vcast-findings/aidlc/design/docs/assets excluded - do-not-touch or out-of-scope), explicit select (E4/E7/E9,F,B,I,UP,SIM,C4,RUF,PERF,PIE,FURB,PLW,BLE), reasoned ignores (RUF022 semantic __all__ grouping; F401 in __init__ re-exports; BLE001 in tests); [tool.mypy] python_version 3.11. Result: ruff check . exit 0 (baseline 118 in scope: 65 auto-fixes + 39 hand fixes incl. 3 real F821 missing imports shared with mypy; noqa'd 1 PLW0603 singleton + 2 deliberate BLE001 fallbacks with reasons); mypy src exit 0 (baseline 11 -> 0; 2 yaml Event attr-defined errors surfaced only after stubs installed, fixed with commented inline ignores). Suite 237 passed / 1 skipped unchanged. Full triage with per-rule counts + excluded-path findings recorded in docs/glm-night/lint-baseline.md. No sweeping reformat (34 files, +167/-152). Landing sha backfilled at the next tracker-touching commit.
-
-### TASK-004 — Coverage baseline and gap-filling tests (≥80% on core/prj/ing)
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 30 · **Source:** BACKLOG · **Area:** tests · **Est.:** 200k tokens
-- **Dependencies:** `TASK-001`
-- **Blocking decision / gate:** —
-- **SRS requirements:** —
-- **Work packages:** — · **Related:** `WP-CORE-08`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
-- **Files likely touched:** `pyproject.toml (pytest-cov in dev extras)`, `tests/core/`, `tests/prj/`, `tests/ing/`, `docs/glm-night/coverage-baseline.md`
-- **Acceptance criteria:**
-  1. line coverage ≥ 80% on ectt.core, ectt.prj and ectt.ing
-  2. coverage-baseline.md shows before/after per package; ana gaps listed only
-  3. no assert-True tests, no new pragma: no cover
-  4. full gate green
-- **Verification** (pending):
-  - `.venv/Scripts/python -m pytest -q -p no:cacheprovider --cov=ectt.core --cov=ectt.prj --cov=ectt.ing --cov-report=term-missing`
-  - full gate **G-FULL** (see §5.4)
 
 ### TASK-005 — ADR-002 grammar: rejection and preservation test suite
 
