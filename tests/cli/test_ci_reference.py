@@ -82,7 +82,7 @@ def test_templates_cache_exactly_the_artifact_set() -> None:
         for path in expected:
             assert path in text, path
     gitlab_cache_paths = _parse(GITLAB_CI_PIPELINE)["ectt-verify"]["cache"]["paths"]
-    assert sorted(str(p) for p in gitlab_cache_paths) == sorted(expected)
+    assert sorted(str(p).rstrip("/") for p in gitlab_cache_paths) == sorted(expected)
 
 
 def test_cache_key_is_derived_from_compilation_database() -> None:
