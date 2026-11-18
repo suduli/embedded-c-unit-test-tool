@@ -56,7 +56,9 @@ class FunctionSignature:
                     f"stub '{self.name}' has an empty parameter type",
                     reason="invalid_signature",
                 )
-            if not isinstance(parameter_name, str) or not parameter_name.strip():
+            if not isinstance(parameter_name, str) or (
+                not parameter_name.strip() and c_type.strip() != "..."
+            ):
                 raise GenError(
                     f"stub '{self.name}' has an empty parameter name",
                     reason="invalid_signature",

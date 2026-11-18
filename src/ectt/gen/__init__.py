@@ -60,6 +60,17 @@ from ectt.gen.regen import (
     check_test_case_staleness,
     regenerate,
 )
+from ectt.gen.stubregen import (
+    STUB_BODY_REGION_PREFIX,
+    UNSUPPORTED_CONSTRUCT_MARKER,
+    StubResyncResult,
+    UnsupportedConstruct,
+    extract_user_body,
+    flag_unsupported_constructs,
+    render_stub_output,
+    resync_stub,
+    stub_with_user_region,
+)
 from ectt.gen.stubs import (
     STUB_MARKER,
     DuplicateStubError,
@@ -139,4 +150,14 @@ __all__ = [
     "StubPlan",
     "UnknownStubReferenceError",
     "build_stub_plan",
+    # Stub regeneration & flagging (WP-GEN-09)
+    "STUB_BODY_REGION_PREFIX",
+    "UNSUPPORTED_CONSTRUCT_MARKER",
+    "StubResyncResult",
+    "UnsupportedConstruct",
+    "extract_user_body",
+    "flag_unsupported_constructs",
+    "render_stub_output",
+    "resync_stub",
+    "stub_with_user_region",
 ]

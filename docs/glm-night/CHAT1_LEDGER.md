@@ -23,3 +23,4 @@
 | WP-GEN-03 | DONE | 04ec302 | 660 passed, 4 skipped | HAR-030/080: optional statics via UUT-source include + markers, integration harness marks only external stubs; gates green (1 gate retry) |
 | WP-GEN-06 | DONE | 385e9f2 | 671 passed, 4 skipped | STB-010/020/030: per-external stubs, identical signatures, collected type decls, stub marker; gates green (1 gate retry) |
 | WP-GEN-05 | DONE | 6d27fab | 678 passed, 4 skipped | TOOL-HAR-120: stub/user-linkage resolution, enforced closure with named unresolved list; gates green (1 gate retry) |
+| WP-GEN-08 | DONE | 5c03890 | 690 passed, 4 skipped | STB-080/100/140: exclusion precedence, stdlib-only-on-request (19-name vocabulary), pointer targets with access paths; gates green first try |
