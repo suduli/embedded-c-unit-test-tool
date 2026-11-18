@@ -26,6 +26,8 @@ from ectt.ana.errors import (
     TypeDefinitionConflictError,
 )
 from ectt.ana.model import (
+    CALL_CLASSIFICATIONS,
+    CALL_VIA,
     AnalysisModel,
     AnalysisUnit,
     DecisionInventoryModel,
@@ -55,7 +57,7 @@ READER_MIN_MINOR: int = 0
 # and moves only this line; tests must assert this constant, never a literal,
 # so a bump cannot silently strand them (root cause of the 1.0 -> 1.1 -> 1.2
 # test drift fixed in TASK-001).
-SCHEMA_VERSION_CURRENT: str = "1.2"
+SCHEMA_VERSION_CURRENT: str = "1.3"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
 
 
@@ -398,6 +400,30 @@ def read_analysis_model(
                         f"Unit at index {idx} is missing required 'unsupported_constructs' (schema >= 1.1)",
                         reason="missing_unsupported_constructs",
                     )
+
+    # 6c. Minor-version-gated call graph (schema 1.3: TOOL-PAR-060). Fail-closed:
+    # every function must carry calls[], and every call must use a known classification
+    # and via value; an unknown value is rejected, never interpreted.
+    if doc_minor >= 3:
+        units_for_calls = doc.get("units")
+        if isinstance(units_for_calls, list):
+            for u_idx, unit_doc in enumerate(units_for_calls):
+                if not isinstance(unit_doc, dict):
+                    continue
+                for fn_doc in unit_doc.get("functions", []):
+                    if not isinstance(fn_doc, dict) or "calls" not in fn_doc:
+                        raise AnalysisModelError(
+                            f"Function in unit at index {u_idx} is missing required 'calls' (schema >= 1.3)",
+                            reason="missing_calls",
+                        )
+                    for call_doc in fn_doc["calls"]:
+                        cls_value = call_doc.get("classification") if isinstance(call_doc, dict) else None
+                        via_value = call_doc.get("via") if isinstance(call_doc, dict) else None
+                        if cls_value not in CALL_CLASSIFICATIONS or via_value not in CALL_VIA:
+                            raise AnalysisModelError(
+                                f"Unknown call classification {cls_value!r} or via {via_value!r} (schema >= 1.3)",
+                                reason="unknown_call_value",
+                            )
 
     # 7. Type closure validation over merged map on read (SDD-002 §4.2)
     types_obj = doc["types"]

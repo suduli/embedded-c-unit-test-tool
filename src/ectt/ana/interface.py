@@ -12,6 +12,7 @@ from typing import Any
 
 from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind  # type: ignore[import-untyped]
 
+from ectt.ana.callgraph import extract_calls
 from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import normalize_path, resolve_source_location_path
 from ectt.ana.model import (
@@ -255,6 +256,10 @@ def extract_interfaces(
 
             # Globals and file-static variable accesses
             globals_accessed = _extract_globals(child)
+            calls = extract_calls(
+                child,
+                lambda loc: _is_in_main_file(loc, norm_source_path, working_directory),
+            )
 
             functions.append(
                 FunctionModel(
@@ -265,6 +270,7 @@ def extract_interfaces(
                     return_type=return_type_ref,
                     parameters=tuple(parameters),
                     globals=globals_accessed,
+                    calls=calls,
                 )
             )
 

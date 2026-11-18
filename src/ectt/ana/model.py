@@ -327,6 +327,47 @@ class GlobalAccessModel:
         )
 
 
+CALL_CLASSIFICATIONS: tuple[str, ...] = ("internal", "external", "library", "unresolved")
+CALL_VIA: tuple[str, ...] = ("direct", "function_pointer", "undeclared")
+
+
+@dataclass(frozen=True)
+class CallModel:
+    """One call site inside a function body (SDD-002 §4.1 ``calls[]``, schema 1.3).
+
+    classification: ``internal`` (defined in the unit under test), ``external``
+    (declared outside the unit and not a system header), ``library`` (declared in a
+    system header), or ``unresolved`` (no declared target).
+    via: ``direct`` (named callee with a declaration), ``function_pointer`` (indirect
+    call; ``callee`` is empty because the target is never guessed), or ``undeclared``
+    (implicit declaration with no prototype anywhere in the translation unit).
+
+    Implements: TOOL-PAR-060, DSN-ANA-030.
+    """
+
+    callee: str
+    classification: str
+    via: str
+    line: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "callee": self.callee,
+            "classification": self.classification,
+            "via": self.via,
+            "line": self.line,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> CallModel:
+        return cls(
+            callee=data.get("callee", ""),
+            classification=data.get("classification", "unresolved"),
+            via=data.get("via", "function_pointer"),
+            line=int(data.get("line", 0)),
+        )
+
+
 @dataclass(frozen=True)
 class FunctionModel:
     """Extracted function interface and variable accesses.
@@ -341,6 +382,7 @@ class FunctionModel:
     return_type: str  # "ref:type.<id>"
     parameters: tuple[ParameterModel, ...] = field(default_factory=tuple)
     globals: tuple[GlobalAccessModel, ...] = field(default_factory=tuple)
+    calls: tuple[CallModel, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1."""
@@ -352,6 +394,7 @@ class FunctionModel:
             "return_type": self.return_type,
             "parameters": [p.to_dict() for p in self.parameters],
             "globals": [g.to_dict() for g in self.globals],
+            "calls": [c.to_dict() for c in self.calls],
         }
 
     @classmethod
@@ -367,6 +410,7 @@ class FunctionModel:
             return_type=data.get("return_type", ""),
             parameters=tuple(ParameterModel.from_dict(p) for p in data.get("parameters", [])),
             globals=tuple(GlobalAccessModel.from_dict(g) for g in data.get("globals", [])),
+            calls=tuple(CallModel.from_dict(c) for c in data.get("calls", [])),
         )
 
 

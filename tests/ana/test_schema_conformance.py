@@ -24,7 +24,7 @@ from ectt.ana.persist import assemble_analysis_model, write_analysis_model
 from ectt.core.determinism import FixedClock
 from ectt.core.fs import OutputRoot
 
-SCHEMA_RESOURCE = "analysis-model-1.2.schema.json"
+SCHEMA_RESOURCE = "analysis-model-1.3.schema.json"
 
 HEADER = """\
 typedef unsigned short u16;
