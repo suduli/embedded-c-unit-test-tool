@@ -24,6 +24,14 @@ from ectt.gen.errors import (
     UnitNotParsedError,
     UnknownUnitError,
 )
+from ectt.gen.exposure import (
+    STATIC_EXPOSURE_MARKER,
+    STUB_REQUIRED_MARKER,
+    IntegrationHarness,
+    IntegrationScopeTooSmallError,
+    generate_integration_harness,
+    generate_with_statics,
+)
 from ectt.gen.harness import (
     UNRESOLVED_TYPE_MARKER,
     ExposedFunction,
@@ -79,4 +87,11 @@ __all__ = [
     "check_harness_staleness",
     "check_test_case_staleness",
     "regenerate",
+    # Static exposure & integration harness (WP-GEN-03)
+    "STATIC_EXPOSURE_MARKER",
+    "STUB_REQUIRED_MARKER",
+    "IntegrationHarness",
+    "IntegrationScopeTooSmallError",
+    "generate_integration_harness",
+    "generate_with_statics",
 ]
