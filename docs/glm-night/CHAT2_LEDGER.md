@@ -33,3 +33,4 @@
 | WP-ANA-05 | PARTIAL | f8231eb | 8 new cfg tests; suite 504/4 | complexity+capability landed; CFG construction = open ADR-001 2.4 |
 | WP-PRJ-04 | DONE | ba6302c | references 7 passed/2 skips; suite 504/4 | TOOL-PRJ-090 evidenced; skips privilege-gated |
 | WP-MIG-06 | DONE | e7b63b7 | 8 new mig tests; suite 512/4 | scan+snapshot contract; adapters = other MIG WPs |
+| WP-QUA-01 | BLOCKED | db1f031 | suite 512/4 | TI/TD/TCL = owner classification decision; no code written |
