@@ -20,6 +20,7 @@ Satisfies: TOOL-HAR-010, TOOL-HAR-020, TOOL-HAR-040, TOOL-HAR-050.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from typing import Final
 
@@ -87,6 +88,8 @@ class GeneratedHarness:
     source: str
     functions: tuple[ExposedFunction, ...]
     variables: tuple[ExposedVariable, ...]
+    tool_version: str = "0.1.0"
+    interface_fingerprint: str = ""
 
     def has_setup_teardown(self) -> bool:
         """Whether the per-test hook block is present in the source."""
@@ -125,12 +128,40 @@ def _merge_accesses(accesses: set[str]) -> str:
     return "rw"
 
 
+_USER_REGION_SLOTS: Final[tuple[str, ...]] = (
+    "/* ectt:user-region: test-cases begin */",
+    "/* ectt:user-region: test-cases end */",
+    "",
+    "/* ectt:user-region: user-helpers begin */",
+    "/* ectt:user-region: user-helpers end */",
+)
+
+
+def _interface_fingerprint(
+    functions: tuple[ExposedFunction, ...],
+    variables: tuple[ExposedVariable, ...],
+) -> str:
+    """Deterministic digest of the exposed interface (TOOL-HAR-090/110)."""
+    canonical = "\n".join(
+        [f"fn:{fn.return_type} {fn.name}({', '.join(t + ' ' + n for t, n in fn.parameters)})" for fn in functions]
+        + [f"var:{variable.name} {variable.access}" for variable in variables]
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+
+
 class HarnessGenerator:
     """Generates a harness translation unit from an analysis model."""
 
-    def __init__(self, model: AnalysisModel, *, uut_path: str | None = None) -> None:
+    def __init__(
+        self,
+        model: AnalysisModel,
+        *,
+        uut_path: str | None = None,
+        tool_version: str = "0.1.0",
+    ) -> None:
         self._model = model
         self._uut_path = uut_path
+        self._tool_version = tool_version
 
     def _select_unit(self) -> AnalysisUnit:
         units = self._model.units
@@ -203,13 +234,16 @@ class HarnessGenerator:
         functions = self._exposed_functions(unit)
         variables = self._exposed_variables(unit)
         header = _header_for(unit.path)
-        source = self._render(header, functions, variables)
+        fingerprint = _interface_fingerprint(functions, variables)
+        source = self._render(header, functions, variables, fingerprint)
         return GeneratedHarness(
             uut_path=unit.path,
             uut_header=header,
             source=source,
             functions=functions,
             variables=variables,
+            tool_version=self._tool_version,
+            interface_fingerprint=fingerprint,
         )
 
     def _render(
@@ -217,9 +251,12 @@ class HarnessGenerator:
         header: str,
         functions: tuple[ExposedFunction, ...],
         variables: tuple[ExposedVariable, ...],
+        fingerprint: str,
     ) -> str:
         lines: list[str] = [
             _BANNER,
+            f"/* Tool version: {self._tool_version} "
+            f"Interface fingerprint: {fingerprint} */",
             f"/* Source model UUT: {header} */",
             f'#include "{header}"',
             "",
@@ -247,4 +284,5 @@ class HarnessGenerator:
                 for variable in variables
             )
             lines.append("")
+        lines.extend(_USER_REGION_SLOTS)
         return "\n".join(lines)

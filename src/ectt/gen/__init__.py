@@ -31,6 +31,18 @@ from ectt.gen.harness import (
     GeneratedHarness,
     HarnessGenerator,
 )
+from ectt.gen.regen import (
+    STATUS_CONFLICT,
+    STATUS_PRESERVED,
+    HarnessRegenerationConflictError,
+    HarnessStaleness,
+    RegenerationResult,
+    TestInterfaceBinding,
+    apply_regeneration,
+    check_harness_staleness,
+    check_test_case_staleness,
+    regenerate,
+)
 
 __all__ = [
     # Errors
@@ -56,4 +68,15 @@ __all__ = [
     "BackendRegistry",
     "register_framework_builtins",
     "render_framework_test",
+    # Regeneration contract (WP-GEN-04)
+    "STATUS_PRESERVED",
+    "STATUS_CONFLICT",
+    "HarnessRegenerationConflictError",
+    "HarnessStaleness",
+    "RegenerationResult",
+    "TestInterfaceBinding",
+    "apply_regeneration",
+    "check_harness_staleness",
+    "check_test_case_staleness",
+    "regenerate",
 ]
