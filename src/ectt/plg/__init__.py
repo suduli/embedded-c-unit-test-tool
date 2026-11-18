@@ -5,10 +5,21 @@ extension seams and an open registry that accepts user-defined points without
 modifying tool source.
 """
 
+from ectt.plg.aiprovider import (
+    AI_PROVIDER_CONTRACT,
+    AI_PROVIDER_POINT_ID,
+    AiProviderDescriptor,
+    AiProviderRegistry,
+    define_ai_provider_extension_point,
+)
 from ectt.plg.errors import (
+    DuplicateAiProviderError,
     DuplicateExtensionPointError,
+    IncompatibleAiProviderError,
+    InvalidAiProviderError,
     InvalidExtensionPointError,
     PlgError,
+    UnknownAiProviderError,
     UnknownExtensionPointError,
 )
 from ectt.plg.points import (
@@ -37,4 +48,14 @@ __all__ = [
     "ExtensionPoint",
     "ExtensionPointRegistry",
     "default_registry",
+    # AI-provider protocol (WP-PLG-04)
+    "AI_PROVIDER_POINT_ID",
+    "AI_PROVIDER_CONTRACT",
+    "AiProviderDescriptor",
+    "AiProviderRegistry",
+    "define_ai_provider_extension_point",
+    "InvalidAiProviderError",
+    "DuplicateAiProviderError",
+    "UnknownAiProviderError",
+    "IncompatibleAiProviderError",
 ]

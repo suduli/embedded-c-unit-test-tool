@@ -12,3 +12,4 @@
 | WP-CORE-06 | DONE | 0cd11c6 | 533 passed, 4 skipped | TOOL-NFR-130/160: Verbosity logger, SEC-04 guard at record time, manifest-linked bundle; gates green (1 gate retry) |
 | WP-TCH-07 | DONE | 88ca73c | 547 passed, 4 skipped | TOOL-INS-080: injectable env verification (toolchain presence, feature availability), clear sorted report, first-run marker; gates green (1 gate retry) |
 | WP-ING-02 | PARTIAL | e60cd94 | 554 passed, 4 skipped | ING-060 done; ING-210 claimed (pre-existing green tests); ING-050 documented; ING-080 IDE importers remain open; gates green (1 gate retry) |
+| WP-ING-03 | DONE | 6456992 | 569 passed, 4 skipped | ING-070/090 implemented; ING-100/220 claimed with pre-existing green evidence + fresh demo; gates green (1 gate retry) |
