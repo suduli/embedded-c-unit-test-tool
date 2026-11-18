@@ -17,3 +17,12 @@ Analysis evidence for requirements verified under WP-PRJ-04. No schema change: t
 
 - **Why the owner is always `ectt.project`.** Today every stored reference lives in the project manifest. Recording the owner anyway means the report stays correct when references move into other authored files.
 - **Why the check does not raise.** SDD-003 §6 asks for a report that names the file and the target, rather than a failure at first use in a later stage. A raising check would stop a project from opening at all.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/prj/test_references.py` → 7 passed,
+2 skipped (symlink privilege — WinError 1314 class, pre-existing at baseline, environment-dependent);
+full suite 504 passed / 4 skipped (baseline 4). TOOL-PRJ-090 (detect and report references to
+missing source/requirements/configuration) is fully evidenced: resolution, required-vs-optional
+reporting, deterministic sort, unsafe stored paths reported not followed, symlink/junction cycles
+terminating. **DONE** (the two skips are privilege-gated variants of covered behaviour, recorded).
