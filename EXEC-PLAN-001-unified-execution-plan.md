@@ -24,23 +24,23 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `a39bff5` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `d8c2368` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
 | PLAN-001 | 9 | · | · | 173 | 9 | 191 |
 | vcast-findings | · | 16 | · | · | 6 | 22 |
-| BACKLOG | · | 9 | · | 15 | 1 | 25 |
+| BACKLOG | · | 10 | · | 14 | 1 | 25 |
 | BACKLOG-RESERVE | · | · | · | 8 | · | 8 |
-| **Total** | 9 | 25 | · | 196 | 16 | 246 |
+| **Total** | 9 | 26 | · | 195 | 16 | 246 |
 
 - **Requirements:** 346 in SRS-001; 344 allocated to a work package; 2 Future (not allocated); 259 design elements. Allocated requirements by owning-WP status: Implemented 21, Planned 299, Blocked 24.
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 337 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
+- **Tests at HEAD:** 361 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
-- **Startable right now:** `TASK-010`, `TASK-011`, `TASK-012`, `TASK-013`, `TASK-014`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
+- **Startable right now:** `TASK-011`, `TASK-012`, `TASK-013`, `TASK-014`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
 **Notes and discrepancies found while consolidating:**
 
@@ -197,7 +197,6 @@ A task is **startable** only when its status is Planned, it has no `blockedBy`, 
 <!-- BEGIN GENERATED: queue -->
 | Seq | ID | Title | Delivers WP | Est. | Depends on | Status | Startable now |
 |---|---|---|---|---|---|---|---|
-| 38 | `TASK-010` | WP-ING-07 authored link plan ingestion and validation | `WP-ING-07` | 170k tokens | `TASK-006` | Planned | yes |
 | 40 | `TASK-011` | WP-PRJ-04 dangling reference detection | `WP-PRJ-04` | 100k tokens | `TASK-006` | Planned | yes |
 | 42 | `TASK-012` | WP-PRJ-03 schema migration with explicit confirmation | `WP-PRJ-03` | 200k tokens | `TASK-006` | Planned | yes |
 | 44 | `TASK-013` | WP-CORE-04 provenance record and version identification | `WP-CORE-04` | 130k tokens | `TASK-006` | Planned | yes |
@@ -318,7 +317,8 @@ Of these, **14** already have every hard dependency satisfied (candidates for `T
 | 31 | `TASK-005` | ADR-002 grammar: rejection and preservation test suite | Landed | `a1cd6f3` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 32 | `TASK-006` | WP-CORE-02 structured error model, fail-safe, cancellation | Landed | `9f0f9e1` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 34 | `TASK-008` | WP-ANA-03 call graph and scope classification | Landed | `a39bff5` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
-| 36 | `TASK-009` | WP-ANA-07 partial-failure resilience | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 36 | `TASK-009` | WP-ANA-07 partial-failure resilience | Landed | `d8c2368` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 38 | `TASK-010` | WP-ING-07 authored link plan ingestion and validation | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 <!-- END GENERATED: done -->
 
 ---
@@ -557,24 +557,6 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 
 <!-- BEGIN GENERATED: cards -->
 ## 7.1 Ready queue — core overnight backlog (BACKLOG TASK-000 … TASK-024)
-
-### TASK-010 — WP-ING-07 authored link plan ingestion and validation
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 38 · **Source:** BACKLOG · **Area:** impl · **Est.:** 170k tokens
-- **Dependencies:** `TASK-006`
-- **Blocking decision / gate:** —
-- **SRS requirements:** `TOOL-ING-200`
-- **Work packages:** `WP-ING-07` · **Related:** `T-12`
-- **ADRs:** — · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
-- **Files likely touched:** `src/ectt/ing/linkplan.py (new)`, `tests/ing/test_linkplan.py (new)`
-- **Acceptance criteria:**
-  1. spec clauses (DSN-ING-120) map to tests
-  2. invalid plans never partially load; violations carry named reasons (missing objects, duplicates, unknown toolchain keys, absolute paths outside project)
-  3. gate green
-- **Verification** (pending):
-  - `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/ing/test_linkplan.py`
-  - full gate **G-FULL** (see §5.4)
 
 ### TASK-011 — WP-PRJ-04 dangling reference detection
 
