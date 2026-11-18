@@ -21,6 +21,14 @@ from ectt.tch.config import (
     load_compiler_config_text,
     validate_compiler_config_document,
 )
+from ectt.tch.cross import (
+    CROSS_CONFIG_NAMES,
+    SHIPPED_CONFIG_NAMES,
+    ensure_roster_complete,
+    register_cross_builtins,
+    shipped_cross_configs,
+    shipped_roster,
+)
 from ectt.tch.environment import (
     STATUS_MISSING,
     STATUS_OK,
@@ -95,4 +103,11 @@ __all__ = [
     "gate_metrics",
     "check_version",
     "parse_compiler_version",
+    # Cross-toolchain support (WP-TCH-03)
+    "CROSS_CONFIG_NAMES",
+    "SHIPPED_CONFIG_NAMES",
+    "shipped_cross_configs",
+    "shipped_roster",
+    "register_cross_builtins",
+    "ensure_roster_complete",
 ]
