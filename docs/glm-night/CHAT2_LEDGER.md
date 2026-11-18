@@ -23,3 +23,4 @@
 | WP-CORE-04 | PARTIAL | fdf471b | provenance 10 passed; suite 459/4 | facility done; in-every-artifact embedding open |
 | WP-QUA-07 | PARTIAL | aff86c3 | 7 new qua tests; suite 466/4 | mechanism+evidence done; classification (WP-QUA-01) OPEN by design |
 | WP-ING-07 | PARTIAL | fcfda9a | linkplan 24 passed; suite 466/4 | loader done; build-step wiring + schema amendment open |
+| WP-ANA-03 | DONE | cb092ac | callgraph 13 passed; suite 466/4 | PAR-060 fully evidenced; limits recorded |
