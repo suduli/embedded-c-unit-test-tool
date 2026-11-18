@@ -19,6 +19,13 @@ from ectt.gen.backends import (
     register_gtest_backend,
     render_framework_test,
 )
+from ectt.gen.callwrap import (
+    CALL_WRAP_MARKER,
+    CallWrapPlan,
+    NotInternalCalleeError,
+    plan_call_wraps,
+    render_call_wrap_seam,
+)
 from ectt.gen.errors import (
     AmbiguousUnitError,
     GenError,

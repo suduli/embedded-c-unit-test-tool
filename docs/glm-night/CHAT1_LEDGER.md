@@ -27,3 +27,4 @@
 | WP-GEN-09 | DONE | cd472b5 | 700 passed, 4 skipped | STB-110/120/130: delimited stub bodies, preserve-where-permitted resync with reports, greppable unsupported markers; gates green (1 gate retry) |
 | WP-ING-06 | DONE | 6724244 | 708 passed, 4 skipped | TOOL-ING-110: per-toolchain databases, verbatim flags, distinct same-source configs, build tags; gates green (1 gate retry) |
 | WP-SEC-07 | DONE | 5505736 | 717 passed, 4 skipped | TOOL-SEC-090: frozen untrusted payload wrapper (no exec surface), data-only parsing, code-like content retained as data; gates green (1 gate retry) |
+| WP-GEN-10 | DONE | 0daabb5 | 724 passed, 4 skipped | TOOL-HAR-065: gtest descriptor opt-in, host-only flag, cpp_allowed scan exemption, builtins unchanged; gates green (2 gate retries) |
