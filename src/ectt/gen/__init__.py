@@ -68,6 +68,13 @@ from ectt.gen.stubs import (
     StubUnit,
     generate_stubs,
 )
+from ectt.gen.stubscope import (
+    POINTER_TARGET_MARKER,
+    STDLIB_FUNCTIONS,
+    StubPlan,
+    UnknownStubReferenceError,
+    build_stub_plan,
+)
 
 __all__ = [
     # Errors
@@ -126,4 +133,10 @@ __all__ = [
     "UnresolvedReferenceError",
     "assert_closed",
     "resolve_link_closure",
+    # Stub scope control (WP-GEN-08)
+    "STDLIB_FUNCTIONS",
+    "POINTER_TARGET_MARKER",
+    "StubPlan",
+    "UnknownStubReferenceError",
+    "build_stub_plan",
 ]
