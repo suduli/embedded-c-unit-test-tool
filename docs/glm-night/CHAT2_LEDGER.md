@@ -36,3 +36,4 @@
 | WP-QUA-01 | BLOCKED | db1f031 | suite 512/4 | TI/TD/TCL = owner classification decision; no code written |
 | WP-QUA-05 | DONE | 67db638 | 6 new qua tests; suite 518/4 | three sections, all citations resolve |
 | WP-QUA-06 | PARTIAL | c1ddab8 | 6 new qua tests; suite 524/4 | structure done; mapping population = classification-dependent |
+| WP-QUA-08 | PARTIAL | 099de88 | 6 new template tests; suite 530/4 | 4 skeletons done; classification prefill = WP-QUA-01 |
