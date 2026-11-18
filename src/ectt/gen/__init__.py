@@ -7,6 +7,7 @@ per-test setup/teardown hooks.
 
 from ectt.gen.backends import (
     CMOCKA_BACKEND_ID,
+    GTEST_BACKEND_ID,
     UNITY_BACKEND_ID,
     BackendRegistry,
     CppConstructInOutputError,
@@ -15,6 +16,7 @@ from ectt.gen.backends import (
     FrameworkBackendError,
     UnknownBackendError,
     register_framework_builtins,
+    register_gtest_backend,
     render_framework_test,
 )
 from ectt.gen.errors import (

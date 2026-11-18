@@ -26,3 +26,4 @@
 | WP-GEN-08 | DONE | 5c03890 | 690 passed, 4 skipped | STB-080/100/140: exclusion precedence, stdlib-only-on-request (19-name vocabulary), pointer targets with access paths; gates green first try |
 | WP-GEN-09 | DONE | cd472b5 | 700 passed, 4 skipped | STB-110/120/130: delimited stub bodies, preserve-where-permitted resync with reports, greppable unsupported markers; gates green (1 gate retry) |
 | WP-ING-06 | DONE | 6724244 | 708 passed, 4 skipped | TOOL-ING-110: per-toolchain databases, verbatim flags, distinct same-source configs, build tags; gates green (1 gate retry) |
+| WP-SEC-07 | DONE | 5505736 | 717 passed, 4 skipped | TOOL-SEC-090: frozen untrusted payload wrapper (no exec surface), data-only parsing, code-like content retained as data; gates green (1 gate retry) |
