@@ -18,3 +18,4 @@
 | WP-ANA-04 | DONE | 0ad9eba | persist+schema 41 passed; suite 447/4 | 5.4 criterion met in full; PAR-100 row added |
 | WP-ANA-08 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-150: inventory presence/status/fail-closed evidenced |
 | WP-ANA-09 | DONE | e531ad8 | ana suite green; suite 447/4 | PAR-160: round-trip + optional-absence evidenced |
+| WP-ANA-07 | PARTIAL | 2adfafd | ana 128 passed; suite 447/4 | PAR-130 done; PAR-140 inventory unpopulated + no multi-file driver |
