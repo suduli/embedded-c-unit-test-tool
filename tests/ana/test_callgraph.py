@@ -20,7 +20,11 @@ from ectt.ana.errors import AnalysisModelError
 from ectt.ana.frontend import parse
 from ectt.ana.interface import extract_interfaces
 from ectt.ana.model import CallModel
-from ectt.ana.persist import assemble_analysis_model, read_analysis_model
+from ectt.ana.persist import (
+    SCHEMA_VERSION_CURRENT,
+    assemble_analysis_model,
+    read_analysis_model,
+)
 from ectt.core.determinism import FixedClock
 
 CALL_FIXTURE = b"""#include <vendor/vendor.h>
@@ -152,7 +156,7 @@ def _assembled_doc(sysdir: Path, tmp_path: Path) -> dict[str, Any]:
 def test_schema_1_3_document_round_trips(sysdir: Path, tmp_path: Path) -> None:
     """verifies: TOOL-PAR-060 — a 1.3 document with calls reads back with the same call sites."""
     doc = _assembled_doc(sysdir, tmp_path)
-    assert doc["schema_version"] == "1.3"
+    assert doc["schema_version"] == SCHEMA_VERSION_CURRENT
 
     reloaded = read_analysis_model(doc)
 

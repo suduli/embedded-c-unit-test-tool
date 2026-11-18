@@ -27,6 +27,7 @@ __all__ = [
     "TypeModel",
     "UnsupportedConstructModel",
     "DecisionInventoryModel",
+    "UnitFailureModel",
     "AnalysisUnit",
     "InputFileModel",
     "ProvenanceModel",
@@ -621,6 +622,42 @@ class DecisionInventoryModel:
 
 
 @dataclass(frozen=True)
+class UnitFailureModel:
+    """Named reason a translation unit could not be analysed (TOOL-PAR-130).
+
+    ``reason`` and ``code`` come from the ectt error model (TASK-006): ``reason``
+    is the stable machine value and ``code`` the concrete exception class name.
+    ``message`` is deterministic text: the first error diagnostic for a unit that
+    parsed with errors, otherwise a fixed description. Absolute paths and raw
+    libclang exception strings are deliberately not stored.
+    """
+
+    reason: str
+    code: str
+    category: str
+    message: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        return {
+            "reason": self.reason,
+            "code": self.code,
+            "category": self.category,
+            "message": self.message,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> UnitFailureModel:
+        """Create UnitFailureModel from dictionary representation."""
+        return cls(
+            reason=str(data.get("reason", "")),
+            code=str(data.get("code", "")),
+            category=str(data.get("category", "")),
+            message=str(data.get("message", "")),
+        )
+
+
+@dataclass(frozen=True)
 class AnalysisUnit:
     """Extracted unit containing functions, types, and diagnostics.
 
@@ -633,6 +670,7 @@ class AnalysisUnit:
     functions: tuple[FunctionModel, ...] = field(default_factory=tuple)
     types: dict[str, TypeModel] = field(default_factory=dict)
     unsupported_constructs: tuple[UnsupportedConstructModel, ...] = field(default_factory=tuple)
+    failure: UnitFailureModel | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1 unit shape."""
@@ -643,6 +681,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
+            **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
     def to_dict_without_types(self) -> dict[str, Any]:
@@ -654,6 +693,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
             "cfg": None,
+            **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
     def to_json(self, *, indent: int | None = 2) -> str:
@@ -673,6 +713,7 @@ class AnalysisUnit:
             unsupported_constructs=tuple(
                 UnsupportedConstructModel.from_dict(u) for u in data.get("unsupported_constructs", [])
             ),
+            failure=UnitFailureModel.from_dict(data["failure"]) if isinstance(data.get("failure"), dict) else None,
         )
 
 

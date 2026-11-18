@@ -15,6 +15,7 @@ from ectt.ana.model import (
     GlobalAccessModel,
     ParameterModel,
     SourceLocation,
+    UnitFailureModel,
 )
 
 _VOID = frozenset({"type.builtin.void"})
@@ -150,7 +151,29 @@ def test_discovery_does_not_imply_eligibility(tmp_path: Path) -> None:
     assert all(r.to_dict()["unit"] == "src/adc.c" for r in records)
 
 
-def test_failed_units_contribute_no_records() -> None:
-    """verifies: TOOL-PAR-170 — a failed unit has no discovered functions."""
-    unit = AnalysisUnit(path="src/broken.c", status="failed")
-    assert assess_eligibility([unit]) == ()
+def test_failed_unit_contributes_one_unmeasurable_unit_record() -> None:
+    """verifies: TOOL-PAR-170, TOOL-PAR-130 — a failed unit is unmeasurable with its recorded reason.
+
+    Changed from the pre-1.4 behaviour (no records): a failed unit now yields one
+    unit-kind record so the gap is visible to CMP-ATG instead of silently absent.
+    """
+    unit = AnalysisUnit(
+        path="src/broken.c",
+        status="failed",
+        failure=UnitFailureModel(reason="frontend_parse_error", code="FrontendParseError", category="analysis", message="expected ';'"),
+    )
+    records = assess_eligibility([unit])
+
+    assert len(records) == 1
+    assert records[0].kind == "unit"
+    assert records[0].function == ""
+    assert records[0].eligible is False
+    assert records[0].reasons == ("frontend_parse_error",)
+    assert records[0].to_dict()["unit"] == "src/broken.c"
+
+
+def test_failed_unit_without_failure_record_uses_generic_reason() -> None:
+    """verifies: TOOL-PAR-170 — a failed unit lacking a recorded reason still reports as unmeasurable."""
+    records = assess_eligibility([AnalysisUnit(path="src/broken.c", status="failed")])
+
+    assert [r.reasons for r in records] == [("unit_failed",)]

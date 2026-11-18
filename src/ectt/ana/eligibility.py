@@ -42,6 +42,9 @@ class EligibilityRecord:
         observable_channels: Declared channels — a subset of "parameters",
             "return_value", "globals".
         reasons: Machine-readable gate reasons; empty when eligible.
+        kind: "function" for a function record; "unit" for the single record a
+            failed unit contributes (TOOL-PAR-130). A unit record has an empty
+            ``function``, and its reason is the unit's recorded failure reason.
     """
 
     function: str
@@ -49,12 +52,14 @@ class EligibilityRecord:
     eligible: bool
     observable_channels: tuple[str, ...] = ()
     reasons: tuple[str, ...] = field(default_factory=tuple)
+    kind: str = "function"
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation."""
         return {
             "function": self.function,
             "unit": self.unit,
+            "kind": self.kind,
             "eligible": self.eligible,
             "observable_channels": list(self.observable_channels),
             "reasons": list(self.reasons),
@@ -82,7 +87,8 @@ def assess_eligibility(
     enter the gate when their model facts exist.
 
     Args:
-        units: Analysis units to assess (failed units contribute nothing).
+        units: Analysis units to assess. A failed unit contributes one unit-kind
+            record that is unmeasurable, with its recorded failure reason.
         expose_static: The static-exposure capability flag (PAR-080/090).
         void_type_refs: Type-graph refs that mean "returns nothing".
 
@@ -92,6 +98,17 @@ def assess_eligibility(
     records: list[EligibilityRecord] = []
     for unit in units:
         if unit.status != "parsed":
+            # Unmeasurable as a whole: no function of a failed unit is assessed (TOOL-PAR-130).
+            unit_reason = unit.failure.reason if unit.failure is not None else "unit_failed"
+            records.append(
+                EligibilityRecord(
+                    function="",
+                    unit=unit.path,
+                    eligible=False,
+                    reasons=(unit_reason,),
+                    kind="unit",
+                )
+            )
             continue
         for fn in unit.functions:
             return_ref = fn.return_type
