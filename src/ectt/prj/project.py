@@ -31,6 +31,7 @@ from ectt.prj.paths import (
     resolve_project_path,
     validate_project_path,
 )
+from ectt.prj.references import DanglingReference, find_dangling_references
 from ectt.prj.yaml_adapter import (
     RestrictedYamlAdapter,
     SerializationAdapter,
@@ -206,6 +207,13 @@ class Project:
         posix_rel = validate_project_path(rel_path)
         self.document["output_root"] = posix_rel
         return posix_rel
+
+    def dangling_references(self) -> tuple[DanglingReference, ...]:
+        """Report stored references that do not resolve. Reports only; never raises.
+
+        Implements: DSN-PRJ-050. Satisfies: TOOL-PRJ-090.
+        """
+        return find_dangling_references(self.root, self.source_roots, self.output_root)
 
     def read_file(self, rel_path: str | Path) -> ProjectDocument:
         """Read and parse an authored project file, dispatching on its schema_version."""
