@@ -18,3 +18,11 @@ Analysis evidence for requirements verified under WP-CORE-04. No schema change: 
 
 - **Why the timestamp is outside the hash.** A timestamp in the hash would make two identical productions produce different digests, so a digest could never prove a match. Keeping it beside the digest keeps the timestamp available without weakening the proof.
 - **Why no source-tree version fallback.** The source constant is what the tree says, not what is installed. Reporting it as the installed version would make a stale checkout look current.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/core/test_provenance.py` → 10 passed; full suite
+459 passed / 4 skipped (baseline 4). Assessment stands: both requirements have named, passing tests
+for the record/report facility itself. **PARTIAL** — TOOL-QUA-060 requires provenance *in every
+generated artifact*; embedding it into emitted artifacts (analysis model, reports) lands with the
+producing packages (WP-ANA-04+, WP-REP-*). Until then the facility is complete but unwired.
