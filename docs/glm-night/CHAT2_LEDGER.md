@@ -28,3 +28,4 @@
 | WP-CLI-04 | PARTIAL | ba6042d | 6 new ci tests; suite 479/4 | templates+cache done; live CI demo + container (PKG-05) open |
 | WP-PRJ-02 | PARTIAL | 3ef91fc | 11 new shard tests; suite 490/4 | shard store done; Project.save integration deferred |
 | WP-PRJ-03 | DONE | 1f79d27 | migration 19 passed; suite 490/4 | TOOL-PRJ-040 fully evidenced |
+| WP-ANA-06 | PARTIAL | 9b87d1c | ana 128 passed; suite 490/4 | PAR-170 done; PAR-080 exposure open; PAR-090 unimplemented |
