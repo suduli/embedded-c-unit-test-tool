@@ -84,4 +84,9 @@ __all__ = [
     "assert_fresh",
     "StalenessInputs",
     "StalenessReport",
+    # Multi-toolchain ingestion (WP-ING-06)
+    "MultiToolchainIngestion",
+    "ToolchainEntry",
+    "UnknownToolchainError",
+    "ingest_multi_toolchain",
 ]
