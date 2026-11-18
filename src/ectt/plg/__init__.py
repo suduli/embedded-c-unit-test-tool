@@ -12,6 +12,17 @@ from ectt.plg.aiprovider import (
     AiProviderRegistry,
     define_ai_provider_extension_point,
 )
+from ectt.plg.discovery import (
+    KIND_IMPORT_ERROR,
+    KIND_INCOMPATIBLE,
+    KIND_RUNTIME_ERROR,
+    KIND_SYNTAX_ERROR,
+    DiscoveryReport,
+    ExtensionsDirError,
+    LoadFailure,
+    discover_extensions,
+    load_extension_file,
+)
 from ectt.plg.errors import (
     DuplicateAiProviderError,
     DuplicateExtensionPointError,
