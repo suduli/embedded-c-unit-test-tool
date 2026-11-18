@@ -23,7 +23,9 @@ import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, ClassVar, Protocol, runtime_checkable
+
+from ectt.core.errors import EcttError
 
 __all__ = [
     "Clock",
@@ -41,25 +43,10 @@ __all__ = [
 ]
 
 
-class CoreError(Exception):
+class CoreError(EcttError):
     """Base exception for ectt core platform errors."""
 
-    def __init__(
-        self,
-        message: str,
-        *,
-        reason: str = "core_error",
-        path: Path | str | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.message = message
-        self.reason = reason
-        self.path = Path(path) if path is not None else None
-
-    def __str__(self) -> str:
-        if self.path is not None:
-            return f"{self.message} [reason={self.reason}, path={self.path}]"
-        return f"{self.message} [reason={self.reason}]"
+    category: ClassVar[str] = "core"
 
 
 @runtime_checkable
