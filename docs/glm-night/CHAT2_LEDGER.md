@@ -10,3 +10,4 @@
 | WP-API-01 | DONE | 427c319 | 20 new api tests; suite 419/4 | AC-1..6 from SRS+SDD-002; transport deferred to WP-API-02 |
 | WP-CLI-01 | DONE | 0b19151 | 13 new cli tests; suite 432/4 | catalogue-generated parser; exit codes deferred to WP-CLI-02 |
 | WP-CLI-02 | DONE | 9335003 | 11 new exit-code tests; suite 443/4 | 4 categories distinct+documented; 0/1/2/10/11 |
+| WP-CLI-03 | PARTIAL | 3bb0df2 | 4 new container tests; suite 447/4 | execution contract pinned; real image = WP-PKG-05 |
