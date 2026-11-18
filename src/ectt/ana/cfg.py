@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
+from typing import Any
 
 __all__ = [
     "CFG_UNAVAILABLE_REASON",
@@ -87,10 +88,11 @@ def _iter_function_extents(tu: object) -> Iterator[tuple[str, object, object]]:
     # libclang cursors are duck-typed here to avoid importing clang.cindex at
     # module import time (the frontend owns that dependency).
     root = tu.cursor  # type: ignore[attr-defined]
-    for child in root.get_children():
-        kind_name = child.kind.name
-        if kind_name in _FUNCTION_KINDS and child.is_definition():
-            yield child.spelling, child.extent, child.get_tokens()
+    children: Iterable[object] = root.get_children()  # type: ignore[attr-defined]
+    for child in children:
+        kind_name = child.kind.name  # type: ignore[attr-defined]
+        if kind_name in _FUNCTION_KINDS and child.is_definition():  # type: ignore[attr-defined]
+            yield child.spelling, child.extent, child.get_tokens()  # type: ignore[attr-defined]
 
 
 def compute_complexities(tu: object) -> dict[str, int]:
@@ -101,6 +103,7 @@ def compute_complexities(tu: object) -> dict[str, int]:
     """
     result: dict[str, int] = {}
     for name, _extent, tokens in _iter_function_extents(tu):
-        token_pairs = [(token.kind.name.lower(), token.spelling) for token in tokens]
+        libclang_tokens: Iterable[Any] = tokens  # type: ignore[assignment]
+        token_pairs = [(token.kind.name.lower(), token.spelling) for token in libclang_tokens]
         result[name] = cyclomatic_complexity(count_decision_points(token_pairs))
     return dict(sorted(result.items()))
