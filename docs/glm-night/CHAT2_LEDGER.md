@@ -21,3 +21,4 @@
 | WP-ANA-07 | PARTIAL | 2adfafd | ana 128 passed; suite 447/4 | PAR-130 done; PAR-140 inventory unpopulated + no multi-file driver |
 | WP-API-02 | DONE | 944c1cb | 12 new transport tests; suite 459/4 | framing fixtures + no-network guard; UDS alt-transport follow-up |
 | WP-CORE-04 | PARTIAL | fdf471b | provenance 10 passed; suite 459/4 | facility done; in-every-artifact embedding open |
+| WP-QUA-07 | PARTIAL | aff86c3 | 7 new qua tests; suite 466/4 | mechanism+evidence done; classification (WP-QUA-01) OPEN by design |
