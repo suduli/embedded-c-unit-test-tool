@@ -18,6 +18,7 @@ from typing import TextIO
 
 from ectt.api.catalogue import Catalogue, default_catalogue
 from ectt.cli.errors import CliError, OperationNotAvailable
+from ectt.cli.exit_codes import EXIT_TOOL_ERROR, EXIT_USAGE
 from ectt.cli.generator import build_parser, command_names
 
 __all__ = [
@@ -29,10 +30,9 @@ __all__ = [
 #: Handler signature: receives the parsed argparse namespace.
 Handler = Callable[[argparse.Namespace], int]
 
-#: Exit code for an operation the build cannot execute yet. The stable,
-#: documented exit-code table is WP-CLI-02 (TOOL-CIC-030); until that WP
-#: lands, any non-zero code is a provisional failure signal.
-EXIT_OPERATION_NOT_AVAILABLE = 1
+#: Exit code for an operation the build cannot execute yet: a tool error
+#: (TOOL-CIC-030 table in ``ectt.cli.exit_codes``).
+EXIT_OPERATION_NOT_AVAILABLE = EXIT_TOOL_ERROR
 
 
 class Dispatcher:
@@ -97,7 +97,7 @@ def run(
 
     if getattr(namespace, "operation", None) is None:
         parser.print_help(stderr)
-        return 2
+        return EXIT_USAGE
 
     try:
         return dispatcher.dispatch(namespace)
