@@ -14,3 +14,4 @@
 | WP-PRJ-01 | DONE | 6a9ff96 | prj 79 passed/2 skips; suite 447/4 | 5 reqs evidenced; companion inspection note cited |
 | WP-ING-01 | DONE | 18304a0 | ing 83 passed/0 skip; suite 447/4 | 4 reqs evidenced incl. real cmake scratch-configure |
 | WP-ANA-01 | DONE | 28427d2 | ana 128 passed/0 skip; suite 447/4 | PAR-010/020 evidenced vs real libclang |
+| WP-ANA-02 | DONE | 0a9dbfa | ana 128 passed/0 skip; suite 447/4 | PAR-030/040/050 evidenced incl closure termination |
