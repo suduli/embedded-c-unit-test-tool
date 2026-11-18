@@ -24,23 +24,23 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `ea0a75f` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-18** · HEAD `d644a3b` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
 | PLAN-001 | 9 | · | · | 173 | 9 | 191 |
 | vcast-findings | · | 16 | · | · | 6 | 22 |
-| BACKLOG | · | 5 | · | 19 | 1 | 25 |
+| BACKLOG | · | 6 | · | 18 | 1 | 25 |
 | BACKLOG-RESERVE | · | · | · | 8 | · | 8 |
-| **Total** | 9 | 21 | · | 200 | 16 | 246 |
+| **Total** | 9 | 22 | · | 199 | 16 | 246 |
 
 - **Requirements:** 346 in SRS-001; 344 allocated to a work package; 2 Future (not allocated); 259 design elements. Allocated requirements by owning-WP status: Implemented 21, Planned 299, Blocked 24.
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 272 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
+- **Tests at HEAD:** 292 passed, 0 failed, 1 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
-- **Startable right now:** `TASK-005`, `TASK-006`, `TASK-014`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
+- **Startable right now:** `TASK-006`, `TASK-014`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
 **Notes and discrepancies found while consolidating:**
 
@@ -197,7 +197,6 @@ A task is **startable** only when its status is Planned, it has no `blockedBy`, 
 <!-- BEGIN GENERATED: queue -->
 | Seq | ID | Title | Delivers WP | Est. | Depends on | Status | Startable now |
 |---|---|---|---|---|---|---|---|
-| 31 | `TASK-005` | ADR-002 grammar: rejection and preservation test suite | `WP-PRJ-01` | 150k tokens | `TASK-001` | Planned | yes |
 | 32 | `TASK-006` | WP-CORE-02 structured error model, fail-safe, cancellation | `WP-CORE-02` | 220k tokens | `TASK-004` | Planned | yes |
 | 34 | `TASK-008` | WP-ANA-03 call graph and scope classification | `WP-ANA-03` | 250k tokens | `TASK-006` | Planned | after deps |
 | 36 | `TASK-009` | WP-ANA-07 partial-failure resilience | `WP-ANA-07` | 130k tokens | `TASK-006` | Planned | after deps |
@@ -318,7 +317,8 @@ Of these, **14** already have every hard dependency satisfied (candidates for `T
 | 27 | `TASK-001` | Fix the 3 failing `test_persist` tests (schema 1.0 → 1.2 drift) | Landed | `aaf88a1` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 28 | `TASK-002` | CI workflow: pytest + design gates, Linux & Windows | Landed | `35487c4` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 29 | `TASK-003` | Add ruff + mypy config and triage findings | Landed | `ea0a75f` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
-| 30 | `TASK-004` | Coverage baseline and gap-filling tests (≥80% on core/prj/ing) | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 30 | `TASK-004` | Coverage baseline and gap-filling tests (≥80% on core/prj/ing) | Landed | `d644a3b` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 31 | `TASK-005` | ADR-002 grammar: rejection and preservation test suite | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 <!-- END GENERATED: done -->
 
 ---
@@ -557,24 +557,6 @@ Full per-task detail for everything an agent may pick up, escalate, or has compl
 
 <!-- BEGIN GENERATED: cards -->
 ## 7.1 Ready queue — core overnight backlog (BACKLOG TASK-000 … TASK-024)
-
-### TASK-005 — ADR-002 grammar: rejection and preservation test suite
-
-- **Status:** Planned · **Lane:** Ready queue · **Seq:** 31 · **Source:** BACKLOG · **Area:** tests · **Est.:** 150k tokens
-- **Dependencies:** `TASK-001`
-- **Blocking decision / gate:** —
-- **SRS requirements:** `TOOL-PRJ-010`, `TOOL-PRJ-020`, `TOOL-PRJ-070`
-- **Work packages:** `WP-PRJ-01` · **Related:** —
-- **ADRs:** `ADR-002` · **PRs:** —
-- **Branch:** `glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip)`
-- **Files likely touched:** `tests/prj/test_adr002_conformance.py (new)`, `src/ectt/prj/yaml_adapter.py (only a minimal in-ADR fix)`
-- **Acceptance criteria:**
-  1. every restricted-grammar rule named in ADR-002 maps to ≥ 1 test (docstrings cite ADR section numbers)
-  2. forbidden constructs rejected with named errors; byte-stable round trip; key order preserved
-  3. genuine adapter bugs: minimal fix or xfail(strict=True) + log
-- **Verification** (pending):
-  - `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/prj/test_adr002_conformance.py`
-  - full gate **G-FULL** (see §5.4)
 
 ### TASK-006 — WP-CORE-02 structured error model, fail-safe, cancellation
 
