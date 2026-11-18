@@ -24,3 +24,4 @@
 | WP-QUA-07 | PARTIAL | aff86c3 | 7 new qua tests; suite 466/4 | mechanism+evidence done; classification (WP-QUA-01) OPEN by design |
 | WP-ING-07 | PARTIAL | fcfda9a | linkplan 24 passed; suite 466/4 | loader done; build-step wiring + schema amendment open |
 | WP-ANA-03 | DONE | cb092ac | callgraph 13 passed; suite 466/4 | PAR-060 fully evidenced; limits recorded |
+| WP-API-03 | PARTIAL | ae87cbd | 7 new roundtrip tests; suite 473/4 | engine leg done; GUI leg blocked (no GUI exists) |
