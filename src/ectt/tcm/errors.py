@@ -21,6 +21,7 @@ __all__ = [
     "MissingCaseFieldError",
     "ValueParseError",
     "InvalidComparisonSpecError",
+    "InvalidSelectionError",
 ]
 
 
@@ -151,6 +152,19 @@ class InvalidComparisonSpecError(TcmError):
         message: str,
         *,
         reason: str = "invalid_comparison_spec",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidSelectionError(TcmError):
+    """Raised when a selection expression or its operands are malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_selection",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)

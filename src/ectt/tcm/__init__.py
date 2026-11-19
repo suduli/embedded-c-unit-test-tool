@@ -27,6 +27,7 @@ from ectt.tcm.datacases import (
 )
 from ectt.tcm.errors import (
     DuplicateTestCaseError,
+    InvalidSelectionError,
     InvalidTestCaseError,
     InvalidTestCasesFileError,
     MissingCaseFieldError,
@@ -34,6 +35,15 @@ from ectt.tcm.errors import (
     TcmError,
     TestCaseReadError,
     UnknownTestCaseError,
+)
+from ectt.tcm.independence import (
+    IndependenceReport,
+    check_order_independence,
+    execution_order,
+)
+from ectt.tcm.selection import (
+    Selection,
+    partition_cases,
 )
 
 __all__ = [
@@ -46,6 +56,7 @@ __all__ = [
     "UnknownTestCaseError",
     "InvalidTestCasesFileError",
     "MissingCaseFieldError",
+    "InvalidSelectionError",
     # C-authored cases
     "CSourceTestCase",
     "TestCaseSet",
@@ -64,4 +75,10 @@ __all__ = [
     "load_test_cases_file",
     "dump_test_cases_document",
     "save_test_cases_file",
+    # Selection and independence
+    "Selection",
+    "partition_cases",
+    "execution_order",
+    "IndependenceReport",
+    "check_order_independence",
 ]
