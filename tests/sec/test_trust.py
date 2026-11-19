@@ -42,7 +42,7 @@ def test_mark_opened_persists_and_project_becomes_known(tmp_path: Path) -> None:
     assert tracker.decision(tmp_path).known is True
     assert tracker.decision(tmp_path).requires_warning is False
     document = json.loads(record.read_text(encoding="utf-8"))
-    assert document["schema_version"] == 1
+    assert document["schema_version"] == 2
     assert tmp_path.resolve().as_posix() in document["projects"]
 
 
@@ -105,3 +105,63 @@ def test_wrongly_shaped_record_is_named_error(tmp_path: Path) -> None:
     tracker = UntrustedProjectTracker(record)
     with pytest.raises(TrustRecordError):
         tracker.decision(tmp_path)
+
+
+def test_changed_contents_make_a_recorded_project_untrusted_again(
+    tmp_path: Path,
+) -> None:
+    """verifies: TOOL-SEC-050"""
+    (tmp_path / "suite.c").write_text("int a;\n", encoding="utf-8")
+    tracker = UntrustedProjectTracker(tmp_path / "trust.json")
+    tracker.mark_opened(tmp_path)
+    assert tracker.decision(tmp_path).known is True
+
+    (tmp_path / "suite.c").write_text(
+        "int b; /* changed after trust */\n", encoding="utf-8"
+    )
+
+    assert tracker.decision(tmp_path).requires_warning is True
+
+
+def test_added_file_makes_a_recorded_project_untrusted_again(tmp_path: Path) -> None:
+    """verifies: TOOL-SEC-050"""
+    (tmp_path / "suite.c").write_text("int a;\n", encoding="utf-8")
+    tracker = UntrustedProjectTracker(tmp_path / "trust.json")
+    tracker.mark_opened(tmp_path)
+
+    (tmp_path / "injected.py").write_text("print('new')\n", encoding="utf-8")
+
+    assert tracker.decision(tmp_path).requires_warning is True
+
+
+def test_record_file_and_cache_dirs_do_not_affect_the_digest(tmp_path: Path) -> None:
+    """verifies: TOOL-SEC-050"""
+    (tmp_path / "suite.c").write_text("int a;\n", encoding="utf-8")
+    tracker = UntrustedProjectTracker(tmp_path / "trust.json")
+    tracker.mark_opened(tmp_path)
+
+    cache = tmp_path / "__pycache__"
+    cache.mkdir()
+    (cache / "suite.cpython-313.pyc").write_bytes(b"\x00")
+
+    assert tracker.decision(tmp_path).known is True
+
+
+def test_schema_one_record_trusts_nothing(tmp_path: Path) -> None:
+    """verifies: TOOL-SEC-050"""
+    (tmp_path / "suite.c").write_text("int a;\n", encoding="utf-8")
+    record = tmp_path / "trust.json"
+    record.write_text(
+        json.dumps({"schema_version": 1, "projects": [tmp_path.resolve().as_posix()]}),
+        encoding="utf-8",
+    )
+    tracker = UntrustedProjectTracker(record)
+
+    assert tracker.decision(tmp_path).requires_warning is True
+
+
+def test_mark_opened_refuses_a_missing_directory(tmp_path: Path) -> None:
+    """verifies: TOOL-SEC-050"""
+    tracker = UntrustedProjectTracker(tmp_path / "trust.json")
+    with pytest.raises(TrustRecordError):
+        tracker.mark_opened(tmp_path / "absent")

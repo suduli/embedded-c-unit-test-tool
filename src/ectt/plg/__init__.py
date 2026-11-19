@@ -32,6 +32,7 @@ from ectt.plg.errors import (
     PlgError,
     UnknownAiProviderError,
     UnknownExtensionPointError,
+    UntrustedExtensionsError,
 )
 from ectt.plg.points import (
     BUILTIN_EXTENSION_POINTS,
@@ -50,6 +51,7 @@ __all__ = [
     "InvalidExtensionPointError",
     "DuplicateExtensionPointError",
     "UnknownExtensionPointError",
+    "UntrustedExtensionsError",
     # Points
     "CONTRACT_COMPILER_CONFIG",
     "CONTRACT_FRAMEWORK_BACKEND",

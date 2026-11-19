@@ -19,6 +19,7 @@ __all__ = [
     "DuplicateAiProviderError",
     "UnknownAiProviderError",
     "IncompatibleAiProviderError",
+    "UntrustedExtensionsError",
 ]
 
 
@@ -123,6 +124,19 @@ class IncompatibleAiProviderError(PlgError):
         message: str,
         *,
         reason: str = "incompatible_ai_provider",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class UntrustedExtensionsError(PlgError):
+    """Raised before any extension module runs, when its directory is not trusted."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "untrusted_extensions",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
