@@ -31,6 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+<<<<<<< HEAD
 pythonpath = ["src"]
 
 # ---------------------------------------------------------------- linter ----
@@ -91,3 +92,6 @@ ignore = [
 python_version = "3.11"
 # Incremental cache lives in .venv; keep repo tree clean.
 cache_dir = ".venv/.mypy_cache"
+=======
+pythonpath = ["src", "tools"]
+>>>>>>> codex/github-projects-workflow
