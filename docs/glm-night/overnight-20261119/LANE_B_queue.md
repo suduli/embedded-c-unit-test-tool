@@ -68,7 +68,7 @@ Steps:
 - Requirements: TOOL-NFR-090, TOOL-NFR-180
 - Acceptance criteria (board): **No package-specific acceptance criterion is recorded in PLAN-001 §5.4 for this package yet — flagged for reconciliation.** Write falsifiable, reviewable criteria before moving this item to Ready.
 - Dependencies: WP-CORE-01. Items already implemented are in the repo; items earlier in this queue must be DONE or PARTIAL in your ledger first.
-- Allowed paths: `src/ectt/core/`, `tests/core/`, `docs/verification/WP-CORE-02-analysis.md`, `docs/glm-night/overnight-20261119/LANE_B_LEDGER.md`, `docs/glm-night/overnight-20261119/SECOND_PASS_B.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
+- Allowed paths: `src/ectt/core/`, `tests/core/`, `src/ectt/cli/`, `tests/cli/`, `docs/verification/WP-CORE-02-analysis.md`, `docs/glm-night/overnight-20261119/LANE_B_LEDGER.md`, `docs/glm-night/overnight-20261119/SECOND_PASS_B.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
 
 Steps:
 1. Implement the smallest increment that meets the criteria with tests: happy path plus at least two error/edge cases; deterministic output; no network; no wall-clock in outputs.
@@ -201,7 +201,7 @@ Steps:
 - Requirements: TOOL-INS-110, TOOL-QUA-060
 - Acceptance criteria (board): **No package-specific acceptance criterion is recorded in PLAN-001 §5.4 for this package yet — flagged for reconciliation.** Write falsifiable, reviewable criteria before moving this item to Ready.
 - Dependencies: WP-CORE-01. Items already implemented are in the repo; items earlier in this queue must be DONE or PARTIAL in your ledger first.
-- Allowed paths: `src/ectt/core/`, `tests/core/`, `docs/verification/WP-CORE-04-analysis.md`, `docs/glm-night/overnight-20261119/LANE_B_LEDGER.md`, `docs/glm-night/overnight-20261119/SECOND_PASS_B.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
+- Allowed paths: `src/ectt/core/`, `tests/core/`, `src/ectt/rep/`, `tests/rep/`, `docs/verification/WP-CORE-04-analysis.md`, `docs/glm-night/overnight-20261119/LANE_B_LEDGER.md`, `docs/glm-night/overnight-20261119/SECOND_PASS_B.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
 
 Steps:
 1. Implement the smallest increment that meets the criteria with tests: happy path plus at least two error/edge cases; deterministic output; no network; no wall-clock in outputs.

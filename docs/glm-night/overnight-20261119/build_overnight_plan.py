@@ -117,6 +117,11 @@ RUNTIME = {
     "WP-EXT-02": "needs a debug probe and hardware",
 }
 
+ALLOW_EXTRA = {
+    "WP-CORE-02": ["src/ectt/cli/", "tests/cli/"],
+    "WP-CORE-04": ["src/ectt/rep/", "tests/rep/"],
+}
+
 KEEP_BLOCKED = {  # blockers that stay explicit after the D-02/D-03 answers
     "WP-CORE-05": "D-04 answered 'defer to post-pilot, mark provisional': calibrate before WP-CORE-05 exits P2",
 }
@@ -213,7 +218,9 @@ def block(n: int, lane: str, wp: str, est: int, extra: str, needs: str | None,
     if r["adr"] and not extra:
         lines.append("- ADR-sensitive: implement the decision-free part only; record each open ADR question in the second-pass file.")
     lines += [
-        f"- Allowed paths: `src/ectt/{pkg}/`, `tests/{pkg}/`, `docs/verification/{wp}-analysis.md`, "
+        f"- Allowed paths: `src/ectt/{pkg}/`, `tests/{pkg}/`, "
+        + "".join(f"`{x}`, " for x in ALLOW_EXTRA.get(wp, []))
+        + f"`docs/verification/{wp}-analysis.md`, "
         f"`{ledger}`, `{sp}`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): "
         "do not edit; write the needed change in the second-pass file.",
         "",
