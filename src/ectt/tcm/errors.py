@@ -17,6 +17,8 @@ __all__ = [
     "NotAgainstHarnessError",
     "DuplicateTestCaseError",
     "UnknownTestCaseError",
+    "InvalidTestCasesFileError",
+    "MissingCaseFieldError",
 ]
 
 
@@ -95,6 +97,32 @@ class UnknownTestCaseError(TcmError):
         message: str,
         *,
         reason: str = "unknown_test_case",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidTestCasesFileError(TcmError):
+    """Raised when a data-driven test cases file is structurally malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_test_cases_file",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class MissingCaseFieldError(TcmError):
+    """Raised when a required test case section or field is absent or empty."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "missing_case_field",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
