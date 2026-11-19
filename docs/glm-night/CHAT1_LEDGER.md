@@ -34,3 +34,4 @@
 | WP-TCH-03 | PARTIAL | d120d53 | 752 passed, 4 skipped | TCH-050/040 done (6-config roster, user cross config); TCH-030 configs shipped but against-real-toolchain execution pending runtime evidence; SDCC flag owner-review; gates green first try |
 | WP-BLD-03 | PARTIAL | 6c29113 | 759 passed, 4 skipped | TGT-010: exact cross command composition + metric gate + staleness carryover; real-toolchain execution pending runtime evidence; gates green (1 gate retry) |
 | WP-TCH-05 | PARTIAL | 714d97f | 767 passed, 4 skipped | TCH-080 done (isolated per-toolchain dirs, one invocation); TCH-090 spec generation done, actual image build pending CI runtime evidence; fixed bld/tch circular import via lazy import; gates green (2 gate retries) |
+| WP-TCH-06 | PARTIAL | f4f35cc | 773 passed, 4 skipped | TCH-100: 5-family roster with scriptability notes, armclang+IAR configs through public path; licensed-toolchain execution pending runtime evidence; gates green first try |
