@@ -1,13 +1,13 @@
 # Tonight's plan (2026-11-19)
 
-Branch: `glm-night/20261117` (pushed to origin, head after this commit).
+Branch: `glm-night/20261117` (pushed to origin). Merged into `main` and pushed as `a9e8a0a` on 2026-11-19.
 Board: GitHub project 5, "ECTT — Delivery". Status was synced from the chat ledgers on 2026-11-19.
 
 ## Where things stand
 
 - 76 queued items ran in the two GLM chats: 51 DONE, 24 PARTIAL, 1 BLOCKED (WP-QUA-01). Both chats are merged locally into this branch, and the trunk gates pass (970 passed, 4 skipped).
 - 115 items are held. Each one waits on an owner decision (see below). No agent can run them tonight.
-- Nothing merges to `main` tonight. The branch stays a review branch until the owner approves.
+- The branch is merged into `main` (`a9e8a0a`, pushed). The owner's answers to D-01..D-04 are recorded in `docs/proposals/decision-answers-20261119.md` (`d440cec`). They are not yet applied to the licence, SRS or SDD files.
 
 ### Board status applied from the ledgers (66 items changed)
 
@@ -21,6 +21,8 @@ Board: GitHub project 5, "ECTT — Delivery". Status was synced from the chat le
 ## 1. Owner decisions (highest value tonight)
 
 Answering these releases most of the held work. The agent must not answer them.
+
+Status: D-01 to D-04 are answered (Apache-2.0; stable ids plus digests; Windows first with Linux CI green; NFR-030/040/150 marked provisional). The answers are recorded but not applied. Applying them is a reviewed change that needs the owner's confirmation, because the licence change is hard to reverse once public. Still open: ADR-003, ADR-004, ADR-005, ADR-007, SRS-Q2, SRS-Q9.
 
 | Decision | Releases (held items, approx.) |
 |---|---|
@@ -58,7 +60,6 @@ These need the real toolchain or hardware. Schedule them when the machine is fre
 
 ## Order for the morning
 
-1. Answer section 1 (owner).
-2. Approve or reject the merge of `glm-night/20261117` into `main`.
-3. Run section 2 on a machine with the toolchain.
-4. Next overnight run: the held items whose blockers are now answered.
+1. Confirm and apply the D-01..D-04 answers as one reviewed change (licence, SRS, SDD-003, decision register). Answer the six open items in section 1.
+2. Run section 2 on a machine with the toolchain.
+3. Next overnight run: the held items whose blockers are now answered.
