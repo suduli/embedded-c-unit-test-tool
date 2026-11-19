@@ -1,0 +1,152 @@
+name: Project sync
+
+# Keeps the dedicated "ECTT — Delivery" GitHub Project in step with the work
+# package register in PLAN-001 §5.5. The importer, its tests and the templates
+# live with the code; run `python tools/github_projects.py --help` for the CLI.
+#
+# - Pull requests: validate parsing and run the importer test suite. These jobs
+#   never receive project credentials and never write anywhere.
+# - Pushes to main: synchronize the project when the importer, configuration,
+#   work plan, requirements or referenced evidence changed. This is the
+#   "automatic synchronization" path and it is disabled by default: it runs
+#   only when the repository variable ECTT_PROJECTS_SYNC_ENABLED is 'true'.
+#   Keep it disabled until the reviewed 191-package baseline has landed on main.
+# - Manual dispatch: preview (default) or apply. Apply additionally requires
+#   the sync flag; preview is read-only and safe at any time.
+#
+# Credential contract: the ECTT_PROJECTS_TOKEN Actions secret is exposed only
+# to the sync job below. It is never visible to pull_request runs. The local
+# gh CLI credential must not be copied into the repository.
+
+on:
+  pull_request:
+    paths:
+      - "tools/github_projects.py"
+      - "tests/projects/**"
+      - ".github/workflows/project-sync.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "PLAN-001-*.md"
+      - "SRS-001-*.md"
+      - "docs/projects/**"
+  push:
+    branches: ["**"]
+    paths:
+      - "tools/github_projects.py"
+      - "tests/projects/**"
+      - ".github/workflows/project-sync.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "PLAN-001-*.md"
+      - "SRS-001-*.md"
+      - "docs/projects/**"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "preview (read-only) or apply"
+        type: choice
+        options: ["preview", "apply"]
+        default: "preview"
+
+permissions:
+  contents: read
+
+env:
+  SYNC_FLAG: ${{ vars.ECTT_PROJECTS_SYNC_ENABLED }}
+  PROJECT_NUMBER: ${{ vars.ECTT_PROJECT_NUMBER }}
+
+jobs:
+  tests:
+    # Pull requests and pushes: parsing is validated and the importer suite
+    # runs entirely offline — no project credentials, no external writes.
+    name: Importer tests (no credentials)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check "pyyaml==6.0.1" "pytest>=8.0"
+      - name: Validate source parsing and derived totals
+        run: python -m pytest tests/projects/ -q
+
+  sync:
+    needs: tests
+    name: Synchronize project (${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'apply' }})
+    runs-on: ubuntu-latest
+    # Push-triggered synchronization is disabled by default: without the
+    # ECTT_PROJECTS_SYNC_ENABLED variable set to 'true' this job simply skips,
+    # which is the expected state until the 191-package baseline reaches main.
+    # A dispatch run always reaches this job: preview needs no flag, apply is
+    # refused loudly by the mode step below when the flag is off.
+    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && vars.ECTT_PROJECTS_SYNC_ENABLED == 'true')
+    concurrency:
+      # Serialize every sync run: two concurrent applies would race the
+      # digest re-check and could interleave issue creation.
+      group: ectt-project-sync
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Decide mode and enforce the sync flag
+        id: mode
+        run: |
+          mode="${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'apply' }}"
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          if [ "$mode" = "apply" ] && [ "$SYNC_FLAG" != "true" ]; then
+            echo "::error::Synchronization is disabled."
+            echo "::error::Set the repository variable to enable it: gh variable set ECTT_PROJECTS_SYNC_ENABLED --body true"
+            echo "::error::It must stay disabled until the reviewed 191-package baseline is merged to main."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check "pyyaml==6.0.1"
+
+      # GH_TOKEN authenticates the gh CLI the importer shells out to. Scoped to
+      # this job only; never attached to pull_request runs.
+      - name: Run importer
+        id: run
+        env:
+          GH_TOKEN: ${{ secrets.ECTT_PROJECTS_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Missing credentials. Configure the ECTT_PROJECTS_TOKEN Actions secret"
+            echo "::error::(a token with access to the user project and repository issues)."
+            exit 1
+          fi
+          if [ -z "$PROJECT_NUMBER" ]; then
+            echo "::error::Missing project number. Set: gh variable set ECTT_PROJECT_NUMBER --body <number>"
+            exit 1
+          fi
+          args=(--repo "${{ github.repository }}" --project-number "$PROJECT_NUMBER" \
+                --summary-file sync-summary.md)
+          if [ "${{ steps.mode.outputs.mode }}" = "apply" ]; then
+            python tools/github_projects.py plan "${args[@]}" --output preview.json
+            python tools/github_projects.py apply "${args[@]}" --preview preview.json
+          else
+            python tools/github_projects.py plan "${args[@]}" --output preview.json
+          fi
+
+      - name: Publish job summary
+        if: always() && steps.run.outcome != 'skipped'
+        run: |
+          if [ -f sync-summary.md ]; then
+            cat sync-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ECTT project sync produced no summary (see the error above if the job failed)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Retain preview and summary as artifacts
+        if: always() && hashFiles('preview.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-sync-${{ github.run_id }}
+          path: |
+            preview.json
+            sync-summary.md
+          if-no-files-found: ignore

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ECTT — Delivery work packages
+    url: https://github.com/suduli/embedded-c-unit-test-tool
+    description: Work packages live as [WP-ID] issues imported from PLAN-001 §5.5; check there before filing a new item.

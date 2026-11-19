@@ -1,0 +1,66 @@
+name: Bug report
+description: Something in the tool's specification, generated artifacts or implementation does not behave as documented.
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bugs are tracked against the work packages they affect so the delivery
+        board stays truthful. If you are unsure which work package is affected,
+        leave the field empty — a reviewer will link it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the wrong behaviour, including what the documentation or specification promises instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Inputs, commands and the minimal project that shows the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: input
+    id: work-package
+    attributes:
+      label: Affected work package(s)
+      description: "`WP-IDs` from PLAN-001 §5.5, e.g. `WP-PRJ-01, WP-ANA-04`."
+      placeholder: WP-PRJ-01
+    validations:
+      required: false
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Affected requirement(s)
+      description: "`TOOL-XXX-NNN` ids from SRS-001, if known."
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and diagnostics
+      description: Command output, log bundle excerpts, stack traces. Do not paste secrets or credentials.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, tool version / revision, compiler and toolchain where relevant.
+    validations:
+      required: false

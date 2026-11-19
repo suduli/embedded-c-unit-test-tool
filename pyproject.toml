@@ -31,7 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "tools"]
 
 # ---------------------------------------------------------------- linter ----
 # Scoped to the directories this project's tasks own. The excluded paths are:

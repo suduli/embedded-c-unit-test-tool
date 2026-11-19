@@ -1,0 +1,66 @@
+name: Review follow-up
+description: An action item arising from a recorded review (cross-review findings, subsystem inventories, gate results).
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Review follow-ups keep recorded findings actionable without duplicating
+        the review documents themselves. The finding stays in its review record
+        under `docs/reviews/` or `vcast-findings/`; this issue tracks the work
+        against the affected work packages.
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Review source
+      options:
+        - vcast-findings cross-review
+        - Subsystem requirements and tasks inventory
+        - Document review (2026-10-15)
+        - Plan/traceability gate failure
+        - Other review (describe below)
+    validations:
+      required: true
+
+  - type: input
+    id: finding-reference
+    attributes:
+      label: Finding reference
+      description: "Finding id or tracker row, e.g. `RV-03` / `NR-12` / `T-05`."
+      placeholder: RV-03
+    validations:
+      required: true
+
+  - type: input
+    id: work-packages
+    attributes:
+      label: Affected work package(s)
+      description: "`WP-IDs` from PLAN-001 §5.5, or `—` if none apply yet."
+      placeholder: WP-ANA-04
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Affected requirement(s)
+      description: "`TOOL-XXX-NNN` ids from SRS-001, if known."
+    validations:
+      required: false
+
+  - type: textarea
+    id: action
+    attributes:
+      label: Proposed action
+      description: What has to change — specification, decision, implementation, test or evidence — and what done looks like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence links
+      description: Paths or URLs to the review record, gate output or documents supporting this follow-up.
+    validations:
+      required: false
