@@ -20,3 +20,12 @@ Analysis evidence for requirements verified under WP-ING-07. No schema change: t
 - **Why the plan is refused whole.** A build that links a partial input set could pass with a missing object, so partial loading is the unsafe outcome. The loader returns nothing unless every check passes.
 - **Why identities are digests.** A digest is checked against the file on disk, so a changed object is caught before the build. A name alone would not catch that.
 - **Why the version is the string `"1"`.** The restricted YAML adapter (ADR-002) reads every scalar as a string, so the version is compared as a string.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/ing/test_linkplan.py` → 24 passed, 0 skipped;
+full suite 466 passed / 4 skipped (baseline 4). Assessment stands unchanged. **PARTIAL** — the
+loader and its fail-closed guarantees are complete and tested; remaining: (1) wire
+`load_link_plan` into the harness-build step (the build step itself does not exist yet —
+CMP-BLD/CMP-GEN), (2) SDD-003 amendment for the proposed plan field schema, (3) toolchain-adapter
+verification of linker/runtime identities.

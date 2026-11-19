@@ -384,10 +384,14 @@ class FunctionModel:
     parameters: tuple[ParameterModel, ...] = field(default_factory=tuple)
     globals: tuple[GlobalAccessModel, ...] = field(default_factory=tuple)
     calls: tuple[CallModel, ...] = field(default_factory=tuple)
+    # TOOL-PAR-120 (WP-ANA-05): cyclomatic complexity when computed. Optional;
+    # omitted from to_dict() while unset so the persisted SDD-002 §4.1 shape
+    # is unchanged until the schema bump lands.
+    complexity: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1."""
-        return {
+        result: dict[str, Any] = {
             "name": self.name,
             "linkage": self.linkage,
             "storage_class": self.storage_class,
@@ -397,6 +401,9 @@ class FunctionModel:
             "globals": [g.to_dict() for g in self.globals],
             "calls": [c.to_dict() for c in self.calls],
         }
+        if self.complexity is not None:
+            result["complexity"] = self.complexity
+        return result
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> FunctionModel:
@@ -412,6 +419,7 @@ class FunctionModel:
             parameters=tuple(ParameterModel.from_dict(p) for p in data.get("parameters", [])),
             globals=tuple(GlobalAccessModel.from_dict(g) for g in data.get("globals", [])),
             calls=tuple(CallModel.from_dict(c) for c in data.get("calls", [])),
+            complexity=data.get("complexity"),
         )
 
 

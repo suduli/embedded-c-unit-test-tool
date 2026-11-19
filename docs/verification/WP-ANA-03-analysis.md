@@ -12,3 +12,14 @@ Analysis evidence for requirements verified under WP-ANA-03. Schema change: **1.
 - **Per-unit scope.** The graph covers one translation unit. A callee defined in another unit is `external`, not `internal`, even if that unit is part of the same project.
 - **Library detection depends on include flags.** A header is `library` only if the include path that brings it in is marked `-isystem` (or the equivalent). With no such flag, a vendor header is `external`.
 - **Unresolved calls make the unit's status `failed`.** A call to an undeclared function is a hard error under C99 and later. The tests use `-std=gnu89`, which makes it a warning, so the unit still parses. Under C99 the unit is refused, as before.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/ana/test_callgraph.py` → 13 passed, 0 skipped;
+`tests/ana` → 128 passed; full suite 466 passed / 4 skipped (baseline 4). TOOL-PAR-060 requires a
+per-function call graph with internal/external callee classification — fully evidenced (the
+`library`/`unresolved` classes are additive extensions beyond the requirement, and the recorded
+known limits — per-unit scope, `-isystem` dependence, builtins — are scope notes consistent with
+the requirement's own "defined in the unit under test" wording, not open criterion elements).
+**DONE**. ADR-sensitive note: the schema extension (1.2 → 1.3) is recorded in the note and
+Accepted; nothing reopened here.
