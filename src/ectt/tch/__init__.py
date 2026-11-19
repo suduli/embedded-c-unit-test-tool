@@ -66,6 +66,12 @@ from ectt.tch.multibuild import (
     container_spec,
     plan_multi_toolchain_builds,
 )
+from ectt.tch.proprietary import (
+    PROPRIETARY_FAMILIES,
+    ProprietaryConfigError,
+    ProprietaryFamily,
+    proprietary_families,
+)
 
 __all__ = [
     # Errors
@@ -123,4 +129,9 @@ __all__ = [
     "MultiBuildPlan",
     "plan_multi_toolchain_builds",
     "container_spec",
+    # Proprietary compilers (WP-TCH-06)
+    "PROPRIETARY_FAMILIES",
+    "ProprietaryFamily",
+    "ProprietaryConfigError",
+    "proprietary_families",
 ]
