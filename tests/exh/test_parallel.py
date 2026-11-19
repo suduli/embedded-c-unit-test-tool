@@ -29,6 +29,11 @@ DIGEST = "d" * 64
 PLAIN_HARNESS = """\
 import sys
 print(f"RESULT {sys.argv[2]} pass")
+"""
+
+COV_HARNESS = """\
+import sys
+print(f"RESULT {sys.argv[2]} pass")
 open("cov.dat", "w").write("data")
 """
 
@@ -121,7 +126,7 @@ def test_low_degree_serializes_overlap(tmp_path) -> None:
 def test_per_worker_directories_prevent_collisions(tmp_path) -> None:
     parallel = run_units(
         tmp_path,
-        PLAIN_HARNESS,
+        COV_HARNESS,
         ["u0", "u1"],
         concurrency=2,
         worker_root=tmp_path / "workers",

@@ -33,6 +33,7 @@ WP-GEN-06's trunk state confirmed.
 | af0fcee | WP-EXH-03 — parallel execution with per-worker output directories |
 | b63a54f | WP-TCM-05 — ranged input expansion, robustness marking + range-check gate |
 | 2288a0d | WP-TCM-06 — CSV-class interchange with loss reporting and byte-identical round trip |
+| *(hygiene)* | parallel-execution tests no longer write `cov.dat` outside worker directories (stray untracked artifact removed from the worktree root) |
 
 Never pushed; no PR or board writes; no decisions taken (D-02 was applied
 verbatim as answered; D-01/D-03/D-04, ADR-003/004/005/007, SRS-Q2/Q9 and
