@@ -44,6 +44,14 @@ from ectt.ext.simulator import (
     qemu_descriptor,
     renode_descriptor,
 )
+from ectt.ext.usermethod import (
+    DuplicateMethodError,
+    ExecutionMethodDescriptor,
+    ExecutionMethodPlan,
+    MethodRegistry,
+    UnknownMethodError,
+    plan_user_execution,
+)
 
 __all__ = [
     "ExtError",
@@ -81,4 +89,10 @@ __all__ = [
     "jlink_descriptor",
     "plan_probe_run",
     "plan_flash",
+    # User-supplied execution methods (WP-EXT-07)
+    "DuplicateMethodError",
+    "ExecutionMethodDescriptor",
+    "ExecutionMethodPlan",
+    "MethodRegistry",
+    "plan_user_execution",
 ]
