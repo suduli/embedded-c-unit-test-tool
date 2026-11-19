@@ -21,8 +21,10 @@ from __future__ import annotations
 
 import subprocess
 from collections.abc import Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
+from typing import Any
 
 from ectt.core.determinism import stable_id
 from ectt.exh.errors import (
@@ -400,6 +402,7 @@ def run_isolated(
     current_digests: Mapping[str, str],
     timeout_seconds: float,
     argv_prefix: Sequence[str] = (),
+    cwd: Path | str | None = None,
 ) -> ExecutedRun:
     """Execute each bound test in its own harness process (DSN-EXH-020/030).
 
@@ -458,6 +461,7 @@ def run_isolated(
                 text=True,
                 check=False,
                 timeout=timeout_seconds,
+                cwd=None if cwd is None else str(cwd),
             )
         except subprocess.TimeoutExpired:
             records.append(
@@ -492,3 +496,110 @@ def exit_code(run: ExecutedRun) -> int:
     an unverified run.
     """
     return 0 if run.outcome == "pass" else 1
+
+
+def exit_code_for_outcome(outcome: str) -> int:
+    """The exit-code contract applied to an outcome string (DSN-EXH-050)."""
+    return 0 if outcome == "pass" else 1
+
+
+@dataclass(frozen=True)
+class ParallelUnit:
+    """One independent executable to run in parallel, with its own integrity data."""
+
+    attempt: RunAttempt
+    executable: Path | str
+    current_digests: Mapping[str, str]
+
+
+@dataclass(frozen=True)
+class ParallelRun:
+    """Per-unit executed runs in input order plus the aggregated outcome."""
+
+    units: tuple[ExecutedRun, ...]
+    outcome: str
+    worker_dirs: tuple[str, ...] = ()
+
+
+def aggregate_parallel_outcome(runs: Sequence[ExecutedRun]) -> str:
+    """Aggregate per-unit outcomes (DSN-EXH-040 + NR-18 across units).
+
+    ``pass`` only when every unit passed; any ``failed`` unit makes the
+    parallel outcome ``failed``; every other mix (incomplete, build_failed)
+    is ``incomplete``.
+    """
+    outcomes = [run.outcome for run in runs]
+    if not outcomes:
+        return "incomplete"
+    if any(outcome == "failed" for outcome in outcomes):
+        return "failed"
+    if all(outcome == "pass" for outcome in outcomes):
+        return "pass"
+    return "incomplete"
+
+
+def run_parallel(
+    units: Sequence[ParallelUnit],
+    *,
+    concurrency: int,
+    timeout_seconds: float,
+    worker_root: Path | str | None = None,
+    argv_prefix: Sequence[str] = (),
+) -> ParallelRun:
+    """Run independent test executables concurrently (TOOL-EXE-050, DSN-EXH-040).
+
+    Each unit goes through :func:`run_isolated` unchanged — its own attempt,
+    binding check, and aggregation (run integrity is per unit, T-14). With a
+    ``worker_root``, unit ``i`` runs with ``worker-{i % concurrency}`` as its
+    process working directory, so per-worker outputs (e.g. coverage data
+    files) cannot collide. Results are returned in input order regardless of
+    completion order; no wall-clock is recorded and no network is used.
+    """
+    if concurrency < 1:
+        raise ValueError("concurrency must be at least 1")
+    if not units:
+        raise ValueError("run_parallel requires at least one unit")
+    worker_dirs: list[Path] = []
+    if worker_root is not None:
+        root = Path(worker_root)
+        root.mkdir(parents=True, exist_ok=True)
+        for slot in range(min(concurrency, len(units))):
+            worker_dir = root / f"worker-{slot}"
+            worker_dir.mkdir(parents=True, exist_ok=True)
+            worker_dirs.append(worker_dir)
+
+    ordered_runs: list[ExecutedRun | None] = [None] * len(units)
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        futures: dict[int, Any] = {}
+        for index, unit in enumerate(units):
+            cwd: Path | None = None
+            if worker_dirs:
+                cwd = worker_dirs[index % len(worker_dirs)]
+            futures[index] = pool.submit(
+                _run_unit, unit, timeout_seconds, argv_prefix, cwd
+            )
+        for index, future in futures.items():
+            ordered_runs[index] = future.result()
+    runs = tuple(run for run in ordered_runs if run is not None)
+    return ParallelRun(
+        units=runs,
+        outcome=aggregate_parallel_outcome(runs),
+        worker_dirs=tuple(str(directory) for directory in worker_dirs),
+    )
+
+
+def _run_unit(
+    unit: ParallelUnit,
+    timeout_seconds: float,
+    argv_prefix: Sequence[str],
+    cwd: Path | None,
+) -> ExecutedRun:
+    """One unit of parallel work: run_isolated with an optional worker cwd."""
+    return run_isolated(
+        unit.attempt,
+        unit.executable,
+        current_digests=unit.current_digests,
+        timeout_seconds=timeout_seconds,
+        argv_prefix=argv_prefix,
+        cwd=cwd,
+    )

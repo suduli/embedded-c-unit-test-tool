@@ -33,16 +33,21 @@ from ectt.exh.results import (
 from ectt.exh.runner import (
     BindingCheckResult,
     ExecutedRun,
+    ParallelRun,
+    ParallelUnit,
     RunAttempt,
     TestBinding,
+    aggregate_parallel_outcome,
     allocate_attempt,
     build_failed_run,
     check_test_bindings,
     exit_code,
+    exit_code_for_outcome,
     mark_built,
     record_build_failure,
     run_harness,
     run_isolated,
+    run_parallel,
 )
 
 __all__ = [
@@ -80,4 +85,9 @@ __all__ = [
     "run_harness",
     "run_isolated",
     "exit_code",
+    "exit_code_for_outcome",
+    "ParallelUnit",
+    "ParallelRun",
+    "run_parallel",
+    "aggregate_parallel_outcome",
 ]
