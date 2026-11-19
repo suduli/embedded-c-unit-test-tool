@@ -31,8 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-<<<<<<< HEAD
-pythonpath = ["src"]
+pythonpath = ["src", "tools"]
 
 # ---------------------------------------------------------------- linter ----
 # Scoped to the directories this project's tasks own. The excluded paths are:
@@ -92,6 +91,3 @@ ignore = [
 python_version = "3.11"
 # Incremental cache lives in .venv; keep repo tree clean.
 cache_dir = ".venv/.mypy_cache"
-=======
-pythonpath = ["src", "tools"]
->>>>>>> codex/github-projects-workflow
