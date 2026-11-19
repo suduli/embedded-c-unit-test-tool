@@ -31,6 +31,18 @@ from ectt.rep.model import (
     test_entry,
 )
 from ectt.rep.render import render_json, render_text
+from ectt.rep.summary import (
+    CoverageTrend,
+    CrossRunSummary,
+    RunSummary,
+    TrendPoint,
+    build_coverage_trend,
+    build_cross_run_summary,
+    coverage_trend_to_dict,
+    cross_run_summary_to_dict,
+    dump_coverage_trend,
+    dump_cross_run_summary,
+)
 
 __all__ = [
     "FORMAT_CHANGELOG",
@@ -40,14 +52,24 @@ __all__ = [
     "SUPPORTED_FORMAT_VERSIONS",
     "TEST_STATUSES",
     "CoverageEntry",
+    "CoverageTrend",
+    "CrossRunSummary",
     "ExecutionFacts",
     "ReportFormatRegistry",
     "ReportModel",
     "ReportModelError",
+    "RunSummary",
     "TestEntry",
+    "TrendPoint",
+    "build_coverage_trend",
+    "build_cross_run_summary",
     "build_report_model",
     "coverage_entry",
+    "coverage_trend_to_dict",
+    "cross_run_summary_to_dict",
     "default_format_registry",
+    "dump_coverage_trend",
+    "dump_cross_run_summary",
     "dump_report_model",
     "load_report_model",
     "render_json",
