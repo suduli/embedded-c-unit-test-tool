@@ -19,6 +19,8 @@ __all__ = [
     "UnknownTestCaseError",
     "InvalidTestCasesFileError",
     "MissingCaseFieldError",
+    "ValueParseError",
+    "InvalidComparisonSpecError",
 ]
 
 
@@ -123,6 +125,32 @@ class MissingCaseFieldError(TcmError):
         message: str,
         *,
         reason: str = "missing_case_field",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class ValueParseError(TcmError):
+    """Raised when a comparison value is not valid for its declared type."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "value_parse_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidComparisonSpecError(TcmError):
+    """Raised when a comparison specification (types, tolerances) is malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_comparison_spec",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
