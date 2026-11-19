@@ -14,6 +14,7 @@ from ectt.rep.formats import (
     ReportFormatRegistry,
     default_format_registry,
 )
+from ectt.rep.from_archive import report_from_archive, result_set_from_dict
 from ectt.rep.model import (
     FORMAT_CHANGELOG,
     REPORT_MODEL_SCHEMA_VERSION,
@@ -73,7 +74,9 @@ __all__ = [
     "dump_report_model",
     "load_report_model",
     "render_json",
+    "report_from_archive",
     "render_text",
     "report_model_to_dict",
+    "result_set_from_dict",
     "test_entry",
 ]
