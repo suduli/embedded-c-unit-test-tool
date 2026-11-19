@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from ectt.core.determinism import FixedClock
+from ectt.core.determinism import FixedClock, canonical_json_bytes, stable_id
 from ectt.exh.results import (
     AssertionFailure,
     ExecutionMetadata,
@@ -18,7 +18,9 @@ from ectt.exh.results import (
 )
 from ectt.rep.errors import ReportModelError
 from ectt.rep.model import (
+    FORMAT_CHANGELOG,
     REPORT_MODEL_SCHEMA_VERSION,
+    SUPPORTED_FORMAT_VERSIONS,
     ReportModel,
     build_report_model,
     coverage_entry,
@@ -169,7 +171,7 @@ def test_dump_is_byte_deterministic() -> None:
     assert dump_report_model(model) == dump_report_model(model)
     text = dump_report_model(model)
     assert text.splitlines()[0] == "{"
-    assert text.splitlines()[1] == '  "schema_version": "1.0",'
+    assert text.splitlines()[1] == f'  "schema_version": "{REPORT_MODEL_SCHEMA_VERSION}",'
     assert "\r" not in text
     doc = json.loads(text)
     assert doc["schema_version"] == REPORT_MODEL_SCHEMA_VERSION
@@ -232,3 +234,76 @@ def test_load_refuses_duplicate_test_entry() -> None:
     with pytest.raises(ReportModelError) as excinfo:
         load_report_model(doc)
     assert excinfo.value.reason == "duplicate_test"
+
+
+# --- WP-REP-06: provenance, execution facts, format versioning -------------------------
+
+
+def test_model_carries_execution_and_provenance() -> None:
+    model = _model()
+
+    assert model.execution is not None
+    assert model.execution.where == "host"
+    assert model.execution.toolchain == "gcc"
+    assert model.provenance is not None
+    assert model.provenance.schema_versions["report_model"] == REPORT_MODEL_SCHEMA_VERSION
+    assert model.provenance.input_digests["result_set"]
+
+    facts = model.provenance_facts()
+    assert facts["compiler"] == "gcc"
+    assert facts["executed_at"] == "2026-11-19T00:00:00+00:00"
+    assert facts["target"] == "none"  # the fixture run recorded no target id
+    assert facts["tool_version"] == model.provenance.tool_version
+
+
+def test_target_id_renders_when_recorded() -> None:
+    rs = _result_set(execution=ExecutionMetadata(where="lab-pc", toolchain="gcc", target_id="tgt-9"))
+    model = build_report_model(rs, clock=CLOCK)
+
+    assert model.provenance_facts()["target"] == "tgt-9"
+
+
+def test_load_refuses_tampered_provenance() -> None:
+    model = _model()
+    doc = json.loads(dump_report_model(model))
+    doc["provenance"]["tool_version"] = "999.9"
+
+    with pytest.raises(ReportModelError) as excinfo:
+        load_report_model(doc)
+    assert excinfo.value.reason == "digest_mismatch"
+
+
+def test_format_changes_are_documented() -> None:
+    """verifies: TOOL-REP-130 — versioned format with a documented change log."""
+    versions = [version for version, _ in FORMAT_CHANGELOG]
+    assert versions == sorted(versions)
+    assert versions[-1] == REPORT_MODEL_SCHEMA_VERSION
+    assert set(SUPPORTED_FORMAT_VERSIONS) == set(versions)
+    assert len(FORMAT_CHANGELOG[1][1]) > 20  # the 1.1 entry documents its change
+
+
+def _legacy_1_0_doc() -> dict[str, Any]:
+    model = _model()
+    doc: dict[str, Any] = json.loads(dump_report_model(model))
+    body = {key: doc[key] for key in ("coverage", "generated_at", "partial", "run_id", "tests")}
+    legacy: dict[str, Any] = {"schema_version": "1.0", "report_id": stable_id(canonical_json_bytes(body))}
+    legacy.update(body)
+    return legacy
+
+
+def test_reader_accepts_1_0_documents() -> None:
+    """verifies: TOOL-REP-130 — archived 1.0 reports stay interpretable."""
+    loaded = load_report_model(_legacy_1_0_doc())
+
+    assert loaded.execution is None
+    assert loaded.provenance is None
+    assert loaded.provenance_facts() == {}
+
+
+def test_reader_refuses_1_0_document_carrying_execution() -> None:
+    doc = _legacy_1_0_doc()
+    doc["execution"] = {"where": "h", "toolchain": "gcc", "target_id": None}
+
+    with pytest.raises(ReportModelError) as excinfo:
+        load_report_model(doc)
+    assert excinfo.value.reason == "unexpected_field"

@@ -84,9 +84,13 @@ def _models() -> list[ReportModel]:
     return [mixed, empty, partial, single]
 
 
-def _parse_text(text: str) -> tuple[dict[str, str], dict[str, tuple[int, int]]]:
+_FACT_KEYS = ("compiler", "executed_at", "target", "tool_version")
+
+
+def _parse_text(text: str) -> tuple[dict[str, str], dict[str, tuple[int, int]], dict[str, str]]:
     statuses: dict[str, str] = {}
     figures: dict[str, tuple[int, int]] = {}
+    facts: dict[str, str] = {}
     for line in text.splitlines():
         if line.startswith("TEST "):
             _, test_id, status = line.split(" ")
@@ -95,30 +99,36 @@ def _parse_text(text: str) -> tuple[dict[str, str], dict[str, tuple[int, int]]]:
             _, unit, counters = line.split(" ")
             covered, total = counters.split("/")
             figures[unit] = (int(covered), int(total))
-    return statuses, figures
+        else:
+            key, _, value = line.partition(": ")
+            if key in _FACT_KEYS:
+                facts[key] = value
+    return statuses, figures, facts
 
 
-def _parse_json(text: str) -> tuple[dict[str, str], dict[str, tuple[int, int]]]:
+def _parse_json(text: str) -> tuple[dict[str, str], dict[str, tuple[int, int]], dict[str, str]]:
     doc: dict[str, Any] = json.loads(text)
     statuses = {entry["id"]: entry["status"] for entry in doc["tests"]}
     figures = {entry["unit"]: (entry["covered"], entry["total"]) for entry in doc["coverage"]}
-    return statuses, figures
+    return statuses, figures, doc.get("provenance", {})
 
 
 @pytest.mark.parametrize("model", _models(), ids=["mixed", "empty", "partial", "single"])
 def test_renderers_cannot_disagree(model: ReportModel) -> None:
     """verifies: the PLAN-001 §5.4 criterion for WP-REP-01.
 
-    Both renderers are fed the same persisted round-trip model; the status
-    and coverage maps they expose must equal each other and the model.
+    Both renderers are fed the same persisted round-trip model; the status,
+    coverage, and provenance maps they expose must equal each other and the
+    model.
     """
     persisted = load_report_model(dump_report_model(model))
 
-    text_statuses, text_figures = _parse_text(render_text(persisted))
-    json_statuses, json_figures = _parse_json(render_json(persisted))
+    text_statuses, text_figures, text_facts = _parse_text(render_text(persisted))
+    json_statuses, json_figures, json_facts = _parse_json(render_json(persisted))
 
     assert text_statuses == json_statuses == persisted.test_statuses()
     assert text_figures == json_figures == persisted.coverage_figures()
+    assert text_facts == json_facts == persisted.provenance_facts()
 
 
 @pytest.mark.parametrize("model", _models(), ids=["mixed", "empty", "partial", "single"])
@@ -131,13 +141,24 @@ def test_rendering_is_byte_identical(model: ReportModel) -> None:
     assert dump_report_model(persisted) == dump_report_model(persisted)
 
 
-def test_renderers_exclude_timestamps() -> None:
-    """verifies: TOOL-REP-100 — rendered output excludes timestamps."""
+def test_renderers_record_execution_timestamp_exclude_creation_timestamp() -> None:
+    """verifies: TOOL-REP-070 records the execution timestamp; TOOL-REP-100 holds.
+
+    The execution timestamp is model content (byte-identity applies to it);
+    the report-creation timestamp (generated_at) is excluded from renders.
+    """
     model = _models()[0]
 
-    assert "generated_at" not in render_json(model)
-    assert "2026-11-19" not in render_text(model)
-    assert "2026-11-19" not in render_json(model)
+    text = render_text(model)
+    rendered_json = render_json(model)
+
+    assert "executed_at: 2026-11-19T00:00:00+00:00" in text
+    assert "generated_at" not in rendered_json
+    assert text.count("2026-11-19") == 1  # the execution timestamp, nothing else
+    assert render_text(model) == render_text(model)  # identity still holds
+    assert "tool_version: " in text
+    assert "compiler: gcc" in text
+    assert "target: none" in text
 
 
 def test_text_summary_counts_statuses_deterministically() -> None:

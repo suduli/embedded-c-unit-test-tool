@@ -1,18 +1,29 @@
-# implements: TOOL-REP-090, TOOL-REP-100
-"""Single intermediate report model (WP-REP-01).
+# implements: TOOL-REP-070, TOOL-REP-090, TOOL-REP-100, TOOL-REP-130
+"""Single intermediate report model (WP-REP-01, WP-REP-06).
 
 One documented intermediate data model feeds every report format: renderers
 consume only the model's accessors, so two renderers cannot disagree on a
 test status or a coverage figure (TOOL-REP-090), and rendering is a pure
-function of the model content (TOOL-REP-100; timestamps enter the model only
-through the injected Clock and are excluded from rendered output).
+function of the model content (TOOL-REP-100; the report-creation timestamp
+is excluded from rendered output).
+
+Provenance (WP-REP-06, TOOL-REP-070): the model embeds the core provenance
+record — tool version, build id, interpreter version, dependency and schema
+versions, input digests, and the execution timestamp — plus the execution
+facts (where, toolchain, target). The provenance record carries its own
+content digest, verified on load; the wall-clock timestamps are never hashed.
+
+Format versioning (WP-REP-06, TOOL-REP-130): the format is versioned and its
+changes are documented in ``FORMAT_CHANGELOG``. The reader accepts every
+version in ``SUPPORTED_FORMAT_VERSIONS``; the writer emits
+``REPORT_MODEL_SCHEMA_VERSION``.
 
 Identity follows decision D-02 ("stable ids plus content digests"): every
 executed test entry carries the content digest of the test definition it
 executed, and the model carries a report id computed over its canonical
 content and verified on load.
 
-Satisfies: TOOL-REP-090, TOOL-REP-100.
+Satisfies: TOOL-REP-070, TOOL-REP-090, TOOL-REP-100, TOOL-REP-130.
 """
 
 from __future__ import annotations
@@ -23,13 +34,17 @@ from dataclasses import dataclass
 from typing import Any
 
 from ectt.core.determinism import Clock, canonical_json, canonical_json_bytes, stable_id
-from ectt.exh.results import ResultSet
+from ectt.core.provenance import ProvenanceRecord, build_provenance
+from ectt.exh.results import ResultSet, dump_result_set
 from ectt.rep.errors import ReportModelError
 
 __all__ = [
+    "FORMAT_CHANGELOG",
     "REPORT_MODEL_SCHEMA_VERSION",
+    "SUPPORTED_FORMAT_VERSIONS",
     "TEST_STATUSES",
     "CoverageEntry",
+    "ExecutionFacts",
     "ReportModel",
     "TestEntry",
     "build_report_model",
@@ -40,7 +55,27 @@ __all__ = [
     "test_entry",
 ]
 
-REPORT_MODEL_SCHEMA_VERSION = "1.0"
+#: Versioned format history (TOOL-REP-130): changes to the report model
+#: format are documented here so archived reports stay interpretable.
+FORMAT_CHANGELOG: tuple[tuple[str, str], ...] = (
+    (
+        "1.0",
+        "Initial report model: run id, tests, coverage, partial flag, "
+        "generated_at, report id.",
+    ),
+    (
+        "1.1",
+        "Added execution facts (where, toolchain, target) and an embedded "
+        "provenance record with its own content digest (TOOL-REP-070). The "
+        "reader still accepts 1.0 documents.",
+    ),
+)
+
+#: Versions the reader accepts (TOOL-REP-130: archived reports stay readable).
+SUPPORTED_FORMAT_VERSIONS: tuple[str, ...] = ("1.0", "1.1")
+
+#: Version the writer emits.
+REPORT_MODEL_SCHEMA_VERSION = "1.1"
 
 #: The report status vocabulary: the S3 outcome vocabulary of the execution
 #: host (ectt.exh.results), carried unchanged.
@@ -55,7 +90,7 @@ class TestEntry:
     status: str
     digest: str = ""  # content digest of the executed definition; empty only for not_run
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the canonical dictionary form."""
         return {"digest": self.digest, "status": self.status, "test_id": self.test_id}
 
@@ -78,6 +113,19 @@ class CoverageEntry:
 
 
 @dataclass(frozen=True)
+class ExecutionFacts:
+    """Where and on what a run executed (TOOL-REP-070)."""
+
+    where: str
+    toolchain: str
+    target_id: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return the canonical dictionary form."""
+        return {"target_id": self.target_id, "toolchain": self.toolchain, "where": self.where}
+
+
+@dataclass(frozen=True)
 class ReportModel:
     """The single intermediate report model every format renders from."""
 
@@ -87,6 +135,8 @@ class ReportModel:
     coverage: tuple[CoverageEntry, ...]
     partial: bool
     generated_at: str
+    execution: ExecutionFacts | None = None
+    provenance: ProvenanceRecord | None = None
 
     def test_statuses(self) -> dict[str, str]:
         """Return the test statuses; the one source every renderer consumes."""
@@ -96,10 +146,32 @@ class ReportModel:
         """Return the coverage figures; the one source every renderer consumes."""
         return {entry.unit: (entry.covered, entry.total) for entry in self.coverage}
 
+    def provenance_facts(self) -> dict[str, str]:
+        """The four facts TOOL-REP-070 names, as every renderer records them.
+
+        Empty for a 1.0 document loaded without provenance. ``target`` reads
+        ``none`` when the run recorded no target id.
+        """
+        if self.provenance is None or self.execution is None:
+            return {}
+        generated = self.provenance.generated_at or "unknown"
+        return {
+            "compiler": self.execution.toolchain,
+            "executed_at": generated,
+            "target": self.execution.target_id or "none",
+            "tool_version": self.provenance.tool_version,
+        }
+
 
 def _id(value: Any, what: str) -> str:
     if not isinstance(value, str) or not value or any(char.isspace() for char in value):
         raise ReportModelError(f"{what} must be a non-empty string without whitespace", reason="invalid_id")
+    return value
+
+
+def _non_empty(value: Any, what: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ReportModelError(f"{what} must be a non-empty string", reason="invalid_field")
     return value
 
 
@@ -134,6 +206,15 @@ def coverage_entry(unit: str, covered: int, total: int) -> CoverageEntry:
     return CoverageEntry(unit=unit, covered=covered, total=total)
 
 
+def _execution_facts(result_set: ResultSet) -> ExecutionFacts:
+    where = _non_empty(result_set.execution.where, "execution where")
+    toolchain = _non_empty(result_set.execution.toolchain, "execution toolchain")
+    target_id = result_set.execution.target_id
+    if target_id is not None:
+        _id(target_id, "target id")
+    return ExecutionFacts(where=where, toolchain=toolchain, target_id=target_id)
+
+
 def _make_model(
     *,
     run_id: str,
@@ -141,6 +222,8 @@ def _make_model(
     coverage: tuple[CoverageEntry, ...],
     partial: bool,
     generated_at: str,
+    execution: ExecutionFacts | None,
+    provenance: ProvenanceRecord | None,
 ) -> ReportModel:
     body: dict[str, Any] = {
         "coverage": [entry.to_dict() for entry in coverage],
@@ -149,6 +232,10 @@ def _make_model(
         "run_id": run_id,
         "tests": [entry.to_dict() for entry in tests],
     }
+    if execution is not None:
+        body["execution"] = execution.to_dict()
+    if provenance is not None:
+        body["provenance"] = provenance.to_dict()
     report_id = stable_id(canonical_json_bytes(body))
     return ReportModel(
         report_id=report_id,
@@ -157,6 +244,8 @@ def _make_model(
         coverage=coverage,
         partial=partial,
         generated_at=generated_at,
+        execution=execution,
+        provenance=provenance,
     )
 
 
@@ -168,9 +257,11 @@ def build_report_model(
 ) -> ReportModel:
     """Aggregate one run's results and optional coverage figures into the model.
 
-    Tests not executed (listed in ``result_set.not_executed``) enter with
-    status ``not_run`` and no digest. Timestamps enter only through the
-    injected Clock (TOOL-REP-100).
+    Embeds the execution facts and the core provenance record (TOOL-REP-070):
+    tool version, build id, interpreter version, schema versions, and the
+    digest of the result set the report was built from. Tests not executed
+    (``result_set.not_executed``) enter with status ``not_run`` and no digest.
+    Timestamps enter only through the injected Clock (TOOL-REP-100).
     """
     if not isinstance(result_set, ResultSet):
         raise TypeError(f"Expected ectt.exh.results.ResultSet, got {type(result_set).__name__}")
@@ -195,18 +286,30 @@ def build_report_model(
             raise ReportModelError(f"duplicate coverage entry for unit '{entry.unit}'", reason="duplicate_coverage")
         coverage_map[entry.unit] = entry
 
+    execution = _execution_facts(result_set)
+    provenance = build_provenance(
+        clock=clock,
+        schema_versions={
+            "report_model": REPORT_MODEL_SCHEMA_VERSION,
+            "result_set": result_set.schema_version,
+        },
+        input_digests={"result_set": stable_id(dump_result_set(result_set))},
+    )
+
     return _make_model(
         run_id=result_set.run_id,
         tests=tuple(entries[key] for key in sorted(entries)),
         coverage=tuple(coverage_map[key] for key in sorted(coverage_map)),
         partial=result_set.partial,
         generated_at=clock.isoformat(),
+        execution=execution,
+        provenance=provenance,
     )
 
 
 def report_model_to_dict(model: ReportModel) -> dict[str, Any]:
     """Return the canonical dictionary form (schema_version first on dump)."""
-    return {
+    doc: dict[str, Any] = {
         "coverage": [entry.to_dict() for entry in model.coverage],
         "generated_at": model.generated_at,
         "partial": model.partial,
@@ -215,6 +318,11 @@ def report_model_to_dict(model: ReportModel) -> dict[str, Any]:
         "schema_version": REPORT_MODEL_SCHEMA_VERSION,
         "tests": [entry.to_dict() for entry in model.tests],
     }
+    if model.execution is not None:
+        doc["execution"] = model.execution.to_dict()
+    if model.provenance is not None:
+        doc["provenance"] = model.provenance.to_dict()
+    return doc
 
 
 def dump_report_model(model: ReportModel) -> str:
@@ -228,25 +336,42 @@ def _field(data: Mapping[str, Any], key: str, where: str) -> Any:
     return data[key]
 
 
-def _report_id_from_body(body: Mapping[str, Any]) -> str:
-    return stable_id(
-        canonical_json_bytes(
-            {
-                "coverage": body["coverage"],
-                "generated_at": body["generated_at"],
-                "partial": body["partial"],
-                "run_id": body["run_id"],
-                "tests": body["tests"],
-            }
-        )
+def _provenance_from_dict(data: Mapping[str, Any]) -> ProvenanceRecord:
+    """Rebuild and digest-verify an embedded provenance record."""
+    for key in ("tool_version", "build_id", "python_version", "dependencies", "schema_versions", "input_digests", "digest"):
+        _field(data, key, "provenance record")
+    record = ProvenanceRecord(
+        tool_version=_non_empty(data["tool_version"], "provenance tool_version"),
+        build_id=_non_empty(data["build_id"], "provenance build_id"),
+        python_version=_non_empty(data["python_version"], "provenance python_version"),
+        dependencies=dict(data["dependencies"]),
+        schema_versions=dict(data["schema_versions"]),
+        input_digests=dict(data["input_digests"]),
+        generated_at=data.get("generated_at"),
     )
+    if record.digest != data["digest"]:
+        raise ReportModelError(
+            "embedded provenance digest does not match its content",
+            reason="digest_mismatch",
+        )
+    return record
+
+
+def _execution_from_dict(data: Mapping[str, Any]) -> ExecutionFacts:
+    where = _non_empty(_field(data, "where", "execution facts"), "execution where")
+    toolchain = _non_empty(_field(data, "toolchain", "execution facts"), "execution toolchain")
+    target_id = data.get("target_id")
+    if target_id is not None:
+        _id(target_id, "target id")
+    return ExecutionFacts(where=where, toolchain=toolchain, target_id=target_id)
 
 
 def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
     """Load and validate a persisted report model.
 
-    Refuses unknown schema versions and models whose stored report id does
-    not match the id recomputed from the content (D-02 digest binding).
+    Accepts every version in ``SUPPORTED_FORMAT_VERSIONS`` (TOOL-REP-130);
+    refuses unknown versions and documents whose stored report id does not
+    match the id recomputed from the content (D-02 digest binding).
     """
     if isinstance(source, (bytes, bytearray, memoryview)):
         doc: Any = json.loads(bytes(source).decode("utf-8"))
@@ -260,9 +385,10 @@ def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
         raise ReportModelError("report model document root must be a JSON object", reason="invalid_root_type")
 
     version = _field(doc, "schema_version", "document")
-    if version != REPORT_MODEL_SCHEMA_VERSION:
+    if version not in SUPPORTED_FORMAT_VERSIONS:
         raise ReportModelError(
-            f"unsupported report model schema version '{version}' (reader publishes {REPORT_MODEL_SCHEMA_VERSION})",
+            f"unsupported report model schema version '{version}' "
+            f"(reader accepts: {', '.join(SUPPORTED_FORMAT_VERSIONS)})",
             reason="incompatible_schema_version",
         )
 
@@ -273,8 +399,7 @@ def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
     if not isinstance(partial, bool):
         raise ReportModelError("'partial' must be a boolean", reason="invalid_partial")
     _id(run_id, "run id")
-    if not isinstance(generated_at, str) or not generated_at:
-        raise ReportModelError("'generated_at' must be a non-empty string", reason="invalid_timestamp")
+    _non_empty(generated_at, "generated_at")
 
     raw_tests = _field(doc, "tests", "document")
     raw_coverage = _field(doc, "coverage", "document")
@@ -303,15 +428,31 @@ def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
         seen_units.add(cov_entry.unit)
         coverage_list.append(cov_entry)
 
-    recomputed = _report_id_from_body(
-        {
-            "coverage": [entry.to_dict() for entry in coverage_list],
-            "generated_at": generated_at,
-            "partial": partial,
-            "run_id": run_id,
-            "tests": [entry.to_dict() for entry in tests],
-        }
-    )
+    execution: ExecutionFacts | None = None
+    provenance: ProvenanceRecord | None = None
+    if version == "1.0":
+        for extra in ("execution", "provenance"):
+            if extra in doc:
+                raise ReportModelError(
+                    f"schema version 1.0 does not carry '{extra}'",
+                    reason="unexpected_field",
+                )
+    else:
+        execution = _execution_from_dict(_field(doc, "execution", "document"))
+        provenance = _provenance_from_dict(_field(doc, "provenance", "document"))
+
+    body: dict[str, Any] = {
+        "coverage": [entry.to_dict() for entry in coverage_list],
+        "generated_at": generated_at,
+        "partial": partial,
+        "run_id": run_id,
+        "tests": [entry.to_dict() for entry in tests],
+    }
+    if execution is not None:
+        body["execution"] = execution.to_dict()
+    if provenance is not None:
+        body["provenance"] = provenance.to_dict()
+    recomputed = stable_id(canonical_json_bytes(body))
     if recomputed != stored_report_id:
         raise ReportModelError(
             "stored report id does not match the recomputed content digest",
@@ -325,4 +466,6 @@ def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
         coverage=tuple(coverage_list),
         partial=partial,
         generated_at=generated_at,
+        execution=execution,
+        provenance=provenance,
     )

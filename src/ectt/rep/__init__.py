@@ -15,9 +15,12 @@ from ectt.rep.formats import (
     default_format_registry,
 )
 from ectt.rep.model import (
+    FORMAT_CHANGELOG,
     REPORT_MODEL_SCHEMA_VERSION,
+    SUPPORTED_FORMAT_VERSIONS,
     TEST_STATUSES,
     CoverageEntry,
+    ExecutionFacts,
     ReportModel,
     TestEntry,
     build_report_model,
@@ -30,11 +33,14 @@ from ectt.rep.model import (
 from ectt.rep.render import render_json, render_text
 
 __all__ = [
+    "FORMAT_CHANGELOG",
     "REPORT_FORMAT_CONTRACT",
     "REPORT_FORMATS_POINT_ID",
     "REPORT_MODEL_SCHEMA_VERSION",
+    "SUPPORTED_FORMAT_VERSIONS",
     "TEST_STATUSES",
     "CoverageEntry",
+    "ExecutionFacts",
     "ReportFormatRegistry",
     "ReportModel",
     "ReportModelError",
