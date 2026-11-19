@@ -6,6 +6,15 @@ declarative hardware inventory, target-failure classification, and the
 on-target footprint documentation surface.
 """
 
+from ectt.ext.channels import (
+    CHANNEL_SEMIHOSTING,
+    CHANNEL_SERIAL_UART,
+    RetrievalChannel,
+    UnknownChannelError,
+    parse_channel_output,
+    semihosting_channel,
+    serial_uart_channel,
+)
 from ectt.ext.errors import ExtError
 from ectt.ext.simulator import (
     FAMILY_QEMU,
@@ -37,4 +46,12 @@ __all__ = [
     "renode_descriptor",
     "plan_simulator_run",
     "consume_simulator_output",
+    # Result retrieval channels (WP-EXT-03)
+    "CHANNEL_SEMIHOSTING",
+    "CHANNEL_SERIAL_UART",
+    "RetrievalChannel",
+    "UnknownChannelError",
+    "semihosting_channel",
+    "serial_uart_channel",
+    "parse_channel_output",
 ]
