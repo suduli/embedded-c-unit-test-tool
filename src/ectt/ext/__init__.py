@@ -16,6 +16,20 @@ from ectt.ext.channels import (
     serial_uart_channel,
 )
 from ectt.ext.errors import ExtError
+from ectt.ext.probe import (
+    FAMILY_JLINK,
+    FAMILY_OPENOCD,
+    FAMILY_PYOCD,
+    PROBE_FAMILIES,
+    ProbeDescriptor,
+    ProbePlan,
+    UnknownProbeError,
+    jlink_descriptor,
+    openocd_descriptor,
+    plan_flash,
+    plan_probe_run,
+    pyocd_descriptor,
+)
 from ectt.ext.simulator import (
     FAMILY_QEMU,
     FAMILY_RENODE,
@@ -54,4 +68,17 @@ __all__ = [
     "semihosting_channel",
     "serial_uart_channel",
     "parse_channel_output",
+    # Debug-probe execution & flashing (WP-EXT-02)
+    "PROBE_FAMILIES",
+    "FAMILY_OPENOCD",
+    "FAMILY_PYOCD",
+    "FAMILY_JLINK",
+    "ProbeDescriptor",
+    "ProbePlan",
+    "UnknownProbeError",
+    "openocd_descriptor",
+    "pyocd_descriptor",
+    "jlink_descriptor",
+    "plan_probe_run",
+    "plan_flash",
 ]

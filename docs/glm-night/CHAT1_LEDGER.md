@@ -36,3 +36,4 @@
 | WP-TCH-05 | PARTIAL | 714d97f | 767 passed, 4 skipped | TCH-080 done (isolated per-toolchain dirs, one invocation); TCH-090 spec generation done, actual image build pending CI runtime evidence; fixed bld/tch circular import via lazy import; gates green (2 gate retries) |
 | WP-TCH-06 | PARTIAL | f4f35cc | 773 passed, 4 skipped | TCH-100: 5-family roster with scriptability notes, armclang+IAR configs through public path; licensed-toolchain execution pending runtime evidence; gates green first try |
 | WP-EXT-01 | PARTIAL | be928a4 | 783 passed, 4 skipped | TGT-020: qemu/renode descriptors, exact command composition, SEC-07 output boundary; real simulator execution pending runtime evidence; gates green first try |
+| WP-EXT-03 | DONE | f0cdb17 | 790 passed, 4 skipped | TGT-050/060: semihosting+UART descriptors, one-way pure-text protocol parse (no bidirectional channel in API); gates green first try |
