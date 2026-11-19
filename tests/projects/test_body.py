@@ -2,10 +2,6 @@
 historical claims, dependency annotations, and hash-driven write suppression."""
 from __future__ import annotations
 
-import re
-
-import pytest
-
 import github_projects as gp
 
 REPO_ROOT = gp.Path(__file__).resolve().parents[2]
@@ -84,14 +80,14 @@ def test_historical_completion_claims_shown_unverified():
 def test_content_hash_stable_and_independent_of_revision():
     pkg = _package("WP-CORE-01")
     assert gp.content_hash(pkg, REPO) == gp.content_hash(pkg, REPO)
-    other = gp.Package(**{**pkg.__dict__})
+    other = gp.Package(**pkg.__dict__)
     other.effort = pkg.effort + 1
     assert gp.content_hash(other, REPO) != gp.content_hash(pkg, REPO)
 
 
 def test_capability_change_changes_hash():
     pkg = _package("WP-CORE-01")
-    other = gp.Package(**{**pkg.__dict__})
+    other = gp.Package(**pkg.__dict__)
     other.capability = "Renamed capability"
     assert gp.content_hash(other, REPO) != gp.content_hash(pkg, REPO)
 

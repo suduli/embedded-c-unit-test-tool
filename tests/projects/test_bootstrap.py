@@ -2,17 +2,15 @@
 views and label idempotently; Status option updates preserve option ids."""
 from __future__ import annotations
 
-import pytest
-
-from conftest import REPO, OWNER, register_components
-
 import github_projects as gp
+import pytest
+from conftest import OWNER, REPO, register_components
 
 REPO_ROOT = gp.Path(__file__).resolve().parents[2]
 
 
 def test_bootstrap_preview_makes_no_writes(fake_gh):
-    ops, notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, None, apply_changes=False)
+    ops, _notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, None, apply_changes=False)
     kinds = {op["op"] for op in ops}
     assert {"ensure_field", "ensure_status_options", "ensure_view", "ensure_label"} <= kinds
     assert fake_gh.project is None        # nothing created
@@ -30,7 +28,7 @@ def test_bootstrap_preview_makes_no_writes(fake_gh):
 
 
 def test_bootstrap_apply_creates_everything_then_is_idempotent(fake_gh):
-    ops, notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, None, apply_changes=True)
+    _ops, notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, None, apply_changes=True)
     assert fake_gh.project is not None
     assert fake_gh.project["title"] == gp.PROJECT_TITLE
     assert {gp.FIELD_WORK_PACKAGE, gp.FIELD_COMPONENT, gp.FIELD_PHASE,
@@ -74,7 +72,7 @@ def test_bootstrap_with_explicit_project_number(fake_gh):
     fake_gh.fields["Status"] = {"id": "FIELD_STATUS", "dataType": "SINGLE_SELECT", "options": [
         {"id": "OPT_T", "name": "Todo"}, {"id": "OPT_IP", "name": "In Progress"}, {"id": "OPT_D", "name": "Done"},
     ]}
-    ops, notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, 7, apply_changes=True)
+    _ops, notes = gp.bootstrap(fake_gh, REPO_ROOT, REPO, OWNER, 7, apply_changes=True)
     assert any("configuring existing project" in n for n in notes)
     assert fake_gh.project["number"] == 7
     # No createProjectV2 mutation was issued.

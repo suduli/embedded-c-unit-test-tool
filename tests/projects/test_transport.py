@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import subprocess
 
-import pytest
-
 import github_projects as gp
+import pytest
 
 
 class _Proc:

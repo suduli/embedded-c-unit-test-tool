@@ -6,6 +6,7 @@ pagination, project fields/items/views, and every mutation the tool issues.
 """
 from __future__ import annotations
 
+import functools
 import json
 import sys
 from pathlib import Path
@@ -287,16 +288,15 @@ class FakeGh:
         return {"updateProjectV2ItemFieldValue": {"item": {"id": variables["itemId"]}}}
 
 
-_COMPONENTS_CACHE: list[str] | None = None
+@functools.cache
+def _components_from_register() -> tuple[str, ...]:
+    root = Path(__file__).resolve().parents[2]
+    return tuple(sorted({p.component for p in gp.load_source(root)}))
 
 
 def register_components() -> list[str]:
     """Component single-select options, derived from the real register once."""
-    global _COMPONENTS_CACHE
-    if _COMPONENTS_CACHE is None:
-        root = Path(__file__).resolve().parents[2]
-        _COMPONENTS_CACHE = sorted({p.component for p in gp.load_source(root)})
-    return _COMPONENTS_CACHE
+    return list(_components_from_register())
 
 
 def seeded_project(fake: FakeGh) -> FakeGh:

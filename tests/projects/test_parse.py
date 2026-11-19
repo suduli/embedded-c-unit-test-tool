@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
-from conftest import make_plan, make_srs, write_fixture_repo
-
 import github_projects as gp
+import pytest
+from conftest import make_plan, make_srs, write_fixture_repo
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -199,5 +197,5 @@ def test_missing_register_section_stops_import(tmp_path):
     root = tmp_path
     (root / "PLAN-001-test.md").write_text("# no register here\n", encoding="utf-8")
     (root / "SRS-001-test.md").write_text(make_srs(_base_requirements()), encoding="utf-8")
-    with pytest.raises(gp.ProjectsError, match="§5.5"):
+    with pytest.raises(gp.ProjectsError, match=r"§5\.5"):
         gp.load_source(root)

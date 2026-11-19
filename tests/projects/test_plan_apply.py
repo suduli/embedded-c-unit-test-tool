@@ -3,11 +3,9 @@ human-edit survival, interruption recovery, conflicts, retired packages,
 stale previews, and actionable failures."""
 from __future__ import annotations
 
-import pytest
-
-from conftest import REPO, OWNER, FakeGh, json_roundtrip, seeded_project
-
 import github_projects as gp
+import pytest
+from conftest import OWNER, REPO, FakeGh, json_roundtrip
 
 REPO_ROOT = gp.Path(__file__).resolve().parents[2]
 
@@ -35,7 +33,7 @@ def test_plan_on_empty_remote_proposes_191_creations(bootstrapped):
     assert first["title"].startswith("[WP-")
     assert f"<!-- ectt-work-package:{first['wp']} -->" in first["body"]
     assert first["initial_status"] == "Needs reconciliation"
-    assert first["fields"][gp.FIELD_COMPONENT] in ("Validation spikes",) or first["fields"][gp.FIELD_COMPONENT].startswith("CMP-")
+    assert first["fields"][gp.FIELD_COMPONENT] == "Validation spikes" or first["fields"][gp.FIELD_COMPONENT].startswith("CMP-")
 
 
 def test_apply_creates_issues_items_fields_and_initial_status(bootstrapped):
@@ -309,7 +307,7 @@ def test_multiple_markers_in_one_body_stop_the_run(bootstrapped):
 def test_marker_without_generated_block_is_a_conflict(bootstrapped):
     bootstrapped.seed_issue("[WP-CORE-01] Determinism, source immutability and output confinement",
                             "<!-- ectt-work-package:WP-CORE-01 -->\n\nsomeone rebuilt this body")
-    with pytest.raises(gp.ProjectsError, match="conflicting match.*not the importer's generated block"):
+    with pytest.raises(gp.ProjectsError, match=r"conflicting match.*not the importer's generated block"):
         run_plan(bootstrapped)
 
 
