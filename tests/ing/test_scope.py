@@ -91,18 +91,14 @@ def test_directory_expansion_finds_c_files_recursively(tmp_path: Path) -> None:
     )
 
 
-def test_glob_expansion(tmp_path: Path) -> None:
+def test_glob_expansion(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """verifies: TOOL-ING-150"""
     (tmp_path / "x_driver.c").write_text("int x;\n", encoding="utf-8")
     (tmp_path / "y_driver.c").write_text("int y;\n", encoding="utf-8")
     (tmp_path / "main.c").write_text("int m;\n", encoding="utf-8")
-    import os
 
-    os.chdir(tmp_path)
-    try:
-        assert expand_glob("*_driver.c") == ("x_driver.c", "y_driver.c")
-    finally:
-        os.chdir(tmp_path.parent)
+    monkeypatch.chdir(tmp_path)
+    assert expand_glob("*_driver.c") == ("x_driver.c", "y_driver.c")
 
 
 def test_named_build_target_resolved_from_mapping() -> None:
