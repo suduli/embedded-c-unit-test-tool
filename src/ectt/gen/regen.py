@@ -49,15 +49,15 @@ _FINGERPRINT_RE: Final[re.Pattern[str]] = re.compile(
 class HarnessRegenerationConflictError(GenError):
     """Raised when a conflicting regeneration is applied (nothing was written)."""
 
-    def __init__(self, message: str, *, reason: str = "harness_regeneration_conflict") -> None:
+    def __init__(
+        self, message: str, *, reason: str = "harness_regeneration_conflict"
+    ) -> None:
         super().__init__(message, reason=reason)
 
 
 def _fingerprint_of(harness: GeneratedHarness) -> str:
     if not harness.interface_fingerprint:
-        raise GenError(
-            "harness carries no interface fingerprint; regenerate it first"
-        )
+        raise GenError("harness carries no interface fingerprint; regenerate it first")
     return harness.interface_fingerprint
 
 
@@ -71,7 +71,10 @@ def _extract_fingerprint(text: str) -> str:
 
 
 def _extract_regions(text: str) -> dict[str, str]:
-    return {match.group("name"): match.group("content") for match in _REGION_RE.finditer(text)}
+    return {
+        match.group("name"): match.group("content")
+        for match in _REGION_RE.finditer(text)
+    }
 
 
 def _signature_of(harness: GeneratedHarness) -> dict[str, str]:
@@ -115,6 +118,7 @@ def regenerate(old_text: str, harness: GeneratedHarness) -> RegenerationResult:
     if old_fingerprint == new_fingerprint:
         regions = _extract_regions(old_text)
         text = harness.source
+        dropped: list[str] = []
         for name, content in regions.items():
             empty_block = (
                 f"/* ectt:user-region: {name} begin */\n"
@@ -125,10 +129,17 @@ def regenerate(old_text: str, harness: GeneratedHarness) -> RegenerationResult:
                 f"{content}"
                 f"/* ectt:user-region: {name} end */"
             )
+            # A region with no slot in the regenerated source would lose the
+            # user's content silently, so it is a conflict, not a success.
+            if empty_block not in text:
+                dropped.append(f"user region dropped: {name}")
+                continue
             text = text.replace(empty_block, filled_block)
-        return RegenerationResult(
-            status=STATUS_PRESERVED, text=text, conflicts=()
-        )
+        if dropped:
+            return RegenerationResult(
+                status=STATUS_CONFLICT, text=None, conflicts=tuple(dropped)
+            )
+        return RegenerationResult(status=STATUS_PRESERVED, text=text, conflicts=())
     return RegenerationResult(
         status=STATUS_CONFLICT,
         text=None,
@@ -183,7 +194,9 @@ class HarnessStaleness:
     reasons: tuple[str, ...]
 
 
-def check_harness_staleness(old_text: str, harness: GeneratedHarness) -> HarnessStaleness:
+def check_harness_staleness(
+    old_text: str, harness: GeneratedHarness
+) -> HarnessStaleness:
     """Whether the existing harness is stale relative to the current interface."""
     try:
         old_fingerprint = _extract_fingerprint(old_text)
