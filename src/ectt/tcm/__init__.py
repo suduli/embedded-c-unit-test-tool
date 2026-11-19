@@ -27,6 +27,7 @@ from ectt.tcm.datacases import (
 )
 from ectt.tcm.errors import (
     DuplicateTestCaseError,
+    InvalidSelectionError,
     InvalidTestCaseError,
     InvalidTestCasesFileError,
     MissingCaseFieldError,
@@ -34,6 +35,31 @@ from ectt.tcm.errors import (
     TcmError,
     TestCaseReadError,
     UnknownTestCaseError,
+)
+from ectt.tcm.independence import (
+    IndependenceReport,
+    check_order_independence,
+    execution_order,
+)
+from ectt.tcm.interchange import (
+    COLUMNS,
+    INTERCHANGE_VERSION,
+    InterchangeExport,
+    InterchangeImport,
+    export_cases,
+    import_cases,
+)
+from ectt.tcm.ranged import (
+    RangedInput,
+    ValidRange,
+    ensure_range_checking,
+    expand_case,
+    expand_integer_range,
+    mark_robustness,
+)
+from ectt.tcm.selection import (
+    Selection,
+    partition_cases,
 )
 
 __all__ = [
@@ -46,6 +72,10 @@ __all__ = [
     "UnknownTestCaseError",
     "InvalidTestCasesFileError",
     "MissingCaseFieldError",
+    "InvalidSelectionError",
+    "RangeExpansionError",
+    "RangeCheckingError",
+    "InterchangeError",
     # C-authored cases
     "CSourceTestCase",
     "TestCaseSet",
@@ -64,4 +94,24 @@ __all__ = [
     "load_test_cases_file",
     "dump_test_cases_document",
     "save_test_cases_file",
+    # Selection and independence
+    "Selection",
+    "partition_cases",
+    "execution_order",
+    "IndependenceReport",
+    "check_order_independence",
+    # Ranged and robustness inputs
+    "RangedInput",
+    "ValidRange",
+    "expand_integer_range",
+    "expand_case",
+    "mark_robustness",
+    "ensure_range_checking",
+    # Interchange
+    "INTERCHANGE_VERSION",
+    "COLUMNS",
+    "InterchangeExport",
+    "InterchangeImport",
+    "export_cases",
+    "import_cases",
 ]

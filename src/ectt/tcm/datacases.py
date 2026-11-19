@@ -79,7 +79,7 @@ TEST_CASES_KIND = FileKind(
 _ORIGIN_AUTHORS = ("human", "atg", "ai")
 _EXPECT_CALL_RE = re.compile(r"^\d+$")
 
-_CASE_KEYS = frozenset({"id", "unit", "function", "origin", "requirements", "inputs", "expected", "stubs", "digest"})
+_CASE_KEYS = frozenset({"id", "unit", "function", "origin", "requirements", "suites", "robustness", "inputs", "expected", "stubs", "digest"})
 _FILE_KEYS = frozenset({"schema_version", "test_cases"})
 _ORIGIN_KEYS = frozenset({"author", "engine", "model", "review_state"})
 _INPUTS_KEYS = frozenset({"parameters", "globals"})
@@ -144,6 +144,8 @@ class DataDrivenTestCase:
     stubs: tuple[StubSpec, ...]
     origin: TestCaseOrigin = field(default_factory=TestCaseOrigin)
     requirements: tuple[str, ...] = ()
+    suites: tuple[str, ...] = ()
+    robustness: bool = False
     recorded_digest: str | None = None
     content_digest: str = ""
     extra: Mapping[str, str] = field(default_factory=dict)
@@ -177,6 +179,8 @@ class DataDrivenTestCase:
             "function": self.function,
             "origin": origin,
             "requirements": list(self.requirements),
+            "suites": list(self.suites),
+            "robustness": self.robustness,
             "inputs": {
                 "parameters": dict(self.inputs.parameters),
                 "globals": dict(self.inputs.global_inits),
@@ -408,6 +412,30 @@ def _parse_case(entry: Any, *, path: Path | str | None) -> DataDrivenTestCase:
             path=path,
         )
 
+    suites_raw = entry.get("suites")
+    if suites_raw is None:
+        suites: tuple[str, ...] = ()
+    elif isinstance(suites_raw, list) and all(
+        isinstance(name, str) and name.strip() for name in suites_raw
+    ):
+        suites = tuple(suites_raw)
+    else:
+        raise InvalidTestCasesFileError(
+            f"test case '{case_id}': 'suites' must be a list of non-empty strings",
+            path=path,
+        )
+
+    robustness_raw = entry.get("robustness")
+    if robustness_raw is None:
+        robustness = False
+    elif isinstance(robustness_raw, str) and robustness_raw.lower() in ("true", "false"):
+        robustness = robustness_raw.lower() == "true"
+    else:
+        raise InvalidTestCasesFileError(
+            f"test case '{case_id}': 'robustness' must be true or false",
+            path=path,
+        )
+
     inputs_raw = entry.get("inputs")
     if not isinstance(inputs_raw, Mapping):
         raise MissingCaseFieldError(
@@ -495,6 +523,8 @@ def _parse_case(entry: Any, *, path: Path | str | None) -> DataDrivenTestCase:
         stubs=stubs,
         origin=origin,
         requirements=requirements,
+        suites=suites,
+        robustness=robustness,
         recorded_digest=recorded_digest,
         extra=extras,
     )
@@ -609,6 +639,10 @@ def _case_to_dict(case: DataDrivenTestCase) -> dict[str, Any]:
     }
     if case.requirements:
         out["requirements"] = list(case.requirements)
+    if case.suites:
+        out["suites"] = list(case.suites)
+    if case.robustness:
+        out["robustness"] = "true"
     out.update(case.extra)
     return out
 
