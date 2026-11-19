@@ -17,6 +17,7 @@ from ectt.trc.matrix import (
     associations_from_datacases,
     build_matrix,
 )
+from ectt.trc.unlinked import UnlinkedReport, find_unlinked
 
 __all__ = [
     "Association",
@@ -26,6 +27,8 @@ __all__ = [
     "TestLink",
     "TraceabilityMatrix",
     "TrcError",
+    "UnlinkedReport",
     "associations_from_datacases",
     "build_matrix",
+    "find_unlinked",
 ]
