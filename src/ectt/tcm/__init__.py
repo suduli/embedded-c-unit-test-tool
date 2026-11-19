@@ -41,6 +41,14 @@ from ectt.tcm.independence import (
     check_order_independence,
     execution_order,
 )
+from ectt.tcm.ranged import (
+    RangedInput,
+    ValidRange,
+    ensure_range_checking,
+    expand_case,
+    expand_integer_range,
+    mark_robustness,
+)
 from ectt.tcm.selection import (
     Selection,
     partition_cases,
@@ -57,6 +65,8 @@ __all__ = [
     "InvalidTestCasesFileError",
     "MissingCaseFieldError",
     "InvalidSelectionError",
+    "RangeExpansionError",
+    "RangeCheckingError",
     # C-authored cases
     "CSourceTestCase",
     "TestCaseSet",
@@ -81,4 +91,11 @@ __all__ = [
     "execution_order",
     "IndependenceReport",
     "check_order_independence",
+    # Ranged and robustness inputs
+    "RangedInput",
+    "ValidRange",
+    "expand_integer_range",
+    "expand_case",
+    "mark_robustness",
+    "ensure_range_checking",
 ]

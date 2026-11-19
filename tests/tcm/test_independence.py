@@ -5,7 +5,15 @@ Covers TOOL-TCD-090 per docs/verification/WP-TCM-04-analysis.md.
 
 from __future__ import annotations
 
-from ectt.tcm.datacases import DataDrivenTestCase, TestCaseExpected, TestCaseInputs
+from ectt.tcm.datacases import (
+    DataDrivenTestCase,
+)
+from ectt.tcm.datacases import (
+    TestCaseExpected as TcmCaseExpected,
+)
+from ectt.tcm.datacases import (
+    TestCaseInputs as TcmCaseInputs,
+)
 from ectt.tcm.independence import check_order_independence, execution_order
 
 
@@ -14,8 +22,8 @@ def case(case_id: str) -> DataDrivenTestCase:  # type: ignore[no-untyped-def]
         case_id=case_id,
         unit="src/a.c",
         function="f",
-        inputs=TestCaseInputs(),
-        expected=TestCaseExpected(return_value="0"),
+        inputs=TcmCaseInputs(),
+        expected=TcmCaseExpected(return_value="0"),
         stubs=(),
     )
 

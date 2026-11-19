@@ -22,6 +22,8 @@ __all__ = [
     "ValueParseError",
     "InvalidComparisonSpecError",
     "InvalidSelectionError",
+    "RangeExpansionError",
+    "RangeCheckingError",
 ]
 
 
@@ -165,6 +167,32 @@ class InvalidSelectionError(TcmError):
         message: str,
         *,
         reason: str = "invalid_selection",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class RangeExpansionError(TcmError):
+    """Raised when a range specification is malformed or expands to nothing."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "range_expansion_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class RangeCheckingError(TcmError):
+    """Raised when the tool's own range check refuses out-of-range inputs."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "range_checking_error",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
