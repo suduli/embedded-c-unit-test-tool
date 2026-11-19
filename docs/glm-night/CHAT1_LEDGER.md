@@ -39,3 +39,4 @@
 | WP-EXT-03 | DONE | f0cdb17 | 790 passed, 4 skipped | TGT-050/060: semihosting+UART descriptors, one-way pure-text protocol parse (no bidirectional channel in API); gates green first try |
 | WP-EXT-02 | PARTIAL | afe5f7a | 797 passed, 4 skipped | TGT-030/040: 3-family probe descriptors, flash+run command composition; real-hardware execution pending runtime evidence; gates green (1 gate retry) |
 | WP-EXT-07 | DONE | 1864dc8 | 805 passed, 4 skipped | TOOL-PLG-040 + TGT-120: descriptor registry, template-slot composition, plan-time never executes scripts; gates green first try |
+| WP-EXT-05 | DONE | 28cc19f | 817 passed, 4 skipped | TGT-080/090: 5-field inventory, 4 target-failure kinds distinguished from test failures; gates green first try |

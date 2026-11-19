@@ -55,6 +55,18 @@ from ectt.ext.simulator import (
     qemu_descriptor,
     renode_descriptor,
 )
+from ectt.ext.suite_split import (
+    OVERHEAD_BASIS,
+    OVERHEAD_ENTRIES,
+    ChunkTooLargeError,
+    OverheadEntry,
+    OverheadTable,
+    SuiteChunk,
+    SuiteSplit,
+    UnknownConfigurationError,
+    overhead_table,
+    split_suite,
+)
 from ectt.ext.usermethod import (
     DuplicateMethodError,
     ExecutionMethodDescriptor,
