@@ -16,6 +16,17 @@ from ectt.ext.channels import (
     serial_uart_channel,
 )
 from ectt.ext.errors import ExtError
+from ectt.ext.inventory import (
+    FAILURE_FLASH,
+    FAILURE_NO_OUTPUT,
+    FAILURE_TARGET_RESET,
+    FAILURE_WATCHDOG,
+    HardwareInventory,
+    TargetDescriptor,
+    TargetFailure,
+    UnknownTargetError,
+    classify_target_failure,
+)
 from ectt.ext.probe import (
     FAMILY_JLINK,
     FAMILY_OPENOCD,
@@ -95,4 +106,14 @@ __all__ = [
     "ExecutionMethodPlan",
     "MethodRegistry",
     "plan_user_execution",
+    # Hardware inventory & failure classification (WP-EXT-05)
+    "FAILURE_FLASH",
+    "FAILURE_NO_OUTPUT",
+    "FAILURE_TARGET_RESET",
+    "FAILURE_WATCHDOG",
+    "HardwareInventory",
+    "TargetDescriptor",
+    "TargetFailure",
+    "UnknownTargetError",
+    "classify_target_failure",
 ]
