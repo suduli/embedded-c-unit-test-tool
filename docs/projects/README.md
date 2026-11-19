@@ -205,7 +205,7 @@ tests, the templates, the workflow itself, the plan, the SRS or `docs/projects/`
 `tests/projects/` runs offline against an in-memory GitHub double:
 
 - the current source yields exactly **191** unique package records with the
-  register-audit totals (336 allocations; 275/2/10 dependency edges);
+  register-audit totals (344 allocations; 275/2/10 dependency edges);
 - malformed rows, duplicate ids, unknown dependencies, unknown requirements,
   rollup mismatches, cycles and duplicate SRS lines stop the import;
 - pagination finds open **and** closed issues beyond one page;
