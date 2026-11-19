@@ -27,6 +27,7 @@ __all__ = [
     "TypeModel",
     "UnsupportedConstructModel",
     "DecisionInventoryModel",
+    "UnitFailureModel",
     "AnalysisUnit",
     "InputFileModel",
     "ProvenanceModel",
@@ -327,6 +328,47 @@ class GlobalAccessModel:
         )
 
 
+CALL_CLASSIFICATIONS: tuple[str, ...] = ("internal", "external", "library", "unresolved")
+CALL_VIA: tuple[str, ...] = ("direct", "function_pointer", "undeclared")
+
+
+@dataclass(frozen=True)
+class CallModel:
+    """One call site inside a function body (SDD-002 §4.1 ``calls[]``, schema 1.3).
+
+    classification: ``internal`` (defined in the unit under test), ``external``
+    (declared outside the unit and not a system header), ``library`` (declared in a
+    system header), or ``unresolved`` (no declared target).
+    via: ``direct`` (named callee with a declaration), ``function_pointer`` (indirect
+    call; ``callee`` is empty because the target is never guessed), or ``undeclared``
+    (implicit declaration with no prototype anywhere in the translation unit).
+
+    Implements: TOOL-PAR-060, DSN-ANA-030.
+    """
+
+    callee: str
+    classification: str
+    via: str
+    line: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "callee": self.callee,
+            "classification": self.classification,
+            "via": self.via,
+            "line": self.line,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> CallModel:
+        return cls(
+            callee=data.get("callee", ""),
+            classification=data.get("classification", "unresolved"),
+            via=data.get("via", "function_pointer"),
+            line=int(data.get("line", 0)),
+        )
+
+
 @dataclass(frozen=True)
 class FunctionModel:
     """Extracted function interface and variable accesses.
@@ -341,10 +383,15 @@ class FunctionModel:
     return_type: str  # "ref:type.<id>"
     parameters: tuple[ParameterModel, ...] = field(default_factory=tuple)
     globals: tuple[GlobalAccessModel, ...] = field(default_factory=tuple)
+    calls: tuple[CallModel, ...] = field(default_factory=tuple)
+    # TOOL-PAR-120 (WP-ANA-05): cyclomatic complexity when computed. Optional;
+    # omitted from to_dict() while unset so the persisted SDD-002 §4.1 shape
+    # is unchanged until the schema bump lands.
+    complexity: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1."""
-        return {
+        result: dict[str, Any] = {
             "name": self.name,
             "linkage": self.linkage,
             "storage_class": self.storage_class,
@@ -352,7 +399,11 @@ class FunctionModel:
             "return_type": self.return_type,
             "parameters": [p.to_dict() for p in self.parameters],
             "globals": [g.to_dict() for g in self.globals],
+            "calls": [c.to_dict() for c in self.calls],
         }
+        if self.complexity is not None:
+            result["complexity"] = self.complexity
+        return result
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> FunctionModel:
@@ -367,6 +418,8 @@ class FunctionModel:
             return_type=data.get("return_type", ""),
             parameters=tuple(ParameterModel.from_dict(p) for p in data.get("parameters", [])),
             globals=tuple(GlobalAccessModel.from_dict(g) for g in data.get("globals", [])),
+            calls=tuple(CallModel.from_dict(c) for c in data.get("calls", [])),
+            complexity=data.get("complexity"),
         )
 
 
@@ -480,9 +533,8 @@ class TypeModel:
             res["size"] = self.size
             if self.dimensions:
                 res["dimensions"] = [d.to_dict() for d in self.dimensions]
-        elif self.kind == "builtin":
-            if self.name is not None:
-                res["name"] = self.name
+        elif self.kind == "builtin" and self.name is not None:
+            res["name"] = self.name
 
         return res
 
@@ -578,6 +630,42 @@ class DecisionInventoryModel:
 
 
 @dataclass(frozen=True)
+class UnitFailureModel:
+    """Named reason a translation unit could not be analysed (TOOL-PAR-130).
+
+    ``reason`` and ``code`` come from the ectt error model (TASK-006): ``reason``
+    is the stable machine value and ``code`` the concrete exception class name.
+    ``message`` is deterministic text: the first error diagnostic for a unit that
+    parsed with errors, otherwise a fixed description. Absolute paths and raw
+    libclang exception strings are deliberately not stored.
+    """
+
+    reason: str
+    code: str
+    category: str
+    message: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        return {
+            "reason": self.reason,
+            "code": self.code,
+            "category": self.category,
+            "message": self.message,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> UnitFailureModel:
+        """Create UnitFailureModel from dictionary representation."""
+        return cls(
+            reason=str(data.get("reason", "")),
+            code=str(data.get("code", "")),
+            category=str(data.get("category", "")),
+            message=str(data.get("message", "")),
+        )
+
+
+@dataclass(frozen=True)
 class AnalysisUnit:
     """Extracted unit containing functions, types, and diagnostics.
 
@@ -590,6 +678,7 @@ class AnalysisUnit:
     functions: tuple[FunctionModel, ...] = field(default_factory=tuple)
     types: dict[str, TypeModel] = field(default_factory=dict)
     unsupported_constructs: tuple[UnsupportedConstructModel, ...] = field(default_factory=tuple)
+    failure: UnitFailureModel | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1 unit shape."""
@@ -600,6 +689,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
+            **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
     def to_dict_without_types(self) -> dict[str, Any]:
@@ -611,6 +701,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
             "cfg": None,
+            **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
     def to_json(self, *, indent: int | None = 2) -> str:
@@ -630,6 +721,7 @@ class AnalysisUnit:
             unsupported_constructs=tuple(
                 UnsupportedConstructModel.from_dict(u) for u in data.get("unsupported_constructs", [])
             ),
+            failure=UnitFailureModel.from_dict(data["failure"]) if isinstance(data.get("failure"), dict) else None,
         )
 
 

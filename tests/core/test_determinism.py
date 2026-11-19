@@ -25,7 +25,6 @@ from ectt.core.determinism import (
     canonical_bytes,
     canonical_float_repr,
     canonical_json,
-    canonical_json_bytes,
     canonical_text,
     canonicalize,
     neutralize_hash_seed,
@@ -49,7 +48,7 @@ def test_system_clock_returns_utc() -> None:
     dt = clock.now()
     iso = clock.isoformat()
 
-    assert dt.tzinfo == datetime.timezone.utc
+    assert dt.tzinfo == datetime.UTC
     assert iso.endswith("+00:00")
     assert t1 > 0.0
 
@@ -59,7 +58,7 @@ def test_fixed_clock_frozen_and_advance() -> None:
     # From ISO string with explicit timezone
     clock = FixedClock("2026-09-26T12:00:00+00:00")
     assert clock.isoformat() == "2026-09-26T12:00:00+00:00"
-    assert clock.time() == datetime.datetime(2026, 9, 26, 12, 0, 0, tzinfo=datetime.timezone.utc).timestamp()
+    assert clock.time() == datetime.datetime(2026, 9, 26, 12, 0, 0, tzinfo=datetime.UTC).timestamp()
 
     # Repeated calls return identical values
     assert clock.now() == clock.now()
@@ -74,12 +73,12 @@ def test_fixed_clock_initialization_variants() -> None:
     """verifies: TOOL-NFR-060, DSN-CORE-010"""
     # Default construction
     default_clock = FixedClock()
-    assert default_clock.now() == datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+    assert default_clock.now() == datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=datetime.UTC)
 
     # From naive datetime (assumes UTC)
     naive_dt = datetime.datetime(2026, 5, 1, 8, 30, 0)
     clock_dt = FixedClock(naive_dt)
-    assert clock_dt.now().tzinfo == datetime.timezone.utc
+    assert clock_dt.now().tzinfo == datetime.UTC
     assert clock_dt.now().hour == 8
 
     # From float timestamp
@@ -248,7 +247,7 @@ def test_canonicalize_paths_and_dates() -> None:
     p = Path("foo/bar/baz.c")
     assert canonicalize(p) == "foo/bar/baz.c"
 
-    dt = datetime.datetime(2026, 9, 26, 15, 30, tzinfo=datetime.timezone.utc)
+    dt = datetime.datetime(2026, 9, 26, 15, 30, tzinfo=datetime.UTC)
     assert canonicalize(dt) == "2026-09-26T15:30:00+00:00"
 
 
@@ -283,6 +282,7 @@ def test_neutralize_hash_seed_subprocess_observes_zero(tmp_path: Path) -> None:
         env=env,
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert res.returncode == 0, f"Child script failed: {res.stderr}"
     assert "OBSERVED_SEED=0" in res.stdout
@@ -309,6 +309,7 @@ def test_neutralize_hash_seed_propagates_exit_code(tmp_path: Path) -> None:
         env=env,
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert res.returncode == 42
 

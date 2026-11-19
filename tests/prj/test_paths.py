@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from ectt.prj.errors import InvalidRelativePathError, ProjectConfinementError
+from ectt.prj.errors import InvalidRelativePathError
 from ectt.prj.paths import (
     normalize_posix_path,
     resolve_project_path,

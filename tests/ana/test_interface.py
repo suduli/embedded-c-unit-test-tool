@@ -13,7 +13,7 @@ import pytest
 from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import parse
 from ectt.ana.interface import extract, extract_interfaces
-from ectt.ana.model import AnalysisUnit, FunctionModel
+from ectt.ana.model import AnalysisUnit
 
 
 def test_function_storage_class_and_linkage() -> None:
@@ -291,7 +291,10 @@ def test_to_dict_matches_sdd002_exact_shape() -> None:
         {"name": "g_flag", "access": "w"}
     ]
 
+    # calls[] is in scope since schema 1.3 (TOOL-PAR-060); it is always emitted.
+    assert isinstance(fn_data["calls"], list)
+
     # Verify out-of-scope fields are absent
-    for forbidden in ("calls", "decisions", "complexity", "cfg", "annotations"):
+    for forbidden in ("decisions", "complexity", "cfg", "annotations"):
         assert forbidden not in fn_data
         assert forbidden not in data

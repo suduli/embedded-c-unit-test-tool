@@ -3,9 +3,9 @@
 - **Date:** 2026-11-07 · **Supersedes:** the review-delta-only version of this file
 - **Inventory source:** PLAN-001 §5.5 register (188 work packages · 638 person-weeks) and SRS-001 (338 unique requirement IDs: 336 allocated + 2 future; the former "323" prose is retired — see T-03 evidence), parsed at HEAD `b5786e0`
 - **Review deltas:** 29 proposed requirements (NR-01..29) and 22 tasks (T-01..22) from the [vcast-findings review](2026-11-06-vcast-findings-review-tracker.md) (evidence files RV-01..06)
-- **Status:** T-03 **landed 2026-11-07** — SRS-001 correction note applied (EXE-040, PLG-080/PLG-100, COV-150, AIF-260), design register extended (DSN-PLG-050, DSN-AIF-140/150), PLAN-001 derived tables regenerated; **both gates green** (plan_check exit 0: 329 requirements / 327 allocations / 188 packages; trace_check exit 0: 327/327 allocated). All other items remain proposals — landing them requires the change process and approval
+- **Status (updated 2026-11-17):** 16 of 22 review tasks landed (T-03, T-07..T-13, T-16 on 2026-11-07; T-15, T-17..T-22 on 2026-11-17 — evidence sections below); **both gates green** at HEAD (plan_check exit 0: 346 requirements / 344 allocations / 191 packages; trace_check exit 0: 344/344 allocated); baseline merged to `main` via PR #7. **All decision-free review tasks are landed.** Four user decisions pending — see the [Decision queue](#decision-queue-awaiting-user); T-14 is blocked by D-02 (identity model), T-01 by D-01 (licence), and T-02 waits on ADR-005 (the no-import rule is its consequence). Landing anything else requires the change process and approval
 - **Implemented at HEAD:** WP-CORE-01, WP-PRJ-01, WP-ING-01, WP-ANA-01, WP-ANA-02, WP-ANA-04 (+ spikes WP-SPIKE-01..03 recorded in ADR-001)
-- **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision)
+- **Companion:** [HTML tracker](2026-11-07-subsystem-task-tracker.html) (filterable) · [subsystem work map](diagrams/subsystem-workmap.html) · [§ Repository hosting](#9-repository-hosting-decision) · [§ Decision queue](#decision-queue-awaiting-user)
 
 ## L0 — Platform & Persistence
 
@@ -42,7 +42,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-06 | DR-06 NFR calibration plan + fixtures; provisional NFRs marked | NR-06 | RV-06 F-07/F-24 | P2 | Not Started | — |
+| T-06 | DR-06 NFR calibration plan + fixtures; provisional NFRs marked | NR-06 | RV-06 F-07/F-24 | P2 | Awaiting decision | — |
 
 ## L1 — Comprehension
 
@@ -157,7 +157,7 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-13 | Compound-test defer decision + migration flag | NR-15 | RV-03 F-03 | P1 | Not Started | — |
+| T-13 | Compound-test defer decision + migration flag | NR-15 | RV-03 F-03 | P1 | **Complete** | — |
 
 ## L3 — Realization
 
@@ -196,14 +196,14 @@
 | NR-17 | RunAttempt allocated before build; build failure is a first-class attempt record | S3, WP-CORE-04 | RV-06 F-12 | P1 |
 | NR-18 | Pass requires finalized per-attempt result record; exit(0) alone is abnormal | S3, TOOL-EXE-030/060 | RV-06 F-19 | P1 |
 | NR-19 | Exact artifact↔test-revision binding checked before every run | HAR-090/110, CBT-070 | RV-06 F-11 | P1 |
-| NR-20 | HostProfile records target→host derivations and ABI gaps | TOOL-TGT-070 | RV-02 F-04 | P2 |
+| NR-20 | HostProfile records target→host derivations and ABI gaps — landed 2026-11-17 as TOOL-TGT-130 (DSN-EXT-110, WP-EXT-04, SDD-002 §6.1) | TOOL-TGT-070 | RV-02 F-04 | P2 |
 
 ### Review-derived tasks
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
 | T-14 | Run-integrity acceptance into WP-EXH-01/02 + WP-CBT-01 | NR-17..19 | RV-06 F-11/12/19 | P1 | Not Started | T-04 |
-| T-15 | HostProfile/ABI-divergence record section | NR-20 | RV-02 F-04 | P2 | Not Started | — |
+| T-15 | HostProfile/ABI-divergence record section | NR-20 | RV-02 F-04 | P2 | **Complete** | — |
 
 ## L4 — Evidence
 
@@ -262,21 +262,21 @@
 | ID | Requirement (proposed) | Baseline | Source | Priority |
 |---|---|---|---|:--:|
 | NR-21 | Coverage completeness state complete|truncated|missing; truncated → unmeasured + advisory | S3/S4, S5 | RV-04 F-06 | P1 |
-| NR-22 | MC/DC condition-limit probing per backend + boundary fixtures | SDD-005 §6.3/§6.4 | RV-04 F-04/F-05 | P1 |
-| NR-23 | Known-answer MC/DC corpus mandated before WP-COV-05 | PLAN §6.4 | RV-04 F-10 | P1 |
-| NR-24 | Macro/source-variant divergence merge-incompatible | S4 merge rules | RV-04 F-03 | P1 |
-| NR-25 | Crashed-run coverage quarantined unless validated | WP-COV-02 | RV-06 F-18 | P1 |
-| NR-26 | Per-requirement verdicts deduplicated, worst outcome, labeled denominators | SDD-002 §8 | RV-03 F-08 | P1 |
+| NR-22 | MC/DC condition-limit probing per backend + boundary fixtures — landed 2026-11-17 (TOOL-COV-190, DSN-COV-120, PLAN §5.4/§6.4) | SDD-005 §6.3/§6.4 | RV-04 F-04/F-05 | P1 |
+| NR-23 | Known-answer MC/DC corpus mandated before WP-COV-05 — landed 2026-11-17 (TOOL-COV-210, DSN-COV-140, PLAN §6.4 gate) | PLAN §6.4 | RV-04 F-10 | P1 |
+| NR-24 | Macro/source-variant divergence merge-incompatible — landed 2026-11-17 (TOOL-COV-200, DSN-COV-130, SDD-002 §7.1) | S4 merge rules | RV-04 F-03 | P1 |
+| NR-25 | Crashed-run coverage quarantined unless validated — landed 2026-11-17 (TOOL-COV-220, DSN-COV-150, SDD-002 §7.1 admission rule) | WP-COV-02 | RV-06 F-18 | P1 |
+| NR-26 | Per-requirement verdicts deduplicated, worst outcome, labeled denominators — landed 2026-11-17 (TOOL-TRC-110, DSN-TRC-090, SDD-002 §8 + 2/1 anomaly fixture) | SDD-002 §8 | RV-03 F-08 | P1 |
 
 ### Review-derived tasks
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
 | T-16 | Coverage completeness state: TOOL-COV-180 + SDD-002 §6.1/§7.2/§8 amendments + DSN-COV-110 | NR-21, NR-27 | RV-04 F-06 | P1 | **Complete** | — |
-| T-17 | MC/DC limit probing + boundary fixtures + macro-variant merge rule | NR-22, NR-24 | RV-04 F-03..05 | P1 | Not Started | — |
-| T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | Not Started | — |
-| T-19 | Verdict dedup + labeled denominators + 2/1 anomaly fixture | NR-26 | RV-03 F-08 | P1 | Not Started | — |
-| T-20 | Crashed-run coverage admission rule | NR-25 | RV-06 F-18 | P1 | Not Started | — |
+| T-17 | MC/DC limit probing + boundary fixtures + macro-variant merge rule | NR-22, NR-24 | RV-04 F-03..05 | P1 | **Complete** | — |
+| T-18 | Known-answer MC/DC corpus mandate | NR-23 | RV-04 F-10 | P1 | **Complete** | — |
+| T-19 | Verdict dedup + labeled denominators + 2/1 anomaly fixture | NR-26 | RV-03 F-08 | P1 | **Complete** | — |
+| T-20 | Crashed-run coverage admission rule | NR-25 | RV-06 F-18 | P1 | **Complete** | — |
 
 ## L5 — Interfaces
 
@@ -415,15 +415,15 @@
 
 | ID | Requirement (proposed) | Baseline | Source | Priority |
 |---|---|---|---|:--:|
-| NR-28 | Generated-harness results agree with independently written reference tests | WP-QUA-03 | RV-06 F-02 | P2 |
-| NR-29 | Packaging gated on clean-machine endpoint acceptance (ADR-007) | WP-PKG-07 | RV-01 F-17 | P2 |
+| NR-28 | Generated-harness results agree with independently written reference tests — landed 2026-11-17 (TOOL-QUA-110, DSN-QUA-090, PLAN §5.4/§6.4) | WP-QUA-03 | RV-06 F-02 | P2 |
+| NR-29 | Packaging gated on clean-machine endpoint acceptance (ADR-007) — landed 2026-11-17 as TOOL-INS-120 in WP-PKG-01 (the installation package owns the gate, not the licence-policy package) + ADR-007 exit criterion | WP-PKG-07 | RV-01 F-17 | P2 |
 
 ### Review-derived tasks
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-21 | Harness-vs-reference agreement check in WP-QUA-03 | NR-28 | RV-06 F-02 | P2 | Not Started | — |
-| T-22 | Clean-machine endpoint gate in WP-PKG (ADR-007) | NR-29 | RV-01 F-17 | P2 | Not Started | — |
+| T-21 | Harness-vs-reference agreement check in WP-QUA-03 | NR-28 | RV-06 F-02 | P2 | **Complete** | — |
+| T-22 | Clean-machine endpoint gate in WP-PKG (ADR-007) | NR-29 | RV-01 F-17 | P2 | **Complete** | — |
 
 ## Governance & cross-cutting decisions (gates everything)
 
@@ -441,11 +441,11 @@
 
 | ID | Task | Lands | Source | Priority | Status | Blocked by |
 |---|---|---|---|:--:|---|---|
-| T-01 | Convene ADR-005 licence decision; update LICENSE/LIC-010; re-run gates | NR-01 | RV-06 F-27 | P0 | Not Started | — |
+| T-01 | Convene ADR-005 licence decision; update LICENSE/LIC-010; re-run gates | NR-01 | RV-06 F-27 | P0 | Awaiting decision | — |
 | T-02 | Write the no-import/provenance rule for vcast-findings assets | NR-02 | RV-06 F-27 | P0 | Not Started | — |
 | T-03 | SRS change: TOOL-EXE-040 timeout distinct from fail + gate repair (PLG-080/100, COV-150, AIF allocations) | NR-03 | RV-02 F-11 | P0 | **Complete** | — |
-| T-04 | Decide and record the identity model (SDD-003 §6/§7) — memo prepared, decision pending | NR-04 | RV-05 F-05 | P0 | Not Started | — |
-| T-05 | Decide and record platform order | NR-05 | RV-05 F-06 | P1 | Not Started | — |
+| T-04 | Decide and record the identity model (SDD-003 §6/§7) — memo prepared, decision pending | NR-04 | RV-05 F-05 | P0 | Awaiting decision | — |
+| T-05 | Decide and record platform order | NR-05 | RV-05 F-06 | P1 | Awaiting decision | — |
 
 ### T-03 evidence (landed 2026-11-07)
 
@@ -530,6 +530,118 @@
 - **Design register:** DSN-COV-110 added — closes the last open overclaim channel: a latched or lost coverage sink can never read as a full score; requirement_count 338.
 - **SDD-002 amendments:** §6.1 — coverage.completeness is a field on every artifact reference; §7.2 — truncated forces unmeasured with the completeness state as the reason and an advisory emitted; §8 — the S5 advisories example gains the coverage_truncated kind.
 - **Gates:** plan_check exit 0 — 338 requirements, 336 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 336/336 allocated, 246 elements. Count reconciled: HEAD SRS had 337 lines, +TOOL-COV-180 = 338.
+
+### T-17 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-190 (M, P3, T) — per pinned backend, the effective maximum decision condition count and limit-option availability (e.g. clang's `-fmcdc-max-conditions`) are probed and recorded as run evidence; a decision exceeding the recorded maximum is `unmeasured` with the recorded limit in its reason; documentation-derived limits are non-behaviors. TOOL-COV-200 (M, P1, T) — records differing only by macro expansion or another preprocessing variant are merge-incompatible, kept separate with a variant-naming diagnostic; silent variant-ignoring merges are a non-behavior.
+- **PLAN-001:** COV-190 → WP-COV-06 (uninstrumentable-expression detection owns the probe), COV-200 → WP-COV-02 (merge owner); §5.4 exit-criteria examples extended (WP-COV-05 boundary clause, new WP-COV-06 row); §6.4 gains the MC/DC backend-boundary fixture mandate — exactly-at-maximum + maximum+1, changed-limit rebuild merge-invalidation, exceeded → unmeasured assertion. Derived tables regenerated.
+- **Design register:** DSN-COV-120 (MC/DC condition-limit probing) and DSN-COV-130 (macro-variant merge incompatibility) added; requirement_count 340.
+- **SDD-002 §7.1:** the macro-variant case named as an explicit merge incompatibility, with the variant difference carried in the record identity; fixture list extended with variant-differing records and backend-boundary cases.
+- **SDD-005 §5.5.1/§6.3:** the Clang `-fmcdc-max-conditions` trap tied to TOOL-COV-190 as mandatory run evidence; MC/DC condition-limit availability added to §6.3's probed-capability list.
+- **Gates:** plan_check exit 0 — 340 requirements, 338 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 338/338 allocated, 253 elements.
+
+### T-18 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-210 (M, P3, T) — the tool's own validation suite includes a known-answer MC/DC corpus with hand-computed expected results: the minimal `a && b` independence matrix, nested decisions, repeated and coupled operands, a side-effecting operand that must not be evaluated, a macro-expanded condition, a constant or never-taken decision, and a masking-versus-unique-cause divergent case per TOOL-COV-090; each case asserts the resulting statuses (`demonstrated`, `not_demonstrated`, `unmeasured`) and the witness pair.
+- **PLAN-001:** COV-210 allocated to WP-COV-05; WP-COV-05's §5.4 exit criterion gains the known-answer corpus clause; §6.4 adds the corpus mandate paragraph — the differential oracle is self-blind (two agreeing readings can both be wrong), so masking semantics are pinned by known cases, not by backend agreement. Derived tables regenerated.
+- **Design register:** DSN-COV-140 (Known-answer MC/DC corpus) added; requirement_count 341.
+- **Gates:** plan_check exit 0 — 341 requirements, 339 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 339/339 allocated, 254 elements.
+
+### T-19 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-TRC-110 (M, P4, T) — requirement-level verdict figures deduplicate association rows to unique (requirement, test) pairs; the per-requirement verdict is the worst outcome among linked executed tests, with unreviewed-origin tests counted as unverified per TOOL-ATG-080; every percentage labels its denominator; a requirement linked to no executed test is `unverified`, never inferred from coverage.
+- **PLAN-001:** TRC-110 allocated to WP-TRC-01; §5.4 adds the WP-TRC-01 exit-criterion example — two association rows for one requirement aggregate to one counted pair and one worst-outcome verdict, never a 2/1 figure. Derived tables regenerated.
+- **Design register:** DSN-TRC-090 (Requirement-verdict aggregation) added, including the two-associations-for-one-requirement acceptance fixture; requirement_count 342.
+- **SDD-002 §8:** the `traceability` block is now aggregation-controlled — dedup to unique pairs, worst-outcome verdict, labeled denominators, unverified-never-coverage-inferred, and the 2/1 anomaly fixture mandated.
+- **Gates:** plan_check exit 0 — 342 requirements, 340 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 340/340 allocated, 255 elements.
+
+### T-20 evidence (landed 2026-11-17 — L4 Evidence)
+
+- **SRS-001:** TOOL-COV-220 (M, P1, T) — coverage artifacts from runs whose outcome is `error`, `timeout`, or a crash are retained but excluded from aggregate merges unless explicitly admitted by a recorded per-run decision; quarantined artifacts stay visible in per-run provenance and never contribute to an aggregate coverage figure.
+- **PLAN-001:** COV-220 allocated to WP-COV-02; §5.4 adds the WP-COV-02 exit-criterion example — a profile flushed by a run that then crashes is retained but excluded from the aggregate until explicitly admitted; the aggregate never includes quarantined data. Derived tables regenerated.
+- **Design register:** DSN-COV-150 (Crashed-run coverage admission) added; requirement_count 343.
+- **SDD-002 §7.1:** the merge contract now carries the admission rule, consistent with "missing measurement stays visible in per-run provenance" — the optimistic merge of partial crash profiles is a non-behavior.
+- **Gates:** plan_check exit 0 — 343 requirements, 341 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 341/341 allocated, 256 elements.
+
+### T-21 evidence (landed 2026-11-17 — L6 Assurance)
+
+- **SRS-001:** TOOL-QUA-110 (M, P2, T) — the validation suite includes a harness-agreement fixture set: for each fixture, the generated-harness outcome on hand-authored inputs equals the independently hand-written reference-test outcome of the same case, including at least one deliberately failing case and one stubbed-dependency case; any disagreement is reported as a harness-generation defect.
+- **PLAN-001:** QUA-110 allocated to WP-QUA-03; §5.4 adds the WP-QUA-03 exit-criterion example; §6.4 adds the harness-vs-reference agreement paragraph — golden files prove determinism, not generated semantics; the metamorphic check is the cheapest strong oracle for WP-GEN-01/02. Derived tables regenerated.
+- **Design register:** DSN-QUA-090 (Harness-vs-reference agreement) added; requirement_count 344.
+- **Gates:** plan_check exit 0 — 344 requirements, 342 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 342/342 allocated, 257 elements.
+
+### T-22 evidence (landed 2026-11-17 — L6 Assurance)
+
+- **SRS-001:** TOOL-INS-120 (M, P2, T) — no release package ships before it passes a clean-machine endpoint acceptance test: install and run on a machine with no development toolchain, under default endpoint-security policy (AV/SmartScreen or platform equivalent), without administrative privileges and without network access; security-policy interactions recorded per release.
+- **PLAN-001:** INS-120 allocated to WP-PKG-01 (offline, non-admin installation — the package the gate tests; the register's WP-PKG-07 baseline was the licence-policy package, and the gate belongs with the installation package); §5.4 adds the WP-PKG-01 exit criterion. Derived tables regenerated.
+- **Design register:** DSN-PKG-140 (Clean-machine endpoint acceptance gate) added; requirement_count 345.
+- **ADR-001 §ADR-007:** the gate recorded as ADR-007's exit criterion — the signing + SBOM pipeline (SDD-005 §5.9) is the mechanism; the ADR stays open for the per-platform installer/signing choice, which is entangled with the licence decision (D-01/T-01).
+- **Gates:** plan_check exit 0 — 345 requirements, 343 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 343/343 allocated, 258 elements.
+
+### T-15 evidence (landed 2026-11-17 — L3 Realization)
+
+- **SRS-001:** TOOL-TGT-130 (M, P3, T) — host executions on behalf of a target build are governed by a versioned host profile recording the target→host derivation (triples, flag/define changes, substituted platform headers, unavailable hardware behavior) and its known ABI differences — widths, alignment, packing, endianness, signedness — with unmeasured differences explicitly unknown; every host-executed result is labeled with its execution profile, and host success never establishes target behavior.
+- **PLAN-001:** TGT-130 allocated to WP-EXT-04 (host and target test parity — TOOL-TGT-070's owner, so parity is established and recorded rather than presumed); §5.4 adds the WP-EXT-04 exit criterion. Derived tables regenerated.
+- **Design register:** DSN-EXT-110 (HostProfile derivation and ABI record) added; requirement_count 346.
+- **SDD-002 §6.1:** contract point added — `execution` names the versioned host profile; host success never establishes target behavior.
+- **Gates:** plan_check exit 0 — 346 requirements, 344 allocations, 191 packages, 642 person-weeks; trace_check exit 0 — 344/344 allocated, 259 elements.
+
+## Decision queue (awaiting user)
+
+Recorded 2026-11-16. Four decisions block P0/P1 work; answer inline here (or state the choice in chat) and each lands through the change process noted at the bottom. The [HTML tracker](2026-11-07-subsystem-task-tracker.html) §1 carries the same queue.
+
+### D-01 · Licence posture — T-01 / NR-01 / ADR-005 (P0)
+
+**Question:** which licence does the project ship under? The repo is already public at `github.com/suduli/embedded-c-unit-test-tool` showing AGPL-3.0, but SRS LIC-010 requires a permissive licence — one of the two must move.
+
+| Option | Consequence |
+|---|---|
+| a) Keep AGPL-3.0 | Amend LIC-010 to require AGPL-3.0. No relicense churn (repo already public under it); strong copyleft keeps forks open; deters commercial/embedding use. |
+| b) Apache-2.0 | Satisfies LIC-010 as written. Permissive + explicit patent grant; feasible as sole author; requires repo licence change. |
+| c) MIT | Simplest permissive option satisfying LIC-010; no patent grant. |
+| d) Proprietary / closed | Repo goes private, AGPL dropped, LIC-010 becomes proprietary. Loses public visibility. |
+
+**Gates:** publicizing the repo / contributor solicitation; WP-PKG-07 (LIC-010..060); T-02 no-import rule (cites ADR-005 as its consequence anchor); NR-01 is P0 — before further implementation.
+**Answer:** _awaiting decision —_
+
+### D-02 · Identity model — T-04 / NR-04 (P0)
+
+**Question:** stable ids + content digests vs revision entities? The T-04 memo above recommends stable ids + digests.
+
+| Option | Consequence |
+|---|---|
+| a) Stable ids + digests (memo recommendation) | SDD-003 §6/§7 amendment + one sentence in SDD-002 S2/S3; WP-TCM-02 implements digest binding; **unblocks T-14** (run-integrity four-pack, which also needs NR-17..19 wording). |
+| b) Revision entities | Heavier model and schema churn; conflicts with the accepted stable-id + digest staleness model (RV-05 F-05). |
+| c) Defer | T-14 stays blocked; revisit after T-17..T-22. |
+
+**Answer:** _awaiting decision —_
+
+### D-03 · Platform order — T-05 / NR-05 (P1)
+
+**Question:** Windows pilot first or Linux-first (NFR-010/020)?
+
+| Option | Consequence |
+|---|---|
+| a) Windows pilot first | Matches the current dev platform; WP-SPIKE-03 (PyInstaller onto clean Windows) already complete; Linux CI kept green in parallel as a compat check. |
+| b) Linux-first | Matches typical embedded toolchains/CI; Windows compatibility tracked as secondary. |
+| c) Both in parallel | Equal co-pilots from day one; highest setup and test-matrix cost. |
+
+**Gates:** NFR-010/020 wording; WP-CORE-03 (platform baseline) and WP-GUI-01 platform-support planning.
+**Answer:** _awaiting decision —_
+
+### D-04 · DR-06 NFR calibration — T-06 / NR-06 (P2)
+
+**Question:** how should DR-06 NFR calibration be handled before pilot data exists?
+
+| Option | Consequence |
+|---|---|
+| a) Defer to post-pilot | Provisional NFRs stay explicitly marked; calibrate from measured baselines before WP-CORE-05 exits P2 (already mandated by NR-06). |
+| b) Calibrate now | Set provisional targets from current analysis runs; revisit post-pilot. |
+| c) Drop DR-06 | Remove the requirement if no longer meaningful. |
+
+**Answer:** _awaiting decision —_
+
+**How answers land:** D-01 → ADR-005 recorded + LICENSE/LIC-010 updated + gates re-run (T-01); D-02 → SDD-003 §6/§7 amendment (T-04, then WP-TCM-02 unblocks T-14); D-03 → NFR-010/020 wording note (T-05); D-04 → NR-06 disposition recorded on T-06. Each answer also flips the task status here and in the HTML tracker.
 
 ## Validation spikes (complete — ADR-001)
 

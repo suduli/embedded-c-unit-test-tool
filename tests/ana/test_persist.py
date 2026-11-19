@@ -28,7 +28,6 @@ from ectt.ana.interface import extract_interfaces
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
-    Diagnostic,
     FunctionModel,
     SourceLocation,
     TypeModel,
@@ -36,9 +35,9 @@ from ectt.ana.model import (
 from ectt.ana.persist import (
     READER_MAJOR,
     READER_MIN_MINOR,
+    SCHEMA_VERSION_CURRENT,
     assemble_analysis_model,
     compute_model_digest,
-    load_analysis_model,
     read_analysis_model,
     write_analysis_model,
 )
@@ -155,11 +154,13 @@ def test_real_extraction_assemble_write_read_roundtrip(
         source_root=tmp_path,
     )
 
-    # 1. Document shape assertions per SDD-002 §4.1
+    # 1. Document shape assertions per SDD-002 §4.1. The emitted version is
+    # asserted via the module's own current-version constant (not a literal)
+    # so a schema bump moves persist.py, not this test.
     doc = model.to_dict()
     keys = list(doc.keys())
     assert keys[0] == "schema_version"
-    assert doc["schema_version"] == "1.0"
+    assert doc["schema_version"] == SCHEMA_VERSION_CURRENT
     assert "provenance" in doc
     assert "units" in doc
     assert "types" in doc
@@ -178,12 +179,13 @@ def test_real_extraction_assemble_write_read_roundtrip(
     # Verify on-disk file text formatting (first key is schema_version)
     raw_content = model_path.read_text(encoding="utf-8")
     first_data_line = [line.strip() for line in raw_content.splitlines() if line.strip()][1]
-    assert first_data_line.startswith('"schema_version": "1.0"')
+    assert first_data_line.startswith('"schema_version": "')
+    assert json.loads(raw_content)["schema_version"] == SCHEMA_VERSION_CURRENT
 
     # Read back and verify round-trip
     loaded = read_analysis_model(model_path)
     assert isinstance(loaded, AnalysisModel)
-    assert loaded.schema_version == "1.0"
+    assert loaded.schema_version == SCHEMA_VERSION_CURRENT
     assert len(loaded.units) == 2
     assert loaded.capabilities == {"cfg": False}
     assert loaded.provenance.generated_at == "2026-09-27T12:00:00+00:00"
@@ -402,7 +404,10 @@ def test_schema_version_gate_exact_match() -> None:
 def test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored() -> None:
     """Verifies: TOOL-PAR-110, SDD-002 §3.
 
-    Newer minor version (1.5) with unknown extra fields is accepted and extra fields are ignored.
+    Newer minor version (1.5) with unknown extra fields is accepted and extra
+    fields are ignored. The fixture carries the inventories mandatory at
+    >= 1.1 (TOOL-PAR-140, TOOL-PAR-150); a newer minor is still a >= 1.1
+    document, so omitting them would be rejected as malformed, not accepted.
     """
     doc = {
         "schema_version": "1.5",
@@ -414,10 +419,12 @@ def test_schema_version_gate_newer_minor_accepted_and_unknown_fields_ignored() -
             "diagnostics": [],
             "functions": [],
             "cfg": None,
+            "unsupported_constructs": [],  # mandatory at >= 1.1 (TOOL-PAR-140)
             "future_metadata": {"foo": "bar"},  # unknown extra unit field
         }],
         "types": {},
         "capabilities": {"cfg": False},
+        "decision_inventory": {"status": "not_extracted"},  # mandatory at >= 1.1 (TOOL-PAR-150)
     }
     model = read_analysis_model(doc)
     assert model.schema_version == "1.5"
@@ -512,6 +519,7 @@ assert not loaded_clang_modules, f"Seam violation: clang modules loaded: {loaded
         [sys.executable, "-c", check_code],
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert result.returncode == 0, f"Subprocess failed:\nSTDOUT: {result.stdout}\nSTDERR: {result.stderr}"
 
@@ -614,9 +622,10 @@ def test_read_accepts_1_0_historical_document() -> None:
     assert model.schema_version == "1.0"
 
 
-def test_assemble_emits_1_1_with_not_extracted_inventory(tmp_path: Path) -> None:
-    """Verifies: TOOL-PAR-150 — the assembler emits schema 1.1 with an explicit
-    not_extracted decision inventory and per-unit empty unsupported inventories."""
+def test_assemble_emits_current_version_with_not_extracted_inventory(tmp_path: Path) -> None:
+    """Verifies: TOOL-PAR-150 — the assembler emits the current schema version
+    (SCHEMA_VERSION_CURRENT, not a literal) with an explicit not_extracted
+    decision inventory and per-unit empty unsupported inventories."""
     src = tmp_path / "adc.c"
     src.write_text("int adc(void) { return 1; }\n", encoding="utf-8")
     unit = AnalysisUnit(path="adc.c", status="parsed")
@@ -627,7 +636,7 @@ def test_assemble_emits_1_1_with_not_extracted_inventory(tmp_path: Path) -> None
         tool_version="0.1.0",
         front_end="libclang 18.1.8 (assumed)",
     )
-    assert model.schema_version == "1.1"
+    assert model.schema_version == SCHEMA_VERSION_CURRENT
     assert model.decision_inventory.status == "not_extracted"
     assert model.units[0].unsupported_constructs == ()
     # The emitted document survives its own reader gates.

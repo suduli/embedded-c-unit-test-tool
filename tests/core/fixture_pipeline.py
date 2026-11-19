@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -90,8 +89,7 @@ def run_pipeline(
         f"/* Generated at: {clock.isoformat()} */",
         "",
     ]
-    for inc in sorted(found_includes):
-        stub_lines.append(f'#include "{inc}"')
+    stub_lines.extend(f'#include "{inc}"' for inc in sorted(found_includes))
     stub_lines.append("")
     for func in sorted(found_functions):
         stub_lines.append(f"void stub_{func}(void) {{")

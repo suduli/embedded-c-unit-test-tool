@@ -7,6 +7,7 @@ Satisfies: TOOL-PAR-010, TOOL-PAR-020, DSN-ANA-090.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, ClassVar
 
 from ectt.core.determinism import CoreError
 
@@ -36,6 +37,8 @@ __all__ = [
 
 class AnalysisError(CoreError):
     """Base exception for ectt analysis and C front-end errors."""
+
+    category: ClassVar[str] = "analysis"
 
     def __init__(
         self,

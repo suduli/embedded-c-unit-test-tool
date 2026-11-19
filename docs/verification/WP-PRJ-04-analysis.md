@@ -1,0 +1,28 @@
+# Verification Analysis Note — WP-PRJ-04 (Dangling Reference Detection)
+
+Analysis evidence for requirements verified under WP-PRJ-04. No schema change: the check reads the current project schema and writes nothing.
+
+| Requirement ID | Summary Statement | Implementation Reference | Analysis Argument & Verification Evidence |
+|---|---|---|---|
+| **TOOL-PRJ-090** | The tool shall detect and report when project data references source, requirements, or configuration that no longer exists. | `src/ectt/prj/references.py` (`find_dangling_references`, `DanglingReference`), `src/ectt/prj/project.py` (`Project.dangling_references`), `tests/prj/test_references.py` | **Guarantee (every stored reference is resolved):** each `source_roots` entry and the `output_root` are resolved against the project root. A failure is reported with the referencing file (`ectt.project`), the kind of reference, the target as stored, whether it is required, and a reason.<br><br>**Guarantee (required versus optional):** a source root is required, because the build cannot proceed without it. The output root is optional, because generation creates it. A missing output root is reported with `required: false`.<br><br>**Guarantee (named reasons):** `missing_target`, `not_a_directory`, `outside_project` (the resolved path escapes the root, including through a link), `invalid_path` (not a project-relative POSIX path, including absolute paths and `..`), and `unresolvable` (the filesystem cannot resolve it, for example a link loop).<br><br>**Guarantee (report, not exception):** the check returns a tuple and never raises for a broken reference. A project with broken references still opens.<br><br>**Guarantee (deterministic):** the result is sorted by the field order of `DanglingReference`, so repeated runs over the same project give the same tuple.<br><br>**Test evidence:** `tests/prj/test_references.py` — `test_none_when_every_reference_resolves` (none), `test_one_missing_source_root_is_reported_as_required` (one), `test_many_failures_are_sorted_and_stable` (many), `test_missing_output_root_is_reported_as_optional`, `test_source_root_that_is_a_file_is_not_a_directory`, `test_unsafe_stored_path_is_reported_not_followed` (two forms), `test_symlink_pointing_outside_the_project_is_reported`, `test_cyclic_symlink_terminates_and_is_reported` (cyclic), `test_directory_junction_cycle_terminates_and_is_not_dangling` (cyclic, Windows junctions), `test_project_with_broken_references_still_opens`. |
+
+## Not yet covered
+
+- **Symlink cases skipped on this host.** Creating a symbolic link needs a privilege this account does not have. The outside-project symlink and the self-referencing symlink tests skip here. The junction cycle test runs, because junctions need no elevated rights. Run the suite with symlink rights to exercise the two skipped cases.
+- **Requirements and configuration references.** The schema stores no requirements-file or configuration references yet. TOOL-PRJ-090 names them, so this check will need a new entry in `find_dangling_references` when those fields land (SDD-003 §6 says where they are stored, but not as a field).
+- **Missing identifiers.** The task card described "references that point at missing ids". The requirement, and SDD-003 §6, describe paths to missing files and directories. The implementation follows the requirement. Ids are not stored as references in this schema.
+- **Not wired into the CLI.** Nothing presents this report to a user yet. The method is the API the CLI will call.
+
+## Design notes
+
+- **Why the owner is always `ectt.project`.** Today every stored reference lives in the project manifest. Recording the owner anyway means the report stays correct when references move into other authored files.
+- **Why the check does not raise.** SDD-003 §6 asks for a report that names the file and the target, rather than a failure at first use in a later stage. A raising check would stop a project from opening at all.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/prj/test_references.py` → 7 passed,
+2 skipped (symlink privilege — WinError 1314 class, pre-existing at baseline, environment-dependent);
+full suite 504 passed / 4 skipped (baseline 4). TOOL-PRJ-090 (detect and report references to
+missing source/requirements/configuration) is fully evidenced: resolution, required-vs-optional
+reporting, deterministic sort, unsafe stored paths reported not followed, symlink/junction cycles
+terminating. **DONE** (the two skips are privilege-gated variants of covered behaviour, recorded).

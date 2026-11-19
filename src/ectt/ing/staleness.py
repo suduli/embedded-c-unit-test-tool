@@ -286,10 +286,10 @@ def check_staleness(
             changed_paths,
         )
 
-    reasons = tuple(dict.fromkeys(reasons))
-    changed_paths = tuple(dict.fromkeys(changed_paths))
+    unique_reasons = tuple(dict.fromkeys(reasons))
+    unique_changed_paths = tuple(dict.fromkeys(changed_paths))
     return StalenessReport(
-        stale=bool(reasons), reasons=reasons, changed_paths=changed_paths
+        stale=bool(unique_reasons), reasons=unique_reasons, changed_paths=unique_changed_paths
     )
 
 

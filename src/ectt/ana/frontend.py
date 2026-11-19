@@ -9,7 +9,6 @@ Satisfies: TOOL-PAR-010, TOOL-PAR-020, DSN-ANA-090.
 
 from __future__ import annotations
 
-import os
 import re
 from collections.abc import Sequence
 from pathlib import Path
@@ -24,7 +23,7 @@ from ectt.ana.errors import (
     SourceFileNotFoundError,
     UnsupportedDialectError,
 )
-from ectt.ana.model import Diagnostic, ParsedTranslationUnit, ParseResult
+from ectt.ana.model import Diagnostic, ParsedTranslationUnit
 from ectt.ing.model import TranslationUnit
 
 __all__ = [
@@ -413,9 +412,8 @@ class ClangFrontend:
                 uf_norm = normalize_path(uf_name, working_dir, include_dirs=inc_dirs)
                 prepared_unsaved.append((uf_name, uf_content))
                 if (
-                    uf_name == source_path
+                    uf_name in (source_path, norm_source_path)
                     or uf_norm == norm_source_path
-                    or uf_name == norm_source_path
                     or Path(uf_name).name == Path(source_path).name
                 ):
                     has_unsaved = True
@@ -433,7 +431,7 @@ class ClangFrontend:
                 )
 
         # 3. Process compiler arguments
-        clean_args, resolved_dialect = self._prepare_arguments(
+        clean_args, _ = self._prepare_arguments(
             source_args=source_args,
             source_path=source_path,
             norm_source_path=norm_source_path,
@@ -446,7 +444,7 @@ class ClangFrontend:
             tu_handle = self._index.parse(
                 source_path,
                 args=clean_args,
-                unsaved_files=prepared_unsaved if prepared_unsaved else None,
+                unsaved_files=prepared_unsaved or None,
                 options=options or 0,
             )
         except self._cindex.TranslationUnitLoadError as exc:
@@ -572,8 +570,7 @@ class ClangFrontend:
             # Strip source file token to avoid duplicate input error in libclang
             tok_norm = tok.replace("\\", "/")
             if (
-                tok_norm == norm_src
-                or tok_norm == norm_source_path
+                tok_norm in (norm_src, norm_source_path)
                 or (Path(tok_norm).name == src_name and tok_norm.endswith((".c", ".C", ".h")))
             ):
                 idx += 1
@@ -609,7 +606,9 @@ _DEFAULT_FRONTEND: ClangFrontend | None = None
 
 def _get_default_frontend() -> ClangFrontend:
     """Return or lazily create the default ClangFrontend singleton."""
-    global _DEFAULT_FRONTEND
+    # Deliberate lazy module-level singleton: one shared libclang Index for the
+    # process. Replacing it with a registry is not a mechanical change.
+    global _DEFAULT_FRONTEND  # noqa: PLW0603
     if _DEFAULT_FRONTEND is None:
         _DEFAULT_FRONTEND = ClangFrontend()
     return _DEFAULT_FRONTEND

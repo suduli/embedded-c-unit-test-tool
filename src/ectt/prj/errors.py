@@ -7,6 +7,7 @@ Satisfies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-070, TOOL-UIX-360.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar
 
 from ectt.core.fs import CoreError
 
@@ -42,6 +43,8 @@ __all__ = [
 
 class ProjectError(CoreError):
     """Base exception for ectt project store operations."""
+
+    category: ClassVar[str] = "project"
 
     def __init__(
         self,

@@ -15,15 +15,16 @@ Satisfies: TOOL-NFR-070, TOOL-NFR-080, TOOL-PRJ-050, TOOL-PRJ-080.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
-import io
 import os
 import tempfile
 from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Any
+from typing import IO, Any, ClassVar
 
 from ectt.core.determinism import CoreError, canonical_json, canonical_text
+from ectt.core.errors import CancellationToken
 
 __all__ = [
     "DEFAULT_OUTPUT_REL_PATH",
@@ -46,6 +47,8 @@ GITIGNORE_FILENAME = ".gitignore"
 
 class CoreFsError(CoreError):
     """Base exception for filesystem operations."""
+
+    category: ClassVar[str] = "filesystem"
 
     def __init__(
         self,
@@ -126,6 +129,9 @@ class OutputRoot:
         self._check_source_overlap()
         self._check_unmarked_directory()
         self._initialized = False
+        self._journal: dict[Path, bytes | None] | None = None
+        self._created_dirs: list[Path] | None = None
+        self._token: CancellationToken | None = None
 
     def _check_source_overlap(self) -> None:
         """Refuse construction if output root equals, contains, or is contained by any source root."""
@@ -201,10 +207,8 @@ class OutputRoot:
             os.replace(temp_path, file_path)
         except Exception:
             if temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
     def resolve_path(self, rel_path: Path | str) -> Path:
@@ -280,6 +284,11 @@ class OutputRoot:
             except OSError:
                 pass
 
+        if self._token is not None:
+            self._token.raise_if_cancelled()
+        if self._journal is not None:
+            self._record_for_rollback(target_path)
+
         parent_dir = target_path.parent
         parent_dir.mkdir(parents=True, exist_ok=True)
 
@@ -297,13 +306,71 @@ class OutputRoot:
             os.replace(temp_path, target_path)
         except Exception:
             if temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
         return target_path
+
+    @contextlib.contextmanager
+    def transaction(self, token: CancellationToken | None = None) -> Iterator[None]:
+        """Fail-safe write scope: on any exception (including cancellation) undo its writes.
+
+        Files created inside the scope are removed, directories created by it are removed
+        when empty, and files overwritten inside it are restored byte-for-byte. Rollback
+        problems are attached to the original exception as notes, never swallowed.
+
+        Root initialisation (marker file and .gitignore) runs before the scope opens and is
+        setup rather than output, so it is retained on rollback.
+        """
+        self.ensure_initialized()
+        if token is not None:
+            token.raise_if_cancelled()
+        self._journal = {}
+        self._created_dirs = []
+        self._token = token
+        try:
+            yield
+        except BaseException as exc:
+            for note in self._rollback():
+                exc.add_note(note)
+            raise
+        finally:
+            self._journal = None
+            self._created_dirs = None
+            self._token = None
+
+    def _record_for_rollback(self, target: Path) -> None:
+        """Remember a write target's prior bytes and any directories this write will create."""
+        assert self._journal is not None and self._created_dirs is not None
+        if target not in self._journal:
+            self._journal[target] = target.read_bytes() if target.is_file() else None
+        for ancestor in target.parents:
+            if ancestor == self.root or ancestor.exists():
+                break
+            if ancestor not in self._created_dirs:
+                self._created_dirs.append(ancestor)
+
+    def _rollback(self) -> list[str]:
+        """Undo recorded writes, newest first. Returns human-readable failure notes."""
+        notes: list[str] = []
+        for path, original in reversed(list((self._journal or {}).items())):
+            try:
+                if original is None:
+                    if path.exists():
+                        path.unlink()
+                else:
+                    self._write_file_direct(path, original)
+            except OSError as exc:
+                notes.append(f"rollback could not restore '{path}': {exc}")
+        for directory in self._created_dirs or []:
+            try:
+                directory.rmdir()
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                notes.append(f"rollback could not remove directory '{directory}': {exc}")
+        return notes
 
     def write_text(
         self,
@@ -443,7 +510,7 @@ class SourceTree:
         mode: str = "r",
         encoding: str | None = None,
         errors: str | None = None,
-    ) -> io.IOBase:
+    ) -> IO[Any]:
         """Open a source file for reading only. Any mutating mode raises SourceMutationError."""
         for mutating_char in ("w", "a", "+", "x"):
             if mutating_char in mode:

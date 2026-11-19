@@ -130,6 +130,7 @@ def test_byte_identical_across_differing_subprocesses(tmp_path: Path) -> None:
         env=env1,
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert res1.returncode == 0, f"Machine 1 failed: {res1.stderr}"
 
@@ -160,6 +161,7 @@ def test_byte_identical_across_differing_subprocesses(tmp_path: Path) -> None:
         env=env2,
         capture_output=True,
         text=True,
+        check=False,  # returncode is asserted below
     )
     assert res2.returncode == 0, f"Machine 2 failed: {res2.stderr}"
 
@@ -171,7 +173,7 @@ def test_byte_identical_across_differing_subprocesses(tmp_path: Path) -> None:
     assert manifest1 == manifest2, f"Manifest mismatch:\nOut1: {manifest1}\nOut2: {manifest2}"
 
     # Byte-by-byte direct verification
-    for rel_path, digest1 in manifest1.items():
+    for rel_path in manifest1:
         f1 = out1 / rel_path
         f2 = out2 / rel_path
         bytes1 = f1.read_bytes()

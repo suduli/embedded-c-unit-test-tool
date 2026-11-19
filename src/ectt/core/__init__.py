@@ -18,6 +18,14 @@ from ectt.core.determinism import (
     neutralize_hash_seed,
     stable_id,
 )
+from ectt.core.docindex import (
+    STATUS_PENDING,
+    STATUS_SHIPPED,
+    DocEntry,
+    DocIndexError,
+    UserDocumentationIndex,
+    documentation_index,
+)
 from ectt.core.fs import (
     DEFAULT_OUTPUT_REL_PATH,
     GITIGNORE_FILENAME,
@@ -30,6 +38,20 @@ from ectt.core.fs import (
     SourceMutationError,
     SourceTree,
     UnmarkedOutputRootError,
+)
+from ectt.core.logging import (
+    DiagnosticBundle,
+    EcttLogger,
+    LogRecord,
+    Verbosity,
+    build_diagnostic_bundle,
+)
+from ectt.core.text import (
+    DEFAULT_CATALOG_NAME,
+    MessageCatalog,
+    TextFormatError,
+    UnknownMessageKeyError,
+    default_catalog,
 )
 
 __all__ = [
@@ -55,6 +77,24 @@ __all__ = [
     "PathConfinementError",
     "SourceMutationError",
     "UnmarkedOutputRootError",
+    # Logging & diagnostic bundle (WP-CORE-06)
+    "Verbosity",
+    "LogRecord",
+    "EcttLogger",
+    "DiagnosticBundle",
+    "build_diagnostic_bundle",
+    # Text externalisation & documentation index (WP-CORE-07)
+    "DEFAULT_CATALOG_NAME",
+    "MessageCatalog",
+    "TextFormatError",
+    "UnknownMessageKeyError",
+    "default_catalog",
+    "STATUS_PENDING",
+    "STATUS_SHIPPED",
+    "DocEntry",
+    "DocIndexError",
+    "UserDocumentationIndex",
+    "documentation_index",
     "OutputRoot",
     "SourceTree",
 ]

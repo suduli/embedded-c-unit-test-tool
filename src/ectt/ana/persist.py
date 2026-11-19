@@ -17,6 +17,8 @@ from typing import Any
 
 from ectt.ana.errors import (
     AnalysisModelError,
+    ExtractionError,
+    FrontendParseError,
     IncompatibleSchemaVersionError,
     InvalidSchemaVersionOrderError,
     MalformedSchemaVersionError,
@@ -26,15 +28,16 @@ from ectt.ana.errors import (
     TypeDefinitionConflictError,
 )
 from ectt.ana.model import (
+    CALL_CLASSIFICATIONS,
+    CALL_VIA,
     AnalysisModel,
     AnalysisUnit,
     DecisionInventoryModel,
-    Diagnostic,
-    FunctionModel,
     InputFileModel,
     ParsedTranslationUnit,
     ProvenanceModel,
     TypeModel,
+    UnitFailureModel,
 )
 from ectt.core.determinism import Clock, canonical_json_bytes
 from ectt.core.fs import OutputRoot
@@ -42,7 +45,10 @@ from ectt.core.fs import OutputRoot
 __all__ = [
     "READER_MAJOR",
     "READER_MIN_MINOR",
+    "SCHEMA_VERSION_CURRENT",
+    "PER_UNIT_FAILURES",
     "assemble_analysis_model",
+    "failed_unit_from_error",
     "write_analysis_model",
     "read_analysis_model",
     "load_analysis_model",
@@ -51,7 +57,54 @@ __all__ = [
 
 READER_MAJOR: int = 1
 READER_MIN_MINOR: int = 0
+# The schema version assemble() emits for newly created models. Bumping this
+# is a schema-publishing event (src/ectt/ana/schema/analysis-model-<v>.schema.json)
+# and moves only this line; tests must assert this constant, never a literal,
+# so a bump cannot silently strand them (root cause of the 1.0 -> 1.1 -> 1.2
+# test drift fixed in TASK-001).
+SCHEMA_VERSION_CURRENT: str = "1.4"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
+
+# Errors that describe one translation unit only (TOOL-PAR-130). Anything else is
+# run-level and must propagate: catching it here would report a real defect as a
+# "unit failed" record, which is the misleading output NFR-090 forbids.
+PER_UNIT_FAILURES: tuple[type[Exception], ...] = (
+    SourceFileNotFoundError,
+    FrontendParseError,
+    ExtractionError,
+)
+
+
+def failed_unit_from_error(
+    path: Path | str,
+    exc: Exception,
+    *,
+    diagnostics: Sequence[Any] = (),
+) -> AnalysisUnit:
+    """Turn one per-unit error into a failed analysis unit with a named reason.
+
+    The caller catches ``PER_UNIT_FAILURES`` and passes the error here, so the
+    other units of the run are unaffected. The message is fixed text: the raw
+    exception message can embed absolute paths and libclang internals.
+
+    Implements: TOOL-PAR-130.
+    """
+    if not isinstance(exc, PER_UNIT_FAILURES):
+        raise TypeError(f"Only per-unit failures may become a failed unit, got {type(exc).__name__}")
+    reason = str(getattr(exc, "reason", "analysis_error"))
+    return AnalysisUnit(
+        path=_normalize_unit_path(str(path)),
+        status="failed",
+        diagnostics=tuple(diagnostics),
+        functions=(),
+        types={},
+        failure=UnitFailureModel(
+            reason=reason,
+            code=type(exc).__name__,
+            category=str(getattr(exc, "category", "analysis")),
+            message=f"unit not analysed: {reason}",
+        ),
+    )
 
 
 def _find_all_type_refs(obj: Any) -> set[str]:
@@ -117,11 +170,14 @@ def assemble_analysis_model(
         maj, min_, patch = get_libclang_version_tuple()
         front_end = f"libclang {maj}.{min_}.{patch}"
 
-    # 2. Process units and convert failed parses into failed unit models
+    # 2. Process units. A per-unit failure becomes a failed unit with a named reason
+    # (TOOL-PAR-130) and never removes the other units. Run-level errors (type merge,
+    # closure, digests of parsed units) still propagate.
     final_units: list[AnalysisUnit] = []
     for item in units:
         if isinstance(item, ParsedTranslationUnit):
             if item.status == "failed" or item.has_errors:
+                errors = item.errors
                 final_units.append(
                     AnalysisUnit(
                         path=_normalize_unit_path(item.source_path),
@@ -129,12 +185,22 @@ def assemble_analysis_model(
                         diagnostics=item.diagnostics,
                         functions=(),
                         types={},
+                        failure=UnitFailureModel(
+                            reason="frontend_parse_error",
+                            code=FrontendParseError.__name__,
+                            category=FrontendParseError.category,
+                            message=errors[0].message if errors else "translation unit did not parse",
+                        ),
                     )
                 )
             else:
                 from ectt.ana.interface import extract_interfaces
 
-                extracted = extract_interfaces(item)
+                try:
+                    extracted = extract_interfaces(item)
+                except ExtractionError as exc:
+                    final_units.append(failed_unit_from_error(item.source_path, exc, diagnostics=item.diagnostics))
+                    continue
                 final_units.append(
                     AnalysisUnit(
                         path=_normalize_unit_path(extracted.path),
@@ -142,6 +208,7 @@ def assemble_analysis_model(
                         diagnostics=extracted.diagnostics,
                         functions=extracted.functions,
                         types=extracted.types,
+                        unsupported_constructs=extracted.unsupported_constructs,
                     )
                 )
         elif isinstance(item, AnalysisUnit):
@@ -154,6 +221,14 @@ def assemble_analysis_model(
                         diagnostics=item.diagnostics,
                         functions=(),
                         types={},
+                        unsupported_constructs=item.unsupported_constructs,
+                        failure=item.failure
+                        or UnitFailureModel(
+                            reason="unit_analysis_failed",
+                            code="AnalysisError",
+                            category="analysis",
+                            message="unit not analysed: no reason recorded by the caller",
+                        ),
                     )
                 )
             else:
@@ -164,6 +239,7 @@ def assemble_analysis_model(
                         diagnostics=item.diagnostics,
                         functions=item.functions,
                         types=item.types,
+                        unsupported_constructs=item.unsupported_constructs,
                     )
                 )
         else:
@@ -217,6 +293,9 @@ def assemble_analysis_model(
             cand = base_dir / unit_path_str if base_dir is not None else Path(unit_path_str)
             if cand.is_file():
                 digest = hashlib.sha256(cand.read_bytes()).hexdigest()
+            elif unit.status == "failed":
+                # A failed unit may have no readable source; its failure reason records that.
+                continue
             else:
                 raise SourceFileNotFoundError(
                     f"Translation unit source file '{unit_path_str}' not found on disk at '{cand}'",
@@ -234,7 +313,7 @@ def assemble_analysis_model(
     )
 
     return AnalysisModel(
-        schema_version="1.2",
+        schema_version=SCHEMA_VERSION_CURRENT,
         provenance=provenance,
         units=tuple(final_units),
         types=merged_types,
@@ -394,6 +473,56 @@ def read_analysis_model(
                         reason="missing_unsupported_constructs",
                     )
 
+    # 6c. Minor-version-gated call graph (schema 1.3: TOOL-PAR-060). Fail-closed:
+    # every function must carry calls[], and every call must use a known classification
+    # and via value; an unknown value is rejected, never interpreted.
+    if doc_minor >= 3:
+        units_for_calls = doc.get("units")
+        if isinstance(units_for_calls, list):
+            for u_idx, unit_doc in enumerate(units_for_calls):
+                if not isinstance(unit_doc, dict):
+                    continue
+                for fn_doc in unit_doc.get("functions", []):
+                    if not isinstance(fn_doc, dict) or "calls" not in fn_doc:
+                        raise AnalysisModelError(
+                            f"Function in unit at index {u_idx} is missing required 'calls' (schema >= 1.3)",
+                            reason="missing_calls",
+                        )
+                    for call_doc in fn_doc["calls"]:
+                        cls_value = call_doc.get("classification") if isinstance(call_doc, dict) else None
+                        via_value = call_doc.get("via") if isinstance(call_doc, dict) else None
+                        if cls_value not in CALL_CLASSIFICATIONS or via_value not in CALL_VIA:
+                            raise AnalysisModelError(
+                                f"Unknown call classification {cls_value!r} or via {via_value!r} (schema >= 1.3)",
+                                reason="unknown_call_value",
+                            )
+
+    # 6d. Minor-version-gated failure record (schema 1.4: TOOL-PAR-130). A failed unit
+    # must name its reason and carry no functions; a parsed unit must not carry one.
+    if doc_minor >= 4:
+        units_for_failure = doc.get("units")
+        if isinstance(units_for_failure, list):
+            for u_idx, unit_doc in enumerate(units_for_failure):
+                if not isinstance(unit_doc, dict):
+                    continue
+                failure_doc = unit_doc.get("failure")
+                if unit_doc.get("status") == "failed":
+                    if not _is_failure_doc(failure_doc):
+                        raise AnalysisModelError(
+                            f"Failed unit at index {u_idx} is missing a valid 'failure' record (schema >= 1.4)",
+                            reason="missing_unit_failure",
+                        )
+                    if unit_doc.get("functions"):
+                        raise AnalysisModelError(
+                            f"Failed unit at index {u_idx} must not carry functions (schema >= 1.4)",
+                            reason="failed_unit_has_functions",
+                        )
+                elif "failure" in unit_doc:
+                    raise AnalysisModelError(
+                        f"Unit at index {u_idx} carries a 'failure' record but is not failed (schema >= 1.4)",
+                        reason="unexpected_unit_failure",
+                    )
+
     # 7. Type closure validation over merged map on read (SDD-002 §4.2)
     types_obj = doc["types"]
     if not isinstance(types_obj, dict):
@@ -419,6 +548,13 @@ def read_analysis_model(
 
 # Canonical alias for reader
 load_analysis_model = read_analysis_model
+
+
+def _is_failure_doc(value: Any) -> bool:
+    """True when a failure record carries all four string fields (schema 1.4)."""
+    return isinstance(value, dict) and all(
+        isinstance(value.get(key), str) for key in ("reason", "code", "category", "message")
+    )
 
 
 def _read_file(path: Path) -> bytes:

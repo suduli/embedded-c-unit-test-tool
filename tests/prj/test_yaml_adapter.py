@@ -6,9 +6,6 @@ Verifies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-050, TOOL-SEC-070, DSN-PRJ-010, D
 
 from __future__ import annotations
 
-import math
-from pathlib import Path
-
 import pytest
 
 from ectt.prj.errors import (

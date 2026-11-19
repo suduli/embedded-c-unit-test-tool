@@ -284,6 +284,7 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 ### ADR-007 — Distribution and packaging
 **Question:** the concrete packaging mechanism per platform, given INS-010 through INS-050.
 **Why it matters:** offline installation, side-by-side versions, no administrative privileges, and decade-scale archivability are demanding in combination. This is the primary risk attached to the Python recommendation in §2.4; the §4.2 distribution spike (`WP-SPIKE-03`, §2.3.1) has now run and cleared the mechanical question, so this ADR can proceed — it should focus on the per-platform signing/installer mechanism and the still-open clean-machine endpoint-security question rather than re-litigating whether PyInstaller works at all.
+**Exit criterion (recorded 2026-11-17, RV-01 F-17 → TOOL-INS-120):** no release package ships before it passes the clean-machine endpoint acceptance test — install and run on a machine with no development toolchain, under default endpoint-security policy (AV/SmartScreen or platform equivalent), without administrative privileges and without network access, with the security-policy interactions recorded per release. The signing + SBOM pipeline (SDD-005 §5.9) is the mechanism; the ADR remains open for the per-platform installer/signing choice, which is entangled with the licence decision (NR-01, T-01).
 
 ---
 

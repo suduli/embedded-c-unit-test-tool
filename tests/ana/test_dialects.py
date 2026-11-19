@@ -12,7 +12,6 @@ from ectt.ana.errors import UnsupportedDialectError
 from ectt.ana.frontend import (
     GNU_DIALECTS,
     ISO_DIALECTS,
-    SUPPORTED_DIALECTS,
     is_supported_dialect,
     normalize_dialect,
     parse,

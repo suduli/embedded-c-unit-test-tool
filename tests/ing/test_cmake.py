@@ -6,7 +6,6 @@ Verifies: TOOL-ING-040, DSN-ING-020.
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 

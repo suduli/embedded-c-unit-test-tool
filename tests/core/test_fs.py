@@ -6,7 +6,6 @@ Verifies: TOOL-NFR-070, TOOL-NFR-080, TOOL-PRJ-050, TOOL-PRJ-080, DSN-CORE-060.
 
 from __future__ import annotations
 
-import os
 import sys
 import time
 from pathlib import Path
@@ -29,7 +28,7 @@ from ectt.core.fs import (
 
 def test_output_root_default_path() -> None:
     """verifies: TOOL-NFR-080, DSN-CORE-060"""
-    assert DEFAULT_OUTPUT_REL_PATH == Path("build/ectt")
+    assert Path("build/ectt") == DEFAULT_OUTPUT_REL_PATH
 
 
 def test_overlap_refusal_equal(tmp_path: Path) -> None:

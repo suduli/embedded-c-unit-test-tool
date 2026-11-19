@@ -23,7 +23,9 @@ import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, ClassVar, Protocol, runtime_checkable
+
+from ectt.core.errors import EcttError
 
 __all__ = [
     "Clock",
@@ -41,25 +43,10 @@ __all__ = [
 ]
 
 
-class CoreError(Exception):
+class CoreError(EcttError):
     """Base exception for ectt core platform errors."""
 
-    def __init__(
-        self,
-        message: str,
-        *,
-        reason: str = "core_error",
-        path: Path | str | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.message = message
-        self.reason = reason
-        self.path = Path(path) if path is not None else None
-
-    def __str__(self) -> str:
-        if self.path is not None:
-            return f"{self.message} [reason={self.reason}, path={self.path}]"
-        return f"{self.message} [reason={self.reason}]"
+    category: ClassVar[str] = "core"
 
 
 @runtime_checkable
@@ -83,7 +70,7 @@ class SystemClock:
     """System clock reading host time in UTC."""
 
     def now(self) -> datetime.datetime:
-        return datetime.datetime.now(datetime.timezone.utc)
+        return datetime.datetime.now(datetime.UTC)
 
     def time(self) -> float:
         return time.time()
@@ -97,20 +84,20 @@ class FixedClock:
 
     def __init__(self, frozen_time: datetime.datetime | float | int | str | None = None) -> None:
         if frozen_time is None:
-            self._dt = datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+            self._dt = datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=datetime.UTC)
         elif isinstance(frozen_time, datetime.datetime):
             if frozen_time.tzinfo is None:
-                self._dt = frozen_time.replace(tzinfo=datetime.timezone.utc)
+                self._dt = frozen_time.replace(tzinfo=datetime.UTC)
             else:
-                self._dt = frozen_time.astimezone(datetime.timezone.utc)
+                self._dt = frozen_time.astimezone(datetime.UTC)
         elif isinstance(frozen_time, (int, float)):
-            self._dt = datetime.datetime.fromtimestamp(float(frozen_time), tz=datetime.timezone.utc)
+            self._dt = datetime.datetime.fromtimestamp(float(frozen_time), tz=datetime.UTC)
         elif isinstance(frozen_time, str):
             parsed = datetime.datetime.fromisoformat(frozen_time)
             if parsed.tzinfo is None:
-                self._dt = parsed.replace(tzinfo=datetime.timezone.utc)
+                self._dt = parsed.replace(tzinfo=datetime.UTC)
             else:
-                self._dt = parsed.astimezone(datetime.timezone.utc)
+                self._dt = parsed.astimezone(datetime.UTC)
         else:
             raise TypeError(f"Unsupported time specification for FixedClock: {type(frozen_time)!r}")
 
@@ -176,7 +163,7 @@ def canonicalize(data: Any, *, first_keys: Sequence[str] = ()) -> Any:
     if isinstance(data, dict):
         result: dict[str, Any] = {}
         stringified_keys: set[str] = set()
-        for k in data.keys():
+        for k in data:
             k_str = str(k)
             if k_str in stringified_keys:
                 raise ValueError(
@@ -204,9 +191,9 @@ def canonicalize(data: Any, *, first_keys: Sequence[str] = ()) -> Any:
     if isinstance(data, (datetime.datetime, datetime.date)):
         if isinstance(data, datetime.datetime):
             if data.tzinfo is None:
-                data = data.replace(tzinfo=datetime.timezone.utc)
+                data = data.replace(tzinfo=datetime.UTC)
             else:
-                data = data.astimezone(datetime.timezone.utc)
+                data = data.astimezone(datetime.UTC)
         return data.isoformat()
     return data
 
@@ -257,7 +244,7 @@ def canonical_json(
         canonical_data,
         indent=indent,
         ensure_ascii=False,
-        sort_keys=False if first_keys else True,
+        sort_keys=not first_keys,
         separators=separators,
     )
     return canonical_text(raw_json)
@@ -333,11 +320,12 @@ def neutralize_hash_seed(
     env[guard_var] = "1"
 
     # sys.orig_argv preserves python interpreter flags and -m invocations
-    cmd = [sys.executable] + list(sys.orig_argv[1:])
+    cmd = [sys.executable, *sys.orig_argv[1:]]
 
     if sys.platform == "win32":
         try:
-            res = subprocess.run(cmd, env=env)
+            # check=False: the child's exit code is propagated verbatim below.
+            res = subprocess.run(cmd, env=env, check=False)
         except Exception as exc:
             raise CoreError(
                 f"Failed to re-execute process with {env_var}={target_seed}: {exc}",

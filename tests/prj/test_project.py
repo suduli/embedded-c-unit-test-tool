@@ -6,7 +6,6 @@ Verifies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-050, TOOL-PRJ-070, TOOL-UIX-320, 
 
 from __future__ import annotations
 
-import os
 import shutil
 import time
 from pathlib import Path
@@ -15,11 +14,10 @@ import pytest
 
 from ectt.prj.errors import (
     CommentPreservationError,
-    ProjectError,
     ProjectLocationError,
     ProjectRootNotFoundError,
 )
-from ectt.prj.project import PROJECT_ROOT_MARKER, Project
+from ectt.prj.project import Project
 
 
 def test_project_create_and_no_metadata_leak(tmp_path: Path) -> None:
@@ -59,7 +57,7 @@ def test_project_create_and_no_metadata_leak(tmp_path: Path) -> None:
 def test_project_open_and_find_upward(tmp_path: Path) -> None:
     """verifies: TOOL-PRJ-010, DSN-PRJ-010"""
     proj_dir = tmp_path / "root_proj"
-    project = Project.create(proj_dir, name="root_proj")
+    Project.create(proj_dir, name="root_proj")
 
     # Open directly
     opened = Project.open(proj_dir)

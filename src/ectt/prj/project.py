@@ -6,6 +6,7 @@ Satisfies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-050, TOOL-PRJ-070, TOOL-UIX-320,
 
 from __future__ import annotations
 
+import contextlib
 import os
 import tempfile
 from collections.abc import Mapping, Sequence
@@ -26,7 +27,11 @@ from ectt.prj.model import (
     ProjectDocument,
     dispatch_schema_version,
 )
-from ectt.prj.paths import normalize_posix_path, resolve_project_path, validate_project_path
+from ectt.prj.paths import (
+    resolve_project_path,
+    validate_project_path,
+)
+from ectt.prj.references import DanglingReference, find_dangling_references
 from ectt.prj.yaml_adapter import (
     RestrictedYamlAdapter,
     SerializationAdapter,
@@ -203,6 +208,13 @@ class Project:
         self.document["output_root"] = posix_rel
         return posix_rel
 
+    def dangling_references(self) -> tuple[DanglingReference, ...]:
+        """Report stored references that do not resolve. Reports only; never raises.
+
+        Implements: DSN-PRJ-050. Satisfies: TOOL-PRJ-090.
+        """
+        return find_dangling_references(self.root, self.source_roots, self.output_root)
+
     def read_file(self, rel_path: str | Path) -> ProjectDocument:
         """Read and parse an authored project file, dispatching on its schema_version."""
         target_path = self.resolve_path(rel_path)
@@ -323,10 +335,8 @@ class Project:
             os.replace(temp_path, target_path)
         except Exception:
             if temp_path is not None and temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
             raise
 
         return target_path

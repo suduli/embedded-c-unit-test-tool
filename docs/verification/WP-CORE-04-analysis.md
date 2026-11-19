@@ -1,0 +1,28 @@
+# Verification Analysis Note — WP-CORE-04 (Provenance Record and Version Identification)
+
+Analysis evidence for requirements verified under WP-CORE-04. No schema change: the provenance record is a new core facility, not yet embedded in any artifact.
+
+| Requirement ID | Summary Statement | Implementation Reference | Analysis Argument & Verification Evidence |
+|---|---|---|---|
+| **TOOL-QUA-060** | The tool shall record, in every artifact it generates, sufficient information to reproduce that artifact. | `src/ectt/core/provenance.py` (`build_provenance`, `ProvenanceRecord`), `tests/core/test_provenance.py` | **Guarantee (sufficient facts):** the record holds the tool version, build identifier, interpreter version, caller-supplied dependency versions, schema versions and input digests. The caller supplies the dependency and schema versions. Core must not import the analysis or ingestion layers, so libclang is recorded by the layer that loads it.<br><br>**Guarantee (stable digest):** the digest is SHA-256 over the canonical encoding of the hashed portion. Identical facts give an identical digest, and map insertion order does not change it. Any changed input, dependency, schema or build changes the digest.<br><br>**Guarantee (no wall clock in the hash):** `generated_at` is carried beside the digest and excluded from it. Two clocks give the same digest. With no clock, the record has no timestamp at all.<br><br>**Test evidence:** `tests/core/test_provenance.py` — `test_record_carries_tool_interpreter_dependency_schema_and_input_facts`, `test_digest_is_stable_for_identical_facts`, `test_digest_changes_with_any_hashed_fact`, `test_timestamp_is_recorded_but_never_hashed`, `test_no_clock_means_no_timestamp_field`, `test_canonical_json_is_byte_identical_across_runs`, `test_dependency_and_input_maps_are_sorted_regardless_of_insertion_order`. |
+| **TOOL-INS-110** | The tool shall report its version, build identifier, and the versions of its principal dependencies on request. | `src/ectt/core/provenance.py` (`version_report`, `tool_version`, `BUILD_ID_ENV`), `tests/core/test_provenance.py` | **Guarantee (version from the installation):** `tool_version()` reads the installed distribution's metadata. When the package is not installed it reports `unknown`, not the source-tree constant `__version__`, because an unprovable version is not reported as fact.<br><br>**Guarantee (build identifier from the build):** the identifier comes from the `ECTT_BUILD_ID` environment variable, read at call time. When the build did not record one, it reports `unset`. The tool does not invent a build identity from git or the clock.<br><br>**Guarantee (dependencies on request):** `version_report` answers with the tool, version, build, interpreter and the dependency versions the caller passes.<br><br>**Test evidence:** `test_build_id_comes_from_the_environment_when_recorded`, `test_tool_version_is_not_faked_when_the_package_is_not_installed`, `test_version_report_answers_on_request_with_dependencies`. |
+
+## Not yet covered
+
+- **Not embedded in artifacts.** The analysis model still carries its own provenance block (`ProvenanceModel`). Nothing writes a `ProvenanceRecord` into an artifact yet. Adopting it is a schema change for each artifact, and each needs its own bump.
+- **Build identifier is not set by any build.** Nothing in the repository sets `ECTT_BUILD_ID`. Until a build does, every record reports `unset`. This is honest but weak evidence of which build made an artifact.
+- **Dependency versions are the caller's job.** No code yet collects libclang's version into a record. The analysis layer already has `get_libclang_version`. Wiring it in belongs to the caller.
+- **No check that the record reproduces the artifact.** TOOL-QUA-060 asks for sufficient information. Whether that information is enough to rebuild the same bytes needs a replay test, which does not exist yet.
+
+## Design notes
+
+- **Why the timestamp is outside the hash.** A timestamp in the hash would make two identical productions produce different digests, so a digest could never prove a match. Keeping it beside the digest keeps the timestamp available without weakening the proof.
+- **Why no source-tree version fallback.** The source constant is what the tree says, not what is installed. Reporting it as the installed version would make a stale checkout look current.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suite on this worktree: `tests/core/test_provenance.py` → 10 passed; full suite
+459 passed / 4 skipped (baseline 4). Assessment stands: both requirements have named, passing tests
+for the record/report facility itself. **PARTIAL** — TOOL-QUA-060 requires provenance *in every
+generated artifact*; embedding it into emitted artifacts (analysis model, reports) lands with the
+producing packages (WP-ANA-04+, WP-REP-*). Until then the facility is complete but unwired.

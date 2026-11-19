@@ -32,7 +32,6 @@ from ectt.ing.model import (
 from ectt.prj.errors import ProjectConfinementError
 from ectt.prj.paths import normalize_posix_path, validate_project_path
 
-
 __all__ = [
     "parse_command_to_arguments",
     "expand_response_files",
@@ -248,18 +247,13 @@ def extract_compiler_flags(
                 include_paths.append(_normalize_path_token(inc, directory, project_root))
             idx += 1
             continue
-        elif tok.startswith("-I") and len(tok) > 2:
+        elif (tok.startswith("-I") and len(tok) > 2) or (tok.startswith("/I") and len(tok) > 2):
             inc = tok[2:].strip("\"'")
             include_paths.append(_normalize_path_token(inc, directory, project_root))
             idx += 1
             continue
-        elif tok.startswith("/I") and len(tok) > 2:
-            inc = tok[2:].strip("\"'")
-            include_paths.append(_normalize_path_token(inc, directory, project_root))
-            idx += 1
-            continue
-        elif tok.startswith(("-isystem", "-iquote", "-idirafter")) and (
-            tok.startswith("-isystem=") or tok.startswith("-iquote=") or tok.startswith("-idirafter=")
+        elif tok.startswith(("-isystem", "-iquote", "-idirafter")) and tok.startswith(
+            ("-isystem=", "-iquote=", "-idirafter=")
         ):
             inc = tok.split("=", 1)[1].strip("\"'")
             include_paths.append(_normalize_path_token(inc, directory, project_root))
@@ -273,11 +267,7 @@ def extract_compiler_flags(
                 preprocessor_definitions.append(tokens[idx].strip("\"'"))
             idx += 1
             continue
-        elif tok.startswith("-D") and len(tok) > 2:
-            preprocessor_definitions.append(tok[2:].strip("\"'"))
-            idx += 1
-            continue
-        elif tok.startswith("/D") and len(tok) > 2:
+        elif (tok.startswith("-D") and len(tok) > 2) or (tok.startswith("/D") and len(tok) > 2):
             preprocessor_definitions.append(tok[2:].strip("\"'"))
             idx += 1
             continue
@@ -289,11 +279,7 @@ def extract_compiler_flags(
                 language_standard = tokens[idx].strip("\"'")
             idx += 1
             continue
-        elif tok.startswith("-std=") and len(tok) > 5:
-            language_standard = tok[5:].strip("\"'")
-            idx += 1
-            continue
-        elif tok.startswith("/std:") and len(tok) > 5:
+        elif (tok.startswith("-std=") and len(tok) > 5) or (tok.startswith("/std:") and len(tok) > 5):
             language_standard = tok[5:].strip("\"'")
             idx += 1
             continue
@@ -392,7 +378,7 @@ def _normalize_path_token(
             rel = candidate_resolved.relative_to(proj_root_resolved).as_posix()
             try:
                 return validate_project_path(rel)
-            except Exception:
+            except Exception:  # noqa: BLE001 - deliberate fallback: unvalidatable rel path is returned raw
                 return rel
 
     # Default to POSIX format with forward slashes
@@ -649,7 +635,7 @@ class CompDbAdapter:
 
         # Explicit 'output' key in entry overrides or provides output_file
         output_file = cli_output
-        if "output" in entry and entry["output"]:
+        if entry.get("output"):
             raw_output = str(entry["output"]).strip()
             output_file = _normalize_path_token(
                 raw_output,
@@ -699,7 +685,7 @@ def _normalize_source_path(
     # When no project root is given
     try:
         return normalize_posix_path(clean_file)
-    except Exception:
+    except Exception:  # noqa: BLE001 - deliberate fallback: unnormalizable path is returned raw
         return clean_file
 
 

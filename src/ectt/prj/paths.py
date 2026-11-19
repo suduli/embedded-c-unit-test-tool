@@ -12,7 +12,7 @@ Satisfies: TOOL-PRJ-070, DSN-PRJ-040.
 from __future__ import annotations
 
 import re
-from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from ectt.prj.errors import InvalidRelativePathError, ProjectConfinementError
 
@@ -52,7 +52,7 @@ def normalize_posix_path(path_str: str) -> str:
         )
 
     # Check for leading slashes indicating root/absolute paths
-    if raw.startswith("/") or raw.startswith("\\"):
+    if raw.startswith(("/", "\\")):
         raise InvalidRelativePathError(
             f"Absolute path '{path_str}' is forbidden; paths must be relative to project root",
             reason="absolute_path",

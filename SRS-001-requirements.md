@@ -397,6 +397,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-TGT-120** *(C, P3, T)* — The tool shall support execution on targets without a debug probe via a user-supplied flashing and communication script.
 
+**TOOL-TGT-130** *(M, P3, T)* — Executing a test on the host on behalf of a target build shall be governed by a versioned host profile recording the target-to-host derivation — target and host triples, flag and define changes, substituted platform headers, and unavailable hardware behavior — and its known ABI differences (widths, alignment, packing, endianness, signedness); unmeasured differences shall remain explicitly unknown; every host-executed result shall be labeled with its execution profile, and host success shall never establish target behavior.
+
 ---
 
 ## 12. Code Coverage (COV)
@@ -436,6 +438,14 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-COV-170** *(S, P4, T)* — The tool shall support control coupling and data coupling analysis between integrated units.
 
 **TOOL-COV-180** *(M, P1, T)* — The tool shall record a completeness state for every coverage artifact — `complete`, `truncated`, or `missing` — and a truncated or missing artifact shall force the decisions and constructs it would have measured to `unmeasured`, with an advisory carried into the report; the completeness state shall be surfaced through the CLI and UI exactly as recorded, without relabeling.
+
+**TOOL-COV-190** *(M, P3, T)* — The tool shall probe and record, per pinned backend configuration, the effective maximum decision condition count and the availability of limit-tuning options (such as clang's `-fmcdc-max-conditions`) as run evidence; a decision exceeding the recorded maximum shall be reported `unmeasured` with the recorded limit cited in its reason, and a documentation-derived limit shall not be substituted for the probed value.
+
+**TOOL-COV-200** *(M, P1, T)* — Coverage records whose source or expression identity differs only by macro expansion or another preprocessing variant shall be merge-incompatible: such records remain separate with a diagnostic naming the variant mismatch, and silently merging variant-differing records is a non-behavior.
+
+**TOOL-COV-210** *(M, P3, T)* — The tool's own validation suite shall include a known-answer MC/DC corpus whose cases carry hand-computed expected results: the minimal `a && b` independence matrix, nested decisions, repeated and coupled operands, a side-effecting operand that must not be evaluated, a macro-expanded condition, a constant or never-taken decision, and a masking-versus-unique-cause divergent case documenting the expected difference per TOOL-COV-090; each case asserts the resulting statuses (`demonstrated`, `not_demonstrated`, `unmeasured`) and the witness pair.
+
+**TOOL-COV-220** *(M, P1, T)* — Coverage artifacts collected from runs whose outcome is `error`, `timeout`, or a crash shall be retained but excluded from aggregate merges unless explicitly admitted by a recorded per-run decision; quarantined artifacts shall remain visible in per-run provenance without contributing to any aggregate coverage figure.
 
 ---
 
@@ -480,6 +490,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-TRC-090** *(S, P4, T)* — The tool shall detect when a requirement has changed since its linked test cases were last executed or reviewed.
 
 **TOOL-TRC-100** *(C, P4, T)* — The tool shall interoperate with an established open-source traceability tool rather than requiring its own requirements database.
+
+**TOOL-TRC-110** *(M, P4, T)* — Requirement-level verdict figures shall be computed by deduplicating association rows to unique (requirement, test) pairs; a requirement's verdict shall be the worst outcome among its linked executed tests, with unreviewed-origin tests counted as unverified per TOOL-ATG-080; every requirement-level percentage shall label its denominator; and a requirement linked to no executed test shall be reported `unverified`, never inferred from coverage.
 
 ---
 
@@ -717,6 +729,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-QUA-100** *(C, P4, I)* — The tool shall provide templates for the user's own tool qualification artifacts.
 
+**TOOL-QUA-110** *(M, P2, T)* — The validation suite shall include a harness-agreement fixture set: for each fixture, the outcome of the generated harness executing hand-authored inputs shall equal the outcome of an independently hand-written reference test of the same case, including at least one deliberately failing case and one stubbed-dependency case; any disagreement shall be reported as a harness-generation defect.
+
 ---
 
 ## 20. Non-Functional Requirements (NFR)
@@ -862,6 +876,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-INS-100** *(S, P3, D)* — The tool shall support a shared network or read-only installation serving multiple users, with per-user state held separately.
 
 **TOOL-INS-110** *(M, P2, T)* — The tool shall report its version, build identifier, and the versions of its principal dependencies on request.
+
+**TOOL-INS-120** *(M, P2, T)* — No release package shall ship before it passes a clean-machine endpoint acceptance test: the package installs and runs on a machine with no development toolchain installed, under default endpoint-security policy (antivirus, SmartScreen, or the platform equivalent), without administrative privileges and without network access; endpoint-security interactions shall be recorded per release.
 
 ---
 

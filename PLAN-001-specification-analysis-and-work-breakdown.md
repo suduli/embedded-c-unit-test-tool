@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 338 SRS-001 requirements
+**Covers:** all 346 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-338 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+346 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 207 · S 113 · C 16 · F 2 |
-| Phase | P1 36 · P2 153 · P3 105 · P4 42 · — 2 |
-| Verification | T 240 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 215 · S 113 · C 16 · F 2 |
+| Phase | P1 38 · P2 155 · P3 108 · P4 43 · — 2 |
+| Verification | T 248 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -49,25 +49,25 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | ATG | 11 | 5 | 5 | 1 | 0 | 0 | 0 | 11 | 0 | 9 | 1 | 1 | 0 |
 | CBT | 8 | 2 | 5 | 1 | 0 | 0 | 2 | 6 | 0 | 7 | 1 | 0 | 0 |
 | CIC | 8 | 4 | 4 | 0 | 0 | 4 | 3 | 1 | 0 | 4 | 1 | 3 | 0 |
-| COV | 18 | 13 | 5 | 0 | 0 | 6 | 0 | 8 | 4 | 16 | 2 | 0 | 0 |
+| COV | 22 | 17 | 5 | 0 | 0 | 8 | 0 | 10 | 4 | 20 | 2 | 0 | 0 |
 | EXE | 9 | 5 | 4 | 0 | 0 | 7 | 2 | 0 | 0 | 9 | 0 | 0 | 0 |
 | HAR | 13 | 9 | 3 | 1 | 0 | 0 | 12 | 1 | 0 | 11 | 1 | 0 | 1 |
 | ING | 22 | 11 | 9 | 2 | 0 | 4 | 17 | 1 | 0 | 19 | 1 | 2 | 0 |
-| INS | 11 | 9 | 2 | 0 | 0 | 0 | 10 | 1 | 0 | 4 | 1 | 6 | 0 |
+| INS | 12 | 10 | 2 | 0 | 0 | 0 | 11 | 1 | 0 | 5 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 11 | 4 | 6 | 1 | 0 | 0 | 4 | 5 | 2 | 10 | 1 | 0 | 0 |
 | NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
 | PAR | 17 | 8 | 8 | 1 | 0 | 0 | 16 | 1 | 0 | 16 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | PRJ | 11 | 9 | 2 | 0 | 0 | 0 | 8 | 1 | 2 | 7 | 4 | 0 | 0 |
-| QUA | 10 | 7 | 2 | 1 | 0 | 0 | 0 | 0 | 10 | 1 | 9 | 0 | 0 |
+| QUA | 11 | 8 | 2 | 1 | 0 | 0 | 1 | 0 | 10 | 2 | 9 | 0 | 0 |
 | REP | 15 | 11 | 4 | 0 | 0 | 3 | 3 | 2 | 7 | 12 | 2 | 0 | 1 |
 | SEC | 12 | 10 | 2 | 0 | 0 | 0 | 8 | 4 | 0 | 5 | 5 | 2 | 0 |
 | STB | 14 | 9 | 5 | 0 | 0 | 0 | 13 | 1 | 0 | 14 | 0 | 0 | 0 |
 | TCD | 14 | 8 | 5 | 1 | 0 | 1 | 11 | 2 | 0 | 12 | 1 | 0 | 1 |
 | TCH | 10 | 5 | 4 | 1 | 0 | 2 | 0 | 8 | 0 | 8 | 1 | 1 | 0 |
-| TGT | 12 | 8 | 3 | 1 | 0 | 0 | 0 | 12 | 0 | 9 | 0 | 1 | 2 |
-| TRC | 10 | 4 | 5 | 1 | 0 | 0 | 0 | 0 | 10 | 10 | 0 | 0 | 0 |
+| TGT | 13 | 9 | 3 | 1 | 0 | 0 | 0 | 13 | 0 | 10 | 0 | 1 | 2 |
+| TRC | 11 | 5 | 5 | 1 | 0 | 0 | 0 | 0 | 11 | 11 | 0 | 0 | 0 |
 | UIX | 40 | 27 | 10 | 1 | 2 | 2 | 22 | 10 | 4 | 31 | 3 | 2 | 2 |
 
 ## 3. Layer 1 — Specification analysis
@@ -207,11 +207,11 @@ Three rules were applied and are worth stating because they are where a work bre
 | Package start phase | Work packages | Requirements owned | Effort (person-weeks) | Dependency lower bound (weeks) |
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
-| P1 | 28 | 67 | 88 | 46 |
-| P2 | 69 | 133 | 228 | 48 |
-| P3 | 65 | 101 | 230 | 52 |
-| P4 | 26 | 35 | 92 | 52 |
-| Total | 191 | 336 | 642 | 52 |
+| P1 | 28 | 69 | 88 | 46 |
+| P2 | 69 | 135 | 228 | 48 |
+| P3 | 65 | 104 | 230 | 52 |
+| P4 | 26 | 36 | 92 | 52 |
+| Total | 191 | 344 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -245,14 +245,20 @@ the foundation and the certification-critical packages:
 | `WP-CORE-01` | Two runs from identical inputs on different machines produce byte-identical generated artifacts; a write attempted outside the configured output root fails and is reported; no user source file's mtime or content changes across a full run |
 | `WP-ANA-04` | A model emitted by the analyzer validates against its published schema, carries a schema version, and is rejected with a named reason by a consumer pinned to an incompatible version |
 | `WP-GEN-04` | Regenerating a harness whose user region is still valid preserves it byte-for-byte; regenerating one whose UUT signature changed incompatibly reports a conflict and writes nothing |
-| `WP-COV-05` | For a decision with N conditions, the report names which conditions were unexercised true and unexercised false, and every report states the MC/DC form obtained and the compiler mechanism that produced it |
+| `WP-COV-05` | For a decision with N conditions, the report names which conditions were unexercised true and unexercised false, and every report states the MC/DC form obtained and the compiler mechanism that produced it; the fixture set includes a decision at exactly the probed backend condition maximum and one at maximum+1, and the exceeded decision reads unmeasured with the recorded limit in its reason; the known-answer MC/DC corpus (COV-210) passes with hand-computed statuses and witness pairs |
+| `WP-COV-06` | The probed effective condition maximum and limit-option availability are recorded per pinned backend as run evidence, and a decision exceeding the recorded maximum is unmeasured with that limit in its reason |
+| `WP-COV-02` | A profile flushed by a run that then crashes is retained but excluded from the aggregate until explicitly admitted per run; the aggregate figure never includes quarantined data, and per-run provenance still shows it |
 | `WP-COV-09` | Editing a source line under an accepted justification invalidates that justification, and the next report shows the construct as uncovered rather than justified |
 | `WP-EXH-02` | A test case that segfaults, one that hangs past the timeout, and one that calls `abort()` are each reported as a failure with the remaining cases still executed |
+| `WP-EXT-04` | A host-executed result carries a versioned host profile naming the target→host derivation and its known ABI differences, with unmeasured differences shown as unknown; host success is never displayed as target behavior |
 | `WP-REP-01` | Two different renderers over one persisted report model cannot disagree on any test's status or any coverage figure; re-running the renderer produces byte-identical output excluding timestamps |
 | `WP-REP-12` | Export passing, failing, crashed, timed-out and partial-run cases plus result identities, expected/actual values, diagnostics and provenance; an independent reader reconstructs the test cases from TCM-06 and complete results without a private project database. Publish the versioned JSON interchange schema, examples and explicit loss/error handling; coverage export remains REP-10/P4 |
 | `WP-AIF-14` | Valid typed decisions pass schema/domain validation; invalid, unsupported, failed and timed-out provider responses produce recorded rejection and no altered measured result |
 | `WP-AIF-15` | Exercise remote and local/self-hosted adapters through the same extension contract for each role; deny unsupported capabilities explicitly and verify no calling feature imports a vendor SDK |
 | `WP-PLG-04` | A third-party provider registers via the public extension API, negotiates capabilities and version compatibility, and an incompatible provider is rejected without loading it into a feature |
+| `WP-PKG-01` | The release package installs and runs on a clean machine with no development toolchain under default endpoint-security policy, without administrative privileges and without network access; the endpoint-security interactions are recorded per release |
+| `WP-QUA-03` | For each harness-agreement fixture, the generated-harness outcome equals the hand-written reference-test outcome on the same inputs — including one failing case and one stubbed-dependency case; any disagreement is reported as a harness-generation defect |
+| `WP-TRC-01` | A requirement linked by two association rows to the same test aggregates to one counted pair and one worst-outcome verdict — never a 2/1 numerator-over-denominator — and a requirement linked to no executed test is reported unverified |
 | `WP-QUA-07` | Documentation states, in one place, what qualification evidence is provided and what remains the user's responsibility, and no other document claims more |
 
 ### 5.5 The work package register
@@ -352,7 +358,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L3 — Realization
 
-14 work packages · 22 requirements · 51 person-weeks
+14 work packages · 23 requirements · 51 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -366,14 +372,14 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-EXT-01` | Simulator execution: QEMU and Renode | CMP-EXT | P3 | 5w | TGT-020 | BLD-03 |  |
 | `WP-EXT-02` | Hardware execution and flashing via debug probe | CMP-EXT | P3 | 6w | TGT-030 TGT-040 | BLD-03 |  |
 | `WP-EXT-03` | Target result retrieval channels and protocol | CMP-EXT | P3 | 4w | TGT-050 TGT-060 | EXT-01 SEC-07 |  |
-| `WP-EXT-04` | Host and target test parity | CMP-EXT | P3 | 3w | TGT-070 | EXT-03 EXH-01 |  |
+| `WP-EXT-04` | Host and target test parity | CMP-EXT | P3 | 3w | TGT-070 TGT-130 | EXT-03 EXH-01 |  |
 | `WP-EXT-05` | Hardware inventory and target failure classification | CMP-EXT | P3 | 4w | TGT-080 TGT-090 | EXT-02 |  |
 | `WP-EXT-06` | Suite splitting and on-target footprint documentation | CMP-EXT | P3 | 4w | TGT-100 TGT-110 | EXT-02 |  |
 | `WP-EXT-07` | User-supplied target execution methods | CMP-EXT | P3 | 3w | TGT-120 PLG-040 | EXT-02 PLG-01 |  |
 
 #### L4 — Evidence
 
-32 work packages · 53 requirements · 115 person-weeks
+32 work packages · 58 requirements · 115 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -382,11 +388,11 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-CBT-03` | Run comparison and coverage delta | CMP-CBT | P3 | 3w | CBT-050 CBT-060 | CBT-01 COV-02 |  |
 | `WP-CBT-04` | Test suite minimization | CMP-CBT | P3 | 3w | CBT-080 | CBT-02 |  |
 | `WP-COV-01` | Statement and branch coverage from compiler backend | CMP-COV | P1 | 4w | COV-010 COV-020 | EXH-01 TCH-02 | ● |
-| `WP-COV-02` | Coverage merge and per-test attribution | CMP-COV | P1 | 4w | COV-110 COV-120 COV-180 | COV-01 |  |
+| `WP-COV-02` | Coverage merge and per-test attribution | CMP-COV | P1 | 4w | COV-110 COV-120 COV-180 COV-200 COV-220 | COV-01 |  |
 | `WP-COV-03` | Coverage threshold enforcement | CMP-COV | P1 | 1w | COV-130 | COV-02 |  |
 | `WP-COV-04` | Function and function-call coverage | CMP-COV | P3 | 2w | COV-030 COV-040 | COV-01 |  |
-| `WP-COV-05` | MC/DC measurement and form declaration | CMP-COV | P3 | 6w | COV-050 COV-060 COV-070 | COV-01 TCH-04 | ● |
-| `WP-COV-06` | Uninstrumentable expression detection | CMP-COV | P3 | 3w | COV-080 | COV-05 |  |
+| `WP-COV-05` | MC/DC measurement and form declaration | CMP-COV | P3 | 6w | COV-050 COV-060 COV-070 COV-210 | COV-01 TCH-04 | ● |
+| `WP-COV-06` | Uninstrumentable expression detection | CMP-COV | P3 | 3w | COV-080 COV-190 | COV-05 |  |
 | `WP-COV-07` | Bare-metal coverage retrieval | CMP-COV | P3 | 5w | COV-100 | COV-01 EXT-03 |  |
 | `WP-COV-08` | Unit-under-test versus harness coverage separation | CMP-COV | P3 | 2w | COV-160 | COV-01 ING-04 |  |
 | `WP-COV-09` | Coverage-by-analysis justification with digest binding | CMP-COV | P4 | 4w | COV-140 COV-150 | COV-01 PRJ-01 |  |
@@ -403,7 +409,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-REP-09` | Report generation from archived result data | CMP-REP | P4 | 3w | REP-150 | REP-01 PRJ-05 |  |
 | `WP-REP-10` | Coverage interchange import and export | CMP-REP | P4 | 3w | MIG-080 | REP-01 COV-02 |  |
 | `WP-REP-11` | Report format extension point | CMP-REP | P3 | 2w | PLG-050 | REP-01 PLG-01 |  |
-| `WP-TRC-01` | Requirement association and bidirectional matrix | CMP-TRC | P4 | 4w | TRC-010 TRC-020 TRC-030 | TCM-02 REP-01 |  |
+| `WP-TRC-01` | Requirement association and bidirectional matrix | CMP-TRC | P4 | 4w | TRC-010 TRC-020 TRC-030 TRC-110 | TCM-02 REP-01 |  |
 | `WP-TRC-02` | Unlinked requirement and unlinked test reporting | CMP-TRC | P4 | 2w | TRC-040 | TRC-01 |  |
 | `WP-TRC-03` | Requirement import from ReqIF, CSV and plain text | CMP-TRC | P4 | 4w | TRC-050 TRC-060 | TRC-01 |  |
 | `WP-TRC-04` | ReqIF export and external traceability tool interop | CMP-TRC | P4 | 4w | TRC-070 TRC-100 | TRC-03 |  |
@@ -450,7 +456,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L6 — Assurance and Ecosystem
 
-53 work packages · 78 requirements · 164 person-weeks
+53 work packages · 80 requirements · 164 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
@@ -477,7 +483,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-MIG-05` | Import fidelity reporting | CMP-MIG | P3 | 3w | MIG-040 MIG-110 | MIG-04 |  |
 | `WP-MIG-06` | Coexistence with another tool on one project | CMP-MIG | P3 | 3w | MIG-070 | CORE-01 PRJ-01 |  |
 | `WP-MIG-07` | Migration assessment mode | CMP-MIG | P4 | 4w | MIG-090 | MIG-05 |  |
-| `WP-PKG-01` | Offline, non-admin, runtime-free installation | CMP-PKG | P2 | 6w | INS-010 INS-020 INS-030 | SPIKE-03 CORE-03 | ● |
+| `WP-PKG-01` | Offline, non-admin, runtime-free installation | CMP-PKG | P2 | 6w | INS-010 INS-020 INS-030 INS-120 | SPIKE-03 CORE-03 | ● |
 | `WP-PKG-02` | Self-contained archivable release identity | CMP-PKG | P2 | 3w | INS-040 QUA-050 | PKG-01 CORE-04 |  |
 | `WP-PKG-03` | Side-by-side versions and confirmed upgrade | CMP-PKG | P2 | 4w | INS-050 INS-060 | PKG-01 PRJ-03 |  |
 | `WP-PKG-04` | Documented uninstallation | CMP-PKG | P2 | 1w | INS-070 | PKG-01 |  |
@@ -492,7 +498,7 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 | `WP-PLG-04` | AI provider extension protocol, registration and capability negotiation | CMP-PLG | P2 | 3w | PLG-100 | PLG-01 |  |
 | `WP-QUA-01` | Tool classification analysis and confidence level | CMP-QUA | P4 | 3w | QUA-010 | CORE-04 | ● |
 | `WP-QUA-02` | Tool operational requirements specification | CMP-QUA | P2 | 4w | QUA-020 | CORE-04 | ● |
-| `WP-QUA-03` | User-executable validation suite | CMP-QUA | P2 | 6w | QUA-030 | QUA-02 CORE-08 | ● |
+| `WP-QUA-03` | User-executable validation suite | CMP-QUA | P2 | 6w | QUA-030 QUA-110 | QUA-02 CORE-08 | ● |
 | `WP-QUA-04` | Known error list maintained per release | CMP-QUA | P2 | 2w | QUA-040 | PKG-02 |  |
 | `WP-QUA-05` | Development process and change control documentation | CMP-QUA | P4 | 3w | QUA-070 | — |  |
 | `WP-QUA-06` | Standards objective mapping | CMP-QUA | P4 | 4w | QUA-080 | QUA-02 | ● |
@@ -537,16 +543,16 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 146 | 43.2% |
-| INSPECTION CHECKLIST | 52 | 15.4% |
-| BOUNDARY VALUE ANALYSIS | 28 | 8.3% |
-| DECISION TABLE | 25 | 7.4% |
-| SCENARIO (demonstration) | 25 | 7.4% |
-| PAIRWISE | 21 | 6.2% |
-| STATE TRANSITION | 20 | 5.9% |
-| ANALYSIS ARGUMENT | 19 | 5.6% |
+| EQUIVALENCE PARTITIONING | 154 | 44.5% |
+| INSPECTION CHECKLIST | 52 | 15.0% |
+| BOUNDARY VALUE ANALYSIS | 28 | 8.1% |
+| DECISION TABLE | 25 | 7.2% |
+| SCENARIO (demonstration) | 25 | 7.2% |
+| PAIRWISE | 21 | 6.1% |
+| STATE TRANSITION | 20 | 5.8% |
+| ANALYSIS ARGUMENT | 19 | 5.5% |
 | — (deferred) | 2 | 0.6% |
-| Total | 338 | 100% |
+| Total | 346 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -556,7 +562,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 240 |
+| T | 248 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -582,10 +588,33 @@ oracle: for any corpus program and test set, the tool's reported coverage must a
 report, line for line. Any disagreement is a defect in the adapter. This is the single highest-value test
 harness the project can build, and it is cheap because the oracle already exists.
 
+**MC/DC backend-boundary fixtures.** Vendor prose has been caught disagreeing with itself on an
+off-by-one at a semantic boundary, and the toolchain notes carry the same worry (SDD-005 §5.5.1). Before
+`WP-COV-05` and `WP-COV-06` exit, the fixture set must include: a decision with condition count exactly at
+the probed backend maximum and one at maximum+1; a rebuild with a changed limit or threshold option whose
+earlier records must merge-invalidate; and an assertion that the exceeded decision appears as `unmeasured`
+with the recorded limit in its reason (`COV-190`, `COV-200`). Equality behavior at any tunable threshold is
+settled by fixture, never by prose.
+
+**Known-answer MC/DC corpus.** The differential oracle above is necessary but self-blind: two agreeing
+readings of the same raw data can both be wrong, and masking semantics are exactly where backends diverge.
+`WP-COV-05` is therefore gated on a known-answer corpus whose seed case is the classic `a && b` independence
+matrix, extended to nested decisions, repeated/coupled operands, a side-effecting operand that must not be
+evaluated, a macro-expanded condition, a constant/`if(0)` decision, and a masking-versus-unique-cause
+divergent case per `COV-090`. Each case carries a hand-computed expected result — S4 statuses plus the
+witness pair — so interpretation is pinned by known cases, not by agreement with the backend (`COV-210`).
+
 **Golden-file and diff-stability testing.** `PRJ-050`, `REP-100` and `NFR-060` require byte-stable output. The
 test is mechanical: run twice, on two machines, and diff. Extend it to the case `PRJ-050` actually cares about —
 a semantically null edit (reordering a test case, reopening and resaving a project) must produce **no diff at
 all**, not merely a valid file.
+
+**Harness-vs-reference agreement.** Golden-file testing proves determinism, not correctness of generated
+semantics. Inside `WP-QUA-03`'s known-answer suite, a fixture set runs each case twice — once through the
+generated pipeline and once as a hand-written Unity/cmocka reference test of the same case and inputs — and
+requires the two outcomes to agree, including one deliberately failing case and one stubbed-dependency case
+(`QUA-110`). Any disagreement is a harness-generation defect; this is the cheapest strong oracle for
+`WP-GEN-01`/`WP-GEN-02` semantics.
 
 **Cross-toolchain matrix, reduced pairwise.** `TCH-050` commits to six shipped configurations; `PAR-020` to
 five dialects; `TGT-020` through `TGT-040` to two simulators and three probes. The full cross-product is not
@@ -629,10 +658,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 338 |
-| Non-Future IDs | 336 |
-| Primary allocation entries | 336 |
-| Distinct allocated IDs | 336 |
+| SRS unique IDs | 346 |
+| Non-Future IDs | 344 |
+| Primary allocation entries | 344 |
+| Distinct allocated IDs | 344 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -661,11 +690,11 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 34 | 104 | 49 | 20 | 0 | 207 |
+| M | 36 | 106 | 52 | 21 | 0 | 215 |
 | S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 36 | 153 | 105 | 42 | 2 | 338 |
+| Total | 38 | 155 | 108 | 43 | 2 | 346 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -781,6 +810,10 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-COV-160` | S | P3 | T | `WP-COV-08` | EQUIVALENCE PARTITIONING |
 | `TOOL-COV-170` | S | P4 | T | `WP-COV-11` | DECISION TABLE |
 | `TOOL-COV-180` | M | P1 | T | `WP-COV-02` | EQUIVALENCE PARTITIONING |
+| `TOOL-COV-190` | M | P3 | T | `WP-COV-06` | EQUIVALENCE PARTITIONING |
+| `TOOL-COV-200` | M | P1 | T | `WP-COV-02` | EQUIVALENCE PARTITIONING |
+| `TOOL-COV-210` | M | P3 | T | `WP-COV-05` | EQUIVALENCE PARTITIONING |
+| `TOOL-COV-220` | M | P1 | T | `WP-COV-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-EXE-010` | M | P1 | T | `WP-EXH-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-EXE-020` | M | P1 | T | `WP-EXH-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-EXE-030` | M | P1 | T | `WP-EXH-02` | DECISION TABLE |
@@ -836,6 +869,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-INS-090` | S | P2 | D | `WP-PKG-05` | SCENARIO (demonstration) |
 | `TOOL-INS-100` | S | P3 | D | `WP-PKG-06` | SCENARIO (demonstration) |
 | `TOOL-INS-110` | M | P2 | T | `WP-CORE-04` | EQUIVALENCE PARTITIONING |
+| `TOOL-INS-120` | M | P2 | T | `WP-PKG-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-LIC-010` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |
 | `TOOL-LIC-020` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |
 | `TOOL-LIC-030` | M | P1 | I | `WP-PKG-07` | INSPECTION CHECKLIST |
@@ -921,6 +955,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-QUA-080` | S | P4 | I | `WP-QUA-06` | INSPECTION CHECKLIST |
 | `TOOL-QUA-090` | M | P4 | I | `WP-QUA-07` | INSPECTION CHECKLIST |
 | `TOOL-QUA-100` | C | P4 | I | `WP-QUA-08` | INSPECTION CHECKLIST |
+| `TOOL-QUA-110` | M | P2 | T | `WP-QUA-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-REP-010` | M | P1 | T | `WP-REP-02` | EQUIVALENCE PARTITIONING |
 | `TOOL-REP-020` | M | P1 | T | `WP-REP-02` | PAIRWISE |
 | `TOOL-REP-030` | M | P1 | T | `WP-REP-03` | EQUIVALENCE PARTITIONING |
@@ -998,6 +1033,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-TGT-100` | S | P3 | T | `WP-EXT-06` | BOUNDARY VALUE ANALYSIS |
 | `TOOL-TGT-110` | M | P3 | A | `WP-EXT-06` | ANALYSIS ARGUMENT |
 | `TOOL-TGT-120` | C | P3 | T | `WP-EXT-07` | EQUIVALENCE PARTITIONING |
+| `TOOL-TGT-130` | M | P3 | T | `WP-EXT-04` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-010` | M | P4 | T | `WP-TRC-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-020` | M | P4 | T | `WP-TRC-01` | PAIRWISE |
 | `TOOL-TRC-030` | M | P4 | T | `WP-TRC-01` | STATE TRANSITION |
@@ -1008,6 +1044,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-TRC-080` | S | P4 | T | `WP-TRC-05` | EQUIVALENCE PARTITIONING |
 | `TOOL-TRC-090` | S | P4 | T | `WP-TRC-05` | STATE TRANSITION |
 | `TOOL-TRC-100` | C | P4 | T | `WP-TRC-04` | DECISION TABLE |
+| `TOOL-TRC-110` | M | P4 | T | `WP-TRC-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-UIX-010` | M | P1 | A | `WP-API-01` | ANALYSIS ARGUMENT |
 | `TOOL-UIX-020` | M | P2 | A | `WP-API-01` | ANALYSIS ARGUMENT |
 | `TOOL-UIX-030` | M | P2 | D | `WP-GUI-01` | SCENARIO (demonstration) |

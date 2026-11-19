@@ -29,7 +29,6 @@ import yaml.scanner
 from ectt.core.determinism import canonical_float_repr
 from ectt.prj.errors import (
     AnchorForbiddenError,
-    CommentPreservationError,
     DuplicateKeyError,
     EmptyDocumentError,
     MergeKeyForbiddenError,
@@ -185,7 +184,9 @@ class RestrictedYamlAdapter:
                 line = ev.start_mark.line + 1 if ev.start_mark else None
                 col = ev.start_mark.column + 1 if ev.start_mark else None
                 raise AnchorForbiddenError(
-                    f"YAML anchor '&{ev.anchor}' is forbidden in project files",
+                    # types-PyYAML stubs do not model .anchor on the base Event
+                    # type; access is guarded by the getattr() check above.
+                    f"YAML anchor '&{ev.anchor}' is forbidden in project files",  # type: ignore[attr-defined]
                     path=path,
                     line=line,
                     column=col,
@@ -196,7 +197,8 @@ class RestrictedYamlAdapter:
                 line = ev.start_mark.line + 1 if ev.start_mark else None
                 col = ev.start_mark.column + 1 if ev.start_mark else None
                 raise TagForbiddenError(
-                    f"Explicit YAML tag '{ev.tag}' is forbidden in project files",
+                    # Same stub gap as .anchor above: guarded by getattr().
+                    f"Explicit YAML tag '{ev.tag}' is forbidden in project files",  # type: ignore[attr-defined]
                     path=path,
                     line=line,
                     column=col,
@@ -421,8 +423,7 @@ class RestrictedYamlAdapter:
                 keys_set.remove(k)
 
         # 3. Remaining keys sorted alphabetically
-        for k in sorted(keys_set):
-            ordered.append(k)
+        ordered.extend(sorted(keys_set))
 
         return ordered
 

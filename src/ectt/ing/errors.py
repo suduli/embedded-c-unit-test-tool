@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
+from typing import ClassVar
 
 from ectt.core.determinism import CoreError
 
@@ -26,6 +27,8 @@ __all__ = [
 
 class IngestionError(CoreError):
     """Base exception for ectt compilation database ingestion errors."""
+
+    category: ClassVar[str] = "ingestion"
 
     def __init__(
         self,

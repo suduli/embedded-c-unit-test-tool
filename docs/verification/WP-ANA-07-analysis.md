@@ -1,0 +1,31 @@
+# Verification Analysis Note — WP-ANA-07 (Partial-Failure Resilience)
+
+Analysis evidence for requirements verified under WP-ANA-07. Schema change: **1.3 → 1.4** (additive minor).
+
+| Requirement ID | Summary Statement | Implementation Reference | Analysis Argument & Verification Evidence |
+|---|---|---|---|
+| **TOOL-PAR-130** | The tool shall continue analysis and report partial results when a subset of translation units fails to parse. | `src/ectt/ana/persist.py` (`PER_UNIT_FAILURES`, `failed_unit_from_error`, `assemble_analysis_model` step 2, reader gate 6d), `src/ectt/ana/model.py` (`UnitFailureModel`, `AnalysisUnit.failure`), `src/ectt/ana/eligibility.py` (unit-kind record), `src/ectt/ana/schema/analysis-model-1.4.schema.json` | **Guarantee (isolation):** a per-unit failure becomes a failed unit and never removes another unit. Per-unit failures are `SourceFileNotFoundError`, `FrontendParseError` and `ExtractionError` (the `PER_UNIT_FAILURES` tuple). Any other exception propagates, so a defect is never reported as a unit failure. `TypeDefinitionConflictError` and `TypeClosureError` stay run-level.<br><br>**Guarantee (named reason):** a failed unit carries a `failure` record with `reason`, `code` (concrete class name), `category` and a fixed `message`, taken from the TASK-006 error model. A unit that parsed with errors gets reason `frontend_parse_error` and its first error diagnostic as the message. Absolute paths and raw libclang exception strings are not stored.<br><br>**Guarantee (no partial unit):** a failed unit has `functions: []` and `types: {}`. It contributes no partial extraction.<br><br>**Guarantee (determinism):** unit order follows the caller's order, as before. Repeated runs over the same input are byte-identical, and the failure inventory contains no path outside the unit's relative path.<br><br>**Guarantee (fail-closed reader, 1.4):** a failed unit without a valid `failure` record is rejected (`missing_unit_failure`), as is a failed unit with functions (`failed_unit_has_functions`) and a parsed unit carrying a `failure` (`unexpected_unit_failure`).<br><br>**Schema decision:** the failure is a new optional object on the unit, present only for failed units. Parsed units keep the 1.3 shape. The schema uses `if`/`then`/`else` on `status` to enforce the same rules as the reader.<br><br>**Test evidence:** `tests/ana/test_partial_failure.py` — `test_syntax_error_in_one_unit_leaves_the_valid_units_extracted`, `test_failure_inventory_is_deterministic_and_path_free`, `test_failed_unit_round_trips_through_the_1_4_reader`, `test_reader_rejects_failed_unit_without_a_failure_record`, `test_reader_rejects_failure_record_on_a_parsed_unit`, `test_reader_rejects_functions_on_a_failed_unit`, `test_missing_source_for_a_failed_unit_is_recorded_not_fatal`, `test_missing_source_for_a_parsed_unit_still_propagates`, `test_extraction_error_becomes_a_failed_unit_with_its_reason`, `test_run_level_errors_are_not_caught_as_unit_failures`, `test_failed_unit_helper_refuses_errors_that_are_not_per_unit`, `test_failed_analysis_unit_without_a_reason_gets_a_generic_one`. `tests/ana/test_eligibility.py::test_failed_unit_contributes_one_unmeasurable_unit_record` replaces the pre-1.4 "no records" expectation. `tests/ana/test_schema_conformance.py` validates emitted models against the 1.4 schema, including a failed unit. |
+| **TOOL-PAR-140** | Per-unit machine-checkable inventory of unsupported constructs, emitted even when empty. | `src/ectt/ana/persist.py` (assembly passes the inventory through on every branch), `src/ectt/ana/model.py` (`AnalysisUnit.unsupported_constructs`) | **Guarantee (not dropped):** `assemble_analysis_model` previously rebuilt parsed units without `unsupported_constructs`. All branches now carry it through. Extraction does not yet populate the inventory, so it is `[]` for every unit. The inventory is emitted, but it does not yet detect any construct. Populating it is future work. |
+
+## Not yet covered
+
+- **No multi-file run driver.** The package has `parse()` per translation unit and `assemble_analysis_model()`, but no command that loops over a project's units. The per-unit `try`/`except` over `PER_UNIT_FAILURES` belongs in that driver, which does not exist yet. The isolation guarantee holds for any caller that follows this pattern. It is not an end-to-end guarantee of the CLI.
+- **Unsupported constructs are not detected.** The inventory is always empty (see TOOL-PAR-140 above).
+- **Failed units have no digest when their source is missing.** Their `inputs` entry is omitted, and the failure reason records the missing source. Parsed units still require a digest.
+- **Warnings on failed units.** A unit that fails with errors keeps its diagnostics, including warnings. The helper does not filter them.
+
+## Design notes
+
+- **Why a failed unit, not an exception.** TOOL-PAR-130 asks for partial results. A raised exception would stop the caller from producing the valid units and their model.
+- **Why the catch list is explicit.** Catching `Exception` would make a `KeyError` look like a failed unit. The narrow tuple keeps defects visible (NFR-090).
+- **Why the eligibility record has `kind`.** A unit-level record with an empty `function` must not look like a function record to CMP-ATG. `kind` makes the difference explicit.
+
+## Night-run re-verification (2026-11-18, chat 2)
+
+Re-ran the evidence suites on this worktree: `tests/ana` → 128 passed, 0 skipped; full suite
+447 passed / 4 skipped (baseline 4). The assessment stands unchanged: TOOL-PAR-130 evidence is
+complete; TOOL-PAR-140's inventory is carried through assembly and schema-gated but **not yet
+populated by extraction** (always `[]`), and the multi-file run driver that would own the per-unit
+isolation loop does not exist yet. **PARTIAL** — remaining: populate the unsupported-construct
+inventory during extraction (TOOL-PAR-080/090/170 territory, WP-ANA-06), and the multi-file
+analysis driver.

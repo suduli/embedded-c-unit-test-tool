@@ -14,6 +14,7 @@ import pytest
 from ectt.ana.model import (
     AnalysisUnit,
     Diagnostic,
+    DimensionModel,
     EnumeratorModel,
     FunctionModel,
     GlobalAccessModel,
@@ -21,7 +22,6 @@ from ectt.ana.model import (
     ParsedTranslationUnit,
     ParseResult,
     RangeModel,
-    DimensionModel,
     SourceLocation,
     StructMemberModel,
     TypeModel,
@@ -214,8 +214,9 @@ def test_range_absent_omits_key() -> None:
 def test_model_with_ranges_validates_against_1_2_schema() -> None:
     """verifies: TOOL-PAR-160, DSN-ANA-120 — a model carrying ranges and
     dimensions validates against the published 1.2 schema."""
-    import jsonschema
     from importlib import resources
+
+    import jsonschema
 
     schema = json.loads(
         resources.files("ectt.ana.schema")
@@ -231,7 +232,6 @@ def test_model_with_ranges_validates_against_1_2_schema() -> None:
                 "status": "parsed",
                 "diagnostics": [],
                 "cfg": None,
-                "unsupported_constructs": [],
                 "functions": [
                     {
                         "name": "f",

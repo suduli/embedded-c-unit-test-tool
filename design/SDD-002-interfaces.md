@@ -256,6 +256,12 @@ that information is present as metadata, but no logic branches on it.
 - `timeout` is a distinct outcome from `fail`, since the diagnosis differs.
 - `order_seed` is recorded so a randomised-order failure is reproducible
   (DSN-TCM-060).
+- **Host executions on behalf of a target carry a host profile.** `execution`
+  names the versioned host profile (TOOL-TGT-130, DSN-EXT-110): the recorded
+  target→host derivation — triples, flag/define changes, substituted platform
+  headers, unavailable hardware behavior — with its known ABI differences;
+  unmeasured differences stay unknown, and host success never establishes
+  target behavior.
 
 ---
 
@@ -317,14 +323,24 @@ Recompute independence from compatible evidence or union traceable backend
 assertions whose documented merge semantics support it. Never OR ordinary
 outcome flags into independence. Cross-run witness pairing is allowed only when
 full compatible vectors prove the selected form; otherwise preserve separate
-run evidence. Incompatible records remain separate with a diagnostic. Missing
+run evidence. Incompatible records remain separate with a diagnostic. A source or
+expression identity that differs only by macro expansion or another
+preprocessing variant is itself an incompatibility — the macro-variant case is
+never silently ignored, and the variant difference is carried in the record
+identity so the diagnostic can name it (DSN-COV-130). Missing
 measurement stays visible in per-run provenance; an aggregate demonstrated
 status requires at least one valid proof. Justifications remain separate and
-expire on source-digest mismatch.
+expire on source-digest mismatch. Coverage artifacts from runs whose outcome
+is `error`, `timeout`, or a crash are retained but excluded from aggregate
+merges unless explicitly admitted by a recorded per-run decision; quarantined
+artifacts stay visible in per-run provenance and never contribute to an
+aggregate coverage figure (TOOL-COV-220, DSN-COV-150).
 
 Acceptance fixtures must include equal true/false outcome flags with different
 independence results, short-circuit/masking pairs, missing backend evidence,
-incompatible merges, and zero/unsupported denominators.
+incompatible merges, zero/unsupported denominators, records differing only by
+macro/preprocessing variant, and backend-boundary cases at the probed condition
+maximum and one above it.
 
 ### 7.2 Contract points
 
@@ -385,6 +401,17 @@ delta, and the provenance record — **persisted**, so that:
 obligations. A renderer that ignores it produces a report that overclaims, so
 the renderer conformance test (§10) asserts that every advisory present in the
 model appears in the output.
+
+Requirement-level figures in `traceability` are aggregation-controlled
+(TOOL-TRC-110, DSN-TRC-090): association rows deduplicate to unique
+(requirement, test) pairs before any count; a requirement's verdict is the
+worst outcome among its linked executed tests, with unreviewed-origin tests
+counted as unverified per TOOL-ATG-080; every requirement-level percentage
+labels its denominator; and a requirement linked to no executed test is
+`unverified`, never inferred from coverage. The acceptance fixtures reproduce
+the two-associations-for-one-requirement anomaly — two association rows, one
+requirement — which must aggregate to one counted pair and one verdict, never
+a 2/1 numerator-over-denominator.
 
 `format_version` is separate from `schema_version` because TOOL-REP-130 requires
 archived evidence to stay interpretable: the model may evolve while a given

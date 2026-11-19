@@ -40,17 +40,17 @@ from ectt.ing.errors import (
     ResponseFileError,
     StalenessError,
 )
+from ectt.ing.model import (
+    CompilationDatabase,
+    CompilerInvocation,
+    TranslationUnit,
+)
 from ectt.ing.staleness import (
     StalenessInputs,
     StalenessReport,
     assert_fresh,
     capture_staleness_inputs,
     check_staleness,
-)
-from ectt.ing.model import (
-    CompilationDatabase,
-    CompilerInvocation,
-    TranslationUnit,
 )
 
 __all__ = [
@@ -84,4 +84,9 @@ __all__ = [
     "assert_fresh",
     "StalenessInputs",
     "StalenessReport",
+    # Multi-toolchain ingestion (WP-ING-06)
+    "MultiToolchainIngestion",
+    "ToolchainEntry",
+    "UnknownToolchainError",
+    "ingest_multi_toolchain",
 ]
