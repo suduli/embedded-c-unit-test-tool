@@ -357,25 +357,138 @@ def run_harness(
     # A stale test's results are rejected: they describe content the artifact
     # was not built from (NR-19), so they never become current evidence.
     accepted = tuple(record for record in records if record.test_id not in stale_ids)
-    accepted_ids = {record.test_id for record in accepted}
+    return _assemble_run(attempt, accepted, binding.stale)
+
+
+def _assemble_run(
+    attempt: RunAttempt,
+    records: tuple[ResultRecord, ...],
+    stale: tuple[str, ...],
+) -> ExecutedRun:
+    """Shared result-set assembly and NR-18 aggregation for the runners."""
+    accepted_ids = {record.test_id for record in records}
     missing = tuple(
         b.test_id for b in attempt.allocations if b.test_id not in accepted_ids
     )
-    not_executed = tuple(sorted(set(missing) | set(binding.stale)))
+    not_executed = tuple(sorted(set(missing) | set(stale)))
     result_set = ResultSet(
         run_id=attempt.attempt_id,
         execution=attempt.execution,
-        results=accepted,
+        results=records,
         partial=bool(not_executed),
         not_executed=not_executed,
     )
     outcome = aggregate_outcome(
-        {record.test_id: record for record in accepted},
+        {record.test_id: record for record in records},
         [b.test_id for b in attempt.allocations],
     )
     return ExecutedRun(
         attempt=attempt,
         result_set=result_set,
         outcome=outcome,
-        stale_ids=binding.stale,
+        stale_ids=stale,
     )
+
+
+_TEST_SELECT_FLAG = "--ectt-select"
+
+
+def run_isolated(
+    attempt: RunAttempt,
+    executable: Path | str,
+    *,
+    current_digests: Mapping[str, str],
+    timeout_seconds: float,
+    argv_prefix: Sequence[str] = (),
+) -> ExecutedRun:
+    """Execute each bound test in its own harness process (DSN-EXH-020/030).
+
+    Process-granularity fault isolation: the harness is invoked once per test
+    with ``--ectt-select <test_id>``. Attribution:
+
+    - a harness that reports a RESULT for the selected test yields that
+      normalized record;
+    - a test whose process hangs past ``timeout_seconds`` is killed and
+      attributed a distinct ``timeout`` record (TOOL-EXE-040, RV-02 F-11) —
+      neither pass nor fail;
+    - a test whose process terminates abnormally or silently without a
+      RESULT record — segfault, ``abort()``, non-zero exit with no protocol
+      output — is attributed an ``error`` record (TOOL-EXE-030).
+
+    The remaining tests still execute: a crash costs one result, not the run.
+    Protocol violations of the RESULT/FAILURE stream still surface as named
+    errors — isolation contains the crash of the test in flight, not harness
+    protocol bugs. Run integrity is identical to :func:`run_harness`: the
+    NR-19 binding check runs first (stale tests are neither executed nor
+    accepted), and the outcome is aggregated from finalized records only
+    (NR-18); no timing is recorded and no network is used.
+    """
+    if attempt.status == "build_failed":
+        raise WrongAttemptStateError(
+            f"attempt '{attempt.attempt_id}' failed to build; a build-failed "
+            "attempt never executes (use build_failed_run)"
+        )
+    if attempt.status != "built":
+        raise WrongAttemptStateError(
+            f"attempt '{attempt.attempt_id}' is '{attempt.status}', not 'built'; "
+            "report the build outcome before running"
+        )
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be positive")
+    binding = check_test_bindings(attempt, current_digests)
+    digests_by_test = {b.test_id: b.artifact_digest for b in attempt.allocations}
+    stale_ids = frozenset(binding.stale)
+
+    executable_path = Path(executable)
+    if not executable_path.is_file():
+        raise ExecutableMissingError(
+            f"built harness executable '{executable_path}' does not exist",
+            path=executable_path,
+        )
+
+    records: list[ResultRecord] = []
+    for binding_entry in attempt.allocations:
+        test_id = binding_entry.test_id
+        if test_id in stale_ids:
+            continue
+        try:
+            completed = subprocess.run(
+                [*argv_prefix, str(executable_path), _TEST_SELECT_FLAG, test_id],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired:
+            records.append(
+                finalize_result(test_id, "timeout", digests_by_test[test_id])
+            )
+            continue
+        except OSError as exc:
+            raise ExecutionLaunchError(
+                f"cannot launch harness executable '{executable_path}': {exc}",
+                path=executable_path,
+            ) from exc
+        test_ids = frozenset({test_id})
+        parsed = _parse_result_stream(completed.stdout, test_ids, digests_by_test)
+        if not parsed:
+            # Abnormal or silent termination with no protocol record — the
+            # case in flight is attributed an error (DSN-EXH-020). exit(0)
+            # alone is abnormal (NR-18): no finalized record exists either.
+            records.append(
+                finalize_result(test_id, "error", digests_by_test[test_id])
+            )
+            continue
+        records.extend(parsed)
+    return _assemble_run(attempt, tuple(records), binding.stale)
+
+
+def exit_code(run: ExecutedRun) -> int:
+    """Map an executed run to the documented exit-code contract (DSN-EXH-050).
+
+    ``pass`` returns 0; every other outcome — ``failed``, ``incomplete``,
+    ``build_failed`` — returns 1, so any test failure or timeout yields a
+    non-zero status (TOOL-EXE-040, TOOL-EXE-060) and CI never sees green for
+    an unverified run.
+    """
+    return 0 if run.outcome == "pass" else 1

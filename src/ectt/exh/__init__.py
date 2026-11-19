@@ -38,9 +38,11 @@ from ectt.exh.runner import (
     allocate_attempt,
     build_failed_run,
     check_test_bindings,
+    exit_code,
     mark_built,
     record_build_failure,
     run_harness,
+    run_isolated,
 )
 
 __all__ = [
@@ -76,4 +78,6 @@ __all__ = [
     "BindingCheckResult",
     "ExecutedRun",
     "run_harness",
+    "run_isolated",
+    "exit_code",
 ]
