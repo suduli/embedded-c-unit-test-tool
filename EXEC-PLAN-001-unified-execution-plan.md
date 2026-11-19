@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-18** · HEAD `b7d60e1` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-19** · HEAD `cb320a8` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -38,7 +38,7 @@
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 399 passed, 0 failed, 4 skipped. Failing:  (fixed by `TASK-001`).
+- **Tests at HEAD:** 970 passed, 0 failed, 4 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
 - **Startable right now:** `TASK-016`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
@@ -50,6 +50,7 @@
 4. ADR-003, ADR-004, ADR-007 and SRS §27 q2/q9 are open but are not in the D-01…D-04 queue; they gate WP-ATG-02/03, WP-COV-01 (critical path), WP-PKG-01, WP-COV-05 and WP-EXH-04.
 5. design/trace/requirement-matrix.csv and trace-graph.json list 323 requirements (stale generated artefacts); the live counts (346) come from SRS-001 and plan_check.
 6. BACKLOG §3.2 tells agents to push glm-night/20261117; that branch is cut from the unpushed docs/pending-decisions, so a push would publish those 10 commits. This plan makes the push owner-approved.
+7. 2026-11-19: GLM-night queues merged locally into glm-night/20261117 (chat1 41 items, chat2 35 items; no shared paths, no file overlap). Fixes on the trunk: test cwd leak (98d9963), trust gate enforced before extension execution and bound to content (1746291), regeneration refuses to drop a user region (cb320a8). Nothing pushed. WP item state lives in docs/glm-night/CHAT1_LEDGER.md and CHAT2_LEDGER.md until the owner reconciles it.
 <!-- END GENERATED: snapshot -->
 
 ---
@@ -318,7 +319,7 @@ Of these, **14** already have every hard dependency satisfied (candidates for `T
 | 42 | `TASK-012` | WP-PRJ-03 schema migration with explicit confirmation | Landed | `1689d08` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 44 | `TASK-013` | WP-CORE-04 provenance record and version identification | Landed | `c320746` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 | 46 | `TASK-014` | Decision memos D-01…D-04 (decision-ready drafts) | Landed | `b7d60e1` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
-| 47 | `TASK-015` | T-02 draft: no-import/provenance rule for `vcast-findings/` | Landed | — | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
+| 47 | `TASK-015` | T-02 draft: no-import/provenance rule for `vcast-findings/` | Landed | `5a9949a` | glm-night/20261117 (worktree ../wt-unit-glm-night, off docs/pending-decisions tip) | pass |
 <!-- END GENERATED: done -->
 
 ---
