@@ -9,6 +9,14 @@ labelled denominators (TOOL-TRC-110).
 
 from ectt.trc.associations import Association, AssociationSet
 from ectt.trc.errors import TrcError
+from ectt.trc.imports import (
+    CSV_COLUMNS,
+    RequirementRecord,
+    import_reqif,
+    import_requirements_csv,
+    import_requirements_text,
+    requirement_universe,
+)
 from ectt.trc.matrix import (
     TEST_SEVERITY,
     RequirementRow,
@@ -22,6 +30,8 @@ from ectt.trc.unlinked import UnlinkedReport, find_unlinked
 __all__ = [
     "Association",
     "AssociationSet",
+    "CSV_COLUMNS",
+    "RequirementRecord",
     "RequirementRow",
     "TEST_SEVERITY",
     "TestLink",
@@ -31,4 +41,8 @@ __all__ = [
     "associations_from_datacases",
     "build_matrix",
     "find_unlinked",
+    "import_reqif",
+    "import_requirements_csv",
+    "import_requirements_text",
+    "requirement_universe",
 ]
