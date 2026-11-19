@@ -41,6 +41,14 @@ from ectt.tcm.independence import (
     check_order_independence,
     execution_order,
 )
+from ectt.tcm.interchange import (
+    COLUMNS,
+    INTERCHANGE_VERSION,
+    InterchangeExport,
+    InterchangeImport,
+    export_cases,
+    import_cases,
+)
 from ectt.tcm.ranged import (
     RangedInput,
     ValidRange,
@@ -67,6 +75,7 @@ __all__ = [
     "InvalidSelectionError",
     "RangeExpansionError",
     "RangeCheckingError",
+    "InterchangeError",
     # C-authored cases
     "CSourceTestCase",
     "TestCaseSet",
@@ -98,4 +107,11 @@ __all__ = [
     "expand_case",
     "mark_robustness",
     "ensure_range_checking",
+    # Interchange
+    "INTERCHANGE_VERSION",
+    "COLUMNS",
+    "InterchangeExport",
+    "InterchangeImport",
+    "export_cases",
+    "import_cases",
 ]

@@ -24,6 +24,7 @@ __all__ = [
     "InvalidSelectionError",
     "RangeExpansionError",
     "RangeCheckingError",
+    "InterchangeError",
 ]
 
 
@@ -193,6 +194,19 @@ class RangeCheckingError(TcmError):
         message: str,
         *,
         reason: str = "range_checking_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InterchangeError(TcmError):
+    """Raised when an interchange document violates its documented schema."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "interchange_error",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)
