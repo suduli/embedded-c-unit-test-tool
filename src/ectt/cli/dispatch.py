@@ -18,8 +18,9 @@ from typing import TextIO
 
 from ectt.api.catalogue import Catalogue, default_catalogue
 from ectt.cli.errors import CliError, OperationNotAvailable
-from ectt.cli.exit_codes import EXIT_TOOL_ERROR, EXIT_USAGE
+from ectt.cli.exit_codes import EXIT_TOOL_ERROR, EXIT_USAGE, exit_code_for_category
 from ectt.cli.generator import build_parser, command_names
+from ectt.core.errors import EcttError
 
 __all__ = [
     "Dispatcher",
@@ -101,6 +102,9 @@ def run(
 
     try:
         return dispatcher.dispatch(namespace)
-    except CliError as exc:
+    except EcttError as exc:
+        # Every ectt exception category maps onto the stable documented
+        # table (TOOL-CIC-030); the error is reported and the process exits
+        # non-zero, never faking success (TOOL-NFR-090, WP-CORE-02).
         print(f"ectt: error: {exc}", file=stderr)
-        return EXIT_OPERATION_NOT_AVAILABLE
+        return exit_code_for_category(exc.category)
