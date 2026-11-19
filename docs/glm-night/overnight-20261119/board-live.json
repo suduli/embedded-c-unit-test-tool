@@ -1,0 +1,1339 @@
+[
+{
+"wp": "WP-SPIKE-01",
+"status": "Review",
+"component": "Validation spikes",
+"phase": "P0",
+"issue": 8
+},
+{
+"wp": "WP-PRJ-01",
+"status": "Review",
+"component": "CMP-PRJ",
+"phase": "P1",
+"issue": 9
+},
+{
+"wp": "WP-ANA-01",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P1",
+"issue": 10
+},
+{
+"wp": "WP-SPIKE-02",
+"status": "Review",
+"component": "Validation spikes",
+"phase": "P0",
+"issue": 11
+},
+{
+"wp": "WP-SPIKE-03",
+"status": "Verification",
+"component": "Validation spikes",
+"phase": "P0",
+"issue": 12
+},
+{
+"wp": "WP-CORE-01",
+"status": "Review",
+"component": "CMP-CORE",
+"phase": "P1",
+"issue": 13
+},
+{
+"wp": "WP-CORE-02",
+"status": "Verification",
+"component": "CMP-CORE",
+"phase": "P1",
+"issue": 14
+},
+{
+"wp": "WP-CORE-03",
+"status": "Backlog",
+"component": "CMP-CORE",
+"phase": "P1",
+"issue": 15
+},
+{
+"wp": "WP-CORE-04",
+"status": "Verification",
+"component": "CMP-CORE",
+"phase": "P2",
+"issue": 16
+},
+{
+"wp": "WP-CORE-05",
+"status": "Backlog",
+"component": "CMP-CORE",
+"phase": "P2",
+"issue": 17
+},
+{
+"wp": "WP-CORE-06",
+"status": "Review",
+"component": "CMP-CORE",
+"phase": "P2",
+"issue": 18
+},
+{
+"wp": "WP-CORE-07",
+"status": "Verification",
+"component": "CMP-CORE",
+"phase": "P2",
+"issue": 19
+},
+{
+"wp": "WP-CORE-08",
+"status": "Backlog",
+"component": "CMP-CORE",
+"phase": "P2",
+"issue": 20
+},
+{
+"wp": "WP-PRJ-02",
+"status": "Verification",
+"component": "CMP-PRJ",
+"phase": "P2",
+"issue": 21
+},
+{
+"wp": "WP-PRJ-03",
+"status": "Review",
+"component": "CMP-PRJ",
+"phase": "P2",
+"issue": 22
+},
+{
+"wp": "WP-PRJ-04",
+"status": "Review",
+"component": "CMP-PRJ",
+"phase": "P3",
+"issue": 23
+},
+{
+"wp": "WP-PRJ-05",
+"status": "Backlog",
+"component": "CMP-PRJ",
+"phase": "P4",
+"issue": 24
+},
+{
+"wp": "WP-ANA-02",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P1",
+"issue": 25
+},
+{
+"wp": "WP-ANA-03",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 26
+},
+{
+"wp": "WP-ANA-04",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P1",
+"issue": 27
+},
+{
+"wp": "WP-ANA-05",
+"status": "Verification",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 28
+},
+{
+"wp": "WP-ANA-06",
+"status": "Verification",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 29
+},
+{
+"wp": "WP-ANA-07",
+"status": "Verification",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 30
+},
+{
+"wp": "WP-ANA-08",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 31
+},
+{
+"wp": "WP-ANA-09",
+"status": "Review",
+"component": "CMP-ANA",
+"phase": "P2",
+"issue": 32
+},
+{
+"wp": "WP-ING-01",
+"status": "Review",
+"component": "CMP-ING",
+"phase": "P1",
+"issue": 33
+},
+{
+"wp": "WP-ING-02",
+"status": "Verification",
+"component": "CMP-ING",
+"phase": "P2",
+"issue": 34
+},
+{
+"wp": "WP-ING-03",
+"status": "Review",
+"component": "CMP-ING",
+"phase": "P2",
+"issue": 35
+},
+{
+"wp": "WP-ING-04",
+"status": "Review",
+"component": "CMP-ING",
+"phase": "P2",
+"issue": 36
+},
+{
+"wp": "WP-ING-05",
+"status": "Review",
+"component": "CMP-ING",
+"phase": "P2",
+"issue": 37
+},
+{
+"wp": "WP-ING-06",
+"status": "Review",
+"component": "CMP-ING",
+"phase": "P3",
+"issue": 38
+},
+{
+"wp": "WP-ING-07",
+"status": "Verification",
+"component": "CMP-ING",
+"phase": "P2",
+"issue": 39
+},
+{
+"wp": "WP-TCH-01",
+"status": "Review",
+"component": "CMP-TCH",
+"phase": "P1",
+"issue": 40
+},
+{
+"wp": "WP-TCH-02",
+"status": "Review",
+"component": "CMP-TCH",
+"phase": "P1",
+"issue": 41
+},
+{
+"wp": "WP-TCH-03",
+"status": "Verification",
+"component": "CMP-TCH",
+"phase": "P3",
+"issue": 42
+},
+{
+"wp": "WP-TCH-04",
+"status": "Review",
+"component": "CMP-TCH",
+"phase": "P3",
+"issue": 43
+},
+{
+"wp": "WP-TCH-05",
+"status": "Verification",
+"component": "CMP-TCH",
+"phase": "P3",
+"issue": 44
+},
+{
+"wp": "WP-TCH-06",
+"status": "Verification",
+"component": "CMP-TCH",
+"phase": "P3",
+"issue": 45
+},
+{
+"wp": "WP-TCH-07",
+"status": "Review",
+"component": "CMP-TCH",
+"phase": "P2",
+"issue": 46
+},
+{
+"wp": "WP-ATG-01",
+"status": "Needs reconciliation",
+"component": "CMP-ATG",
+"phase": "P3",
+"issue": 47
+},
+{
+"wp": "WP-ATG-02",
+"status": "Needs reconciliation",
+"component": "CMP-ATG",
+"phase": "P3",
+"issue": 48
+},
+{
+"wp": "WP-ATG-03",
+"status": "Needs reconciliation",
+"component": "CMP-ATG",
+"phase": "P3",
+"issue": 49
+},
+{
+"wp": "WP-ATG-04",
+"status": "Needs reconciliation",
+"component": "CMP-ATG",
+"phase": "P3",
+"issue": 50
+},
+{
+"wp": "WP-ATG-05",
+"status": "Needs reconciliation",
+"component": "CMP-ATG",
+"phase": "P3",
+"issue": 51
+},
+{
+"wp": "WP-GEN-01",
+"status": "Verification",
+"component": "CMP-GEN",
+"phase": "P1",
+"issue": 52
+},
+{
+"wp": "WP-GEN-02",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 53
+},
+{
+"wp": "WP-GEN-03",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 54
+},
+{
+"wp": "WP-GEN-04",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 55
+},
+{
+"wp": "WP-GEN-05",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 56
+},
+{
+"wp": "WP-GEN-06",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 57
+},
+{
+"wp": "WP-GEN-07",
+"status": "Needs reconciliation",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 58
+},
+{
+"wp": "WP-GEN-08",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 59
+},
+{
+"wp": "WP-GEN-09",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P2",
+"issue": 60
+},
+{
+"wp": "WP-GEN-10",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P3",
+"issue": 61
+},
+{
+"wp": "WP-GEN-11",
+"status": "Review",
+"component": "CMP-GEN",
+"phase": "P3",
+"issue": 62
+},
+{
+"wp": "WP-TCM-01",
+"status": "Review",
+"component": "CMP-TCM",
+"phase": "P1",
+"issue": 63
+},
+{
+"wp": "WP-TCM-02",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P2",
+"issue": 64
+},
+{
+"wp": "WP-TCM-03",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P2",
+"issue": 65
+},
+{
+"wp": "WP-TCM-04",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P2",
+"issue": 66
+},
+{
+"wp": "WP-TCM-05",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P2",
+"issue": 67
+},
+{
+"wp": "WP-TCM-06",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P2",
+"issue": 68
+},
+{
+"wp": "WP-TCM-07",
+"status": "Needs reconciliation",
+"component": "CMP-TCM",
+"phase": "P3",
+"issue": 69
+},
+{
+"wp": "WP-BLD-01",
+"status": "Review",
+"component": "CMP-BLD",
+"phase": "P1",
+"issue": 70
+},
+{
+"wp": "WP-BLD-02",
+"status": "Review",
+"component": "CMP-BLD",
+"phase": "P2",
+"issue": 71
+},
+{
+"wp": "WP-BLD-03",
+"status": "Verification",
+"component": "CMP-BLD",
+"phase": "P3",
+"issue": 72
+},
+{
+"wp": "WP-EXH-01",
+"status": "Backlog",
+"component": "CMP-EXH",
+"phase": "P1",
+"issue": 73
+},
+{
+"wp": "WP-EXH-02",
+"status": "Needs reconciliation",
+"component": "CMP-EXH",
+"phase": "P1",
+"issue": 74
+},
+{
+"wp": "WP-EXH-03",
+"status": "Needs reconciliation",
+"component": "CMP-EXH",
+"phase": "P1",
+"issue": 75
+},
+{
+"wp": "WP-EXH-04",
+"status": "Needs reconciliation",
+"component": "CMP-EXH",
+"phase": "P2",
+"issue": 76
+},
+{
+"wp": "WP-EXT-01",
+"status": "Verification",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 77
+},
+{
+"wp": "WP-EXT-02",
+"status": "Verification",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 78
+},
+{
+"wp": "WP-EXT-03",
+"status": "Review",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 79
+},
+{
+"wp": "WP-EXT-04",
+"status": "Needs reconciliation",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 80
+},
+{
+"wp": "WP-EXT-05",
+"status": "Review",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 81
+},
+{
+"wp": "WP-EXT-06",
+"status": "Review",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 82
+},
+{
+"wp": "WP-EXT-07",
+"status": "Review",
+"component": "CMP-EXT",
+"phase": "P3",
+"issue": 83
+},
+{
+"wp": "WP-CBT-01",
+"status": "Needs reconciliation",
+"component": "CMP-CBT",
+"phase": "P2",
+"issue": 84
+},
+{
+"wp": "WP-CBT-02",
+"status": "Needs reconciliation",
+"component": "CMP-CBT",
+"phase": "P3",
+"issue": 85
+},
+{
+"wp": "WP-CBT-03",
+"status": "Needs reconciliation",
+"component": "CMP-CBT",
+"phase": "P3",
+"issue": 86
+},
+{
+"wp": "WP-CBT-04",
+"status": "Needs reconciliation",
+"component": "CMP-CBT",
+"phase": "P3",
+"issue": 87
+},
+{
+"wp": "WP-COV-01",
+"status": "Backlog",
+"component": "CMP-COV",
+"phase": "P1",
+"issue": 88
+},
+{
+"wp": "WP-COV-02",
+"status": "Backlog",
+"component": "CMP-COV",
+"phase": "P1",
+"issue": 89
+},
+{
+"wp": "WP-COV-03",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P1",
+"issue": 90
+},
+{
+"wp": "WP-COV-04",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P3",
+"issue": 91
+},
+{
+"wp": "WP-COV-05",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P3",
+"issue": 92
+},
+{
+"wp": "WP-COV-06",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P3",
+"issue": 93
+},
+{
+"wp": "WP-COV-07",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P3",
+"issue": 94
+},
+{
+"wp": "WP-COV-08",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P3",
+"issue": 95
+},
+{
+"wp": "WP-COV-09",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P4",
+"issue": 96
+},
+{
+"wp": "WP-COV-10",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P4",
+"issue": 97
+},
+{
+"wp": "WP-COV-11",
+"status": "Needs reconciliation",
+"component": "CMP-COV",
+"phase": "P4",
+"issue": 98
+},
+{
+"wp": "WP-REP-01",
+"status": "Backlog",
+"component": "CMP-REP",
+"phase": "P1",
+"issue": 99
+},
+{
+"wp": "WP-REP-02",
+"status": "Backlog",
+"component": "CMP-REP",
+"phase": "P1",
+"issue": 100
+},
+{
+"wp": "WP-REP-03",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P1",
+"issue": 101
+},
+{
+"wp": "WP-REP-04",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P3",
+"issue": 102
+},
+{
+"wp": "WP-REP-05",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P4",
+"issue": 103
+},
+{
+"wp": "WP-REP-06",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P4",
+"issue": 104
+},
+{
+"wp": "WP-REP-07",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P4",
+"issue": 105
+},
+{
+"wp": "WP-REP-08",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P3",
+"issue": 106
+},
+{
+"wp": "WP-REP-09",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P4",
+"issue": 107
+},
+{
+"wp": "WP-REP-10",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P4",
+"issue": 108
+},
+{
+"wp": "WP-REP-11",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P3",
+"issue": 109
+},
+{
+"wp": "WP-TRC-01",
+"status": "Needs reconciliation",
+"component": "CMP-TRC",
+"phase": "P4",
+"issue": 110
+},
+{
+"wp": "WP-TRC-02",
+"status": "Needs reconciliation",
+"component": "CMP-TRC",
+"phase": "P4",
+"issue": 111
+},
+{
+"wp": "WP-TRC-03",
+"status": "Needs reconciliation",
+"component": "CMP-TRC",
+"phase": "P4",
+"issue": 112
+},
+{
+"wp": "WP-TRC-04",
+"status": "Needs reconciliation",
+"component": "CMP-TRC",
+"phase": "P4",
+"issue": 113
+},
+{
+"wp": "WP-TRC-05",
+"status": "Needs reconciliation",
+"component": "CMP-TRC",
+"phase": "P4",
+"issue": 114
+},
+{
+"wp": "WP-REP-12",
+"status": "Needs reconciliation",
+"component": "CMP-REP",
+"phase": "P2",
+"issue": 115
+},
+{
+"wp": "WP-API-01",
+"status": "Review",
+"component": "CMP-API",
+"phase": "P1",
+"issue": 116
+},
+{
+"wp": "WP-API-02",
+"status": "Review",
+"component": "CMP-API",
+"phase": "P2",
+"issue": 117
+},
+{
+"wp": "WP-API-03",
+"status": "Verification",
+"component": "CMP-API",
+"phase": "P2",
+"issue": 118
+},
+{
+"wp": "WP-CLI-01",
+"status": "Review",
+"component": "CMP-CLI",
+"phase": "P1",
+"issue": 119
+},
+{
+"wp": "WP-CLI-02",
+"status": "Review",
+"component": "CMP-CLI",
+"phase": "P1",
+"issue": 120
+},
+{
+"wp": "WP-CLI-03",
+"status": "Verification",
+"component": "CMP-CLI",
+"phase": "P1",
+"issue": 121
+},
+{
+"wp": "WP-CLI-04",
+"status": "Verification",
+"component": "CMP-CLI",
+"phase": "P2",
+"issue": 122
+},
+{
+"wp": "WP-CLI-05",
+"status": "Needs reconciliation",
+"component": "CMP-CLI",
+"phase": "P3",
+"issue": 123
+},
+{
+"wp": "WP-GUI-01",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 124
+},
+{
+"wp": "WP-GUI-02",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 125
+},
+{
+"wp": "WP-GUI-03",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 126
+},
+{
+"wp": "WP-GUI-04",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 127
+},
+{
+"wp": "WP-GUI-05",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 128
+},
+{
+"wp": "WP-GUI-06",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 129
+},
+{
+"wp": "WP-GUI-07",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 130
+},
+{
+"wp": "WP-GUI-08",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 131
+},
+{
+"wp": "WP-GUI-09",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 132
+},
+{
+"wp": "WP-GUI-10",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 133
+},
+{
+"wp": "WP-GUI-11",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P2",
+"issue": 134
+},
+{
+"wp": "WP-GUI-12",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 135
+},
+{
+"wp": "WP-GUI-13",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 136
+},
+{
+"wp": "WP-GUI-14",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 137
+},
+{
+"wp": "WP-GUI-15",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 138
+},
+{
+"wp": "WP-GUI-16",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 139
+},
+{
+"wp": "WP-GUI-17",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 140
+},
+{
+"wp": "WP-GUI-18",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P3",
+"issue": 141
+},
+{
+"wp": "WP-GUI-19",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P4",
+"issue": 142
+},
+{
+"wp": "WP-GUI-20",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P4",
+"issue": 143
+},
+{
+"wp": "WP-GUI-21",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P4",
+"issue": 144
+},
+{
+"wp": "WP-GUI-22",
+"status": "Needs reconciliation",
+"component": "CMP-GUI",
+"phase": "P4",
+"issue": 145
+},
+{
+"wp": "WP-AIF-01",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 146
+},
+{
+"wp": "WP-AIF-02",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 147
+},
+{
+"wp": "WP-AIF-03",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 148
+},
+{
+"wp": "WP-AIF-04",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 149
+},
+{
+"wp": "WP-AIF-05",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 150
+},
+{
+"wp": "WP-AIF-06",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 151
+},
+{
+"wp": "WP-AIF-07",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 152
+},
+{
+"wp": "WP-AIF-08",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 153
+},
+{
+"wp": "WP-AIF-09",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 154
+},
+{
+"wp": "WP-AIF-10",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 155
+},
+{
+"wp": "WP-AIF-11",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 156
+},
+{
+"wp": "WP-AIF-12",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P4",
+"issue": 157
+},
+{
+"wp": "WP-AIF-13",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P4",
+"issue": 158
+},
+{
+"wp": "WP-AIF-14",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 159
+},
+{
+"wp": "WP-AIF-15",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P3",
+"issue": 160
+},
+{
+"wp": "WP-AIF-16",
+"status": "Needs reconciliation",
+"component": "CMP-AIF",
+"phase": "P4",
+"issue": 161
+},
+{
+"wp": "WP-MIG-01",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P2",
+"issue": 162
+},
+{
+"wp": "WP-MIG-02",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P2",
+"issue": 163
+},
+{
+"wp": "WP-MIG-03",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P2",
+"issue": 164
+},
+{
+"wp": "WP-MIG-04",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P3",
+"issue": 165
+},
+{
+"wp": "WP-MIG-05",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P3",
+"issue": 166
+},
+{
+"wp": "WP-MIG-06",
+"status": "Review",
+"component": "CMP-MIG",
+"phase": "P3",
+"issue": 167
+},
+{
+"wp": "WP-MIG-07",
+"status": "Needs reconciliation",
+"component": "CMP-MIG",
+"phase": "P4",
+"issue": 168
+},
+{
+"wp": "WP-PKG-01",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 169
+},
+{
+"wp": "WP-PKG-02",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 170
+},
+{
+"wp": "WP-PKG-03",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 171
+},
+{
+"wp": "WP-PKG-04",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 172
+},
+{
+"wp": "WP-PKG-05",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 173
+},
+{
+"wp": "WP-PKG-06",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P3",
+"issue": 174
+},
+{
+"wp": "WP-PKG-07",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P1",
+"issue": 175
+},
+{
+"wp": "WP-PKG-08",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P3",
+"issue": 176
+},
+{
+"wp": "WP-PKG-09",
+"status": "Needs reconciliation",
+"component": "CMP-PKG",
+"phase": "P2",
+"issue": 177
+},
+{
+"wp": "WP-PLG-01",
+"status": "Review",
+"component": "CMP-PLG",
+"phase": "P1",
+"issue": 178
+},
+{
+"wp": "WP-PLG-02",
+"status": "Review",
+"component": "CMP-PLG",
+"phase": "P3",
+"issue": 179
+},
+{
+"wp": "WP-PLG-03",
+"status": "Needs reconciliation",
+"component": "CMP-PLG",
+"phase": "P3",
+"issue": 180
+},
+{
+"wp": "WP-PLG-04",
+"status": "Review",
+"component": "CMP-PLG",
+"phase": "P2",
+"issue": 181
+},
+{
+"wp": "WP-QUA-01",
+"status": "Backlog",
+"component": "CMP-QUA",
+"phase": "P4",
+"issue": 182
+},
+{
+"wp": "WP-QUA-02",
+"status": "Verification",
+"component": "CMP-QUA",
+"phase": "P2",
+"issue": 183
+},
+{
+"wp": "WP-QUA-03",
+"status": "Needs reconciliation",
+"component": "CMP-QUA",
+"phase": "P2",
+"issue": 184
+},
+{
+"wp": "WP-QUA-04",
+"status": "Needs reconciliation",
+"component": "CMP-QUA",
+"phase": "P2",
+"issue": 185
+},
+{
+"wp": "WP-QUA-05",
+"status": "Review",
+"component": "CMP-QUA",
+"phase": "P4",
+"issue": 186
+},
+{
+"wp": "WP-QUA-06",
+"status": "Verification",
+"component": "CMP-QUA",
+"phase": "P4",
+"issue": 187
+},
+{
+"wp": "WP-QUA-07",
+"status": "Verification",
+"component": "CMP-QUA",
+"phase": "P2",
+"issue": 188
+},
+{
+"wp": "WP-QUA-08",
+"status": "Verification",
+"component": "CMP-QUA",
+"phase": "P4",
+"issue": 189
+},
+{
+"wp": "WP-SEC-01",
+"status": "Needs reconciliation",
+"component": "CMP-SEC",
+"phase": "P2",
+"issue": 190
+},
+{
+"wp": "WP-SEC-02",
+"status": "Needs reconciliation",
+"component": "CMP-SEC",
+"phase": "P2",
+"issue": 191
+},
+{
+"wp": "WP-SEC-03",
+"status": "Review",
+"component": "CMP-SEC",
+"phase": "P2",
+"issue": 192
+},
+{
+"wp": "WP-SEC-04",
+"status": "Review",
+"component": "CMP-SEC",
+"phase": "P2",
+"issue": 193
+},
+{
+"wp": "WP-SEC-05",
+"status": "Review",
+"component": "CMP-SEC",
+"phase": "P2",
+"issue": 194
+},
+{
+"wp": "WP-SEC-06",
+"status": "Needs reconciliation",
+"component": "CMP-SEC",
+"phase": "P3",
+"issue": 195
+},
+{
+"wp": "WP-SEC-07",
+"status": "Review",
+"component": "CMP-SEC",
+"phase": "P3",
+"issue": 196
+},
+{
+"wp": "WP-SEC-08",
+"status": "Needs reconciliation",
+"component": "CMP-SEC",
+"phase": "P3",
+"issue": 197
+},
+{
+"wp": "WP-SEC-09",
+"status": "Needs reconciliation",
+"component": "CMP-SEC",
+"phase": "P3",
+"issue": 198
+}
+]
