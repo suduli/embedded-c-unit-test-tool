@@ -32,3 +32,4 @@
 | WP-PLG-02 | DONE | 99221eb | 737 passed, 4 skipped | TOOL-PLG-070/080: dir discovery w/o reinstall, 4 failure kinds, isolation proven with 4 failing + 2 good extensions; trust-gate obligation recorded; gates green (2 gate retries) |
 | WP-TCH-04 | DONE | 96bf512 | 746 passed, 4 skipped | TOOL-TCH-060/070: declared-kind metric gate, version parse from real output, mcdc gcc>=14/clang>=18 table; gates green (1 gate retry) |
 | WP-TCH-03 | PARTIAL | d120d53 | 752 passed, 4 skipped | TCH-050/040 done (6-config roster, user cross config); TCH-030 configs shipped but against-real-toolchain execution pending runtime evidence; SDCC flag owner-review; gates green first try |
+| WP-BLD-03 | PARTIAL | 6c29113 | 759 passed, 4 skipped | TGT-010: exact cross command composition + metric gate + staleness carryover; real-toolchain execution pending runtime evidence; gates green (1 gate retry) |

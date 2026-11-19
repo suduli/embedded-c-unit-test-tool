@@ -59,6 +59,13 @@ from ectt.tch.gating import (
     gate_metrics,
     parse_compiler_version,
 )
+from ectt.tch.multibuild import (
+    ContainerSpecError,
+    DuplicateToolchainError,
+    MultiBuildPlan,
+    container_spec,
+    plan_multi_toolchain_builds,
+)
 
 __all__ = [
     # Errors
@@ -110,4 +117,10 @@ __all__ = [
     "shipped_roster",
     "register_cross_builtins",
     "ensure_roster_complete",
+    # Multi-toolchain builds & containers (WP-TCH-05)
+    "DuplicateToolchainError",
+    "ContainerSpecError",
+    "MultiBuildPlan",
+    "plan_multi_toolchain_builds",
+    "container_spec",
 ]
