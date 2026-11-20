@@ -1,3 +1,4 @@
 | item | what is needed | why it needs a human | where |
 |---|---|---|---|
 | WP-CBT-01 | Call record_compiled_suite from the build step and store the record in the SDD-003 project layout; extend reexecute_suite to run_parallel/run_isolated callers when they exist | the build step (ectt.bld) and project layout (SDD-003) are outside this items allowed paths | docs/verification/WP-CBT-01-analysis.md "Not covered" |
+| WP-ATG-01 | Record the review_state vocabulary (unreviewed/reviewed) and the origin.engine form (name@version) in SDD-002 section 5; call report_marks/format_mark from the ectt.rep renderers so reports show machine-generated and unreviewed marks | design text and the rep package are outside this items allowed paths | docs/verification/WP-ATG-01-analysis.md "Design notes" and "Not covered" |
