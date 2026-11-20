@@ -74,11 +74,11 @@ reports.
   columns are the queue's own estimates, not measured usage.
 - **Two commits per item, not one:** the work commit, then a one-line commit recording its sha in the ledger. I did
   this to keep the sha in the ledger without amending.
-- **Three items are not complete:** WP-MIG-04 and WP-TRC-04 are PARTIAL (reasons above and in the ledger).
+- **Two items are PARTIAL, not complete:** WP-MIG-04 and WP-TRC-04 (reasons in the ledger and the second-pass file).
 - FIX-TXN uses a private-attribute check in `ana.persist` to join a caller's transaction, because `core/fs.py` was
   outside the lane's allowed paths (second-pass row).
-- Lane A's queue said some items had no allowed place for a verification note; their evidence is in the commit
-  messages.
+- Three lane A items (FIX-GENPROTO, FIX-TCMNEST, TEST-PROP-TCM) had no `docs/verification` path in their allowed
+  paths, so their evidence is in the commit messages rather than a note.
 
 ## Leftovers to clean up (none are tracked by git)
 
