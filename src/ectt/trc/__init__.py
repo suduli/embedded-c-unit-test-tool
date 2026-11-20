@@ -25,9 +25,13 @@ from ectt.trc.matrix import (
     associations_from_datacases,
     build_matrix,
 )
+from ectt.trc.reqif_export import REQIF_NAMESPACE, TEST_TYPE_ID, export_reqif
 from ectt.trc.unlinked import UnlinkedReport, find_unlinked
 
 __all__ = [
+    "REQIF_NAMESPACE",
+    "TEST_TYPE_ID",
+    "export_reqif",
     "Association",
     "AssociationSet",
     "CSV_COLUMNS",
