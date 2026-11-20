@@ -6,4 +6,4 @@
 | WP-MIG-02 | DONE | a4ef3dd | 180k | 470k | executor: Claude; import_ceedling_project preserves project.yml verbatim and registers test functions by file/name/line/id/digest; unconverted constructs reported with  |
 | WP-MIG-04 | PARTIAL | f3d5cb9 | 230k | 700k | executor: Claude; import_mapped_csv maps any tabular export (csv/tsv/pipe/semicolon) onto data-driven cases with per-row outcomes and unmapped-column report. TOOL-MIG-0 |
 | WP-MIG-05 | DONE | 76da821 | 155k | 855k | executor: Claude; build_*_fidelity_report for CSV and Ceedling imports; converted/lossy/not_converted per artifact; deferred slot structures listed with location in a m |
-| WP-TRC-04 | PARTIAL | PENDING | 180k | 1035k | executor: Claude; export_reqif writes ReqIF 1.2 (requirements, tests, relations, specification) that import_reqif reads back exactly. Fixed importer to read the standar |
+| WP-TRC-04 | PARTIAL | d83e54b | 180k | 1035k | executor: Claude; export_reqif writes ReqIF 1.2 (requirements, tests, relations, specification) that import_reqif reads back exactly. Fixed importer to read the standar |
