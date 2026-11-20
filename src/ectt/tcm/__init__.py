@@ -25,7 +25,24 @@ from ectt.tcm.datacases import (
     refresh_digest,
     save_test_cases_file,
 )
+from ectt.tcm.derivation import (
+    DEFAULT_MAX_VECTORS,
+    STRATEGIES,
+    ClassificationNode,
+    DerivedValue,
+    DerivedVector,
+    EquivalenceClass,
+    IntegerDomain,
+    TreeClass,
+    boundary_values,
+    classification_vectors,
+    derive_vectors,
+    domains_from_parameters,
+    equivalence_classes,
+    vectors_to_cases,
+)
 from ectt.tcm.errors import (
+    DerivationError,
     DuplicateTestCaseError,
     InvalidSelectionError,
     InvalidTestCaseError,
@@ -63,6 +80,21 @@ from ectt.tcm.selection import (
 )
 
 __all__ = [
+    "DerivationError",
+    "DEFAULT_MAX_VECTORS",
+    "STRATEGIES",
+    "ClassificationNode",
+    "DerivedValue",
+    "DerivedVector",
+    "EquivalenceClass",
+    "IntegerDomain",
+    "TreeClass",
+    "boundary_values",
+    "classification_vectors",
+    "derive_vectors",
+    "domains_from_parameters",
+    "equivalence_classes",
+    "vectors_to_cases",
     # Errors
     "TcmError",
     "InvalidTestCaseError",
