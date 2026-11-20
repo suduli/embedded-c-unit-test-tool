@@ -2,3 +2,4 @@
 |---|---|---|---|---|---|
 | FIX-REP | DONE | 3e68e96 | 110k | 110k | executor: Claude; 1465 passed |
 | FIX-TXN | DONE | 650e1df | 120k | 230k | executor: Claude; Project.transaction (journal+rollback+cancellation) and token on save_file/save; write_analysis_model runs in OutputRoot.transaction, joining a caller |
+| CI-LINUX | DONE | PENDING | 60k | 290k | executor: Claude; tests.yml now runs pytest, ruff, mypy, plan_check, trace_check on both OSes plus the explicit Linux baseline test on Linux; actions pinned to exact ta |
