@@ -194,7 +194,10 @@ def test_missing_project_file_is_refused(tmp_path: Path) -> None:
     ("text", "reason"),
     [
         ("- just\n- a list\n", "invalid_project_file"),
-        (":a: &x 1\n:b: *x\n", "invalid_project_file"),
+        (":a: 1\n:a: 2\n", "invalid_project_file"),  # duplicate key
+        (":a: &x [*x]\n", "invalid_project_file"),  # alias to its own enclosing list
+        ("- a\n---\n- b\n", "invalid_project_file"),  # two documents
+        (":a: !!python/object/apply:os.system [x]\n", "invalid_project_file"),  # no code execution
         (":a: [unclosed\n", "invalid_project_file"),
         ("", "invalid_project_file"),
     ],
@@ -250,3 +253,109 @@ def test_strip_keeps_line_structure_and_handles_unterminated_input() -> None:
     assert out.count("\n") == src.count("\n")
     assert "str" not in out
     assert "tail" not in out
+
+
+# --- YAML anchors and aliases (Ceedling's own template uses them) ----------------------------------
+
+STOCK_STYLE_YML = """\
+---
+:project:
+  :build_root: build
+  :use_exceptions: FALSE
+:paths:
+  :test:
+    - +:test/**
+  :source:
+    - src/**
+:defines:
+  # in order to add common defines:
+  #  1) remove the trailing [] from the :common: section
+  #  2) add entries to the :common: section (e.g. :test: has TEST defined)
+  :common: &common_defines []
+  :test:
+    - *common_defines
+    - TEST
+  :test_preprocess:
+    - *common_defines
+    - TEST
+"""
+
+
+def _stock_project(tmp_path: Path) -> Path:
+    root = tmp_path / "stock"
+    (root / "test").mkdir(parents=True)
+    (root / "project.yml").write_text(STOCK_STYLE_YML, encoding="utf-8")
+    (root / "test" / "test_a.c").write_text("void test_a(void) {}\n", encoding="utf-8")
+    return root
+
+
+def test_a_stock_style_project_with_anchors_and_aliases_imports(tmp_path: Path) -> None:
+    """Regression: the importer used to refuse Ceedling's own template as ``invalid_project_file``."""
+    imported = import_ceedling_project(_stock_project(tmp_path))
+
+    assert [f.path for f in imported.test_files] == ["test/test_a.c"]
+    assert imported.config[":defines"][":test"] == [[], "TEST"]
+    assert imported.config[":defines"][":test_preprocess"] == [[], "TEST"]
+    assert imported.config[":defines"][":common"] == []
+
+
+def test_resolved_aliases_are_reported_as_information_not_loss(tmp_path: Path) -> None:
+    imported = import_ceedling_project(_stock_project(tmp_path))
+
+    (note,) = [n for n in imported.unconverted if n.kind == "yaml_aliases_resolved"]
+    assert note.location == "project.yml" and note.detail.startswith("2 YAML alias(es)")
+
+    from ectt.mig.fidelity import build_ceedling_fidelity_report
+
+    report = build_ceedling_fidelity_report("stock", imported)
+    config = next(a for a in report.artifacts if a.artifact == "project.yml")
+    assert config.status == "converted"
+    assert [(n.kind, n.effect) for n in config.notes] == [("yaml_aliases_resolved", "info")]
+
+
+def test_a_project_without_aliases_has_no_alias_note(tmp_path: Path) -> None:
+    assert not [n for n in import_ceedling_project(_make_project(tmp_path / "plain")).unconverted if n.kind == "yaml_aliases_resolved"]
+
+
+def test_every_scalar_stays_the_text_the_author_wrote(tmp_path: Path) -> None:
+    (tmp_path / "project.yml").write_text(
+        ":project:\n  :use_exceptions: FALSE\n  :verbosity: 3\n  :ratio: 0.50\n  :nothing: null\n  :flag: yes\n  :<<: merged\n", encoding="utf-8"
+    )
+
+    config = import_ceedling_project(tmp_path).config
+
+    assert config[":project"] == {
+        ":use_exceptions": "FALSE",
+        ":verbosity": "3",
+        ":ratio": "0.50",
+        ":nothing": "null",
+        ":flag": "yes",
+        ":<<": "merged",
+    }
+
+
+def test_an_alias_expansion_bomb_is_refused_not_expanded(tmp_path: Path) -> None:
+    levels = [":a: &a0 [x, x, x, x, x, x, x, x, x, x]"]
+    levels += [f":a{i}: &a{i} [{', '.join([f'*a{i - 1}'] * 10)}]" for i in range(1, 8)]
+    (tmp_path / "project.yml").write_text("\n".join(levels) + "\n", encoding="utf-8")
+
+    with pytest.raises(MigError) as excinfo:
+        import_ceedling_project(tmp_path)
+    assert excinfo.value.reason == "expansion_too_large"
+
+
+def test_aliases_that_stay_small_are_accepted_whatever_their_number(tmp_path: Path) -> None:
+    lines = [":base: &b [one, two]"] + [f":use{i}: *b" for i in range(200)]
+    (tmp_path / "project.yml").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    imported = import_ceedling_project(tmp_path)
+
+    assert imported.config[":use199"] == ["one", "two"]
+    assert imported.unconverted[0].detail.startswith("200 YAML alias(es)")
+
+
+def test_the_loader_is_public_and_reports_the_alias_count() -> None:
+    from ectt.mig.ceedling import load_ceedling_config
+
+    config, aliases = load_ceedling_config(":a: &x [1]\n:b: *x\n:c: *x\n")
+    assert (config, aliases) == ({":a": ["1"], ":b": ["1"], ":c": ["1"]}, 2)

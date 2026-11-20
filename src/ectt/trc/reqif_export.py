@@ -4,7 +4,7 @@
 TOOL-TRC-070: export traceability data in ReqIF for exchange with external
 requirements management tools.
 
-The document follows ReqIF 1.2 structure: a header, string datatype, object
+The document follows the ReqIF schema (``reqif.xsd``, namespace 20110401): a header, string datatype, object
 and relation types, one ``SPEC-OBJECT`` per requirement and per linked test, one
 ``SPEC-RELATION`` per unique (requirement, test) pair, and one ``SPECIFICATION``
 listing the requirements so tools that show a document tree have one.
@@ -19,8 +19,11 @@ listing the requirements so tools that show a document tree have one.
   reads the export back as exactly the requirement inventory it was built from.
 * Deterministic: no wall clock. The caller supplies ``creation_time``.
 
-Not verified against the OMG XSD or a live tool in this repository (neither is
-available offline); structure follows the 1.2 schema's element order.
+Conformance: the output validates against the OMG ``reqif.xsd`` with zero errors
+(checked with ``xmlschema``; the schema is not vendored here, so
+``tests/trc/test_reqif_export.py`` runs that check only when ``ECTT_REQIF_XSD`` names
+a local copy and ``xmlschema`` is installed). Not exercised against a live
+requirements-management tool.
 
 Satisfies: TOOL-TRC-070.
 """
@@ -120,7 +123,7 @@ def export_reqif(
     creation_time: str,
     title: str = "ectt traceability export",
 ) -> str:
-    """Render ``matrix`` (and requirement titles/text) as a ReqIF 1.2 document.
+    """Render ``matrix`` (and requirement titles/text) as a ReqIF document.
 
     ``creation_time`` is an ISO-8601 timestamp the caller supplies, so the
     output is byte-identical for identical inputs. Requirements in ``matrix``
@@ -135,7 +138,7 @@ def export_reqif(
     _sub(header, "CREATION-TIME", when)
     _sub(header, "REPOSITORY-ID", "ectt")
     _sub(header, "REQ-IF-TOOL-ID", "ectt")
-    _sub(header, "REQ-IF-VERSION", "1.2")
+    _sub(header, "REQ-IF-VERSION", "1.0")  # the schema fixes this value
     _sub(header, "SOURCE-TOOL-ID", "ectt")
     _sub(header, "TITLE", _checked_text(title, "title"))
 

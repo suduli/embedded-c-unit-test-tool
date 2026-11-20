@@ -243,9 +243,9 @@ def _mapped_csv_reader(text: str) -> object:
 
 
 def _ceedling_reader(text: str) -> object:
-    from ectt.prj.yaml_adapter import RestrictedYamlAdapter
+    from ectt.mig.ceedling import load_ceedling_config
 
-    config = RestrictedYamlAdapter().load(text)
+    config, _aliases = load_ceedling_config(text)
     if ":paths" not in config:
         raise MigError("example has no :paths: section", reason="example_invalid")
     return config
@@ -357,7 +357,10 @@ _MAPPED_CSV_EXAMPLE = "Case,Module,Func,Arg x,Want,Slot\nc1,src/adc.c,adc_scale,
 
 _REQUIREMENTS_CSV_EXAMPLE = "id,title,text\nREQ-1,Scaling,The tool shall scale readings.\nREQ-2,Range,The tool shall clamp.\n"
 _REQUIREMENTS_TEXT_EXAMPLE = "# one requirement per line: ID: title\nREQ-1: Scaling\nREQ-2: Range\n"
-_CEEDLING_EXAMPLE = ":project:\n  :build_root: build\n:paths:\n  :test:\n    - test/**\n  :source:\n    - src/**\n"
+_CEEDLING_EXAMPLE = (
+    ":project:\n  :build_root: build\n:paths:\n  :test:\n    - test/**\n  :source:\n    - src/**\n"
+    ":defines:\n  :common: &common_defines []\n  :test:\n    - *common_defines\n    - TEST\n"
+)
 _UNITY_EXAMPLE = "src/test_adc.c:12:test_zero:PASS\nsrc/test_adc.c:20:test_full:FAIL: Expected 4095 Was 4094\nsrc/test_adc.c:30:test_later:IGNORE\n"
 _CMOCKA_EXAMPLE = "[ RUN      ] test_zero\n[       OK ] test_zero\n"
 
@@ -449,12 +452,12 @@ INTERCHANGE_FORMATS: tuple[FormatSpec, ...] = (
     ),
     FormatSpec(
         "reqif",
-        "ReqIF 1.2 requirements and traceability",
+        "ReqIF requirements and traceability",
         "both",
         "xml",
-        "1.2",
+        "1.0",
         "ectt.trc.imports, ectt.trc.reqif_export",
-        "ReqIF 1.2 structure. Export: header, string datatype, object types (requirement, test case), relation and specification types, one SPEC-OBJECT per "
+        "ReqIF as defined by the OMG schema `reqif.xsd` (namespace 20110401; the header's fixed `REQ-IF-VERSION` is 1.0). Export: header, string datatype, object types (requirement, test case), relation and specification types, one SPEC-OBJECT per "
         "requirement and linked test, one SPEC-RELATION per unique (requirement, test) pair, one SPECIFICATION. Requirement id in the `ReqIF.Identifier` attribute; "
         "title in `LONG-NAME`; text in `ReqIF.Description`. Import reads SPEC-OBJECTs, skipping objects of type `ectt.type.TestCase`.",
         "The header carries `REQ-IF-VERSION`; import reads the documented subset of ReqIF 1.x, matching by local name.",
@@ -515,11 +518,11 @@ INTERCHANGE_FORMATS: tuple[FormatSpec, ...] = (
         "yaml",
         "unversioned",
         "ectt.mig.ceedling",
-        "Ceedling's own `project.yml` (restricted YAML: no aliases, anchors, tags or merge keys). Read sections: `:project` (`:test_file_prefix`), `:extension` "
+        "Ceedling's own `project.yml` (YAML; every plain scalar stays text; anchors and aliases, which Ceedling's template uses, are resolved and counted; no explicit tags, no duplicate keys). Read sections: `:project` (`:test_file_prefix`), `:extension` "
         "(`:source`), `:paths` (`:test` entries with optional `+:`/`-:` and globs); every other section is preserved verbatim.",
         "Follows Ceedling; unversioned here.",
-        "A missing, non-UTF-8, non-mapping or aliased project file, or a test path leaving the project root, is refused with a reason.",
-        "Configuration is preserved verbatim; test files are registered by name, line and digest; parameterised rows, followed imports and duplicates are reported as unconverted.",
+        "A missing, non-UTF-8, non-mapping or malformed project file, a duplicate key, a cyclic alias, aliases that expand beyond a fixed size, or a test path leaving the project root, is refused with a reason.",
+        "Configuration is preserved with aliases resolved (the anchors themselves are not preserved, and the count is reported as information); test files are registered by name, line and digest; parameterised rows, followed imports and duplicates are reported as unconverted.",
         lambda: _CEEDLING_EXAMPLE,
         _ceedling_reader,
     ),

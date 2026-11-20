@@ -7,6 +7,7 @@ recorded second-pass item; ReqIF is the exchange the export provides.
 
 from __future__ import annotations
 
+import os
 import xml.etree.ElementTree as ET
 
 import pytest
@@ -195,3 +196,22 @@ def test_requirement_ids_that_are_not_legal_xml_ids_still_roundtrip() -> None:
     records = (RequirementRecord("TOOL-X:1/\u03b1", "Odd id", "text"),)
     text = export_reqif(build_matrix(associations, {"t.1": "pass"}), records, creation_time=WHEN)
     assert import_reqif(text) == records
+
+
+def test_the_header_carries_the_version_the_schema_fixes() -> None:
+    """The OMG schema fixes REQ-IF-VERSION to 1.0; an earlier draft wrote 1.2 and failed validation."""
+    version = ET.fromstring(_export()).find("r:THE-HEADER/r:REQ-IF-HEADER/r:REQ-IF-VERSION", NS)
+    assert version is not None and version.text == "1.0"
+
+
+def test_exports_validate_against_the_omg_schema_when_a_copy_is_supplied() -> None:
+    """Optional conformance check: set ECTT_REQIF_XSD to a local reqif.xsd and install xmlschema."""
+    xmlschema = pytest.importorskip("xmlschema")
+    path = os.environ.get("ECTT_REQIF_XSD")
+    if not path:
+        pytest.skip("ECTT_REQIF_XSD is not set (the schema is not vendored in this repository)")
+    schema = xmlschema.XMLSchema(path, validation="lax")
+    empty = export_reqif(build_matrix(AssociationSet(), {}), creation_time=WHEN)
+
+    for document in (_export(), empty):
+        assert [e.reason for e in schema.iter_errors(document)] == []

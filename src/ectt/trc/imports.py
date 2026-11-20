@@ -99,7 +99,7 @@ def _attribute_values(spec_object: ET.Element) -> dict[str, str]:
             if local == "ATTRIBUTE-DEFINITION-STRING":
                 ref = child.get("REF")  # documented-subset form: REF attribute
             elif local == "ATTRIBUTE-DEFINITION-STRING-REF":
-                ref = (child.text or "").strip() or None  # ReqIF 1.2 form: element text
+                ref = (child.text or "").strip() or None  # schema form: element text
             else:
                 continue
             if ref is not None:
