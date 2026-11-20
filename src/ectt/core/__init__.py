@@ -46,6 +46,19 @@ from ectt.core.logging import (
     Verbosity,
     build_diagnostic_bundle,
 )
+from ectt.core.platform import (
+    NETWORK_MODULES,
+    VALIDATED_PLATFORMS,
+    OfflineViolationError,
+    Platform,
+    PlatformError,
+    assert_offline,
+    current_platform,
+    detect_platform,
+    executable_suffix,
+    find_network_imports,
+    platform_report,
+)
 from ectt.core.text import (
     DEFAULT_CATALOG_NAME,
     MessageCatalog,
@@ -97,4 +110,16 @@ __all__ = [
     "documentation_index",
     "OutputRoot",
     "SourceTree",
+    # Platform baseline & offline guarantee (WP-CORE-03)
+    "NETWORK_MODULES",
+    "VALIDATED_PLATFORMS",
+    "Platform",
+    "PlatformError",
+    "OfflineViolationError",
+    "assert_offline",
+    "current_platform",
+    "detect_platform",
+    "executable_suffix",
+    "find_network_imports",
+    "platform_report",
 ]

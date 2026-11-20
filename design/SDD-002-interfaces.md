@@ -190,7 +190,7 @@ ADR-002 chooses.
 
 ### 5.1 Contract points
 
-- **Identity is assigned, not derived.** Editing a test's values must not change
+- **Identity is assigned, not derived, and bound to a content digest (SDD-003 §6/§7).** Editing a test's values must not change
   its id, because coverage attribution, traceability links, and run comparison
   all key on it (DSN-TCM-110). A content-derived id would silently break all
   three on every edit.

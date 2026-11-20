@@ -10,6 +10,16 @@ Provides plain-text, schema-versioned, deterministic storage for ectt project tr
 Satisfies: TOOL-PRJ-010, TOOL-PRJ-020, TOOL-PRJ-050, TOOL-PRJ-070, TOOL-UIX-320, TOOL-CIC-080.
 """
 
+from ectt.prj.archive import (
+    ARCHIVE_SCHEMA_VERSION,
+    ArchiveError,
+    ArchiveRecord,
+    ReproductionVerdict,
+    build_archive_record,
+    dump_archive_record,
+    load_archive_record,
+    verify_archive_record,
+)
 from ectt.prj.errors import (
     AnchorForbiddenError,
     CommentPreservationError,
@@ -99,4 +109,13 @@ __all__ = [
     # Project lifecycle
     "PROJECT_ROOT_MARKER",
     "Project",
+    # Archival export and reproduction verification (WP-PRJ-05)
+    "ARCHIVE_SCHEMA_VERSION",
+    "ArchiveError",
+    "ArchiveRecord",
+    "ReproductionVerdict",
+    "build_archive_record",
+    "dump_archive_record",
+    "load_archive_record",
+    "verify_archive_record",
 ]

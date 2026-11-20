@@ -1,7 +1,7 @@
 # implements: DSN-ANA-020
 """Function interface and global variable extraction for CMP-ANA.
 
-Satisfies: TOOL-PAR-030, TOOL-PAR-050, DSN-ANA-020.
+Satisfies: TOOL-PAR-030, TOOL-PAR-050, TOOL-PAR-140, DSN-ANA-020.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from ectt.ana.model import (
     ParameterModel,
     ParsedTranslationUnit,
     SourceLocation,
+    UnsupportedConstructModel,
 )
 from ectt.ana.types import TypeGraphBuilder
 
@@ -29,6 +30,39 @@ __all__ = [
     "extract_interfaces",
     "extract",
 ]
+
+#: Parameter type kinds the function model cannot represent: a runtime-sized
+#: array length has no place in the type graph, so a parameter of this kind is
+#: recorded in the unit's unsupported-construct inventory (TOOL-PAR-140)
+#: instead of being silently degraded. Both kinds are named by the existing
+#: array handling in :func:`_determine_global_access`.
+_VLA_TYPE_KINDS = (TypeKind.VARIABLEARRAY, TypeKind.DEPENDENTSIZEDARRAY)
+
+
+def _record_unsupported(
+    records: dict[str, UnsupportedConstructModel],
+    kind: str,
+    detail: str,
+    location: SourceLocation,
+) -> None:
+    """Tally one occurrence of an unsupported construct per kind (TOOL-PAR-140).
+
+    ``count`` groups repeated occurrences of the same kind; ``detail`` and
+    ``location`` keep the first occurrence, which follows the deterministic
+    libclang walk order of the translation unit.
+    """
+    existing = records.get(kind)
+    if existing is None:
+        records[kind] = UnsupportedConstructModel(
+            kind=kind, count=1, detail=detail, location=location
+        )
+    else:
+        records[kind] = UnsupportedConstructModel(
+            kind=kind,
+            count=existing.count + 1,
+            detail=existing.detail,
+            location=existing.location,
+        )
 
 
 def _is_in_main_file(
@@ -208,6 +242,7 @@ def extract_interfaces(
     )
 
     functions: list[FunctionModel] = []
+    unsupported: dict[str, UnsupportedConstructModel] = {}
 
     for child in tu_handle.cursor.get_children():
         # Unit boundary: only functions defined in the main file of the TU
@@ -236,6 +271,16 @@ def extract_interfaces(
                 cursor=child,
             )
 
+            # TOOL-PAR-140: record constructs this extractor recognises as
+            # unsupported. The variadic tail is not representable in the
+            # parameter model (the loop below sees only named parameters), and
+            # a runtime-sized array parameter cannot be expressed in the type
+            # graph. The inventory makes both fail closed downstream instead
+            # of disappearing into prose. ``location`` is the owning
+            # definition; ``detail`` names the construct.
+            if child.type.is_function_variadic():
+                _record_unsupported(unsupported, "variadic_function", name, location)
+
             # Parameters
             parameters: list[ParameterModel] = []
             for p in child.get_arguments():
@@ -253,6 +298,13 @@ def extract_interfaces(
                         direction=direction,
                     )
                 )
+                if p.type.kind in _VLA_TYPE_KINDS:
+                    _record_unsupported(
+                        unsupported,
+                        "variable_length_array_parameter",
+                        f"{name}.{p_name}" if p_name else name,
+                        location,
+                    )
 
             # Globals and file-static variable accesses
             globals_accessed = _extract_globals(child)
@@ -280,6 +332,7 @@ def extract_interfaces(
         diagnostics=parsed_tu.diagnostics,
         functions=tuple(functions),
         types=dict(type_builder.types),
+        unsupported_constructs=tuple(unsupported[k] for k in sorted(unsupported)),
     )
 
 

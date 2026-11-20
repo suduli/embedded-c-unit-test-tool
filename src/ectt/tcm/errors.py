@@ -17,6 +17,14 @@ __all__ = [
     "NotAgainstHarnessError",
     "DuplicateTestCaseError",
     "UnknownTestCaseError",
+    "InvalidTestCasesFileError",
+    "MissingCaseFieldError",
+    "ValueParseError",
+    "InvalidComparisonSpecError",
+    "InvalidSelectionError",
+    "RangeExpansionError",
+    "RangeCheckingError",
+    "InterchangeError",
 ]
 
 
@@ -95,6 +103,110 @@ class UnknownTestCaseError(TcmError):
         message: str,
         *,
         reason: str = "unknown_test_case",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidTestCasesFileError(TcmError):
+    """Raised when a data-driven test cases file is structurally malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_test_cases_file",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class MissingCaseFieldError(TcmError):
+    """Raised when a required test case section or field is absent or empty."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "missing_case_field",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class ValueParseError(TcmError):
+    """Raised when a comparison value is not valid for its declared type."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "value_parse_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidComparisonSpecError(TcmError):
+    """Raised when a comparison specification (types, tolerances) is malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_comparison_spec",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InvalidSelectionError(TcmError):
+    """Raised when a selection expression or its operands are malformed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "invalid_selection",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class RangeExpansionError(TcmError):
+    """Raised when a range specification is malformed or expands to nothing."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "range_expansion_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class RangeCheckingError(TcmError):
+    """Raised when the tool's own range check refuses out-of-range inputs."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "range_checking_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class InterchangeError(TcmError):
+    """Raised when an interchange document violates its documented schema."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "interchange_error",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)

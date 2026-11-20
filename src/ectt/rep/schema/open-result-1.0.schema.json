@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ectt.invalid/schemas/open-result-1.0.schema.json",
+  "title": "ECTT open result export",
+  "description": "Versioned open interchange for one verification run's results plus its test cases (WP-REP-12, TOOL-MIG-060). The result_set section is the S3 exchange dictionary (ectt.exh.results.result_set_to_dict): passing, failing, crashed (error), timed-out and not-run cases, partial-run and infrastructure faults, per-result identities (test_id, test_digest), expected/actual assertion values with locations, and run-level diagnostics. The test_cases_csv section is the TCM-06 fixed-column interchange (ectt.tcm.interchange), carried verbatim with its per-row losses reported. An independent reader reconstructs cases via the TCM-06 importer and results via the S3 reader without any private project database. Coverage export remains REP-10 (P4) and is deliberately not carried here.",
+  "type": "object",
+  "required": [
+    "export_id",
+    "provenance",
+    "result_set",
+    "schema_version",
+    "test_case_losses",
+    "test_cases_csv"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "export_id": {
+      "type": "string",
+      "description": "Stable content digest (D-02) over the canonical body; verified by the reader."
+    },
+    "result_set": {
+      "type": "object",
+      "required": ["run_id", "results"],
+      "properties": {
+        "schema_version": { "type": "string" },
+        "run_id": { "type": "string" },
+        "partial": { "type": "boolean" },
+        "not_executed": { "type": "array", "items": { "type": "string" } },
+        "infrastructure_faults": { "type": "array", "items": { "type": "string" } },
+        "execution": { "type": "object" },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["outcome", "test_digest", "test_id"],
+            "properties": {
+              "test_id": { "type": "string" },
+              "outcome": { "type": "string", "enum": ["pass", "fail", "error", "timeout", "not_run"] },
+              "test_digest": { "type": "string" },
+              "duration_ms": { "type": "integer" },
+              "failures": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["actual", "assertion", "expected", "location"],
+                  "properties": {
+                    "assertion": { "type": "string" },
+                    "expected": { "type": "string" },
+                    "actual": { "type": "string" },
+                    "location": {
+                      "type": "object",
+                      "required": ["file", "line"],
+                      "properties": {
+                        "file": { "type": "string" },
+                        "line": { "type": "integer" },
+                        "column": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "test_cases_csv": {
+      "type": "string",
+      "description": "The TCM-06 fixed-column CSV interchange, carried verbatim (first column ectt_interchange_version)."
+    },
+    "test_case_losses": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit per-row losses the TCM-06 exporter reported; empty when the projection was lossless."
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "build_id",
+        "dependencies",
+        "digest",
+        "input_digests",
+        "python_version",
+        "schema_versions",
+        "tool_version"
+      ],
+      "properties": {
+        "tool_version": { "type": "string" },
+        "build_id": { "type": "string" },
+        "python_version": { "type": "string" },
+        "dependencies": { "type": "object" },
+        "schema_versions": { "type": "object" },
+        "input_digests": { "type": "object" },
+        "digest": { "type": "string" },
+        "generated_at": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
