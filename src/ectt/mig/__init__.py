@@ -23,8 +23,20 @@ from ectt.mig.coexistence import (
     scan_foreign_artifacts,
     snapshot_tree,
 )
+from ectt.mig.csv_import import (
+    DELIMITERS,
+    MappedCsvImport,
+    RowOutcome,
+    import_mapped_csv,
+    validate_mapping,
+)
 
 __all__ = [
+    "DELIMITERS",
+    "MappedCsvImport",
+    "RowOutcome",
+    "import_mapped_csv",
+    "validate_mapping",
     "CEEDLING_PROJECT_FILE",
     "CeedlingTest",
     "CeedlingTestFile",
