@@ -67,6 +67,7 @@ __all__ = [
     "format_mark",
     "is_machine_generated",
     "make_candidate",
+    "validate_one",
     "report_marks",
     "unreviewed_test_ids",
     "validate_candidates",
@@ -128,11 +129,16 @@ class ExecutionOutcome:
 
 @dataclass(frozen=True)
 class CoverageDelta:
-    """Coverage gained by one case (reported by the port; used by WP-ATG-05)."""
+    """Coverage gained by one case, as reported by the port (consumed by ``ectt.atg.run``).
+
+    ``newly_covered`` names the constructs this case covered that no earlier case had, so
+    a run can say *which* constructs are still uncovered, not only how many.
+    """
 
     covered_before: int
     covered_after: int
     total: int
+    newly_covered: tuple[str, ...] = ()
 
 
 @runtime_checkable
@@ -214,6 +220,39 @@ def _emit(candidate: GenerationCandidate, observed: ExecutionOutcome, engine: En
     return refresh_digest(case)
 
 
+def validate_one(
+    candidate: GenerationCandidate,
+    port: TestValidationPort,
+    engine: EngineInfo,
+) -> tuple[DataDrivenTestCase | None, Discard | None]:
+    """Build and run one candidate: ``(case, None)`` when presentable, ``(None, discard)`` when not.
+
+    A failure of the port itself raises :class:`AtgError`; nothing is presented on the
+    strength of a validation that did not happen.
+    """
+    candidate_id = candidate.candidate_id
+    try:
+        built = port.build(candidate)
+        if not built.ok:
+            return None, Discard(candidate_id, "build_failed", "; ".join(built.diagnostics))
+        observed = port.execute(candidate)
+    except AtgError:
+        raise
+    except Exception as exc:
+        raise AtgError(
+            f"validation port failed on candidate '{candidate_id}': {exc}",
+            reason="port_failed",
+        ) from exc
+    if observed.state not in EXECUTION_STATES:
+        raise AtgError(
+            f"validation port reported unknown execution state '{observed.state}' for '{candidate_id}'",
+            reason="invalid_port_result",
+        )
+    if observed.state != "completed":
+        return None, Discard(candidate_id, observed.state, observed.detail)
+    return _emit(candidate, observed, engine), None
+
+
 def validate_candidates(
     candidates: Iterable[GenerationCandidate],
     port: TestValidationPort,
@@ -237,29 +276,11 @@ def validate_candidates(
 
     cases: list[DataDrivenTestCase] = []
     for candidate_id in sorted(unique):
-        candidate = unique[candidate_id]
-        try:
-            built = port.build(candidate)
-            if not built.ok:
-                discarded.append(Discard(candidate_id, "build_failed", "; ".join(built.diagnostics)))
-                continue
-            observed = port.execute(candidate)
-        except AtgError:
-            raise
-        except Exception as exc:
-            raise AtgError(
-                f"validation port failed on candidate '{candidate_id}': {exc}",
-                reason="port_failed",
-            ) from exc
-        if observed.state not in EXECUTION_STATES:
-            raise AtgError(
-                f"validation port reported unknown execution state '{observed.state}' for '{candidate_id}'",
-                reason="invalid_port_result",
-            )
-        if observed.state != "completed":
-            discarded.append(Discard(candidate_id, observed.state, observed.detail))
-            continue
-        cases.append(_emit(candidate, observed, engine))
+        case, discard = validate_one(unique[candidate_id], port, engine)
+        if case is not None:
+            cases.append(case)
+        if discard is not None:
+            discarded.append(discard)
 
     return GenerationOutcome(
         cases=tuple(cases),
