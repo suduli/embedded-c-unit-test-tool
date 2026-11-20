@@ -25,11 +25,17 @@ Each item is one commit followed by a one-line ledger commit that records its sh
 ## Defects found in existing code while doing the work (all fixed, each with a regression test)
 
 - **ReqIF importer** (`ectt.trc.imports`) only read a non-standard `REF` attribute, so standards-shaped ReqIF lost its
-  identifiers and descriptions. It now reads the ReqIF 1.2 `-REF` element form too.
+  identifiers and descriptions. It now reads the schema's `-REF` element form too.
 - **cmocka parser** (`ectt.mig.existing_suites`) recognised only `[  OKAY    ]`; cmocka prints `[       OK ]`, so passing
   tests of a real run produced no records. `OK` is now accepted.
 - **Report reader** required `execution` on every 1.1 report, so merged CI reports could not be loaded. It is now optional
   (provenance stays required).
+- **Two defects found by an end-of-run review against primary sources, and fixed in a follow-up commit:**
+  the Ceedling importer refused Ceedling's own stock template because it parsed `project.yml` with ectt's
+  no-anchors project-file loader (Ceedling's template uses `&common_defines` / `*common_defines`; aliases are
+  now resolved, scalars stay text, bombs and cycles are refused); and the ReqIF export wrote
+  `REQ-IF-VERSION` `1.2` where the OMG schema fixes `1.0`, found by validating the export against the real
+  XSD (zero errors now; the check is an optional test because the XSD is not vendored).
 - Defects in my own first drafts, caught by tests before commit: duplicate ReqIF attribute-definition identifiers across
   object types, a header identifier that depended on the timestamp, `SourceLink` ordering over `None` fields, an analysis
   model example with a dangling type reference.

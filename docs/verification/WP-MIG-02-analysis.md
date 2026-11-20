@@ -11,7 +11,9 @@ territory):
 
 - **AC-1 (configuration preserved):** every section of `project.yml`, including sections
   the importer does not know, is present in the imported `config`; a content digest of the
-  configuration changes when any value changes.
+  configuration changes when any value changes. Ceedling's own template uses YAML anchors
+  and aliases (`:common: &common_defines []`, `- *common_defines`); they are resolved and the
+  count is reported as an informational note, so a stock project imports.
 - **AC-2 (test cases preserved):** every test source selected by `:paths: :test:` (with
   `+:`/`-:` markers and globs) whose name matches the configured prefix and extension
   yields its test functions in source order with their source line and a stable id
@@ -22,9 +24,10 @@ territory):
   `:mixins:`, path entries matching nothing, absent test paths and non-UTF-8 sources are
   each reported in `unconverted` with a location.
 - **AC-4 (read-only, TOOL-MIG-070):** the import leaves the Ceedling tree byte-identical.
-- **AC-5 (fail-safe):** a missing, unreadable, non-UTF-8, non-mapping, aliased or
-  syntactically broken `project.yml`, and any test path that leaves the project root, is
-  refused with a `MigError` carrying a reason; nothing is guessed.
+- **AC-5 (fail-safe):** a missing, unreadable, non-UTF-8, non-mapping or syntactically broken
+  `project.yml`, a duplicate key, a cyclic alias, an alias structure that expands beyond
+  100 000 values, an explicit code-constructing tag, and any test path that leaves the project
+  root, is refused with a `MigError` carrying a reason; nothing is guessed.
 - **AC-6 (determinism):** the result is identical across runs and across checkout roots
   and line-ending styles.
 
@@ -43,8 +46,19 @@ territory):
   `:flags:` translation into ectt toolchain settings; `:cmock:` mock configuration; the
   per-artifact converted / lossy / failed report (TOOL-MIG-040, WP-MIG-04). These are
   listed as `unconverted` notes or left to the named work packages.
-- **Scalars are strings** (`RestrictedYamlAdapter` convention), so `FALSE`/`true` are
-  preserved as written rather than coerced.
+- **Scalars stay text** (a `SafeLoader` without implicit resolvers), so `FALSE`, `3`, `0.50` and
+  `null` are preserved as written rather than coerced.
+- **Defect found by review, fixed:** the first version parsed `project.yml` with ectt's own
+  restricted project-file loader, which refuses anchors and aliases. That rule is ectt's policy
+  for its *own* files (ADR-002), not a property of Ceedling's format, and Ceedling's stock
+  template (v0.31.1 `assets/project_as_gem.yml`, `:common: &common_defines []`) uses both, so
+  the default Ceedling project was refused as `invalid_project_file`. Regression tests:
+  `test_a_stock_style_project_with_anchors_and_aliases_imports`,
+  `test_resolved_aliases_are_reported_as_information_not_loss`,
+  `test_an_alias_expansion_bomb_is_refused_not_expanded`,
+  `test_aliases_that_stay_small_are_accepted_whatever_their_number`,
+  `test_every_scalar_stays_the_text_the_author_wrote`, and the refusal cases in
+  `test_unimportable_project_files_are_refused`.
 - **Test-function recognition** is lexical (comments and string literals blanked, line
   structure kept): `[static] void test*(...)`. Preprocessor-conditional tests are found
   regardless of the condition; a Ceedling run with `:use_test_preprocessor:` could differ.

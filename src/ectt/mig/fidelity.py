@@ -52,7 +52,7 @@ STATUSES: tuple[str, ...] = ("converted", "converted_lossy", "not_converted")
 _EFFECTS: tuple[str, ...] = ("loss", "info")
 
 #: Ceedling importer note kinds that are informational: nothing was lost.
-_CEEDLING_INFO_KINDS = frozenset({"path_matches_nothing", "no_test_paths"})
+_CEEDLING_INFO_KINDS = frozenset({"path_matches_nothing", "no_test_paths", "yaml_aliases_resolved"})
 
 
 @dataclass(frozen=True)

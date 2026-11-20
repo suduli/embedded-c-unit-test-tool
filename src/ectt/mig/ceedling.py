@@ -9,8 +9,13 @@ the test sources and returns an :class:`ImportedCeedlingProject`; nothing in
 the Ceedling tree is created, changed or deleted.
 
 * **Configuration** is preserved verbatim: every section of ``project.yml``,
-  known to this importer or not, is carried in ``config`` (scalars are strings,
-  the project-file convention of ``RestrictedYamlAdapter``).
+  known to this importer or not, is carried in ``config``. Every scalar stays the text
+  the author wrote (``TRUE`` is not turned into a boolean). Ceedling's own template uses
+  YAML anchors and aliases (``:common: &common_defines []`` and ``- *common_defines``),
+  so they are **resolved** to their values and the number resolved is reported as an
+  informational note; the no-anchors rule is ectt's own project-file policy (ADR-002),
+  not a property of Ceedling's format. Duplicate keys, cyclic aliases and aliases that
+  expand beyond a fixed size are refused.
 * **Test cases** are preserved as the authored C test functions. A Ceedling
   test is imperative Unity code, so it is *not* rewritten into a data-driven
   case; it is registered by file, name and source line, with a content digest
@@ -32,10 +37,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from ectt.core.determinism import stable_id
 from ectt.mig.errors import MigError
-from ectt.prj.errors import RestrictedYamlError
-from ectt.prj.yaml_adapter import RestrictedYamlAdapter
 
 __all__ = [
     "CEEDLING_PROJECT_FILE",
@@ -44,6 +49,7 @@ __all__ = [
     "ImportNote",
     "ImportedCeedlingProject",
     "import_ceedling_project",
+    "load_ceedling_config",
     "strip_c_comments_and_strings",
 ]
 
@@ -165,20 +171,72 @@ def _as_str_list(value: Any) -> list[str]:
     return []
 
 
-def _load_config(project_file: Path) -> dict[str, Any]:
+MAX_EXPANDED_NODES = 100_000
+
+
+class _TextLoader(yaml.SafeLoader):
+    """SafeLoader that keeps every plain scalar as text and refuses duplicate keys."""
+
+    def construct_mapping(self, node: Any, deep: bool = False) -> dict[Any, Any]:
+        seen: set[Any] = set()
+        for key_node, _value_node in node.value:
+            key = self.construct_object(key_node, deep=True)
+            if key in seen:
+                raise yaml.constructor.ConstructorError(None, None, f"duplicate key {key!r}", key_node.start_mark)
+            seen.add(key)
+        return super().construct_mapping(node, deep=deep)
+
+
+_TextLoader.yaml_implicit_resolvers = {}  # no int/float/bool/null resolution: scalars stay as authored
+
+
+def _expanded_size(value: Any, memo: dict[int, int], active: set[int]) -> int:
+    """Nodes in ``value`` once aliases are expanded; refuses cycles. Memoised per object."""
+    if not isinstance(value, dict | list):
+        return 1
+    key = id(value)
+    if key in active:
+        raise MigError("project file has an alias that refers to its own enclosing structure", reason="invalid_project_file")
+    if key in memo:
+        return memo[key]
+    active.add(key)
+    children = value.items() if isinstance(value, dict) else enumerate(value)
+    total = 1 + sum(_expanded_size(child, memo, active) for _name, child in children)
+    active.discard(key)
+    if total > MAX_EXPANDED_NODES:
+        raise MigError(
+            f"project file expands to more than {MAX_EXPANDED_NODES} values once aliases are resolved",
+            reason="expansion_too_large",
+        )
+    memo[key] = total
+    return total
+
+
+def load_ceedling_config(text: str, *, source: str = "project.yml") -> tuple[dict[str, Any], int]:
+    """Parse a Ceedling project file: ``(config, number of aliases resolved)``.
+
+    Plain scalars stay text, aliases are resolved, duplicate keys and structures that
+    expand beyond ``MAX_EXPANDED_NODES`` are refused with a :class:`MigError`.
+    """
+    try:
+        aliases = sum(isinstance(event, yaml.AliasEvent) for event in yaml.parse(text, Loader=_TextLoader))
+        document = yaml.load(text, Loader=_TextLoader)
+    except (yaml.YAMLError, TypeError, RecursionError) as exc:
+        raise MigError(f"Ceedling project file '{source}' is not importable: {exc}", reason="invalid_project_file") from exc
+    if not isinstance(document, dict):
+        raise MigError(f"Ceedling project file '{source}' must be a mapping at the top level", reason="invalid_project_file")
+    _expanded_size(document, {}, set())
+    return document, aliases
+
+
+def _load_config(project_file: Path) -> tuple[dict[str, Any], int]:
     try:
         text = project_file.read_text(encoding="utf-8")
     except UnicodeDecodeError as exc:
         raise MigError(f"Ceedling project file '{project_file}' is not UTF-8", reason="invalid_encoding") from exc
     except OSError as exc:
         raise MigError(f"cannot read Ceedling project file '{project_file}': {exc}", reason="unreadable_project") from exc
-    try:
-        return RestrictedYamlAdapter().load(text, path=project_file)
-    except RestrictedYamlError as exc:
-        raise MigError(
-            f"Ceedling project file '{project_file}' is not importable: {exc}",
-            reason="invalid_project_file",
-        ) from exc
+    return load_ceedling_config(text, source=str(project_file))
 
 
 def _section(config: Mapping[str, Any], key: str) -> Mapping[str, Any]:
@@ -267,8 +325,16 @@ def import_ceedling_project(root: Path | str) -> ImportedCeedlingProject:
             f"no Ceedling project file '{CEEDLING_PROJECT_FILE}' in '{root_path}'",
             reason="no_project_file",
         )
-    config = _load_config(project_file)
+    config, aliases = _load_config(project_file)
     unconverted: list[ImportNote] = []
+    if aliases:
+        unconverted.append(
+            ImportNote(
+                "yaml_aliases_resolved",
+                CEEDLING_PROJECT_FILE,
+                f"{aliases} YAML alias(es) were resolved to their anchored values; the anchors themselves are not preserved",
+            )
+        )
 
     unconverted.extend(
         ImportNote(
