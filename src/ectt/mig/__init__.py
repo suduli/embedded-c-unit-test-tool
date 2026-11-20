@@ -7,6 +7,14 @@ packages (WP-MIG-01..05, WP-MIG-07).
 
 from __future__ import annotations
 
+from ectt.mig.ceedling import (
+    CEEDLING_PROJECT_FILE,
+    CeedlingTest,
+    CeedlingTestFile,
+    ImportedCeedlingProject,
+    ImportNote,
+    import_ceedling_project,
+)
 from ectt.mig.coexistence import (
     OWNED_PROJECT_PATHS,
     ForeignArtifact,
@@ -17,6 +25,12 @@ from ectt.mig.coexistence import (
 )
 
 __all__ = [
+    "CEEDLING_PROJECT_FILE",
+    "CeedlingTest",
+    "CeedlingTestFile",
+    "ImportNote",
+    "ImportedCeedlingProject",
+    "import_ceedling_project",
     "OWNED_PROJECT_PATHS",
     "ForeignArtifact",
     "TreeSnapshot",
