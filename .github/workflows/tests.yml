@@ -8,8 +8,9 @@ name: Tests
 # whose pilot-first-or-Linux-first ordering is an open owner decision — this
 # workflow runs both equally and ranks neither).
 #
-# Actions are pinned to the same major-version tags the existing
-# traceability.yml workflow uses; that file is the house convention.
+# Actions are pinned to exact release tags (not floating majors). Pin to a
+# commit SHA if the owner's supply-chain policy requires it; the SHA could not
+# be looked up offline.
 
 on:
   push:
@@ -22,16 +23,16 @@ permissions:
 
 jobs:
   test:
-    name: pytest + design gates (${{ matrix.os }})
+    name: full gate (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5.3.0
         with:
           python-version: "3.11"
 
@@ -42,6 +43,19 @@ jobs:
       # tracker's meta.tests block explicitly permits.
       - name: Run the behaviour test suite
         run: python -m pytest -q -p no:cacheprovider
+
+      - name: Lint - ruff
+        run: python -m ruff check src tests
+
+      - name: Type check - mypy
+        run: python -m mypy src
+
+      # Linux x86-64 baseline (TOOL-NFR-010). Skips itself on other systems, so
+      # on ubuntu-latest it is the executed evidence; run it explicitly so a
+      # skip cannot hide inside the full suite's summary line.
+      - name: Linux baseline test
+        if: runner.os == 'Linux'
+        run: python -m pytest -q -p no:cacheprovider -rs tests/core/test_platform.py::test_linux_x86_64_baseline
 
       # Design gate 1: SRS <-> PLAN-001 §5.5 allocation, dependency closure,
       # derived-table drift (design/trace/plan_check.py).

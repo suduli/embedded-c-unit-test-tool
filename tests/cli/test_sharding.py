@@ -154,17 +154,39 @@ def test_merged_report_dumps_deterministically() -> None:
     assert dump_report_model(merged) == dump_report_model(merged)
 
 
-def test_merged_report_roundtrip_is_a_queued_format_fix() -> None:
-    """Interim constraint, recorded in SECOND_PASS: the 1.1 reader requires
-    'execution', but a merged run has no single runner. Until the reader
-    makes 'execution' optional, the merged dump is refused with
-    ``missing_field`` — fail-safe, never silently accepted.
-    """
+def test_merged_report_roundtrip_loads_without_execution() -> None:
+    """A merged run has no single runner: 'execution' is optional on read."""
+    merged = merge_reports([_shard_report("run-a", ("t1",)), _shard_report("run-b", ("t2",))], clock=CLOCK)
+
+    loaded = load_report_model(dump_report_model(merged))
+
+    assert loaded == merged
+    assert loaded.execution is None
+    assert loaded.provenance is not None
+
+
+def test_merged_report_without_provenance_is_still_refused() -> None:
+    import json
+
     merged = merge_reports([_shard_report("run-a", ("t1",))], clock=CLOCK)
+    doc = json.loads(dump_report_model(merged))
+    del doc["provenance"]
 
     with pytest.raises(ReportModelError) as excinfo:
-        load_report_model(dump_report_model(merged))
+        load_report_model(doc)
     assert excinfo.value.reason == "missing_field"
+
+
+def test_report_with_execution_still_roundtrips_and_validates_it() -> None:
+    import json
+
+    single = _shard_report("run-a", ("t1",))
+    assert load_report_model(dump_report_model(single)).execution == single.execution
+
+    doc = json.loads(dump_report_model(single))
+    doc["execution"] = {"where": "", "toolchain": "gcc"}
+    with pytest.raises(ReportModelError):
+        load_report_model(doc)
 
 
 def test_end_to_end_shard_then_merge_reproduces_the_whole_suite() -> None:

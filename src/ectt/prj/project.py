@@ -9,10 +9,11 @@ from __future__ import annotations
 import contextlib
 import os
 import tempfile
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from ectt.core.errors import CancellationToken
 from ectt.prj.errors import (
     CommentPreservationError,
     ProjectError,
@@ -61,6 +62,67 @@ class Project:
         self.document = document
         self.adapter = adapter or RestrictedYamlAdapter()
         self.registry = registry or DEFAULT_KIND_REGISTRY
+        self._journal: dict[Path, bytes | None] | None = None
+        self._created_dirs: list[Path] | None = None
+        self._token: CancellationToken | None = None
+
+    @contextlib.contextmanager
+    def transaction(self, token: CancellationToken | None = None) -> Iterator[None]:
+        """Fail-safe save scope (SDD-003 section 3, TOOL-NFR-180).
+
+        On any exception, including cancellation, files created inside the scope are
+        removed, directories it created are removed when empty, and overwritten files are
+        restored byte-for-byte. Rollback problems are attached to the original exception
+        as notes. Scopes do not nest: an inner scope joins the outer one.
+        """
+        if self._journal is not None:
+            yield
+            return
+        if token is not None:
+            token.raise_if_cancelled()
+        self._journal = {}
+        self._created_dirs = []
+        self._token = token
+        try:
+            yield
+        except BaseException as exc:
+            for note in self._rollback():
+                exc.add_note(note)
+            raise
+        finally:
+            self._journal = None
+            self._created_dirs = None
+            self._token = None
+
+    def _record_for_rollback(self, target: Path) -> None:
+        assert self._journal is not None and self._created_dirs is not None
+        if target not in self._journal:
+            self._journal[target] = target.read_bytes() if target.is_file() else None
+        for ancestor in target.parents:
+            if ancestor == self.root or ancestor.exists():
+                break
+            if ancestor not in self._created_dirs:
+                self._created_dirs.append(ancestor)
+
+    def _rollback(self) -> list[str]:
+        notes: list[str] = []
+        for path, original in reversed(list((self._journal or {}).items())):
+            try:
+                if original is None:
+                    if path.exists():
+                        path.unlink()
+                else:
+                    path.write_bytes(original)
+            except OSError as exc:
+                notes.append(f"rollback could not restore '{path}': {exc}")
+        for directory in self._created_dirs or []:
+            try:
+                directory.rmdir()
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                notes.append(f"rollback could not remove directory '{directory}': {exc}")
+        return notes
 
     @property
     def marker_path(self) -> Path:
@@ -244,8 +306,12 @@ class Project:
         *,
         kind: FileKind | None = None,
         discard_comments: bool = False,
+        token: CancellationToken | None = None,
     ) -> Path:
         """Atomically save a project file in the project tree.
+
+        A ``token`` (or the one of an open ``transaction``) is checked before anything is
+        written; inside a ``transaction`` the prior bytes are journalled for rollback.
 
         Enforces:
         - Must never write into user source roots or output root.
@@ -316,6 +382,11 @@ class Project:
                 pass
 
         # 5. Atomic write
+        active_token = token or self._token
+        if active_token is not None:
+            active_token.raise_if_cancelled()
+        if self._journal is not None:
+            self._record_for_rollback(target_path)
         target_dir = target_path.parent
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -341,11 +412,17 @@ class Project:
 
         return target_path
 
-    def save(self, *, discard_comments: bool = False) -> Path:
+    def save(
+        self,
+        *,
+        discard_comments: bool = False,
+        token: CancellationToken | None = None,
+    ) -> Path:
         """Save the root ectt.project marker file."""
         return self.save_file(
             PROJECT_ROOT_MARKER,
             self.document.data,
             kind=PROJECT_KIND,
             discard_comments=discard_comments,
+            token=token,
         )

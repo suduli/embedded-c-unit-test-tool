@@ -182,3 +182,18 @@ def test_record_type_is_the_shared_finalized_record() -> None:
     records, _ = parse_unity_output("t.c:1:a:PASS\n")
 
     assert isinstance(records[0], ResultRecord)
+
+
+def test_real_cmocka_ok_spelling_is_a_pass() -> None:
+    """Regression: cmocka itself prints ``[       OK ]``; only ``OKAY`` was recognised before."""
+    records, context = parse_cmocka_output(
+        "[==========] tests: Running 2 test(s).\n"
+        "[ RUN      ] reads_channel\n"
+        "[       OK ] reads_channel\n"
+        "[ RUN      ] calibrates\n"
+        "[  FAILED  ] calibrates\n"
+    )
+
+    assert {r.test_id: r.outcome for r in records} == {"reads_channel": "pass", "calibrates": "error"}
+    assert all("OK" not in line for line in context if line.startswith("[       OK"))
+    assert "[       OK ] reads_channel" not in context
