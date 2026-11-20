@@ -69,6 +69,17 @@ from ectt.gen.regen import (
     check_test_case_staleness,
     regenerate,
 )
+from ectt.gen.stubctl import (
+    JOURNAL_CAPACITY_MACRO,
+    ORDER_CAPACITY_MACRO,
+    STUB_MODES,
+    UNSUPPORTED_MARKER,
+    ProgrammableStubUnit,
+    generate_programmable_stubs,
+    out_parameter_names,
+    render_stub_expectations,
+    render_stub_setup,
+)
 from ectt.gen.stubregen import (
     STUB_BODY_REGION_PREFIX,
     UNSUPPORTED_CONSTRUCT_MARKER,
@@ -97,6 +108,15 @@ from ectt.gen.stubscope import (
 )
 
 __all__ = [
+    "JOURNAL_CAPACITY_MACRO",
+    "ORDER_CAPACITY_MACRO",
+    "STUB_MODES",
+    "UNSUPPORTED_MARKER",
+    "ProgrammableStubUnit",
+    "generate_programmable_stubs",
+    "out_parameter_names",
+    "render_stub_expectations",
+    "render_stub_setup",
     # Errors
     "GenError",
     "NoUnitError",
