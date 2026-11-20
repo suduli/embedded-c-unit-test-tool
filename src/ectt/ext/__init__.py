@@ -27,6 +27,20 @@ from ectt.ext.inventory import (
     UnknownTargetError,
     classify_target_failure,
 )
+from ectt.ext.parity import (
+    HOST_TRANSPORT,
+    ExecutionConfig,
+    ExecutionPlan,
+    OutcomeComparison,
+    OutcomeDivergence,
+    ParityError,
+    ParityReport,
+    PortabilityIssue,
+    Violation,
+    check_parity,
+    compare_outcomes,
+    find_portability_issues,
+)
 from ectt.ext.probe import (
     FAMILY_JLINK,
     FAMILY_OPENOCD,
@@ -77,6 +91,18 @@ from ectt.ext.usermethod import (
 )
 
 __all__ = [
+    "HOST_TRANSPORT",
+    "ExecutionConfig",
+    "ExecutionPlan",
+    "OutcomeComparison",
+    "OutcomeDivergence",
+    "ParityError",
+    "ParityReport",
+    "PortabilityIssue",
+    "Violation",
+    "check_parity",
+    "compare_outcomes",
+    "find_portability_issues",
     "ExtError",
     # Simulator execution (WP-EXT-01)
     "SIMULATOR_FAMILIES",

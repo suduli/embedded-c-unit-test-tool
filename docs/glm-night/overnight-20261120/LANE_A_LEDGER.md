@@ -7,3 +7,4 @@
 | FIX-GENPROTO | DONE | 63da3b4 | 180k | 900k | executor: Claude; New ectt.gen.protocol C runtime placed in every generated harness: RESULT/FAILURE lines with whitespace-safe tokens and line>=1 over an overridable tr |
 | FIX-TCMNEST | DONE | a932d36 | 150k | 1050k | executor: Claude; Nested expected values are authored as path keys (g.header.len, g.payload[1], u.as_int) in the unchanged flat form, so existing flat files are valid a |
 | WP-ATG-05 | DONE | 13b4907 | 155k | 1205k | executor: Claude; ectt.atg.run: run_generation under time/memory/case limits (graceful, returns what was generated, report names the limit; configured memory limit alwa |
+| WP-EXT-04 | DONE | PENDING | 155k | 1360k | executor: Claude; ectt.ext.parity: check_parity (same cases + same generated code, only configuration differs, differences listed), ExecutionConfig validation (host std |
