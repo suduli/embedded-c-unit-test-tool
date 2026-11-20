@@ -10,4 +10,4 @@
 | WP-TRC-05 | DONE | dd71a54 | 180k | 1215k | executor: Claude; SourceLink/resolve_source_links (function or line range, persisted as function anchors, unresolved reasons) and review baselines + detect_changes (cha |
 | WP-MIG-03 | DONE | c41e295 | 100k | 1315k | executor: Claude; INTERCHANGE_FORMATS registry + check_format_documentation (versions vs code, examples vs readers, schemas) + render_format_reference. Found and fixed: |
 | WP-MIG-07 | DONE | 38ff925 | 180k | 1495k | executor: Claude; assess_ceedling_project / assess_mapped_csv dry-run the import adapters and report outcome (ready/needs_manual_work/not_assessable), fidelity counts w |
-| FIX-ANAGATE | DONE | PENDING | 90k | 1585k | executor: Claude; assess_eligibility adds unsupported_construct:<kind> reasons (sorted by kind) to the function that owns the recorded first occurrence; find_unattribut |
+| FIX-ANAGATE | DONE | b373466 | 90k | 1585k | executor: Claude; assess_eligibility adds unsupported_construct:<kind> reasons (sorted by kind) to the function that owns the recorded first occurrence; find_unattribut |
