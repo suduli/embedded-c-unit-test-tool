@@ -74,11 +74,14 @@ CATEGORY_EXIT_CODES: dict[str, int] = {
     "generation": EXIT_TOOL_ERROR,
     "ingestion": EXIT_TOOL_ERROR,
     "internal": EXIT_TOOL_ERROR,
+    "migration": EXIT_TOOL_ERROR,
     "project": EXIT_TOOL_ERROR,
+    "report": EXIT_TOOL_ERROR,
     "security": EXIT_TOOL_ERROR,
     "target": EXIT_TOOL_ERROR,
     "testcase": EXIT_TOOL_ERROR,
     "toolchain": EXIT_TOOL_ERROR,
+    "traceability": EXIT_TOOL_ERROR,
 }
 
 

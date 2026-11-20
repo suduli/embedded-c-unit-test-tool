@@ -118,9 +118,9 @@ def merge_reports(models: Sequence[ReportModel], *, clock: Clock) -> ReportModel
     )
     # Give the merged report the same digest discipline as every other report:
     # recompute the id over its canonical body.
-    from ectt.rep.model import _make_model
+    from ectt.rep.model import make_report_model
 
-    return _make_model(
+    return make_report_model(
         run_id=run_id,
         tests=merged.tests,
         coverage=merged.coverage,
