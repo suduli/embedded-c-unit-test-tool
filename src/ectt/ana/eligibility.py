@@ -21,12 +21,18 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from ectt.ana.model import AnalysisUnit
+from ectt.ana.model import AnalysisUnit, FunctionModel, UnsupportedConstructModel
 
 __all__ = [
+    "CONSTRUCT_REASON_PREFIX",
     "EligibilityRecord",
+    "UnattributedConstruct",
     "assess_eligibility",
+    "find_unattributed_constructs",
 ]
+
+#: Gate reasons for recorded unsupported constructs are ``unsupported_construct:<kind>``.
+CONSTRUCT_REASON_PREFIX = "unsupported_construct:"
 
 DEFAULT_VOID_TYPE_REFS = frozenset({"type.builtin.void"})
 
@@ -81,10 +87,16 @@ def assess_eligibility(
     - ``no_observable_channel`` — no parameters, a void return type, and no
       global accesses: nothing about the function's behaviour can be
       observed through declared channels.
+    - ``unsupported_construct:<kind>`` — the function owns a construct recorded
+      in its unit's unsupported-construct inventory (TOOL-PAR-140), for example
+      ``unsupported_construct:variadic_function``. One reason per kind, sorted
+      by kind, after the reasons above.
 
-    Aspects not yet represented in the analysis model (variadic tails, VLAs,
-    unsupported parameter shapes) are deliberately not assessed here; they
-    enter the gate when their model facts exist.
+    The inventory keeps the *first* occurrence of each kind (its location and
+    the owning function's name), so only that occurrence can be attributed to a
+    function. Occurrences beyond the first are not attributable; they are not
+    guessed onto other functions here and are reported by
+    :func:`find_unattributed_constructs` instead.
 
     Args:
         units: Analysis units to assess. A failed unit contributes one unit-kind
@@ -110,6 +122,7 @@ def assess_eligibility(
                 )
             )
             continue
+        owners = _construct_owners(unit)
         for fn in unit.functions:
             return_ref = fn.return_type
             return_ref = return_ref.removeprefix("ref:")
@@ -126,6 +139,7 @@ def assess_eligibility(
                 reasons.append("static_not_exposed")
             if not channels:
                 reasons.append("no_observable_channel")
+            reasons.extend(f"{CONSTRUCT_REASON_PREFIX}{kind}" for kind in sorted(owners.get(id(fn), ())))
 
             records.append(
                 EligibilityRecord(
@@ -137,3 +151,63 @@ def assess_eligibility(
                 )
             )
     return tuple(records)
+
+
+def _owns(fn: FunctionModel, construct: UnsupportedConstructModel) -> bool:
+    """True when ``construct``'s recorded first occurrence belongs to ``fn``.
+
+    The inventory records the owning definition's location and a detail that
+    names the construct (``fn`` or ``fn.param``). A recorded location must match
+    the function's; a missing location falls back to the name in the detail.
+    A detail that names a different function never matches.
+    """
+    named = construct.detail.split(".", 1)[0] if construct.detail else None
+    if named is not None and named != fn.name:
+        return False
+    if construct.location is not None:
+        return construct.location.file == fn.location.file and construct.location.line == fn.location.line
+    return named is not None
+
+
+def _construct_owners(unit: AnalysisUnit) -> dict[int, set[str]]:
+    """Map ``id(function)`` to the recorded construct kinds it owns."""
+    owners: dict[int, set[str]] = {}
+    for construct in unit.unsupported_constructs:
+        for fn in unit.functions:
+            if _owns(fn, construct):
+                owners.setdefault(id(fn), set()).add(construct.kind)
+                break
+    return owners
+
+
+@dataclass(frozen=True)
+class UnattributedConstruct:
+    """Occurrences of a construct kind the inventory cannot assign to a function."""
+
+    unit: str
+    kind: str
+    count: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"count": self.count, "kind": self.kind, "unit": self.unit}
+
+
+def find_unattributed_constructs(units: Sequence[AnalysisUnit]) -> tuple[UnattributedConstruct, ...]:
+    """Report construct occurrences that no function's gate reason accounts for.
+
+    For each parsed unit and kind: ``count`` minus the one occurrence attributed
+    to a function (or the full count when even the first is unattributable).
+    The inventory keeps only the first occurrence's owner, so these remainders
+    are surfaced explicitly rather than silently dropped or spread over
+    functions that may not own them. Sorted by unit then kind.
+    """
+    found: list[UnattributedConstruct] = []
+    for unit in units:
+        if unit.status != "parsed":
+            continue
+        for construct in sorted(unit.unsupported_constructs, key=lambda c: c.kind):
+            attributed = 1 if any(_owns(fn, construct) for fn in unit.functions) else 0
+            remaining = construct.count - attributed
+            if remaining > 0:
+                found.append(UnattributedConstruct(unit.path, construct.kind, remaining))
+    return tuple(sorted(found, key=lambda f: (f.unit, f.kind)))
