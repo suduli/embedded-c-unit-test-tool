@@ -8,3 +8,4 @@
 | FIX-TCMNEST | DONE | a932d36 | 150k | 1050k | executor: Claude; Nested expected values are authored as path keys (g.header.len, g.payload[1], u.as_int) in the unchanged flat form, so existing flat files are valid a |
 | WP-ATG-05 | DONE | 13b4907 | 155k | 1205k | executor: Claude; ectt.atg.run: run_generation under time/memory/case limits (graceful, returns what was generated, report names the limit; configured memory limit alwa |
 | WP-EXT-04 | DONE | 600e951 | 155k | 1360k | executor: Claude; ectt.ext.parity: check_parity (same cases + same generated code, only configuration differs, differences listed), ExecutionConfig validation (host std |
+| TEST-PROP-TCM | DONE | PENDING | 150k | 1510k | executor: Claude; Tests only (no src edits). Fixed seeds as test ids: CSV interchange round trip/loss confinement/determinism/tamper detection, integer range expansion  |
