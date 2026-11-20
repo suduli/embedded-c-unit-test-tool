@@ -42,8 +42,20 @@ from ectt.mig.fidelity import (
     dump_fidelity_report,
     load_fidelity_report,
 )
+from ectt.mig.formats import (
+    INTERCHANGE_FORMATS,
+    FormatSpec,
+    check_format_documentation,
+    format_by_id,
+    render_format_reference,
+)
 
 __all__ = [
+    "INTERCHANGE_FORMATS",
+    "FormatSpec",
+    "check_format_documentation",
+    "format_by_id",
+    "render_format_reference",
     "DEFERRED_KINDS",
     "ArtifactFidelity",
     "DeferredStructure",

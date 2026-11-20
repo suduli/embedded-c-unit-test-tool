@@ -60,7 +60,7 @@ _UNITY_LINE = re.compile(
     r"(?P<verdict>PASS|FAIL|IGNORE)(?::\s*(?P<message>.*))?$"
 )
 _UNITY_EXPECTED = re.compile(r"Expected (?P<expected>.*) Was (?P<actual>.*)$")
-_CMOCKA_VERDICT = re.compile(r"^\[\s*(?P<verdict>OKAY|FAILED)\s*\]\s*(?P<name>\S+)\s*$")
+_CMOCKA_VERDICT = re.compile(r"^\[\s*(?P<verdict>OKAY|OK|FAILED)\s*\]\s*(?P<name>\S+)\s*$")
 _CMOCKA_LINE = re.compile(r"^\[\s*LINE\s*\]\s*(?P<file>[^:\s]+):(?P<line>\d+):\s*(?P<message>.*)$")
 
 
@@ -151,7 +151,7 @@ def parse_cmocka_output(text: str) -> tuple[tuple[ResultRecord, ...], tuple[str,
             unrecognised.append(line)
             continue
         name = verdict_match.group("name")
-        outcome = "pass" if verdict_match.group("verdict") == "OKAY" else "error"
+        outcome = "error" if verdict_match.group("verdict") == "FAILED" else "pass"
         records.append(_finalize(name, outcome))
     return tuple(records), tuple(unrecognised)
 

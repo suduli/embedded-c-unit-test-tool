@@ -8,3 +8,4 @@
 | WP-MIG-05 | DONE | 76da821 | 155k | 855k | executor: Claude; build_*_fidelity_report for CSV and Ceedling imports; converted/lossy/not_converted per artifact; deferred slot structures listed with location in a m |
 | WP-TRC-04 | PARTIAL | d83e54b | 180k | 1035k | executor: Claude; export_reqif writes ReqIF 1.2 (requirements, tests, relations, specification) that import_reqif reads back exactly. Fixed importer to read the standar |
 | WP-TRC-05 | DONE | dd71a54 | 180k | 1215k | executor: Claude; SourceLink/resolve_source_links (function or line range, persisted as function anchors, unresolved reasons) and review baselines + detect_changes (cha |
+| WP-MIG-03 | DONE | PENDING | 100k | 1315k | executor: Claude; INTERCHANGE_FORMATS registry + check_format_documentation (versions vs code, examples vs readers, schemas) + render_format_reference. Found and fixed: |
