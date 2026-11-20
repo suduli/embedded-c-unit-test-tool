@@ -47,6 +47,7 @@ from ectt.tcm.datacases import (
 )
 
 __all__ = [
+    "DEFERRED_KINDS",
     "DELIMITERS",
     "MappedCsvImport",
     "RowOutcome",
@@ -55,6 +56,9 @@ __all__ = [
 ]
 
 DELIMITERS: tuple[str, ...] = (",", ";", "\t", "|")
+
+#: Compound or iterative test structures whose authoring is deferred (TOOL-MIG-110).
+DEFERRED_KINDS: tuple[str, ...] = ("slot", "slot_iteration", "slot_history")
 
 _SIMPLE_TARGETS = frozenset({"id", "unit", "function", "requirements", "suites", "expect_return"})
 _NAMED_TARGET = re.compile(r"^(input|global_init|expect_global|expect_out):(\S+)$")
@@ -71,6 +75,10 @@ class RowOutcome:
     case_id: str | None
     reason: str | None = None
     detail: str | None = None
+    #: Unmapped source columns whose cell held text that the import did not keep.
+    dropped_columns: tuple[str, ...] = ()
+    #: ``(kind, column)`` pairs of deferred structures found in this row.
+    deferred: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -186,6 +194,7 @@ def import_mapped_csv(
     mapping: Mapping[str, str],
     *,
     delimiter: str = ",",
+    deferred_columns: Mapping[str, str] | None = None,
 ) -> MappedCsvImport:
     """Import ``text`` into data-driven cases according to ``mapping``.
 
@@ -193,7 +202,20 @@ def import_mapped_csv(
     docstring). Raises :class:`MigError` for unusable input as a whole (empty
     text, unknown delimiter or mapping target, a mapped column that is absent,
     duplicate headers); individual bad rows are rejected and reported instead.
+
+    ``deferred_columns`` (``source column -> kind`` with kind in
+    :data:`DEFERRED_KINDS`) names columns that carry compound or iterative test
+    structure. A row with text in one is **not** converted (importing it as an
+    ordinary case would flatten the structure): it is rejected with reason
+    ``deferred_structure`` and the structure is listed on the outcome
+    (TOOL-MIG-110).
     """
+    deferred_map = dict(deferred_columns or {})
+    for column, kind in deferred_map.items():
+        if kind not in DEFERRED_KINDS:
+            raise MigError(f"column '{column}' has unknown deferred kind '{kind}'", reason="unknown_deferred_kind")
+        if column in mapping:
+            raise MigError(f"column '{column}' is both mapped and deferred", reason="deferred_column_mapped")
     if delimiter not in DELIMITERS:
         raise MigError(f"unsupported delimiter {delimiter!r}", reason="unsupported_delimiter")
     validate_mapping(mapping)
@@ -210,12 +232,12 @@ def import_mapped_csv(
     header = [h.strip() for h in header]
     if len(set(header)) != len(header):
         raise MigError("header contains duplicate column names", reason="duplicate_column")
-    missing = sorted(set(mapping) - set(header))
+    missing = sorted((set(mapping) | set(deferred_map)) - set(header))
     if missing:
         raise MigError(f"mapped column(s) not in the header: {', '.join(missing)}", reason="unknown_column")
 
     index = {name: i for i, name in enumerate(header)}
-    unmapped = tuple(sorted(name for name in header if name not in mapping))
+    unmapped = tuple(sorted(name for name in header if name not in mapping and name not in deferred_map))
 
     cases: list[DataDrivenTestCase] = []
     outcomes: list[RowOutcome] = []
@@ -225,6 +247,15 @@ def import_mapped_csv(
             outcomes.append(
                 RowOutcome(number, "rejected", None, "ragged_row", f"expected {len(header)} cells, found {len(record)}")
             )
+            continue
+        found = tuple(
+            (kind, column)
+            for column, kind in sorted(deferred_map.items())
+            if record[index[column]].strip()
+        )
+        if found:
+            detail = "; ".join(f"{kind} at column '{column}'" for kind, column in found)
+            outcomes.append(RowOutcome(number, "rejected", None, "deferred_structure", detail, deferred=found))
             continue
         cells = {
             target: record[index[column]].strip()
@@ -250,7 +281,8 @@ def import_mapped_csv(
             continue
         seen_ids[case.case_id] = number
         cases.append(case)
-        outcomes.append(RowOutcome(number, "converted", case.case_id))
+        dropped = tuple(name for name in unmapped if record[index[name]].strip())
+        outcomes.append(RowOutcome(number, "converted", case.case_id, dropped_columns=dropped))
 
     return MappedCsvImport(
         cases=tuple(sorted(cases, key=lambda c: c.case_id)),

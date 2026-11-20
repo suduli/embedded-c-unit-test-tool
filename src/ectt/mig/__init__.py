@@ -24,14 +24,36 @@ from ectt.mig.coexistence import (
     snapshot_tree,
 )
 from ectt.mig.csv_import import (
+    DEFERRED_KINDS,
     DELIMITERS,
     MappedCsvImport,
     RowOutcome,
     import_mapped_csv,
     validate_mapping,
 )
+from ectt.mig.fidelity import (
+    ArtifactFidelity,
+    DeferredStructure,
+    FidelityNote,
+    FidelityReport,
+    build_ceedling_fidelity_report,
+    build_csv_fidelity_report,
+    check_fidelity_report,
+    dump_fidelity_report,
+    load_fidelity_report,
+)
 
 __all__ = [
+    "DEFERRED_KINDS",
+    "ArtifactFidelity",
+    "DeferredStructure",
+    "FidelityNote",
+    "FidelityReport",
+    "build_ceedling_fidelity_report",
+    "build_csv_fidelity_report",
+    "check_fidelity_report",
+    "dump_fidelity_report",
+    "load_fidelity_report",
     "DELIMITERS",
     "MappedCsvImport",
     "RowOutcome",
