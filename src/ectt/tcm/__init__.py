@@ -66,6 +66,16 @@ from ectt.tcm.interchange import (
     export_cases,
     import_cases,
 )
+from ectt.tcm.nested import (
+    ExpectedPath,
+    compare_expected,
+    ctype_from_model,
+    expected_trees,
+    flatten_expected,
+    is_nested_key,
+    parse_expected_path,
+    validate_expected_keys,
+)
 from ectt.tcm.ranged import (
     RangedInput,
     ValidRange,
@@ -80,6 +90,14 @@ from ectt.tcm.selection import (
 )
 
 __all__ = [
+    "ExpectedPath",
+    "compare_expected",
+    "ctype_from_model",
+    "expected_trees",
+    "flatten_expected",
+    "is_nested_key",
+    "parse_expected_path",
+    "validate_expected_keys",
     "DerivationError",
     "DEFAULT_MAX_VECTORS",
     "STRATEGIES",
