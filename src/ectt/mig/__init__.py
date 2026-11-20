@@ -7,6 +7,14 @@ packages (WP-MIG-01..05, WP-MIG-07).
 
 from __future__ import annotations
 
+from ectt.mig.assessment import (
+    OUTCOMES,
+    Assessment,
+    ManualItem,
+    assess_ceedling_project,
+    assess_mapped_csv,
+    dump_assessment,
+)
 from ectt.mig.ceedling import (
     CEEDLING_PROJECT_FILE,
     CeedlingTest,
@@ -51,6 +59,12 @@ from ectt.mig.formats import (
 )
 
 __all__ = [
+    "OUTCOMES",
+    "Assessment",
+    "ManualItem",
+    "assess_ceedling_project",
+    "assess_mapped_csv",
+    "dump_assessment",
     "INTERCHANGE_FORMATS",
     "FormatSpec",
     "check_format_documentation",
