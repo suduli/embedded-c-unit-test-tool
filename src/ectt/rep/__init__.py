@@ -15,6 +15,7 @@ from ectt.rep.formats import (
     default_format_registry,
 )
 from ectt.rep.from_archive import report_from_archive, result_set_from_dict
+from ectt.rep.machine_formats import cobertura_rate, render_cobertura, render_junit
 from ectt.rep.model import (
     FORMAT_CHANGELOG,
     REPORT_MODEL_SCHEMA_VERSION,
@@ -45,8 +46,10 @@ from ectt.rep.summary import (
     dump_cross_run_summary,
 )
 
-__all__ = [
-    "FORMAT_CHANGELOG",
+__all__ = ["cobertura_rate",
+    "render_cobertura",
+    "render_junit",
+        "FORMAT_CHANGELOG",
     "REPORT_FORMAT_CONTRACT",
     "REPORT_FORMATS_POINT_ID",
     "REPORT_MODEL_SCHEMA_VERSION",
