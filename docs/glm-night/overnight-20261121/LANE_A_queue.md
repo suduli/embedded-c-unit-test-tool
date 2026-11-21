@@ -5,12 +5,12 @@ You are an unattended executor on the ZAI harness. No human will answer. For any
 ## Setup (once)
 ```
 cd /e/projects/UDS_Simulator/Unit
-git worktree add ../wt-night-a -b glm-night/20261121-a main
-cd ../wt-night-a
+git worktree add ../wt-night-21a -b glm-night/20261121-a main
+cd ../wt-night-21a
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -e ".[dev]"
 ```
-Baseline at the branch point (local `main` b393f0d): 3097 passed, 6 skipped; ruff, mypy, plan_check, trace_check all clean. Create `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md` with header `| item | state | commit | est tokens | cumulative | notes |` if missing, and `docs/glm-night/overnight-20261121/SECOND_PASS_A.md` with header `| item | what is needed | why it needs a human | where |`.
+Baseline at the branch point (local `main` c559087): 3097 passed, 6 skipped; ruff, mypy, plan_check, trace_check all clean. Create `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md` with header `| item | state | commit | est tokens | cumulative | notes |` if missing, and `docs/glm-night/overnight-20261121/SECOND_PASS_A.md` with header `| item | what is needed | why it needs a human | where |`.
 
 ## Gate block (run before every commit; all must exit 0)
 ```

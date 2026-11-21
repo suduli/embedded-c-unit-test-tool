@@ -100,6 +100,7 @@ def main():
         text = text.replace("20261119", "20261121").replace("glm-night/20261121-plan", "main")
         text = text.replace("Baseline at the branch point (local `main` 353b9b4): 970 passed, 4 skipped;",
                             f"Baseline at the branch point (local `main` {BASE}): 3097 passed, 6 skipped;")
+        text = text.replace(f"wt-night-{lane.lower()}", f"wt-night-21{lane.lower()}")
         text = text.replace("Item N00 is the only exception for `design/`.", "No item may edit `design/`.")
         text = text.replace(
             "Stop starting new items when your lane's cumulative reaches 1,450k tokens OR the local time reaches 05:30, whichever comes first.",
