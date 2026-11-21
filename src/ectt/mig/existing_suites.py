@@ -56,11 +56,12 @@ __all__ = [
 SUPPORTED_FRAMEWORKS = ("cmocka", "unity")
 
 _UNITY_LINE = re.compile(
-    r"^(?P<file>[^:\s]+):(?P<line>\d+):(?P<name>[^:\s]+):"
+    r"^(?P<file>(?:[A-Za-z]:)?[^:]+):(?P<line>\d+):(?P<name>[^:\s]+):"
     r"(?P<verdict>PASS|FAIL|IGNORE)(?::\s*(?P<message>.*))?$"
 )
-_UNITY_EXPECTED = re.compile(r"Expected (?P<expected>.*) Was (?P<actual>.*)$")
-_CMOCKA_VERDICT = re.compile(r"^\[\s*(?P<verdict>OKAY|FAILED)\s*\]\s*(?P<name>\S+)\s*$")
+_UNITY_EXPECTED = re.compile(r"Expected (?P<expected>.+) Was (?P<actual>.+)$")
+_CMOCKA_VERDICT = re.compile(r"^\[\s*(?P<verdict>OKAY|OK|FAILED)\s*\]\s*(?P<name>\S+)\s*$")
+_CMOCKA_RUN = re.compile(r"^\[\s*RUN\s*\]\s*(?P<name>\S+)\s*$")
 _CMOCKA_LINE = re.compile(r"^\[\s*LINE\s*\]\s*(?P<file>[^:\s]+):(?P<line>\d+):\s*(?P<message>.*)$")
 
 
@@ -142,19 +143,31 @@ def parse_cmocka_output(text: str) -> tuple[tuple[ResultRecord, ...], tuple[str,
     """Normalise cmocka output into finalized records plus unrecognised lines."""
     records: list[ResultRecord] = []
     unrecognised: list[str] = []
+    started: str | None = None  # a test whose RUN line has no verdict yet
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
         if not line.strip():
             continue
         verdict_match = _CMOCKA_VERDICT.match(line)
         if verdict_match is None:
+            run_match = _CMOCKA_RUN.match(line)
+            if run_match is not None:
+                if started is not None:
+                    records.append(_finalize(started, "error"))
+                started = run_match.group("name")
             unrecognised.append(line)
             continue
         name = verdict_match.group("name")
-        outcome = "pass" if verdict_match.group("verdict") == "OKAY" else "error"
+        if name == started:
+            started = None
+        outcome = "error" if verdict_match.group("verdict") == "FAILED" else "pass"
         records.append(_finalize(name, outcome))
+    if started is not None:  # the process ended mid-test: never a silent pass
+        records.append(_finalize(started, "error"))
     return tuple(records), tuple(unrecognised)
 
+
+_FAILING = ("fail", "error", "timeout")
 
 _PARSERS = {
     "unity": parse_unity_output,
@@ -192,7 +205,8 @@ def run_existing_suite(
         completed = subprocess.run(
             [*argv_prefix, str(executable_path)],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
             timeout=None,
         )
@@ -207,7 +221,12 @@ def run_existing_suite(
     parser = _PARSERS[framework]
     records, unrecognised = parser(stdout)
     if records:
-        by_id = {record.test_id: record for record in records}
+        by_id: dict[str, ResultRecord] = {}
+        for record in records:
+            earlier = by_id.get(record.test_id)
+            # A repeated name must never let a later pass hide an earlier failure.
+            if earlier is None or earlier.outcome not in _FAILING:
+                by_id[record.test_id] = record
         aggregate = aggregate_outcome(by_id, sorted(by_id))
     else:
         aggregate = None  # nothing recognised: never a silent pass

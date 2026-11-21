@@ -40,6 +40,7 @@ from ectt.ana.model import (
     UnitFailureModel,
 )
 from ectt.core.determinism import Clock, canonical_json_bytes
+from ectt.core.errors import CancellationToken
 from ectt.core.fs import OutputRoot
 
 __all__ = [
@@ -329,8 +330,13 @@ def write_analysis_model(
     output_root: OutputRoot,
     rel_path: Path | str,
     model: AnalysisModel | Mapping[str, Any],
+    *,
+    token: CancellationToken | None = None,
 ) -> Path:
     """Atomically write an AnalysisModel to disk inside the confined OutputRoot.
+
+    The write runs inside ``OutputRoot.transaction``: a cancelled or failed write leaves
+    any original file byte-identical and no partial file behind (SDD-003 section 3).
 
     Implements: DSN-CORE-060, DSN-ANA-070.
     Satisfies: TOOL-PAR-100.
@@ -343,7 +349,13 @@ def write_analysis_model(
         raise TypeError(f"Expected AnalysisModel or Mapping, got {type(model).__name__}")
 
     data = canonical_json_bytes(doc, first_keys=("schema_version",))
-    return output_root.write_bytes(rel_path, data)
+    if output_root._journal is not None:
+        # OutputRoot.transaction is not re-entrant (core/fs.py); join the caller's scope.
+        if token is not None:
+            token.raise_if_cancelled()
+        return output_root.write_bytes(rel_path, data)
+    with output_root.transaction(token):
+        return output_root.write_bytes(rel_path, data)
 
 
 def read_analysis_model(

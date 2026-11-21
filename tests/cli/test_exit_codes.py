@@ -215,3 +215,10 @@ def test_run_does_not_swallow_non_ectt_exceptions() -> None:
     dispatcher.register("raw.op", handler)  # type: ignore[arg-type]
     with pytest.raises(RuntimeError, match="genuine bug"):
         run(["raw.op"], catalogue=catalogue, dispatcher=dispatcher)
+
+
+@pytest.mark.parametrize("category", ["report", "traceability", "migration"])
+def test_new_package_categories_are_in_the_table(category: str) -> None:
+    """verifies: TOOL-NFR-090 — report, traceability and migration are named, not fallbacks."""
+    assert category in CATEGORY_EXIT_CODES
+    assert exit_code_for_category(category) == EXIT_TOOL_ERROR

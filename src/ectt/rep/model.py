@@ -215,7 +215,7 @@ def _execution_facts(result_set: ResultSet) -> ExecutionFacts:
     return ExecutionFacts(where=where, toolchain=toolchain, target_id=target_id)
 
 
-def _make_model(
+def make_report_model(
     *,
     run_id: str,
     tests: tuple[TestEntry, ...],
@@ -225,6 +225,10 @@ def _make_model(
     execution: ExecutionFacts | None,
     provenance: ProvenanceRecord | None,
 ) -> ReportModel:
+    """Build a digest-bound model outside a ``ResultSet`` (e.g. a CI merge).
+
+    ``execution`` may be ``None`` when no single runner produced the report.
+    """
     body: dict[str, Any] = {
         "coverage": [entry.to_dict() for entry in coverage],
         "generated_at": generated_at,
@@ -296,7 +300,7 @@ def build_report_model(
         input_digests={"result_set": stable_id(dump_result_set(result_set))},
     )
 
-    return _make_model(
+    return make_report_model(
         run_id=result_set.run_id,
         tests=tuple(entries[key] for key in sorted(entries)),
         coverage=tuple(coverage_map[key] for key in sorted(coverage_map)),
@@ -438,7 +442,10 @@ def load_report_model(source: str | bytes | Mapping[str, Any]) -> ReportModel:
                     reason="unexpected_field",
                 )
     else:
-        execution = _execution_from_dict(_field(doc, "execution", "document"))
+        # Merged reports have no single runner, so 'execution' is optional;
+        # provenance stays mandatory for every 1.1+ document.
+        if "execution" in doc:
+            execution = _execution_from_dict(doc["execution"])
         provenance = _provenance_from_dict(_field(doc, "provenance", "document"))
 
     body: dict[str, Any] = {

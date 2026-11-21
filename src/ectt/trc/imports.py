@@ -8,7 +8,8 @@ with two rows for one id is ambiguous input, not a set to silently merge);
 ids follow the association id discipline (non-empty, whitespace-free).
 
 - ReqIF (TOOL-TRC-050): the documented subset of ReqIF 1.x — ``SPEC-OBJECT``
-  elements; the requirement id is the ``ReqIF.Identifier`` attribute value
+  elements (test objects written by ``reqif_export`` are skipped; attribute
+  definitions are read from a ``REF`` attribute or a ``-REF`` element); the requirement id is the ``ReqIF.Identifier`` attribute value
   when present, else the ``SPEC-OBJECT`` ``IDENTIFIER``; title from
   ``LONG-NAME``; text from a ``ReqIF.Description`` attribute value. Matching
   is by local name, so namespaced and namespace-less documents both parse.
@@ -46,6 +47,9 @@ __all__ = [
 #: The documented CSV column set (TOOL-TRC-060): ``id`` required in the
 #: header, ``title``/``text`` optional, order free, no other columns.
 CSV_COLUMNS: tuple[str, ...] = ("id", "text", "title")
+
+#: Object-type id suffix of test objects written by ``ectt.trc.reqif_export``.
+_TEST_TYPE_SUFFIX = "ectt.type.TestCase"
 
 _TEXT_LINE = re.compile(r"^(?P<id>[^\s:]+):\s*(?P<rest>.*)$")
 
@@ -91,11 +95,24 @@ def _attribute_values(spec_object: ET.Element) -> dict[str, str]:
         if the_value is None:
             continue
         for child in element.iter():
-            if _local_name(child.tag) == "ATTRIBUTE-DEFINITION-STRING":
-                ref = child.get("REF")
-                if ref is not None:
-                    values[ref] = the_value
+            local = _local_name(child.tag)
+            if local == "ATTRIBUTE-DEFINITION-STRING":
+                ref = child.get("REF")  # documented-subset form: REF attribute
+            elif local == "ATTRIBUTE-DEFINITION-STRING-REF":
+                ref = (child.text or "").strip() or None  # schema form: element text
+            else:
+                continue
+            if ref is not None:
+                values[ref] = the_value
     return values
+
+
+def _is_test_object(spec_object: ET.Element) -> bool:
+    """True for objects of the exporter's test-case type (not requirements)."""
+    return any(
+        _local_name(child.tag) == "SPEC-OBJECT-TYPE-REF" and (child.text or "").strip().endswith(_TEST_TYPE_SUFFIX)
+        for child in spec_object.iter()
+    )
 
 
 def import_reqif(text: str) -> tuple[RequirementRecord, ...]:
@@ -107,7 +124,7 @@ def import_reqif(text: str) -> tuple[RequirementRecord, ...]:
 
     records: list[RequirementRecord] = []
     for element in root.iter():
-        if _local_name(element.tag) != "SPEC-OBJECT":
+        if _local_name(element.tag) != "SPEC-OBJECT" or _is_test_object(element):
             continue
         identifier = element.get("IDENTIFIER")
         long_name = element.get("LONG-NAME", "")

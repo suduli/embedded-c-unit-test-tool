@@ -15,8 +15,11 @@ from __future__ import annotations
 from typing import Any
 
 from ectt.ana.eligibility import (
+    CONSTRUCT_REASON_PREFIX,
     EligibilityRecord,
+    UnattributedConstruct,
     assess_eligibility,
+    find_unattributed_constructs,
 )
 from ectt.ana.errors import (
     AnalysisError,
@@ -112,7 +115,10 @@ def __getattr__(name: str) -> Any:
 
 __all__ = [
     "EligibilityRecord",
+    "CONSTRUCT_REASON_PREFIX",
+    "UnattributedConstruct",
     "assess_eligibility",
+    "find_unattributed_constructs",
     # Binding & frontend (lazy)
     "ClangFrontend",
     "parse",
