@@ -46,8 +46,7 @@ separate package and is not implemented.
   excludes a slash that follows a drive colon
   (`test_absolute_paths_are_host_specific[D:/data/in.txt]`).
 - **Defect found in review.** A drive letter needs a left boundary: without one the C string
-  `"Error:
-"` matched `r:\` and was reported as a drive path
+  `"Error:\n"` matched `r:\` and was reported as a drive path
   (`test_a_label_ending_in_a_colon_is_not_a_drive_path`). Configuration tokens are matched with
   `fullmatch`, because `$` also matches before a trailing newline.
 - **Digest comparison, not file comparison.** Two plans are the same test when their case
