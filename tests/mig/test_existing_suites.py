@@ -250,3 +250,9 @@ def test_undecodable_suite_output_does_not_crash_the_run(tmp_path: Path) -> None
 
     assert run.aggregate == "pass"
     assert len(run.unrecognised_lines) == 1
+
+
+def test_unity_fail_with_an_empty_expected_or_actual_is_an_error_not_a_crash() -> None:
+    for message in ("Expected  Was 1", "Expected 1 Was ", "Expected  Was "):
+        records, _ = parse_unity_output(f"a.c:1:t:FAIL: {message}\n")
+        assert [r.outcome for r in records] == ["error"]
