@@ -118,7 +118,7 @@ class RunLimits:
 
     def __post_init__(self) -> None:
         for what, value in (("max_seconds", self.max_seconds), ("max_memory_bytes", self.max_memory_bytes), ("max_cases", self.max_cases)):
-            if value is not None and (isinstance(value, bool) or value <= 0):
+            if value is not None and (isinstance(value, bool) or not value > 0):
                 raise AtgError(f"{what} must be positive when set (got {value!r})", reason="invalid_limit")
 
     def to_dict(self) -> dict[str, Any]:

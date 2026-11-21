@@ -169,3 +169,14 @@ def test_an_engine_cannot_declare_an_unknown_kind(kind: str) -> None:
     with pytest.raises(AtgError) as excinfo:
         EngineCapabilities("klee", frozenset({kind}))
     assert excinfo.value.reason == "unknown_limitation_kind"
+
+
+@pytest.mark.parametrize("name", ["_Float16", "__fp16", "__bf16", "__float128", "_Float128", "__ibm128", "double _Complex", "float _Complex"])
+def test_extended_and_complex_floating_builtins_are_floating_point(name: str) -> None:
+    types = {**TYPES, "type.ext": TypeModel(kind="builtin", name=name)}
+    result = assess_capabilities([_unit(_fn("f", params=(("x", "ref:type.ext"),)))], types, EngineCapabilities("klee", ALL))
+    assert [(i.function, i.kind) for i in result] == [("f", "floating_point")]
+
+
+def test_sanitised_graph_keys_for_a_missing_long_double_are_recognised() -> None:
+    assert _found(_fn("f", params=(("x", "ref:type.long_double"),))) == [("f", "floating_point", "parameter 'x' involves floating point")]
