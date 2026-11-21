@@ -39,6 +39,13 @@ from ectt.cov.model import (
     GcovLine,
     MetricTotals,
 )
+from ectt.cov.thresholds import (
+    THRESHOLD_METRICS,
+    MetricThreshold,
+    ThresholdEvaluation,
+    ThresholdResult,
+    enforce_thresholds,
+)
 
 __all__ = [
     "COMPLETENESS_STATES",
@@ -49,6 +56,7 @@ __all__ = [
     "KNOWN_FORMAT_VERSIONS",
     "KNOWN_RUN_OUTCOMES",
     "MergeResult",
+    "MetricThreshold",
     "MetricTotals",
     "QUARANTINE_OUTCOMES",
     "RunAdmission",
@@ -59,9 +67,13 @@ __all__ = [
     "GcovDocument",
     "GcovFile",
     "GcovLine",
+    "THRESHOLD_METRICS",
+    "ThresholdEvaluation",
+    "ThresholdResult",
     "branch_coverage",
     "coverage_for_test",
     "document_metrics",
+    "enforce_thresholds",
     "merge_run_coverage",
     "statement_coverage",
     "read_gcov_document",
