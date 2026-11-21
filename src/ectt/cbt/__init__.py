@@ -1,6 +1,14 @@
 # implements: TOOL-CBT-010, TOOL-CBT-020
 """Compiled-suite lifecycle: re-execution, impact analysis, subset runs (CMP-CBT)."""
 
+from ectt.cbt.compare import (
+    CoverageComparison,
+    MetricDelta,
+    RunComparison,
+    compare_coverage,
+    compare_runs,
+    run_outcomes,
+)
 from ectt.cbt.errors import CbtError
 from ectt.cbt.impact import ImpactResult, SourceChange, affected_cases
 from ectt.cbt.reexecute import (
@@ -25,7 +33,10 @@ __all__ = [
     "SUITE_RECORD_VERSION",
     "CbtError",
     "CompiledSuiteRecord",
+    "CoverageComparison",
     "ImpactResult",
+    "MetricDelta",
+    "RunComparison",
     "ParallelReExecution",
     "ReExecution",
     "ReExecutionSpec",
@@ -33,6 +44,8 @@ __all__ = [
     "SubsetReExecution",
     "affected_cases",
     "bindings_from_cases",
+    "compare_coverage",
+    "compare_runs",
     "current_digests",
     "dump_suite_record",
     "load_suite_record",
@@ -41,4 +54,5 @@ __all__ = [
     "reexecute_parallel",
     "reexecute_subset",
     "reexecute_suite",
+    "run_outcomes",
 ]
