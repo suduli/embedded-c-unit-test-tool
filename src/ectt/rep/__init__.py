@@ -15,6 +15,7 @@ from ectt.rep.formats import (
     default_format_registry,
 )
 from ectt.rep.from_archive import report_from_archive, result_set_from_dict
+from ectt.rep.html import render_html
 from ectt.rep.machine_formats import cobertura_rate, render_cobertura, render_junit
 from ectt.rep.model import (
     FORMAT_CHANGELOG,
@@ -48,6 +49,7 @@ from ectt.rep.summary import (
 
 __all__ = ["cobertura_rate",
     "render_cobertura",
+    "render_html",
     "render_junit",
         "FORMAT_CHANGELOG",
     "REPORT_FORMAT_CONTRACT",
