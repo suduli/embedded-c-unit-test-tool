@@ -110,9 +110,15 @@ class TestCaseInputs:
 
 @dataclass(frozen=True)
 class TestCaseExpected:
-    """Expected results: return value, final globals, output parameters."""
+    """Expected results: return value, final globals, output parameters.
 
-    return_value: str | None = None
+    ``return_value`` is the flat scalar return (a string, as always) or — for a
+    struct, array or union return — a mapping of value paths *relative to the
+    return* to strings (``header.len: "4"``; ectt.tcm.nested). Plain flat files
+    are unchanged and byte-stable.
+    """
+
+    return_value: str | Mapping[str, str] | None = None
     global_finals: Mapping[str, str] = field(default_factory=dict)
     out_parameters: Mapping[str, str] = field(default_factory=dict)
     comparison: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
@@ -174,7 +180,7 @@ class DataDrivenTestCase:
             "comparison": {k: dict(v) for k, v in self.expected.comparison.items()},
         }
         if self.expected.return_value is not None:
-            expected["return"] = self.expected.return_value
+            expected["return"] = _deterministic_return(self.expected.return_value)
         payload: dict[str, Any] = {
             "kind": "data",
             "unit": self.unit,
@@ -230,6 +236,13 @@ def refresh_digest(case: DataDrivenTestCase) -> DataDrivenTestCase:
     """
     digest = compute_case_digest(case.content_payload())
     return replace(case, recorded_digest=digest, content_digest=digest)
+
+
+def _deterministic_return(value: str | Mapping[str, str] | None) -> str | dict[str, str] | None:
+    """The return value in deterministic key order (sorted) for dump and digest."""
+    if isinstance(value, Mapping):
+        return dict(sorted(value.items()))
+    return value
 
 
 def _string_mapping(
@@ -461,8 +474,10 @@ def _parse_case(entry: Any, *, path: Path | str | None) -> DataDrivenTestCase:
         parameters=_string_mapping(
             inputs_raw.get("parameters"), what="inputs.parameters", case_id=case_id, path=path
         ),
+        # Initial global values accept the same value-path keys as expectations
+        # (ectt.tcm.nested): g_frame.header.len: "4" initializes that member.
         global_inits=_string_mapping(
-            inputs_raw.get("globals"), what="inputs.globals", case_id=case_id, path=path
+            inputs_raw.get("globals"), what="inputs.globals", case_id=case_id, path=path, value_paths=True
         ),
     )
 
@@ -473,10 +488,28 @@ def _parse_case(entry: Any, *, path: Path | str | None) -> DataDrivenTestCase:
             path=path,
         )
     _reject_unknown_keys(expected_raw, _EXPECTED_KEYS, what="expected", case_id=case_id, path=path)
-    return_value = expected_raw.get("return")
-    if return_value is not None and not isinstance(return_value, str):
+    return_raw = expected_raw.get("return")
+    return_value: str | dict[str, str] | None
+    if return_raw is None or isinstance(return_raw, str):
+        # The flat scalar return, exactly as before.
+        return_value = return_raw
+    elif isinstance(return_raw, Mapping) and all(
+        isinstance(k, str) and isinstance(v, str) for k, v in return_raw.items()
+    ):
+        # A composite return value, authored as value paths relative to the
+        # return (ectt.tcm.nested). Keys are validated like other path keys.
+        for key in return_raw:
+            try:
+                parse_expected_path(key)
+            except ValueParseError as exc:
+                raise InvalidTestCasesFileError(
+                    f"test case '{case_id}': 'expected.return' key '{key}' is not a valid value path: {exc.message}",
+                    path=path,
+                ) from exc
+        return_value = dict(return_raw)
+    else:
         raise InvalidTestCasesFileError(
-            f"test case '{case_id}': expected 'return' must be a string or absent",
+            f"test case '{case_id}': expected 'return' must be a string, a mapping of value paths, or absent",
             path=path,
         )
     comparison_raw = expected_raw.get("comparison")
@@ -629,7 +662,7 @@ def _case_to_dict(case: DataDrivenTestCase) -> dict[str, Any]:
         inputs["globals"] = dict(case.inputs.global_inits)
     expected: dict[str, Any] = {}
     if case.expected.return_value is not None:
-        expected["return"] = case.expected.return_value
+        expected["return"] = _deterministic_return(case.expected.return_value)
     if case.expected.global_finals:
         expected["globals"] = dict(case.expected.global_finals)
     if case.expected.out_parameters:

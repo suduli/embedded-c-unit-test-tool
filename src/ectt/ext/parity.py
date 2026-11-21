@@ -204,7 +204,12 @@ def _values(case: DataDrivenTestCase) -> Iterable[tuple[str, str]]:
     for name, value in sorted(case.inputs.global_inits.items()):
         yield f"inputs.globals.{name}", value
     if case.expected.return_value is not None:
-        yield "expected.return", case.expected.return_value
+        if isinstance(case.expected.return_value, Mapping):
+            # A composite return: every authored path-keyed value is scanned.
+            for name, value in sorted(case.expected.return_value.items()):
+                yield f"expected.return.{name}", value
+        else:
+            yield "expected.return", case.expected.return_value
     for name, value in sorted(case.expected.global_finals.items()):
         yield f"expected.globals.{name}", value
     for name, value in sorted(case.expected.out_parameters.items()):
