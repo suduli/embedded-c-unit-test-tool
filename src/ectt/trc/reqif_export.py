@@ -72,6 +72,9 @@ _TEST_ATTRS = ((_TEST_IDENTIFIER, "ReqIF.Identifier"), (_TEST_STATUS, "Status"),
 _ILLEGAL_XML = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f￾￿]")
 
 
+_XSD_DATETIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?")
+
+
 def _tag(name: str) -> str:
     return f"{{{REQIF_NAMESPACE}}}{name}"
 
@@ -93,6 +96,9 @@ def _checked_text(value: str, what: str) -> str:
 
 def _checked_time(value: str) -> str:
     try:
+        # fromisoformat also takes forms xsd:dateTime rejects (compact, week dates, no seconds).
+        if not isinstance(value, str) or not _XSD_DATETIME.fullmatch(value):
+            raise ValueError(value)
         datetime.fromisoformat(value)
     except (TypeError, ValueError) as exc:
         raise TrcError(f"creation_time {value!r} is not an ISO-8601 timestamp", reason="invalid_creation_time") from exc

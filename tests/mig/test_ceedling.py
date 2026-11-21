@@ -359,3 +359,53 @@ def test_the_loader_is_public_and_reports_the_alias_count() -> None:
 
     config, aliases = load_ceedling_config(":a: &x [1]\n:b: *x\n:c: *x\n")
     assert (config, aliases) == ({":a": ["1"], ":b": ["1"], ":c": ["1"]}, 2)
+
+
+def test_yaml_merge_key_is_resolved_like_ceedlings_own_loader() -> None:
+    from ectt.mig.ceedling import load_ceedling_config
+
+    text = ":base: &b\n  :k: v\n  :o: old\n:use:\n  <<: *b\n  :o: new\n  :z: 1\n"
+
+    config, aliases = load_ceedling_config(text)
+
+    assert config[":use"] == {":k": "v", ":o": "new", ":z": "1"}
+    assert aliases == 1
+
+
+def test_duplicate_explicit_key_is_still_refused_next_to_a_merge_key() -> None:
+    from ectt.mig.ceedling import load_ceedling_config
+
+    with pytest.raises(MigError) as excinfo:
+        load_ceedling_config(":base: &b\n  :k: v\n:use:\n  <<: *b\n  :o: 1\n  :o: 2\n")
+    assert excinfo.value.reason == "invalid_project_file"
+
+
+def _link_directory(link: Path, target: Path) -> bool:
+    import os
+    import subprocess
+    import sys
+
+    try:
+        os.symlink(target, link, target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        pass
+    if sys.platform == "win32":  # a junction needs no privilege
+        done = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)], capture_output=True, check=False)
+        return done.returncode == 0
+    return False
+
+
+def test_a_test_directory_that_links_outside_the_project_is_refused(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "test_o.c").write_text("void test_o(void) {}\n", encoding="utf-8")
+    root = tmp_path / "proj"
+    (root / "test").mkdir(parents=True)
+    if not _link_directory(root / "linked", outside):
+        pytest.skip("cannot create a directory link on this machine")
+    (root / "project.yml").write_text(":paths:\n  :test:\n    - test\n    - linked\n", encoding="utf-8")
+
+    with pytest.raises(MigError) as excinfo:
+        import_ceedling_project(root)
+    assert excinfo.value.reason == "path_escape"

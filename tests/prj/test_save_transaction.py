@@ -89,3 +89,14 @@ def test_nested_transaction_joins_the_outer_scope(tmp_path: Path) -> None:
         raise RuntimeError("late failure")
     assert not (project.root / "a.yaml").exists()
     assert not (project.root / "b.yaml").exists()
+
+
+def test_rollback_removes_sibling_directories_sharing_a_new_parent(tmp_path: Path) -> None:
+    """Directories created for two files under one new parent are all removed on failure."""
+    project = _project(tmp_path)
+    with pytest.raises(RuntimeError) as info, project.transaction():
+        project.save_file("top/one/a.yaml", {"x": 1})
+        project.save_file("top/two/b.yaml", {"y": 1})
+        raise RuntimeError("late failure")
+    assert not (project.root / "top").exists()
+    assert not getattr(info.value, "__notes__", [])

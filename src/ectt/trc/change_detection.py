@@ -53,7 +53,7 @@ __all__ = [
 ]
 
 BASELINE_VERSION = "1"
-_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_DIGEST = re.compile(r"[0-9a-f]{64}")
 
 
 def _lf(text: str) -> str:
@@ -196,6 +196,6 @@ def load_baseline(text: str) -> ReviewBaseline:
     if not isinstance(digests, dict):
         raise TrcError("'digests' must be an object", reason="invalid_baseline")
     for rid, digest in digests.items():
-        if not rid or any(c.isspace() for c in rid) or not isinstance(digest, str) or not _DIGEST.match(digest):
+        if not rid or any(c.isspace() for c in rid) or not isinstance(digest, str) or not _DIGEST.fullmatch(digest):
             raise TrcError(f"baseline entry '{rid}' is malformed", reason="invalid_baseline")
     return ReviewBaseline(dict(sorted(digests.items())))

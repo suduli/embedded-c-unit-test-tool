@@ -205,18 +205,21 @@ def load_fidelity_report(text: str | Mapping[str, Any]) -> FidelityReport:
     )
     source = doc.get("source")
     _require(isinstance(source, str), "fidelity report needs a 'source' string", "invalid_report")
-    artifacts: list[ArtifactFidelity] = []
-    for raw in doc.get("artifacts", []):
-        _require(isinstance(raw, dict) and raw.get("status") in STATUSES, "artifact has an unknown status", "invalid_status")
-        notes = []
-        for note in raw.get("notes", []):
-            _require(isinstance(note, dict) and note.get("effect") in _EFFECTS, "note has an unknown effect", "invalid_effect")
-            notes.append(FidelityNote(str(note["kind"]), str(note["detail"]), note["effect"]))
-        artifacts.append(ArtifactFidelity(str(raw["artifact"]), str(raw["kind"]), raw["status"], tuple(notes)))
-    deferred: list[DeferredStructure] = []
-    for raw in doc.get("deferred", []):
-        _require(isinstance(raw, dict) and raw.get("kind") in DEFERRED_KINDS, "unknown deferred structure kind", "invalid_deferred_kind")
-        deferred.append(DeferredStructure(raw["kind"], str(raw["artifact"]), str(raw["location"])))
+    try:
+        artifacts: list[ArtifactFidelity] = []
+        for raw in doc.get("artifacts", []):
+            _require(isinstance(raw, dict) and raw.get("status") in STATUSES, "artifact has an unknown status", "invalid_status")
+            notes = []
+            for note in raw.get("notes", []):
+                _require(isinstance(note, dict) and note.get("effect") in _EFFECTS, "note has an unknown effect", "invalid_effect")
+                notes.append(FidelityNote(str(note["kind"]), str(note["detail"]), note["effect"]))
+            artifacts.append(ArtifactFidelity(str(raw["artifact"]), str(raw["kind"]), raw["status"], tuple(notes)))
+        deferred: list[DeferredStructure] = []
+        for raw in doc.get("deferred", []):
+            _require(isinstance(raw, dict) and raw.get("kind") in DEFERRED_KINDS, "unknown deferred structure kind", "invalid_deferred_kind")
+            deferred.append(DeferredStructure(raw["kind"], str(raw["artifact"]), str(raw["location"])))
+    except (KeyError, TypeError, AttributeError) as exc:
+        raise MigError(f"fidelity report is malformed: {type(exc).__name__}: {exc}", reason="invalid_report") from exc
     report = FidelityReport(source, tuple(artifacts), tuple(deferred))
     stored = doc.get("counts")
     _require(stored is None or stored == report.counts(), "stored counts do not match the artifacts", "counts_mismatch")
