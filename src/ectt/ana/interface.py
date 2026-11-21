@@ -17,8 +17,10 @@ from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import normalize_path, resolve_source_location_path
 from ectt.ana.model import (
     AnalysisUnit,
+    ConstructOccurrenceModel,
     FunctionModel,
     GlobalAccessModel,
+    GlobalVariableModel,
     ParameterModel,
     ParsedTranslationUnit,
     SourceLocation,
@@ -44,17 +46,22 @@ def _record_unsupported(
     kind: str,
     detail: str,
     location: SourceLocation,
+    owner: str,
 ) -> None:
     """Tally one occurrence of an unsupported construct per kind (TOOL-PAR-140).
 
     ``count`` groups repeated occurrences of the same kind; ``detail`` and
     ``location`` keep the first occurrence, which follows the deterministic
-    libclang walk order of the translation unit.
+    libclang walk order of the translation unit. Schema 1.5: every occurrence
+    is recorded with its owner function and location, in walk order.
     """
+    occurrence = ConstructOccurrenceModel(
+        function=owner, detail=detail, location=location
+    )
     existing = records.get(kind)
     if existing is None:
         records[kind] = UnsupportedConstructModel(
-            kind=kind, count=1, detail=detail, location=location
+            kind=kind, count=1, detail=detail, location=location, occurrences=(occurrence,)
         )
     else:
         records[kind] = UnsupportedConstructModel(
@@ -62,6 +69,7 @@ def _record_unsupported(
             count=existing.count + 1,
             detail=existing.detail,
             location=existing.location,
+            occurrences=(*existing.occurrences, occurrence),
         )
 
 
@@ -204,6 +212,67 @@ def _extract_globals(func_cursor: Any) -> tuple[GlobalAccessModel, ...]:
     )
 
 
+def _extract_global_variables(
+    tu_handle: Any,
+    norm_source_path: str,
+    working_directory: str | Path | None,
+    include_dirs: Sequence[str | Path] | None,
+    type_builder: TypeGraphBuilder,
+) -> tuple[GlobalVariableModel, ...]:
+    """Record the unit's global and file-static variables (schema 1.5, TOOL-PAR-050).
+
+    Restricted to declarations in the main file, matching the unit boundary
+    rule for functions. ``has_initializer`` is True only for a non-tentative
+    definition that carries an initial value: libclang reports a tentative
+    definition (``int g;``) as not a definition, and a ``TYPE_REF`` child is a
+    type mention, not an initializer. Sorted by name then line.
+    """
+    recorded: list[GlobalVariableModel] = []
+    for child in tu_handle.cursor.get_children():
+        if not _is_global_or_file_static(child):
+            continue
+        if not _is_in_main_file(child.location, norm_source_path, working_directory):
+            continue
+        name = child.spelling
+        if not name:
+            continue
+        if child.location and child.location.file:
+            loc_file, origin = resolve_source_location_path(
+                child.location.file.name,
+                working_directory,
+                include_dirs=include_dirs,
+            )
+        else:
+            loc_file, origin = norm_source_path, "project"
+        location = SourceLocation(file=loc_file, line=child.location.line, origin=origin)
+        type_ref = type_builder.resolve_type(
+            child.type,
+            context=f"global_{name}",
+            cursor=child,
+        )
+        if child.storage_class == StorageClass.STATIC:
+            storage = "static"
+        elif child.storage_class == StorageClass.EXTERN:
+            storage = "extern"
+        else:
+            storage = "none"
+        children = list(child.get_children())
+        has_initializer = child.is_definition() and any(
+            k.kind != CursorKind.TYPE_REF for k in children
+        )
+        recorded.append(
+            GlobalVariableModel(
+                name=name,
+                type=type_ref,
+                has_initializer=has_initializer,
+                storage_class=storage,
+                location=location,
+            )
+        )
+    recorded.sort(key=lambda g: (g.name, g.location.line if g.location else 0))
+    return tuple(recorded)
+
+
 def extract_interfaces(
     parsed_tu: ParsedTranslationUnit,
     *,
@@ -244,6 +313,10 @@ def extract_interfaces(
     functions: list[FunctionModel] = []
     unsupported: dict[str, UnsupportedConstructModel] = {}
 
+    global_variables = _extract_global_variables(
+        tu_handle, norm_source_path, working_directory, include_dirs, type_builder
+    )
+
     for child in tu_handle.cursor.get_children():
         # Unit boundary: only functions defined in the main file of the TU
         if child.kind == CursorKind.FUNCTION_DECL and child.is_definition():
@@ -279,7 +352,7 @@ def extract_interfaces(
             # of disappearing into prose. ``location`` is the owning
             # definition; ``detail`` names the construct.
             if child.type.is_function_variadic():
-                _record_unsupported(unsupported, "variadic_function", name, location)
+                _record_unsupported(unsupported, "variadic_function", name, location, name)
 
             # Parameters
             parameters: list[ParameterModel] = []
@@ -304,6 +377,7 @@ def extract_interfaces(
                         "variable_length_array_parameter",
                         f"{name}.{p_name}" if p_name else name,
                         location,
+                        name,
                     )
 
             # Globals and file-static variable accesses
@@ -323,6 +397,8 @@ def extract_interfaces(
                     parameters=tuple(parameters),
                     globals=globals_accessed,
                     calls=calls,
+                    start_line=child.extent.start.line,
+                    end_line=child.extent.end.line,
                 )
             )
 
@@ -333,6 +409,7 @@ def extract_interfaces(
         functions=tuple(functions),
         types=dict(type_builder.types),
         unsupported_constructs=tuple(unsupported[k] for k in sorted(unsupported)),
+        global_variables=global_variables,
     )
 
 

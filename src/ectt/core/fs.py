@@ -131,7 +131,11 @@ class OutputRoot:
         self._initialized = False
         self._journal: dict[Path, bytes | None] | None = None
         self._created_dirs: list[Path] | None = None
-        self._token: CancellationToken | None = None
+        # Tokens of every active transaction scope, outermost first. Nested
+        # scopes join the outer scope (see transaction), so more than one
+        # token can be live at once; a write is refused when ANY of them is
+        # cancelled.
+        self._active_tokens: list[CancellationToken] = []
 
     def _check_source_overlap(self) -> None:
         """Refuse construction if output root equals, contains, or is contained by any source root."""
@@ -284,8 +288,8 @@ class OutputRoot:
             except OSError:
                 pass
 
-        if self._token is not None:
-            self._token.raise_if_cancelled()
+        for active_token in self._active_tokens:
+            active_token.raise_if_cancelled()
         if self._journal is not None:
             self._record_for_rollback(target_path)
 
@@ -322,23 +326,40 @@ class OutputRoot:
 
         Root initialisation (marker file and .gitignore) runs before the scope opens and is
         setup rather than output, so it is retained on rollback.
+
+        The scope is re-entrant: a nested ``transaction`` joins the outermost active
+        scope instead of replacing it. Writes are durable only when the outermost
+        scope exits without error; a failure unwinding past the outermost scope rolls
+        back every write recorded by the whole stack. A nested scope therefore never
+        rolls back on its own and never ends the outer scope; its token (if given) is
+        checked at entry and on every write while it is active.
         """
         self.ensure_initialized()
         if token is not None:
             token.raise_if_cancelled()
-        self._journal = {}
-        self._created_dirs = []
-        self._token = token
+        outermost = self._journal is None
+        if outermost:
+            self._journal = {}
+            self._created_dirs = []
+        if token is not None:
+            self._active_tokens.append(token)
         try:
             yield
         except BaseException as exc:
-            for note in self._rollback():
-                exc.add_note(note)
+            # Only the outermost scope rolls back: a nested failure unwinds into
+            # the scope it joined, which owns the journal with every write of
+            # the stack. Nested scopes never clear or replay the journal.
+            if outermost:
+                for note in self._rollback():
+                    exc.add_note(note)
             raise
         finally:
-            self._journal = None
-            self._created_dirs = None
-            self._token = None
+            if token is not None:
+                self._active_tokens.remove(token)
+            if outermost:
+                self._journal = None
+                self._created_dirs = None
+                self._active_tokens.clear()
 
     def _record_for_rollback(self, target: Path) -> None:
         """Remember a write target's prior bytes and any directories this write will create."""

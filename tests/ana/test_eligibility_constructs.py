@@ -191,11 +191,13 @@ def test_real_variadic_and_vla_functions_are_named_in_the_gate() -> None:
     assert find_unattributed_constructs([unit]) == ()
 
 
-def test_real_second_variadic_function_is_reported_as_unattributed() -> None:
+def test_real_second_variadic_function_is_named_via_its_occurrence() -> None:
+    """Schema 1.5 records every occurrence, so the second owner is gated by name
+    too (pre-1.5 kept only the first occurrence and left the rest unattributed)."""
     unit = _extracted(b"int first(int n, ...) { return n; }\nint second(int n, ...) { return n; }\n")
 
     reasons = {r.function: r.reasons for r in assess_eligibility([unit])}
 
     assert reasons["first"] == ("unsupported_construct:variadic_function",)
-    assert reasons["second"] == ()
-    assert find_unattributed_constructs([unit]) == (UnattributedConstruct("probe.c", "variadic_function", 1),)
+    assert reasons["second"] == ("unsupported_construct:variadic_function",)
+    assert find_unattributed_constructs([unit]) == ()

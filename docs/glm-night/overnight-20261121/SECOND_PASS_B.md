@@ -1,0 +1,5 @@
+# Second pass (lane B) — items needing a human
+
+| item | what is needed | why it needs a human | where |
+|---|---|---|---|
+| B1 | Move the mig interchange FormatSpec `analysis-model` (src/ectt/mig/formats.py) from documented version `"1.4"` and schema resource `("ectt.ana.schema", "analysis-model-1.4.schema.json")` to `"1.5"` / `analysis-model-1.5.schema.json`, then remove the two `xfail(strict=True)` markers on `tests/mig/test_formats.py::test_the_shipped_documentation_passes_its_own_checklist` and `::test_documented_versions_equal_the_versions_in_code`. | `src/ectt/mig/` and `tests/mig/` are outside B1's allowed paths (`src/ectt/ana/`, `tests/ana/`, ledgers). The `_analysis_version` probe reads `SCHEMA_VERSION_CURRENT`, so the 1.5 bump necessarily turns those two checks stale; per the queue's rule 5 they are marked `xfail(strict=True)` with a reason until the spec pointer moves. The schema file itself is included by the existing `"ectt.ana.schema" = ["*.json"]` package-data glob, so no pyproject change is needed. | src/ectt/mig/formats.py:437-453, tests/mig/test_formats.py |
