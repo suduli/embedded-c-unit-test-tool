@@ -47,6 +47,12 @@ from ectt.cov.model import (
     GcovLine,
     MetricTotals,
 )
+from ectt.cov.separation import (
+    COVERAGE_ROLES,
+    RoleCoverage,
+    SeparatedCoverage,
+    separate_coverage,
+)
 from ectt.cov.thresholds import (
     THRESHOLD_METRICS,
     MetricThreshold,
@@ -67,8 +73,11 @@ __all__ = [
     "MetricThreshold",
     "MetricTotals",
     "QUARANTINE_OUTCOMES",
+    "RoleCoverage",
     "RunAdmission",
     "RunCoverage",
+    "COVERAGE_ROLES",
+    "SeparatedCoverage",
     "SCHEMA_VERSION_CURRENT",
     "GcovBranch",
     "GcovCall",
@@ -87,6 +96,7 @@ __all__ = [
     "enforce_thresholds",
     "function_coverage",
     "merge_run_coverage",
+    "separate_coverage",
     "statement_coverage",
     "read_gcov_document",
 ]
