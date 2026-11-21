@@ -183,6 +183,27 @@ def test_platform_macros_are_host_or_target_specific(macro: str) -> None:
     assert _issues(parameters={"v": f"defined({macro}) ? 1 : 0"}) == [("inputs.parameters.v", "platform_macro", macro)]
 
 
+@pytest.mark.parametrize("value", ['"Error:\\n"', '"Status:\\tok"', '"cfg:/x"', "err:\\n", '"A1:\\r"'])
+def test_a_label_ending_in_a_colon_is_not_a_drive_path(value: str) -> None:
+    # 'r:\' in "Error:\n" is a word ending in a colon followed by an escape, not drive 'r'.
+    assert _issues(parameters={"v": value}) == []
+
+
+@pytest.mark.parametrize("value", ["C:\\temp", '"D:/data"', "path=E:\\x", "(F:/a)"])
+def test_a_standalone_drive_letter_is_still_a_drive_path(value: str) -> None:
+    assert [kind for _f, kind, _t in _issues(parameters={"v": value})] == ["absolute_path"]
+
+
+@pytest.mark.parametrize("field", ["toolchain", "runner", "transport", "target_id"])
+def test_a_token_with_a_trailing_newline_is_not_a_token(field: str) -> None:
+    # '$' matches before a final newline, so gcc plus a newline used to pass the token check.
+    kwargs: dict[str, Any] = {"kind": "target", "toolchain": "t", "runner": "r", "transport": "serial_uart", "target_id": "t1"}
+    kwargs[field] = kwargs[field] + "\n"
+    with pytest.raises(ParityError) as excinfo:
+        ExecutionConfig(**kwargs)
+    assert excinfo.value.reason == "invalid_config"
+
+
 def test_getenv_is_host_specific() -> None:
     assert _issues(parameters={"v": 'getenv("HOME")'}) == [("inputs.parameters.v", "host_environment", "getenv(")]
 

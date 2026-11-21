@@ -80,7 +80,7 @@ class ExecutionConfig:
         if self.kind not in ("host", "target"):
             raise ParityError(f"execution kind must be 'host' or 'target', got '{self.kind}'", reason="invalid_config")
         for what, value in (("toolchain", self.toolchain), ("runner", self.runner), ("transport", self.transport)):
-            if not _TOKEN.match(value or ""):
+            if not _TOKEN.fullmatch(value or ""):
                 raise ParityError(f"execution {what} must be a non-empty token", reason="invalid_config")
         if self.kind == "host":
             if self.target_id is not None:
@@ -88,7 +88,7 @@ class ExecutionConfig:
             if self.transport != HOST_TRANSPORT:
                 raise ParityError(f"a host execution reads results from '{HOST_TRANSPORT}', not '{self.transport}'", reason="invalid_config")
         else:
-            if not self.target_id or not _TOKEN.match(self.target_id):
+            if not self.target_id or not _TOKEN.fullmatch(self.target_id):
                 raise ParityError("a target execution needs a target id", reason="invalid_config")
             if self.transport not in _TARGET_TRANSPORTS:
                 raise ParityError(
@@ -189,7 +189,7 @@ class PortabilityIssue:
     text: str
 
 
-_DRIVE_PATH = re.compile(r"[A-Za-z]:[\\/]")
+_DRIVE_PATH = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]")  # a standalone letter: not the end of 'Error:' + escape
 _UNIX_PATH = re.compile(r"(?<![\w)\]:])/(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]*")  # not the tail of a drive path
 _PLATFORM_MACRO = re.compile(
     r"\b(_WIN32|_WIN64|__linux__|__unix__|__APPLE__|__x86_64__|__i386__|__arm__|__aarch64__|__ARM_ARCH\w*|__MINGW32__|__CYGWIN__)\b"
