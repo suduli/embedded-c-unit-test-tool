@@ -218,3 +218,19 @@ def test_dump_contains_no_wall_clock_or_absolute_paths() -> None:
         "links": [{"function": "f", "requirement_id": "REQ-1", "unit": "src/adc.c"}],
         "links_version": "1",
     }
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        {"requirement_id": "R1", "unit": "src/a.c", "function": 5},
+        {"requirement_id": "R1", "unit": 7, "function": "f"},
+        {"requirement_id": "R1", "unit": "src/a.c", "start_line": 2.5, "end_line": 3.5},
+        {"requirement_id": "R1", "unit": "src/a.c", "start_line": 1.0, "end_line": 2.0},
+        {"requirement_id": "R1", "unit": "src/a.c", "function": ["f"]},
+    ],
+)
+def test_loader_rejects_wrongly_typed_fields_with_trc_error(entry: dict[str, object]) -> None:
+    text = json.dumps({"links_version": "1", "links": [entry]})
+    with pytest.raises(TrcError):
+        load_source_links(text)

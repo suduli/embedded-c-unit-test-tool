@@ -215,3 +215,18 @@ def test_exports_validate_against_the_omg_schema_when_a_copy_is_supplied() -> No
 
     for document in (_export(), empty):
         assert [e.reason for e in schema.iter_errors(document)] == []
+
+
+@pytest.mark.parametrize(
+    "when",
+    ["20261121T000000Z", "2026-W47-5T00:00:00+00:00", "2026-11-21T00:00", "2026-11-21T00:00:00,5+00:00", "2026-11-21T00:00+0000"],
+)
+def test_creation_time_must_be_a_schema_valid_datetime(when: str) -> None:
+    """ISO-8601 forms that xsd:dateTime rejects must not be written into the document."""
+    with pytest.raises(TrcError):
+        export_reqif(_matrix(), RECORDS, creation_time=when)
+
+
+@pytest.mark.parametrize("when", ["2026-11-21T00:00:00", "2026-11-21T00:00:00Z", "2026-11-21T00:00:00.5+05:30"])
+def test_creation_time_xsd_forms_are_accepted(when: str) -> None:
+    assert when in export_reqif(_matrix(), RECORDS, creation_time=when)

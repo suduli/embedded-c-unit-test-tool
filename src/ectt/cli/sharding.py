@@ -101,7 +101,7 @@ def merge_reports(models: Sequence[ReportModel], *, clock: Clock) -> ReportModel
     provenance = build_provenance(
         clock=clock,
         schema_versions={"report_model": "1.1"},
-        input_digests={f"shard[{index}]": model.report_id for index, model in enumerate(models)},
+        input_digests={f"shard[{index}]": digest for index, digest in enumerate(sorted(m.report_id for m in models))},
     )
     merged = ReportModel(
         report_id="",
