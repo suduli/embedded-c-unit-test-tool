@@ -19,3 +19,11 @@ Items blocked only by those decisions stay held.
 ## Next step
 
 Apply the four answers as one reviewed change. It touches the licence file, the SRS and SDD text, and the decision state. Confirm before applying, because the licence change is hard to reverse once it is public.
+
+## Update 2026-11-21 (owner answers in chat)
+
+- D-01 licence: Apache-2.0 applied. `LICENSE` is the standard Apache-2.0 text, `LICENSEES` and the `README.md` badge and licence section are rewritten. Local commit only, not pushed.
+- ADR-004 coverage: GCC is the primary path; Clang is added later. Recorded here only; ADR-001 section text not yet edited.
+- ADR-003 auto test generation: CBMC. Recorded here only; ADR-001 section text not yet edited.
+- ReqIF schema file: keep `reqif.xsd` in the repository so the export check runs in CI (needs the OMG licence terms to allow redistribution, which has not been checked).
+- Still open: ADR-005 record location, ADR-007, SRS-Q2, SRS-Q9.

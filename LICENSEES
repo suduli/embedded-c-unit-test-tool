@@ -1,18 +1,13 @@
 # Licensees
 
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+This project is licensed under the Apache License, Version 2.0 (Apache-2.0). The full text is in the LICENSE file.
 
-## License Information
+## In plain words
 
-This software is free and open source. Under the AGPL-3.0 license:
+- You may use, change, copy and distribute this software, including in commercial products.
+- You must keep the copyright and licence notices, and say which files you changed.
+- Every contributor grants you a licence to any patents their contribution needs.
+- If you start a patent lawsuit claiming this software infringes your patent, your licence to it ends.
+- The software is provided "as is", without warranty.
 
-- You are free to use, modify, and distribute this software
-- If you modify and distribute this software, you must make your modifications available under the same AGPL-3.0 license
-- If you run a modified version on a server or network, users connecting to that service must be able to access the modified source code
-- The software is provided "as-is" without warranty
-
-## Full License
-
-For the complete license text and terms, please see the LICENSE file in this repository.
-
-For more information about AGPL-3.0, visit: https://www.gnu.org/licenses/agpl-3.0.html
+For the full terms, see the LICENSE file. More information: https://www.apache.org/licenses/LICENSE-2.0

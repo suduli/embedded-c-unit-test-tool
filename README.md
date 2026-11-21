@@ -5,7 +5,7 @@ a functional alternative to VectorCAST/C++, Cantata, LDRA TBrun/LDRAunit, and
 Tessy.
 
 [![Traceability](https://github.com/suduli/embedded-c-unit-test-tool/actions/workflows/traceability.yml/badge.svg)](https://github.com/suduli/embedded-c-unit-test-tool/actions/workflows/traceability.yml)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-design%20phase-orange)](design/README.md)
 
 **This repository is design documentation, not yet an implementation.**
@@ -128,10 +128,9 @@ best answer rather than a final one.
 
 ## License
 
-[GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). See
-[LICENSEES](LICENSEES) for a plain-language summary — in short: use, modify,
-and distribute freely, but modifications and network-served versions must
-stay under the same license.
+[Apache License 2.0](LICENSE) (Apache-2.0). See
+[LICENSEES](LICENSEES) for a plain-language summary: use, modify and distribute
+freely, keep the notices, and contributors grant a patent licence.
 
 ## Contributing
 
