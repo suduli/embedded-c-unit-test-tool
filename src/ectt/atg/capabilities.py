@@ -48,7 +48,18 @@ NOT_ASSESSED_KINDS: tuple[str, ...] = ("inline_assembly",)
 _ALLOCATORS = frozenset({"malloc", "calloc", "realloc", "free", "aligned_alloc", "posix_memalign", "strdup", "strndup"})
 _CONCURRENCY_PREFIXES = ("pthread_", "thrd_", "mtx_", "cnd_", "sem_", "atomic_", "__atomic_")
 _CONCURRENCY_CALLS = frozenset({"fork", "vfork", "clone"})
-_FLOAT_NAMES = frozenset({"float", "double", "long double"})
+_FLOAT_NAMES = frozenset(
+    {
+        "float", "double", "float128",
+        "_Float16", "_Float32", "_Float64", "_Float128", "_Float32x", "_Float64x",
+        "__fp16", "__bf16", "__float128", "__ibm128",
+    }
+)
+
+
+def _is_float_name(name: str) -> bool:
+    """True when a builtin type spelling names a floating type (``long double``, ``_Float16``, ``double _Complex``)."""
+    return any(token in _FLOAT_NAMES for token in name.split())
 
 
 @dataclass(frozen=True)
@@ -88,10 +99,11 @@ def _involves_float(ref: str, types: Mapping[str, TypeModel], seen: frozenset[st
         return False
     model = types.get(key)
     if model is None:
-        return key.removeprefix("type.") in _FLOAT_NAMES
+        bare = key.removeprefix("type.")
+        return _is_float_name(bare) or _is_float_name(bare.replace("_", " "))
     trail = seen | {key}
     if model.kind == "builtin":
-        return (model.name or "") in _FLOAT_NAMES
+        return _is_float_name(model.name or "")
     if model.kind == "typedef":
         return bool(model.underlying_type) and _involves_float(str(model.underlying_type), types, trail)
     if model.kind == "pointer":
