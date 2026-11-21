@@ -304,7 +304,7 @@ def _definition(plan: _Plan) -> list[str]:
         ]
     lines += [
         f"unsigned ectt_stub_{name}_call_count(void) {{ return {state}.calls; }}",
-        f"unsigned long ectt_stub_{name}_call_order(unsigned call_index) {{ return call_index < ECTT_STUB_JOURNAL_CAPACITY ? {state}.order[call_index] : 0ul; }}",
+        f"unsigned long ectt_stub_{name}_call_order(unsigned call_index) {{ return (call_index < {state}.calls && call_index < ECTT_STUB_JOURNAL_CAPACITY) ? {state}.order[call_index] : 0ul; }}",
         f"int ectt_stub_{name}_journal_overflowed(void) {{ return {state}.journal_overflow; }}",
     ]
     for _c, pname in plan.parameters:

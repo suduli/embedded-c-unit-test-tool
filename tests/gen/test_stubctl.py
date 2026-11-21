@@ -415,3 +415,9 @@ def test_values_that_would_add_a_second_expression_or_break_the_call_are_refused
 @pytest.mark.parametrize("value", ['"a, b)"', "')'", r"'\''","(char *)0", "f(1, 2)", "tab[1]", "(1 + (2 * 3))"])
 def test_balanced_values_and_brackets_inside_literals_are_accepted(value: str) -> None:
     assert render_stub_setup(SIGS[0], _spec("hal_read", "fixed", (value,)))[-1].endswith(f"({value});")
+
+
+def test_call_order_of_a_call_that_did_not_happen_is_zero_not_a_stale_value_from_an_earlier_test() -> None:
+    # reset() only zeroes the call count, so the order array still holds the previous test's numbers.
+    assert "return (call_index < ectt_stub_hal_tick_state.calls && call_index < ECTT_STUB_JOURNAL_CAPACITY) ? ectt_stub_hal_tick_state.order[call_index] : 0ul;" in UNIT.source
+    assert _errors(UNIT.source) == []
