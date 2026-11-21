@@ -13,7 +13,14 @@ derived only from the model's ``test_statuses``/``coverage_figures``/
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
+from ectt.atg.lifecycle import format_mark, report_marks
 from ectt.rep.model import ReportModel
+
+if TYPE_CHECKING:
+    from ectt.tcm.datacases import DataDrivenTestCase
 
 __all__ = [
     "render_pdf",
@@ -49,8 +56,10 @@ def _fit(text: str) -> str:
     return text[: _MAX_LINE_CHARS - 3] + "..."
 
 
-def _model_lines(model: ReportModel) -> list[str]:
+def _model_lines(model: ReportModel, cases: Sequence[DataDrivenTestCase] = ()) -> list[str]:
     """All report lines, derived only from the model accessors (REP-090)."""
+    marks = report_marks(cases)
+    cases_by_id = {case.case_id: case for case in cases}
     statuses = model.test_statuses()
     figures = model.coverage_figures()
     facts = model.provenance_facts()
@@ -67,7 +76,17 @@ def _model_lines(model: ReportModel) -> list[str]:
     lines.extend(f"{key}: {facts[key]}" for key in sorted(facts))
     lines.append("")
     lines.append("TESTS")
-    lines.extend(f"TEST {test_id} {statuses[test_id]}" for test_id in sorted(statuses))
+    for test_id in sorted(statuses):
+        case = cases_by_id.get(test_id)
+        if case is None:
+            lines.append(f"TEST {test_id} {statuses[test_id]}")
+        else:
+            lines.append(f"TEST {test_id} {statuses[test_id]} [{format_mark(case)}]")
+    if marks["cases"]:
+        lines.append(
+            f"marks: machine_generated={marks['machine_generated']}"
+            f" unreviewed_expectations={marks['unreviewed_expectations']}"
+        )
     lines.append("")
     lines.append("COVERAGE")
     lines.extend(
@@ -76,14 +95,18 @@ def _model_lines(model: ReportModel) -> list[str]:
     return lines
 
 
-def render_pdf(model: ReportModel) -> bytes:
+def render_pdf(model: ReportModel, *, cases: Sequence[DataDrivenTestCase] = ()) -> bytes:
     """Render the model as a deterministic paginated PDF (TOOL-REP-080).
+
+    ``cases`` (optional) adds the machine-generated / unreviewed marks
+    (TOOL-ATG-070); without cases the output is byte-identical to the
+    unmarked report.
 
     Lines flow onto Letter-size pages with fixed margins; every page carries a
     ``Page N of M`` footer. Content streams are uncompressed so the text is
     inspectable and the bytes are stable.
     """
-    body_lines = _model_lines(model)
+    body_lines = _model_lines(model, cases)
     lines_per_page = (_PAGE_HEIGHT - 2 * _MARGIN) // _LINE_HEIGHT
     pages: list[list[str]] = []
     for start in range(0, max(len(body_lines), 1), lines_per_page - 1):
