@@ -176,9 +176,40 @@ def _plan(signature: FunctionSignature, types: dict[str, TypeModel] | None = Non
     return _Plan(signature, _is_void(signature.return_type), storage, outs, reason, _storage_type(signature.return_type))
 
 
+def _is_one_balanced_expression(text: str) -> bool:
+    """True when ``text`` is a single expression: balanced brackets, closed literals, no top-level comma.
+
+    Without this, ``0) , abort(1`` would pass the character check and inject a second call
+    into the generated ``set_return(...)`` statement.
+    """
+    depth = 0
+    quote = ""
+    escaped = False
+    for char in text:
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in "\"'":
+            quote = char
+        elif char in "([":
+            depth += 1
+        elif char in ")]":
+            depth -= 1
+            if depth < 0:
+                return False
+        elif char == "," and depth == 0:
+            return False
+    return depth == 0 and not quote
+
+
 def _checked_value(value: str, what: str) -> str:
     text = value.strip()
-    if not text or any(token in text for token in _FORBIDDEN_IN_VALUE) or not _SAFE_VALUE.match(text):
+    if not text or any(token in text for token in _FORBIDDEN_IN_VALUE) or not _SAFE_VALUE.match(text) or not _is_one_balanced_expression(text):
         raise GenError(f"{what} '{value}' is not a plain C value expression", reason="unsafe_value")
     return text
 

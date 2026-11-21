@@ -403,3 +403,15 @@ def test_a_typedef_of_a_scalar_is_an_output_parameter_in_the_analysers_own_type_
     signature = Sig("probe_fn", "void", (("u8 *", "p"), ("u8b *", "q"), ("X *", "r")))
 
     assert out_parameter_names(signature, types=types) == ("p", "q")
+
+
+@pytest.mark.parametrize("value", ["0) , abort(1", "1), (2", "(1", "1)", "f(1, 2", "1, 2", '"unterminated', "'a", "x[0"])
+def test_values_that_would_add_a_second_expression_or_break_the_call_are_refused(value: str) -> None:
+    with pytest.raises(GenError) as excinfo:
+        render_stub_setup(SIGS[0], _spec("hal_read", "fixed", (value,)))
+    assert excinfo.value.reason == "unsafe_value"
+
+
+@pytest.mark.parametrize("value", ['"a, b)"', "')'", r"'\''","(char *)0", "f(1, 2)", "tab[1]", "(1 + (2 * 3))"])
+def test_balanced_values_and_brackets_inside_literals_are_accepted(value: str) -> None:
+    assert render_stub_setup(SIGS[0], _spec("hal_read", "fixed", (value,)))[-1].endswith(f"({value});")
