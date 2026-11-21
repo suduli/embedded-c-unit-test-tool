@@ -69,7 +69,7 @@ static void ectt_write_token(const char *text) {
         return;
     }
     for (; *text != 0; text++) {
-        one[0] = (*text == ' ' || *text == '\t' || *text == '\n' || *text == '\r') ? '_' : *text;
+        one[0] = ((unsigned char)*text <= ' ' || (unsigned char)*text == 0x7f) ? '_' : *text;
         ECTT_STREAM_WRITE(one);
     }
 }

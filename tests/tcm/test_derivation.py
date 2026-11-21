@@ -350,3 +350,13 @@ def test_equivalence_representatives_flow_into_cases() -> None:
 
     assert sorted(c.inputs.parameters["a"] for c in cases) == ["15", "21", "9"]
     assert sum(1 for c in cases if c.robustness) == 2
+
+
+@pytest.mark.parametrize(("low", "high"), [(0, 1), (0, 2), (0, 3), (-3, -1), (5, 5), (0, 4)])
+def test_the_nominal_value_always_carries_the_nominal_role_so_small_ranges_derive_one_at_a_time(low: int, high: int) -> None:
+    domain = IntegerDomain("p", low, high)
+
+    assert [v.value for v in boundary_values(domain) if v.role == "nominal"] == [str(domain.nominal)]
+    other = boundary_values(IntegerDomain("q", 0, 10))
+    vectors = derive_vectors({"p": boundary_values(domain), "q": other}, strategy="one_at_a_time")
+    assert {v.parameters["p"] for v in vectors} == {v.value for v in boundary_values(domain)}

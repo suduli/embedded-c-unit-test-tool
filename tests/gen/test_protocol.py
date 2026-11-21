@@ -194,8 +194,7 @@ def test_the_reader_refuses_what_a_line_number_below_one_would_produce() -> None
 def test_token_and_number_helpers_in_c_match_the_documented_rules() -> None:
     body = _body(RESULT_PROTOCOL_BLOCK, "static void ectt_write_token(const char *text) {")
     assert "ECTT_STREAM_WRITE(\"-\")" in body
-    for whitespace in ("' '", "'\\t'", "'\\n'", "'\\r'"):
-        assert whitespace in body
+    assert "(unsigned char)*text <= ' '" in body  # space and every control character, not just four
     assert "'_'" in body
     assert "ECTT_STREAM_WRITE(\"0\")" in _body(RESULT_PROTOCOL_BLOCK, "static void ectt_write_unsigned(unsigned long value) {")
 
@@ -290,3 +289,15 @@ def test_the_generated_harness_is_still_byte_identical_across_runs() -> None:
 def test_the_user_hooks_are_still_registered_and_dispatched() -> None:
     for text in ("ectt_register_setup", "ectt_register_teardown", "ectt_setup_hook();", "ectt_teardown_hook();"):
         assert text in SETUP_TEARDOWN_BLOCK
+
+
+def test_every_character_the_reader_splits_on_is_written_as_an_underscore() -> None:
+    # The reader splits lines with str.splitlines()/str.split(), which also break on \v, \f and
+    # 0x1c-0x1f; a token carrying one of them used to corrupt the field count of its line.
+    match = re.search(r"one\[0\] = \(\(unsigned char\)\*text <= ' ' \|\| \(unsigned char\)\*text == (0x[0-9a-f]+)\) \? '_' : \*text;", RESULT_PROTOCOL_BLOCK)
+    assert match is not None
+    mapped = {value for value in range(0x80) if value <= 0x20 or value == int(match.group(1), 16)}
+    splitting = {value for value in range(0x80) if chr(value).isspace() or len(("a" + chr(value) + "b").splitlines()) > 1}
+    assert splitting <= mapped
+    assert {ord(" "), ord("\t"), ord("\n"), ord("\r"), 0x0B, 0x0C, 0x1C} <= splitting
+    assert _diagnostics(RESULT_PROTOCOL_BLOCK, "-std=c89", "-pedantic-errors", NULL_TRANSPORT) == []
