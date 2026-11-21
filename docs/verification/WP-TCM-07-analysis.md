@@ -15,7 +15,8 @@ derived cases get stable ids derived from their input values and a content diges
   PARTITIONING):** for an inclusive integer range the tool derives the minimum, minimum+1,
   a nominal midpoint, maximum-1 and the maximum; in robust mode also the two invalid
   values just outside. Duplicates collapse (a one-value range yields one value), values are
-  ascending, and each keeps the role it was derived for. Negative, narrow, one-value and
+  ascending, and each keeps the role it was derived for (where roles coincide on a narrow range
+  the nominal value keeps the `nominal` role, so `one_at_a_time` works for any range). Negative, narrow, one-value and
   beyond-64-bit ranges behave.
 - **AC-2 (TOOL-TCD-110, equivalence class partitioning):** a range yields a valid class
   (representative: the nominal) and an invalid class below and above (representatives

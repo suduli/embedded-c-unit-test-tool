@@ -160,17 +160,19 @@ def boundary_values(domain: IntegerDomain, *, robust: bool = False) -> tuple[Der
     """Boundary values of ``domain`` in ascending order, duplicates collapsed.
 
     A value that falls on more than one role keeps the first role in the order
-    below_min, min, above_min, nominal, below_max, max, above_max. ``robust`` adds
-    the two invalid values just outside the range.
+    below_min, nominal, min, above_min, below_max, max, above_max, so the nominal
+    value always carries the ``nominal`` role (``one_at_a_time`` holds the other
+    parameters at it, even for a range as small as 0..1). ``robust`` adds the two
+    invalid values just outside the range.
     """
     lo, hi = domain.low, domain.high
     candidates: list[tuple[int, str, bool]] = []
     if robust:
         candidates.append((lo - 1, "below_min", False))
     candidates += [
+        (domain.nominal, "nominal", True),
         (lo, "min", True),
         (lo + 1, "above_min", True),
-        (domain.nominal, "nominal", True),
         (hi - 1, "below_max", True),
         (hi, "max", True),
     ]
