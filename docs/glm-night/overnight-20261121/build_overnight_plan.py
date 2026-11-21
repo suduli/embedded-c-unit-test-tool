@@ -66,11 +66,34 @@ ITEMS = {
         "Tests only. Fixed-seed random inputs for the traceability matrix, ReqIF export and import round trip, and report merge. No wall clock. No src/ edits.",
         ["tests/trc/", "tests/rep/"], 130),
 }
-LANE_A = ["A1", "A2", "A3", "A4", "A5", "A6", "A7"]
-LANE_B = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9"]
+ADR4 = ("ADR-004 coverage backend (owner answer, 2026-11-21): \"GCC first\". GCC is the primary coverage path "
+        "(gcov --json-format, condition coverage via -fcondition-coverage); Clang support is added later and must not "
+        "shape this item. There is no C compiler on this machine: build parsers and readers against hand-written gcov "
+        "JSON fixtures taken from the documented GCC format (check key names against the GCC gcov documentation, not "
+        "your memory), and say in the ledger that real GCC output has not been checked.")
+WPX = {  # wp -> (est k, extra decision text)
+    "WP-COV-01": (180, ADR4), "WP-COV-02": (170, ADR4), "WP-COV-03": (80, ""), "WP-COV-04": (110, ADR4),
+    "WP-COV-08": (110, ""), "WP-COV-09": (170, ""), "WP-COV-07": (190, ADR4),
+    "WP-REP-02": (140, ""), "WP-REP-03": (180, ""), "WP-REP-10": (140, ""), "WP-REP-07": (170, ""),
+    "WP-CBT-02": (190, ""), "WP-CBT-03": (130, ""), "WP-CBT-04": (130, ""),
+}
+CROSS = ("- CROSS-LANE DEPENDENCY on `WP-COV-02` (lane B, worktree `../wt-night-21b`). Before starting: look at "
+         "`docs/glm-night/overnight-20261121/LANE_B_LEDGER.md` there for a WP-COV-02 row that is DONE. If so: "
+         "`git merge --no-edit glm-night/20261121-b`, run the full gate; if red, `git revert -m 1 HEAD` and treat as "
+         "not satisfied. If not satisfied: skip it now, retry once after the last item, then record `SKIPPED (dep)` "
+         "in the ledger and the second-pass file.")
+LANE_A = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "WP-CBT-02", "WP-CBT-03", "WP-CBT-04"]
+LANE_B = ["B1", "B3", "WP-COV-01", "WP-COV-02", "WP-COV-03", "WP-COV-04", "WP-REP-02", "WP-COV-08", "WP-COV-09",
+          "WP-REP-03", "WP-REP-10", "WP-REP-07", "WP-COV-07", "B2", "B4", "B5", "B6", "B7", "B8", "B9"]
 
 
-def block(n, lane, key):
+def block(n, lane, key, by=None, notes=None):
+    if key.startswith("WP-"):
+        est, extra = WPX[key]
+        b = prev.block(n, lane, key, est, extra, None, by, notes).replace("20261119", "20261121")
+        if key.startswith("WP-CBT"):
+            b = b.replace(chr(10) + "Steps:", chr(10) + CROSS + chr(10) + chr(10) + "Steps:", 1)
+        return b
     title, goal, allowed, est = ITEMS[key]
     ledger = f"docs/glm-night/overnight-20261121/LANE_{lane}_LEDGER.md"
     sp = f"docs/glm-night/overnight-20261121/SECOND_PASS_{lane}.md"
@@ -84,10 +107,12 @@ def block(n, lane, key):
 
 
 def main():
+    by = {r["wp"]: r for r in prev.bpp.load_board()}
+    notes = prev.ledger_notes()
     pk = {"A": set(), "B": set()}
     for lane, keys in (("A", LANE_A), ("B", LANE_B)):
         for k in keys:
-            for p in ITEMS[k][2]:
+            for p in (ITEMS[k][2] if k in ITEMS else [f"src/ectt/{prev.bpp.package_of(by[k])}/"]):
                 if p.startswith("src/ectt/"):
                     pk[lane].add(p.split("/")[2].removesuffix(".py"))
     if pk["A"] & pk["B"]:
@@ -106,8 +131,8 @@ def main():
             "Stop starting new items when your lane's cumulative reaches 1,450k tokens OR the local time reaches 05:30, whichever comes first.",
             "Stop starting new items when the ZAI usage counter shows your lane has used 1,450k tokens (if there is no counter, ignore this token limit) OR the local time reaches 05:30, whichever comes first.")
         text = text.replace("Open: ADR-003", "No C compiler is installed on this machine: generated C is checked by parsing only. Open: ADR-003")
-        total = sum(ITEMS[k][3] for k in keys)
-        parts = [block(i, lane, k) for i, k in enumerate(keys, 1)]
+        total = sum(ITEMS[k][3] if k in ITEMS else WPX[k][0] for k in keys)
+        parts = [block(i, lane, k, by, notes) for i, k in enumerate(keys, 1)]
         (HERE / f"LANE_{lane}_queue.md").write_text(
             text + "\n".join(parts) + f"\n## End\nListed total {total}k tokens.\n", encoding="utf-8")
         print(lane, total, len(keys))

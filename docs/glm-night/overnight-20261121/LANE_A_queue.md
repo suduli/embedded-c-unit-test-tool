@@ -10,7 +10,7 @@ cd ../wt-night-21a
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -e ".[dev]"
 ```
-Baseline at the branch point (local `main` c559087): 3097 passed, 6 skipped; ruff, mypy, plan_check, trace_check all clean. Create `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md` with header `| item | state | commit | est tokens | cumulative | notes |` if missing, and `docs/glm-night/overnight-20261121/SECOND_PASS_A.md` with header `| item | what is needed | why it needs a human | where |`.
+Baseline at the branch point (local `main` a690b3f): 3097 passed, 6 skipped; ruff, mypy, plan_check, trace_check all clean. Create `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md` with header `| item | state | commit | est tokens | cumulative | notes |` if missing, and `docs/glm-night/overnight-20261121/SECOND_PASS_A.md` with header `| item | what is needed | why it needs a human | where |`.
 
 ## Gate block (run before every commit; all must exit 0)
 ```
@@ -92,5 +92,59 @@ If an item needs a human (decision, review, hardware, missing input, unresolvabl
 - Allowed paths: `tests/gen/`, `tests/atg/`, `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md`, `docs/glm-night/overnight-20261121/SECOND_PASS_A.md`. Anything else: do not edit; write the needed change in the second-pass file.
 - Done when: tests pass (happy path plus at least two error cases), full gate green, one commit, one ledger row.
 
+### 8. WP-CBT-02
+[WP-CBT-02] Change impact analysis and subset execution  (board: CMP-CBT, phase P3, 5 person-weeks)
+
+- Estimate 190k tokens, hard cap 247k, or 3 failed gate attempts, then PARTIAL and move on.
+- Goal: Implement WP-CBT-02 (Change impact analysis and subset execution) for requirements TOOL-CBT-020, TOOL-CBT-030, TOOL-CBT-040.
+- Requirements: TOOL-CBT-020, TOOL-CBT-030, TOOL-CBT-040
+- Acceptance criteria (board): **No package-specific acceptance criterion is recorded in PLAN-001 §5.4 for this package yet — flagged for reconciliation.** Write falsifiable, reviewable criteria before moving this item to Ready.
+- Dependencies: WP-CBT-01, WP-COV-02. Items already implemented are in the repo; items earlier in this queue must be DONE or PARTIAL in your ledger first.
+- Allowed paths: `src/ectt/cbt/`, `tests/cbt/`, `docs/verification/WP-CBT-02-analysis.md`, `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md`, `docs/glm-night/overnight-20261121/SECOND_PASS_A.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
+
+- CROSS-LANE DEPENDENCY on `WP-COV-02` (lane B, worktree `../wt-night-21b`). Before starting: look at `docs/glm-night/overnight-20261121/LANE_B_LEDGER.md` there for a WP-COV-02 row that is DONE. If so: `git merge --no-edit glm-night/20261121-b`, run the full gate; if red, `git revert -m 1 HEAD` and treat as not satisfied. If not satisfied: skip it now, retry once after the last item, then record `SKIPPED (dep)` in the ledger and the second-pass file.
+
+Steps:
+1. RECON: derive falsifiable acceptance criteria from the PLAN-001 section 5.4 row and the SRS text; write them under `## Acceptance criteria` in `docs/verification/WP-CBT-02-analysis.md` before code. If they cannot be derived without inventing scope, SKIPPED with reason `no derivable AC`.
+2. Implement the smallest increment that meets the criteria with tests: happy path plus at least two error/edge cases; deterministic output; no network; no wall-clock in outputs.
+3. Write or update `docs/verification/WP-CBT-02-analysis.md` (requirement -> implementation -> real test names). Mark anything uncovered as not covered.
+4. Run the gate block. Commit with the commit block. Append one ledger row. Next item.
+
+### 9. WP-CBT-03
+[WP-CBT-03] Run comparison and coverage delta  (board: CMP-CBT, phase P3, 3 person-weeks)
+
+- Estimate 130k tokens, hard cap 169k, or 3 failed gate attempts, then PARTIAL and move on.
+- Goal: Implement WP-CBT-03 (Run comparison and coverage delta) for requirements TOOL-CBT-050, TOOL-CBT-060.
+- Requirements: TOOL-CBT-050, TOOL-CBT-060
+- Acceptance criteria (board): **No package-specific acceptance criterion is recorded in PLAN-001 §5.4 for this package yet — flagged for reconciliation.** Write falsifiable, reviewable criteria before moving this item to Ready.
+- Dependencies: WP-CBT-01, WP-COV-02. Items already implemented are in the repo; items earlier in this queue must be DONE or PARTIAL in your ledger first.
+- Allowed paths: `src/ectt/cbt/`, `tests/cbt/`, `docs/verification/WP-CBT-03-analysis.md`, `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md`, `docs/glm-night/overnight-20261121/SECOND_PASS_A.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
+
+- CROSS-LANE DEPENDENCY on `WP-COV-02` (lane B, worktree `../wt-night-21b`). Before starting: look at `docs/glm-night/overnight-20261121/LANE_B_LEDGER.md` there for a WP-COV-02 row that is DONE. If so: `git merge --no-edit glm-night/20261121-b`, run the full gate; if red, `git revert -m 1 HEAD` and treat as not satisfied. If not satisfied: skip it now, retry once after the last item, then record `SKIPPED (dep)` in the ledger and the second-pass file.
+
+Steps:
+1. RECON: derive falsifiable acceptance criteria from the PLAN-001 section 5.4 row and the SRS text; write them under `## Acceptance criteria` in `docs/verification/WP-CBT-03-analysis.md` before code. If they cannot be derived without inventing scope, SKIPPED with reason `no derivable AC`.
+2. Implement the smallest increment that meets the criteria with tests: happy path plus at least two error/edge cases; deterministic output; no network; no wall-clock in outputs.
+3. Write or update `docs/verification/WP-CBT-03-analysis.md` (requirement -> implementation -> real test names). Mark anything uncovered as not covered.
+4. Run the gate block. Commit with the commit block. Append one ledger row. Next item.
+
+### 10. WP-CBT-04
+[WP-CBT-04] Test suite minimization  (board: CMP-CBT, phase P3, 3 person-weeks)
+
+- Estimate 130k tokens, hard cap 169k, or 3 failed gate attempts, then PARTIAL and move on.
+- Goal: Implement WP-CBT-04 (Test suite minimization) for requirements TOOL-CBT-080.
+- Requirements: TOOL-CBT-080
+- Acceptance criteria (board): **No package-specific acceptance criterion is recorded in PLAN-001 §5.4 for this package yet — flagged for reconciliation.** Write falsifiable, reviewable criteria before moving this item to Ready.
+- Dependencies: WP-CBT-02. Items already implemented are in the repo; items earlier in this queue must be DONE or PARTIAL in your ledger first.
+- Allowed paths: `src/ectt/cbt/`, `tests/cbt/`, `docs/verification/WP-CBT-04-analysis.md`, `docs/glm-night/overnight-20261121/LANE_A_LEDGER.md`, `docs/glm-night/overnight-20261121/SECOND_PASS_A.md`. Anything else (design/, SRS, ADRs, tracker, pyproject, other packages): do not edit; write the needed change in the second-pass file.
+
+- CROSS-LANE DEPENDENCY on `WP-COV-02` (lane B, worktree `../wt-night-21b`). Before starting: look at `docs/glm-night/overnight-20261121/LANE_B_LEDGER.md` there for a WP-COV-02 row that is DONE. If so: `git merge --no-edit glm-night/20261121-b`, run the full gate; if red, `git revert -m 1 HEAD` and treat as not satisfied. If not satisfied: skip it now, retry once after the last item, then record `SKIPPED (dep)` in the ledger and the second-pass file.
+
+Steps:
+1. RECON: derive falsifiable acceptance criteria from the PLAN-001 section 5.4 row and the SRS text; write them under `## Acceptance criteria` in `docs/verification/WP-CBT-04-analysis.md` before code. If they cannot be derived without inventing scope, SKIPPED with reason `no derivable AC`.
+2. Implement the smallest increment that meets the criteria with tests: happy path plus at least two error/edge cases; deterministic output; no network; no wall-clock in outputs.
+3. Write or update `docs/verification/WP-CBT-04-analysis.md` (requirement -> implementation -> real test names). Mark anything uncovered as not covered.
+4. Run the gate block. Commit with the commit block. Append one ledger row. Next item.
+
 ## End
-Listed total 1100k tokens.
+Listed total 1550k tokens.
