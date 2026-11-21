@@ -85,6 +85,7 @@ class _Plan:
     parameters: tuple[tuple[str, str], ...]
     outs: tuple[tuple[str, str], ...]  # (parameter name, pointee type)
     unsupported: str | None
+    return_storage: str = "void"  # return type without top-level qualifiers
 
 
 @dataclass(frozen=True)
@@ -136,6 +137,24 @@ def _out_pointee(c_type: str, types: dict[str, TypeModel] | None) -> str | None:
     return pointee
 
 
+_QUALIFIERS = frozenset({"const", "volatile", "restrict", "__restrict"})
+
+
+def _storage_type(c_type: str) -> str:
+    """``c_type`` without its top-level qualifiers (``const int`` -> ``int``, ``char *const`` -> ``char *``).
+
+    The journal and the programmed values are stored and assigned, which a const-qualified
+    object type forbids; top-level qualifiers do not change the stub's signature, so they are
+    dropped from the storage typedefs only. A qualifier on the pointee (``const char *``) stays.
+    """
+    text = c_type.strip()
+    head, star, tail = text.rpartition("*")
+    kept_tail = [word for word in tail.split() if word not in _QUALIFIERS]
+    if star:
+        return " ".join([head.strip() + " *", *kept_tail]) if kept_tail else head.strip() + " *"
+    return " ".join(kept_tail)
+
+
 def _plan(signature: FunctionSignature, types: dict[str, TypeModel] | None = None) -> _Plan:
     reason: str | None = None
     for c_type, _name in signature.parameters:
@@ -148,7 +167,8 @@ def _plan(signature: FunctionSignature, types: dict[str, TypeModel] | None = Non
             break
     named = tuple((c_type.strip(), name) for c_type, name in signature.parameters if c_type.strip() != "...")
     outs = tuple((name, pointee) for c_type, name in named if (pointee := _out_pointee(c_type, types)) is not None)
-    return _Plan(signature, _is_void(signature.return_type), named, outs, reason)
+    storage = tuple((_storage_type(c_type), name) for c_type, name in named)
+    return _Plan(signature, _is_void(signature.return_type), storage, outs, reason, _storage_type(signature.return_type))
 
 
 def _checked_value(value: str, what: str) -> str:
@@ -162,7 +182,7 @@ def _typedefs(plan: _Plan) -> list[str]:
     name = plan.signature.name
     lines: list[str] = []
     if not plan.is_void:
-        lines.append(f"typedef {plan.signature.return_type} ectt_stub_{name}_ret_t;")
+        lines.append(f"typedef {plan.return_storage} ectt_stub_{name}_ret_t;")
     lines.extend(f"typedef {c_type} ectt_stub_{name}_arg_{pname}_t;" for c_type, pname in plan.parameters)
     lines.extend(f"typedef {pointee} ectt_stub_{name}_out_{pname}_t;" for pname, pointee in plan.outs)
     return lines
@@ -197,8 +217,11 @@ def _definition(plan: _Plan) -> list[str]:
     name = plan.signature.name
     state = f"ectt_stub_{name}_state"
     ret = "void" if plan.is_void else f"ectt_stub_{name}_ret_t"
-    params = ", ".join(f"ectt_stub_{name}_arg_{pname}_t {pname}" for _c, pname in plan.parameters) or "void"
-    call_args = ", ".join(pname for _c, pname in plan.parameters)
+    # The definition names its parameters itself so a user parameter called, say,
+    # ``ectt_call_index`` can never collide with the generated locals.
+    local = {pname: f"ectt_arg{index}" for index, (_c, pname) in enumerate(plan.parameters)}
+    params = ", ".join(f"ectt_stub_{name}_arg_{pname}_t {local[pname]}" for _c, pname in plan.parameters) or "void"
+    call_args = ", ".join(local[pname] for _c, pname in plan.parameters)
 
     lines: list[str] = [f"/* {STUB_MARKER}: {name} */", "static struct {", "    unsigned calls;", "    int journal_overflow;", "    unsigned long order[ECTT_STUB_JOURNAL_CAPACITY];", "    int mode;"]
     lines.extend(f"    ectt_stub_{name}_arg_{pname}_t arg_{pname}[ECTT_STUB_JOURNAL_CAPACITY];" for _c, pname in plan.parameters)
@@ -255,10 +278,10 @@ def _definition(plan: _Plan) -> list[str]:
     lines.append("")
 
     lines += [f"{ret} {name}({params}) {{", f"    unsigned ectt_call_index = {state}.calls;", f"    {state}.calls++;", "    if (ectt_call_index < ECTT_STUB_JOURNAL_CAPACITY) {"]
-    lines.extend(f"        {state}.arg_{pname}[ectt_call_index] = {pname};" for _c, pname in plan.parameters)
+    lines.extend(f"        {state}.arg_{pname}[ectt_call_index] = {local[pname]};" for _c, pname in plan.parameters)
     lines += [f'        {state}.order[ectt_call_index] = ectt_stub_next_sequence("{name}");', "    } else {", f"        {state}.journal_overflow = 1;", f'        (void)ectt_stub_next_sequence("{name}");', "    }"]
     for pname, _pointee in plan.outs:
-        lines += [f"    if ({state}.out_{pname}_set && {pname} != 0) {{", f"        *{pname} = {state}.out_{pname}_value;", "    }"]
+        lines += [f"    if ({state}.out_{pname}_set && {local[pname]} != 0) {{", f"        *{local[pname]} = {state}.out_{pname}_value;", "    }"]
     if plan.is_void:
         lines += [f"    if ({state}.mode == ECTT_STUB_MODE_CALLBACK && {state}.callback != 0) {{", f"        {state}.callback({call_args});", "    }", "    return;", "}", ""]
     else:

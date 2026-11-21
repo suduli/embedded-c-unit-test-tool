@@ -139,8 +139,8 @@ def test_output_parameters_exist_only_for_writable_non_void_pointers() -> None:
 
 
 def test_the_stub_writes_the_output_value_through_the_pointer_when_programmed() -> None:
-    assert "*value = ectt_stub_hal_read_state.out_value_value;" in UNIT.source
-    assert "if (ectt_stub_hal_read_state.out_value_set && value != 0)" in UNIT.source
+    assert "*ectt_arg1 = ectt_stub_hal_read_state.out_value_value;" in UNIT.source
+    assert "if (ectt_stub_hal_read_state.out_value_set && ectt_arg1 != 0)" in UNIT.source
 
 
 def test_sequence_mode_keeps_the_last_value_and_flags_exhaustion() -> None:
@@ -152,9 +152,9 @@ def test_sequence_mode_keeps_the_last_value_and_flags_exhaustion() -> None:
 
 
 def test_every_call_is_counted_and_every_argument_recorded() -> None:
-    for parameter in ("channel", "value", "label"):
+    for index, parameter in enumerate(("channel", "value", "label")):
         assert f"ectt_stub_hal_read_arg_{parameter}(unsigned call_index)" in UNIT.source
-        assert f"ectt_stub_hal_read_state.arg_{parameter}[ectt_call_index] = {parameter};" in UNIT.source
+        assert f"ectt_stub_hal_read_state.arg_{parameter}[ectt_call_index] = ectt_arg{index};" in UNIT.source
     assert "ectt_stub_hal_read_call_count(void)" in UNIT.source
     assert "ectt_stub_hal_tick_state.calls++;" in UNIT.source
 
@@ -354,3 +354,38 @@ def test_an_empty_list_yields_a_valid_runtime_only_unit() -> None:
 def test_default_returns_are_kept_when_nothing_is_programmed() -> None:
     assert "return 0; /* ectt:stub: default value */" in UNIT.source
     assert "return (char *)0; /* ectt:stub: default value */" in UNIT.source
+
+
+# --- review-fix: qualifiers and name collisions in the generated C ----------------------------
+
+
+@pytest.mark.parametrize(
+    ("return_type", "parameters"),
+    [
+        ("int", (("const int", "x"),)),
+        ("int", (("char *const", "x"),)),
+        ("const int", ()),
+        ("int", (("volatile int", "v"), ("unsigned char *const", "p"))),
+    ],
+)
+def test_top_level_qualifiers_do_not_make_the_journal_or_value_storage_const(return_type: str, parameters: tuple[tuple[str, str], ...]) -> None:
+    # The journal arrays and the programmed return value are assigned to; a const object type would not compile.
+    unit = generate_programmable_stubs((Sig("probe_fn", return_type, parameters),))
+
+    assert _errors(unit.source) == []
+    assert "const int ectt_stub_probe_fn" not in unit.source.replace("typedef const int", "")
+
+
+def test_a_pointee_qualifier_is_kept_in_the_storage_type() -> None:
+    unit = generate_programmable_stubs((Sig("probe_fn", "const char *", (("const char *", "text"),)),))
+
+    assert "typedef const char * ectt_stub_probe_fn_arg_text_t;" in unit.source
+    assert "typedef const char * ectt_stub_probe_fn_ret_t;" in unit.source
+    assert _errors(unit.source) == []
+
+
+@pytest.mark.parametrize("pname", ["ectt_call_index", "ectt_arg0", "ectt_arg1", "calls", "mode"])
+def test_a_parameter_named_like_a_generated_identifier_still_compiles(pname: str) -> None:
+    unit = generate_programmable_stubs((Sig("probe_fn", "int", (("int", "first"), ("int *", pname))),))
+
+    assert _errors(unit.source) == []
