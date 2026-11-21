@@ -199,3 +199,18 @@ def test_unknown_deferred_kind_and_mapped_deferred_column_are_refused() -> None:
     with pytest.raises(MigError) as e3:
         import_mapped_csv(text, mapping, deferred_columns={"Nope": "slot"})
     assert e3.value.reason == "unknown_column"
+
+
+@pytest.mark.parametrize(
+    "document",
+    [
+        {"report_version": "1", "source": "s", "artifacts": [{"status": "converted"}]},
+        {"report_version": "1", "source": "s", "artifacts": 5},
+        {"report_version": "1", "source": "s", "artifacts": [{"status": "converted", "artifact": "a", "kind": "k", "notes": [{"effect": "info"}]}]},
+        {"report_version": "1", "source": "s", "deferred": [{"kind": "slot"}]},
+    ],
+)
+def test_malformed_report_documents_raise_mig_error_not_raw_exceptions(document: dict[str, object]) -> None:
+    with pytest.raises(MigError) as excinfo:
+        load_fidelity_report(document)
+    assert excinfo.value.reason == "invalid_report"
