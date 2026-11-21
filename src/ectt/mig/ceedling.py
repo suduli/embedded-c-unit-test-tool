@@ -174,12 +174,17 @@ def _as_str_list(value: Any) -> list[str]:
 MAX_EXPANDED_NODES = 100_000
 
 
+_MERGE_TAG = "tag:yaml.org,2002:merge"
+
+
 class _TextLoader(yaml.SafeLoader):
     """SafeLoader that keeps every plain scalar as text and refuses duplicate keys."""
 
     def construct_mapping(self, node: Any, deep: bool = False) -> dict[Any, Any]:
         seen: set[Any] = set()
         for key_node, _value_node in node.value:
+            if key_node.tag == _MERGE_TAG:  # `<<: *alias`; merged by the base class below
+                continue
             key = self.construct_object(key_node, deep=True)
             if key in seen:
                 raise yaml.constructor.ConstructorError(None, None, f"duplicate key {key!r}", key_node.start_mark)
@@ -187,7 +192,10 @@ class _TextLoader(yaml.SafeLoader):
         return super().construct_mapping(node, deep=deep)
 
 
-_TextLoader.yaml_implicit_resolvers = {}  # no int/float/bool/null resolution: scalars stay as authored
+# No int/float/bool/null resolution: scalars stay as authored. The `<<` merge key keeps its
+# resolver: Ceedling's own loader merges it, so leaving it a literal "<<" key would change
+# what the configuration means.
+_TextLoader.yaml_implicit_resolvers = {"<": [(_MERGE_TAG, re.compile(r"^(?:<<)$"))]}
 
 
 def _expanded_size(value: Any, memo: dict[int, int], active: set[int]) -> int:
@@ -274,6 +282,11 @@ def _test_directories(root: Path, entries: list[str], unconverted: list[ImportNo
         if not dirs:
             unconverted.append(ImportNote("path_matches_nothing", f"{CEEDLING_PROJECT_FILE}:paths/test", raw))
         for directory in dirs:
+            if not directory.resolve().is_relative_to(root.resolve()):
+                raise MigError(
+                    f"Ceedling test path '{raw}' resolves outside the project root through a link",
+                    reason="path_escape",
+                )
             if sign == "+":
                 selected.setdefault(directory.resolve(), None)
             else:
