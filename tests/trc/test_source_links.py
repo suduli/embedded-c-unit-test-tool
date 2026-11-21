@@ -234,3 +234,95 @@ def test_loader_rejects_wrongly_typed_fields_with_trc_error(entry: dict[str, obj
     text = json.dumps({"links_version": "1", "links": [entry]})
     with pytest.raises(TrcError):
         load_source_links(text)
+
+
+# --- schema-1.5 extent: exact range resolution (B2) -----------------------------
+
+
+def _function_with_extent(name: str, start: int, end: int, file: str = "src/adc.c") -> FunctionModel:
+    return FunctionModel(
+        name=name,
+        linkage="external",
+        storage_class="none",
+        location=SourceLocation(file, start),
+        return_type="ref:type.int",
+        start_line=start,
+        end_line=end,
+    )
+
+
+def _extent_model() -> AnalysisModel:
+    """adc_init 10-20, adc_read 30-50, adc_close 60-70 — full extents."""
+    unit = AnalysisUnit(
+        path="src/adc.c",
+        status="parsed",
+        functions=(
+            _function_with_extent("adc_init", 10, 20),
+            _function_with_extent("adc_read", 30, 50),
+            _function_with_extent("adc_close", 60, 70),
+        ),
+    )
+    provenance = ProvenanceModel(tool_version="0", front_end="test", generated_at="t")
+    return AnalysisModel(provenance=provenance, units=(unit,))
+
+
+def _one_extent(link: SourceLink):
+    (result,) = resolve_source_links([link], _extent_model()).links
+    return result
+
+
+def test_range_fully_inside_one_extent_resolves_exactly() -> None:
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=31, end_line=45))
+    assert (result.status, result.function, result.approximate) == ("resolved", "adc_read", False)
+
+
+def test_range_on_extent_boundary_lines_resolves_exactly() -> None:
+    """verifies: B2 — exact hit at both boundary lines (inclusive range)."""
+    assert _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=30, end_line=50)).approximate is False
+    assert _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=30, end_line=30)).function == "adc_read"
+    assert _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=50, end_line=50)).function == "adc_read"
+
+
+def test_range_reaching_beyond_the_extent_is_refused() -> None:
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=31, end_line=60))
+    assert (result.status, result.reason) == ("unresolved", "range_spans_functions")
+
+
+def test_range_in_the_gap_between_extents_is_refused() -> None:
+    """The approximate fallback would have attributed a gap range to the earlier
+    function; the extent knows better and refuses."""
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=21, end_line=29))
+    assert (result.status, result.reason) == ("unresolved", "range_outside_any_function")
+
+
+def test_range_before_the_first_extent_is_refused() -> None:
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=1, end_line=5))
+    assert (result.status, result.reason) == ("unresolved", "range_outside_any_function")
+
+
+def test_model_without_extent_keeps_the_approximate_behaviour() -> None:
+    """A pre-1.5 model (no extents) still resolves approximately — existing
+    behaviour is kept only for models without extent."""
+    result = _one(SourceLink("REQ-1", "src/adc.c", start_line=32, end_line=40))
+    assert (result.status, result.function, result.approximate) == ("resolved", "adc_read", True)
+
+
+def test_mixed_model_is_exact_where_extent_exists_and_approximate_where_not() -> None:
+    unit = AnalysisUnit(
+        path="src/adc.c",
+        status="parsed",
+        functions=(
+            _function_with_extent("adc_init", 10, 20),
+            _function("adc_read", 30),  # legacy: no extent
+        ),
+    )
+    provenance = ProvenanceModel(tool_version="0", front_end="test", generated_at="t")
+    model = AnalysisModel(provenance=provenance, units=(unit,))
+    (in_extent,) = resolve_source_links(
+        [SourceLink("REQ-1", "src/adc.c", start_line=12, end_line=18)], model
+    ).links
+    assert (in_extent.status, in_extent.function, in_extent.approximate) == ("resolved", "adc_init", False)
+    (in_legacy,) = resolve_source_links(
+        [SourceLink("REQ-2", "src/adc.c", start_line=32, end_line=40)], model
+    ).links
+    assert (in_legacy.status, in_legacy.function, in_legacy.approximate) == ("resolved", "adc_read", True)

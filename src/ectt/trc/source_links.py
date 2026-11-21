@@ -10,11 +10,17 @@ the function moves.
 
 Honest limits, never papered over:
 
-* The analysis model records where a function *starts*, not where it ends. A
-  range is attributed to the last function that starts at or before its first
-  line, and is refused (``range_spans_functions``) when it reaches the next
-  function's start. Such a link is flagged ``approximate``: file-scope code
-  between two functions cannot be told apart from the earlier function's body.
+* Since the analysis-model schema 1.5 bump, a function carries its full extent
+  (start and end line). A range fully inside one function's extent resolves
+  *exactly* (``approximate=False``); a range reaching beyond that function's end
+  is refused (``range_spans_functions``), and a range in a gap between two
+  extents is refused (``range_outside_any_function``) — no guessing.
+* Models recorded before schema 1.5 carry no extent: a range is then attributed
+  to the last function that starts at or before its first line and is refused
+  (``range_spans_functions``) when it reaches the next function's start. Such a
+  link is flagged ``approximate``: file-scope code between two functions cannot
+  be told apart from the earlier function's body. Approximate behaviour is kept
+  only for models without extent.
 * A link that does not resolve is reported with a reason and kept out of the
   anchored set; nothing is guessed (a renamed function is ``function_not_found``).
 
@@ -184,11 +190,28 @@ def _resolve_one(link: SourceLink, units: dict[str, AnalysisUnit]) -> ResolvedSo
         return ResolvedSourceLink(link, "resolved", function=link.function)
 
     start, end = link.start_line or 0, link.end_line or 0
-    containing = [f for f in functions if f.location.line <= start]
+    # Exact resolution via the schema-1.5 function extent: a range fully inside
+    # one extent is exact; reaching beyond it or landing between extents is
+    # refused with a named reason — no guessing.
+    extent_functions = [f for f in functions if f.start_line is not None and f.end_line is not None]
+    for candidate in extent_functions:
+        assert candidate.start_line is not None and candidate.end_line is not None
+        if candidate.start_line <= start <= candidate.end_line:
+            if end <= candidate.end_line:
+                return ResolvedSourceLink(link, "resolved", function=candidate.name, approximate=False)
+            return ResolvedSourceLink(link, "unresolved", reason="range_spans_functions")
+    if len(extent_functions) == len(functions):
+        return ResolvedSourceLink(link, "unresolved", reason="range_outside_any_function")
+
+    # Fallback for models recorded before schema 1.5 (no extent): the last
+    # function starting at or before the range's first line, refused when the
+    # range reaches the next function's start. Approximate by nature.
+    legacy = [f for f in functions if f.start_line is None and f.end_line is None]
+    containing = [f for f in legacy if f.location.line <= start]
     if not containing:
         return ResolvedSourceLink(link, "unresolved", reason="range_outside_any_function")
     candidate = containing[-1]
-    later = [f for f in functions if f.location.line > candidate.location.line]
+    later = [f for f in legacy if f.location.line > candidate.location.line]
     if later and end >= later[0].location.line:
         return ResolvedSourceLink(link, "unresolved", reason="range_spans_functions")
     return ResolvedSourceLink(link, "resolved", function=candidate.name, approximate=True)
