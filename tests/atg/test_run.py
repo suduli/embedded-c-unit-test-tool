@@ -278,3 +278,10 @@ def test_the_report_names_what_limitations_were_and_were_not_assessed() -> None:
 
 def test_terminations_are_a_closed_vocabulary() -> None:
     assert TERMINATIONS == ("complete", "time_limit", "memory_limit", "case_limit")
+
+
+@pytest.mark.parametrize("field", ["max_seconds", "max_memory_bytes", "max_cases"])
+def test_a_non_finite_limit_is_refused_not_silently_unenforced(field: str) -> None:
+    with pytest.raises(AtgError) as excinfo:
+        RunLimits(**{field: float("nan")})
+    assert excinfo.value.reason == "invalid_limit"
