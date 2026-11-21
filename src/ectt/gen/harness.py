@@ -9,7 +9,10 @@ for one designated unit under test (UUT):
   read/write access, and read/write exposure is provided through the UUT
   header include (TOOL-HAR-040);
 - per-test setup and teardown hooks can be registered and dispatched
-  (TOOL-HAR-050).
+  (TOOL-HAR-050); the setup hook resets harness state so no test sees what an
+  earlier one left (DSN-TCM-060);
+- the harness emits the RESULT/FAILURE stream the host runner reads (WP-EXH-01,
+  see ``ectt.gen.protocol``).
 
 Generation is a pure function of the model: identical inputs produce
 byte-identical output. Framework rendering (Unity, cmocka, ...) is the job of
@@ -31,6 +34,7 @@ from ectt.gen.errors import (
     UnitNotParsedError,
     UnknownUnitError,
 )
+from ectt.gen.protocol import RESULT_PROTOCOL_BLOCK, SETUP_TEARDOWN_BLOCK
 
 __all__ = [
     "ExposedFunction",
@@ -39,21 +43,6 @@ __all__ = [
     "HarnessGenerator",
     "UNRESOLVED_TYPE_MARKER",
 ]
-
-SETUP_TEARDOWN_BLOCK: Final[str] = """\
-static void (*ectt_setup_hook)(void) = 0;
-static void (*ectt_teardown_hook)(void) = 0;
-
-void ectt_register_setup(void (*fn)(void));
-void ectt_register_teardown(void (*fn)(void));
-void ectt_run_setup(void);
-void ectt_run_teardown(void);
-
-void ectt_register_setup(void (*fn)(void)) { ectt_setup_hook = fn; }
-void ectt_register_teardown(void (*fn)(void)) { ectt_teardown_hook = fn; }
-void ectt_run_setup(void) { if (ectt_setup_hook) { ectt_setup_hook(); } }
-void ectt_run_teardown(void) { if (ectt_teardown_hook) { ectt_teardown_hook(); } }
-"""
 
 UNRESOLVED_TYPE_MARKER: Final[str] = "ectt:unresolved-type"
 
@@ -90,6 +79,10 @@ class GeneratedHarness:
     variables: tuple[ExposedVariable, ...]
     tool_version: str = "0.1.0"
     interface_fingerprint: str = ""
+
+    def has_result_protocol(self) -> bool:
+        """Whether the RESULT/FAILURE stream runtime is present in the source."""
+        return "ectt:result-protocol" in self.source and "ectt_report_result" in self.source
 
     def has_setup_teardown(self) -> bool:
         """Whether the per-test hook block is present in the source."""
@@ -259,6 +252,8 @@ class HarnessGenerator:
             f"Interface fingerprint: {fingerprint} */",
             f"/* Source model UUT: {header} */",
             f'#include "{header}"',
+            "",
+            RESULT_PROTOCOL_BLOCK,
             "",
             SETUP_TEARDOWN_BLOCK,
             "",

@@ -25,6 +25,7 @@ __all__ = [
     "RangeExpansionError",
     "RangeCheckingError",
     "InterchangeError",
+    "DerivationError",
 ]
 
 
@@ -207,6 +208,19 @@ class InterchangeError(TcmError):
         message: str,
         *,
         reason: str = "interchange_error",
+        path: Path | str | None = None,
+    ) -> None:
+        super().__init__(message, reason=reason, path=path)
+
+
+class DerivationError(TcmError):
+    """Raised when a derivation input is unusable or would exceed its stated bound."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "derivation_error",
         path: Path | str | None = None,
     ) -> None:
         super().__init__(message, reason=reason, path=path)

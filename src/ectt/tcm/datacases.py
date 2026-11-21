@@ -50,7 +50,9 @@ from ectt.tcm.errors import (
     InvalidTestCasesFileError,
     MissingCaseFieldError,
     TestCaseReadError,
+    ValueParseError,
 )
+from ectt.tcm.nested import parse_expected_path
 
 __all__ = [
     "TEST_CASES_KIND",
@@ -236,12 +238,24 @@ def _string_mapping(
     what: str,
     case_id: str,
     path: Path | str | None,
+    value_paths: bool = False,
 ) -> dict[str, str]:
     if value is None:
         return {}
     if isinstance(value, Mapping) and all(
         isinstance(k, str) and isinstance(v, str) for k, v in value.items()
     ):
+        if value_paths:
+            # Keys using the path syntax (name.member, name[2]) are nested struct/array/union
+            # values (ectt.tcm.nested); plain names are accepted exactly as before.
+            for key in value:
+                try:
+                    parse_expected_path(key)
+                except ValueParseError as exc:
+                    raise InvalidTestCasesFileError(
+                        f"test case '{case_id}': '{what}' key '{key}' is not a valid value path: {exc.message}",
+                        path=path,
+                    ) from exc
         return dict(value)
     raise InvalidTestCasesFileError(
         f"test case '{case_id}': '{what}' must be a mapping of string to string",
@@ -483,13 +497,18 @@ def _parse_case(entry: Any, *, path: Path | str | None) -> DataDrivenTestCase:
     expected = TestCaseExpected(
         return_value=return_value,
         global_finals=_string_mapping(
-            expected_raw.get("globals"), what="expected.globals", case_id=case_id, path=path
+            expected_raw.get("globals"),
+            what="expected.globals",
+            case_id=case_id,
+            path=path,
+            value_paths=True,
         ),
         out_parameters=_string_mapping(
             expected_raw.get("out_parameters"),
             what="expected.out_parameters",
             case_id=case_id,
             path=path,
+            value_paths=True,
         ),
         comparison=comparison,
     )

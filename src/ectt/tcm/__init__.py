@@ -25,7 +25,24 @@ from ectt.tcm.datacases import (
     refresh_digest,
     save_test_cases_file,
 )
+from ectt.tcm.derivation import (
+    DEFAULT_MAX_VECTORS,
+    STRATEGIES,
+    ClassificationNode,
+    DerivedValue,
+    DerivedVector,
+    EquivalenceClass,
+    IntegerDomain,
+    TreeClass,
+    boundary_values,
+    classification_vectors,
+    derive_vectors,
+    domains_from_parameters,
+    equivalence_classes,
+    vectors_to_cases,
+)
 from ectt.tcm.errors import (
+    DerivationError,
     DuplicateTestCaseError,
     InvalidSelectionError,
     InvalidTestCaseError,
@@ -49,6 +66,16 @@ from ectt.tcm.interchange import (
     export_cases,
     import_cases,
 )
+from ectt.tcm.nested import (
+    ExpectedPath,
+    compare_expected,
+    ctype_from_model,
+    expected_trees,
+    flatten_expected,
+    is_nested_key,
+    parse_expected_path,
+    validate_expected_keys,
+)
 from ectt.tcm.ranged import (
     RangedInput,
     ValidRange,
@@ -63,6 +90,29 @@ from ectt.tcm.selection import (
 )
 
 __all__ = [
+    "ExpectedPath",
+    "compare_expected",
+    "ctype_from_model",
+    "expected_trees",
+    "flatten_expected",
+    "is_nested_key",
+    "parse_expected_path",
+    "validate_expected_keys",
+    "DerivationError",
+    "DEFAULT_MAX_VECTORS",
+    "STRATEGIES",
+    "ClassificationNode",
+    "DerivedValue",
+    "DerivedVector",
+    "EquivalenceClass",
+    "IntegerDomain",
+    "TreeClass",
+    "boundary_values",
+    "classification_vectors",
+    "derive_vectors",
+    "domains_from_parameters",
+    "equivalence_classes",
+    "vectors_to_cases",
     # Errors
     "TcmError",
     "InvalidTestCaseError",
