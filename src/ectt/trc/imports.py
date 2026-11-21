@@ -33,12 +33,15 @@ import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from ectt.trc.associations import AssociationSet
 from ectt.trc.errors import TrcError
 
 __all__ = [
     "CSV_COLUMNS",
     "RequirementRecord",
     "import_reqif",
+    "ReqIfImport",
+    "import_reqif_with_associations",
     "import_requirements_csv",
     "import_requirements_text",
     "requirement_universe",
@@ -116,13 +119,35 @@ def _is_test_object(spec_object: ET.Element) -> bool:
 
 
 def import_reqif(text: str) -> tuple[RequirementRecord, ...]:
-    """Import requirements from a ReqIF 1.x document (documented subset)."""
+    """Import requirements from a ReqIF 1.x document (documented subset).
+
+    Records only; use :func:`import_reqif_with_associations` when the
+    document's ``SPEC-RELATIONS`` should come back as associations too.
+    """
+    return import_reqif_with_associations(text).records
+
+
+def import_reqif_with_associations(text: str) -> ReqIfImport:
+    """Import requirements and associations from a ReqIF 1.x document (B7).
+
+    Everything :func:`import_reqif` reads, plus the ``SPEC-RELATIONS``: each
+    relation's SOURCE and TARGET ``SPEC-OBJECT-REF`` is resolved through the
+    document's ``SPEC-OBJECT`` identifiers to the real requirement/test ids
+    (the ``ReqIF.Identifier`` attribute value when present, else the
+    ``IDENTIFIER``), giving the requirement-to-test associations the exporter
+    wrote from the matrix — export then import is lossless. A relation whose
+    SOURCE or TARGET names no ``SPEC-OBJECT`` in the same document is refused
+    with a named reason (``dangling_relation``); duplicate relations for the
+    same pair merge once (the association set deduplicates by construction).
+    """
     try:
         root = ET.fromstring(text)
     except ET.ParseError as exc:
         raise TrcError(f"ReqIF document is not well-formed XML: {exc}", reason="malformed_reqif") from exc
 
     records: list[RequirementRecord] = []
+    real_id_by_xml: dict[str, str] = {}
+    test_xml_ids: set[str] = set()
     for element in root.iter():
         if _local_name(element.tag) != "SPEC-OBJECT" or _is_test_object(element):
             continue
@@ -144,15 +169,83 @@ def import_reqif(text: str) -> tuple[RequirementRecord, ...]:
                 "ReqIF.Identifier attribute value nor an IDENTIFIER",
                 reason="missing_requirement_id",
             )
+        real_id = _checked_id(requirement_id, "ReqIF SPEC-OBJECT")
         records.append(
             RequirementRecord(
-                requirement_id=_checked_id(requirement_id, "ReqIF SPEC-OBJECT"),
+                requirement_id=real_id,
                 title=long_name,
                 text=description,
             )
         )
+        if identifier is not None:
+            real_id_by_xml[identifier] = real_id
 
-    return _deduplicated(records)
+    # Test objects: their real id is the ReqIF.Identifier attribute value when
+    # present (the exporter writes it), else the IDENTIFIER.
+    for element in root.iter():
+        if _local_name(element.tag) != "SPEC-OBJECT" or not _is_test_object(element):
+            continue
+        identifier = element.get("IDENTIFIER")
+        if identifier is None:
+            continue
+        attributes = _attribute_values(element)
+        test_id = next(
+            (value for ref, value in attributes.items() if ref.endswith("ReqIF.Identifier")),
+            None,
+        )
+        real_id_by_xml[identifier] = _checked_id(test_id if test_id is not None else identifier, "ReqIF test object")
+        test_xml_ids.add(identifier)
+
+    # SPEC-RELATIONS back as requirement-to-test associations.
+    associations = AssociationSet()
+    for element in root.iter():
+        if _local_name(element.tag) != "SPEC-RELATION":
+            continue
+        source_ref = _relation_ref(element, "SOURCE")
+        target_ref = _relation_ref(element, "TARGET")
+        for ref in (source_ref, target_ref):
+            if ref not in real_id_by_xml:
+                raise TrcError(
+                    f"SPEC-RELATION references SPEC-OBJECT '{ref}' which the document does not define",
+                    reason="dangling_relation",
+                )
+        requirement_id = real_id_by_xml[source_ref]
+        test_id = real_id_by_xml[target_ref]
+        if target_ref not in test_xml_ids:
+            raise TrcError(
+                f"SPEC-RELATION TARGET '{target_ref}' is not a test-case object",
+                reason="relation_target_not_a_test",
+            )
+        associations.add(requirement_id, test_id)
+
+    return ReqIfImport(records=_deduplicated(records), associations=associations)
+
+
+def _relation_ref(relation: ET.Element, side: str) -> str:
+    """The SPEC-OBJECT-REF text under the relation's SOURCE or TARGET."""
+    for child in relation:
+        if _local_name(child.tag) != side:
+            continue
+        for grandchild in child:
+            if _local_name(grandchild.tag) == "SPEC-OBJECT-REF":
+                ref = (grandchild.text or "").strip()
+                if ref:
+                    return ref
+        ref_attr = child.get("REF")
+        if ref_attr:
+            return ref_attr.strip()
+    raise TrcError(
+        f"SPEC-RELATION carries no {side} SPEC-OBJECT-REF",
+        reason="malformed_relation",
+    )
+
+
+@dataclass(frozen=True)
+class ReqIfImport:
+    """Requirements plus the associations read back from SPEC-RELATIONS (B7)."""
+
+    records: tuple[RequirementRecord, ...]
+    associations: AssociationSet
 
 
 def import_requirements_csv(text: str) -> tuple[RequirementRecord, ...]:
