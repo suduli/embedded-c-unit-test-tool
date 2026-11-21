@@ -18,6 +18,17 @@ from ectt.cov.errors import (
     CoverageParseError,
 )
 from ectt.cov.gcov import KNOWN_FORMAT_VERSIONS, read_gcov_document
+from ectt.cov.merge import (
+    COMPLETENESS_STATES,
+    KNOWN_RUN_OUTCOMES,
+    QUARANTINE_OUTCOMES,
+    ExcludedRun,
+    MergeResult,
+    RunAdmission,
+    RunCoverage,
+    coverage_for_test,
+    merge_run_coverage,
+)
 from ectt.cov.metrics import branch_coverage, document_metrics, statement_coverage
 from ectt.cov.model import (
     SCHEMA_VERSION_CURRENT,
@@ -30,19 +41,28 @@ from ectt.cov.model import (
 )
 
 __all__ = [
+    "COMPLETENESS_STATES",
     "CoverageError",
     "CoverageFormatError",
     "CoverageParseError",
+    "ExcludedRun",
     "KNOWN_FORMAT_VERSIONS",
+    "KNOWN_RUN_OUTCOMES",
+    "MergeResult",
+    "MetricTotals",
+    "QUARANTINE_OUTCOMES",
+    "RunAdmission",
+    "RunCoverage",
     "SCHEMA_VERSION_CURRENT",
     "GcovBranch",
     "GcovCondition",
     "GcovDocument",
     "GcovFile",
     "GcovLine",
-    "MetricTotals",
     "branch_coverage",
+    "coverage_for_test",
     "document_metrics",
+    "merge_run_coverage",
     "statement_coverage",
     "read_gcov_document",
 ]
