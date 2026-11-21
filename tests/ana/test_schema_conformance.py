@@ -1,10 +1,13 @@
 # verifies: TOOL-PAR-100, TOOL-PAR-110, TOOL-PAR-140, TOOL-PAR-150, DSN-ANA-070
-"""Conformance of emitted analysis models to the published 1.2 JSON Schema.
+"""Conformance of emitted analysis models to the published JSON Schema.
 
 This is the first clause of the WP-ANA-04 exit criterion (PLAN-001 5.4): a model
 emitted by the analyzer validates against its published schema. Since the 1.1/1.2
 minor bumps (TOOL-PAR-140/150/160) the schema also requires the decision inventory
-and per-unit unsupported-construct inventories.
+and per-unit unsupported-construct inventories; since 1.4 it requires per-unit
+failure records; since 1.5 it covers function extents, per-occurrence
+unsupported-construct records, and the global-variable inventory (all additive:
+a pre-1.5 document validates against the 1.4 schema unchanged).
 """
 
 from __future__ import annotations
@@ -24,7 +27,7 @@ from ectt.ana.persist import assemble_analysis_model, write_analysis_model
 from ectt.core.determinism import FixedClock
 from ectt.core.fs import OutputRoot
 
-SCHEMA_RESOURCE = "analysis-model-1.4.schema.json"
+SCHEMA_RESOURCE = "analysis-model-1.5.schema.json"
 
 HEADER = """\
 typedef unsigned short u16;
@@ -128,6 +131,27 @@ def test_writer_emits_only_schema_declared_keys(emitted_doc: dict[str, Any]) -> 
 
 def _first_fn(doc: dict[str, Any]) -> dict[str, Any]:
     return next(f for u in doc["units"] for f in u["functions"] if f["globals"])
+
+
+def test_emitted_model_validates_against_previous_1_4_schema(emitted_doc: dict[str, Any]) -> None:
+    """verifies: TOOL-PAR-110 -- the 1.5 bump is additive: a document stripped of
+    the 1.5 fields keeps validating against the published 1.4 schema."""
+    schema_1_4 = json.loads(
+        resources.files("ectt.ana.schema").joinpath("analysis-model-1.4.schema.json").read_text(encoding="utf-8")
+    )
+    doc = copy.deepcopy(emitted_doc)
+    for unit in doc["units"]:
+        unit.pop("global_variables", None)
+        for fn in unit["functions"]:
+            fn.pop("start_line", None)
+            fn.pop("end_line", None)
+        for construct in unit["unsupported_constructs"]:
+            construct.pop("occurrences", None)
+    errors = sorted(
+        jsonschema.Draft202012Validator(schema_1_4).iter_errors(doc),
+        key=lambda e: list(e.absolute_path),
+    )
+    assert not errors, "\n".join(f"{list(e.absolute_path)}: {e.message}" for e in errors)
 
 
 def _collect_undeclared(value: Any, schema: dict[str, Any], where: str, out: list[str]) -> None:

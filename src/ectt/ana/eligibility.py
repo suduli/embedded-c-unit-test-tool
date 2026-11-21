@@ -92,11 +92,14 @@ def assess_eligibility(
       ``unsupported_construct:variadic_function``. One reason per kind, sorted
       by kind, after the reasons above.
 
-    The inventory keeps the *first* occurrence of each kind (its location and
-    the owning function's name), so only that occurrence can be attributed to a
-    function. Occurrences beyond the first are not attributable; they are not
-    guessed onto other functions here and are reported by
-    :func:`find_unattributed_constructs` instead.
+    Attribution uses the per-occurrence records (schema 1.5): every occurrence
+    names its owner function, so each owner is gated by name. Models recorded
+    before schema 1.5 carry no occurrences; for those the inventory keeps only
+    the *first* occurrence of each kind (its location and the owning
+    function's name), so only that occurrence is attributable via the first-
+    occurrence heuristic. Occurrences beyond the first are not guessed onto
+    other functions; they are reported by :func:`find_unattributed_constructs`
+    instead.
 
     Args:
         units: Analysis units to assess. A failed unit contributes one unit-kind
@@ -156,10 +159,12 @@ def assess_eligibility(
 def _owns(fn: FunctionModel, construct: UnsupportedConstructModel) -> bool:
     """True when ``construct``'s recorded first occurrence belongs to ``fn``.
 
-    The inventory records the owning definition's location and a detail that
-    names the construct (``fn`` or ``fn.param``). A recorded location must match
-    the function's; a missing location falls back to the name in the detail.
-    A detail that names a different function never matches.
+    First-occurrence fallback for models recorded before schema 1.5 (no
+    per-occurrence owner records). The inventory records the owning
+    definition's location and a detail that names the construct (``fn`` or
+    ``fn.param``). A recorded location must match the function's; a missing
+    location falls back to the name in the detail. A detail that names a
+    different function never matches.
     """
     named = construct.detail.split(".", 1)[0] if construct.detail else None
     if named is not None and named != fn.name:
@@ -170,9 +175,21 @@ def _owns(fn: FunctionModel, construct: UnsupportedConstructModel) -> bool:
 
 
 def _construct_owners(unit: AnalysisUnit) -> dict[int, set[str]]:
-    """Map ``id(function)`` to the recorded construct kinds it owns."""
+    """Map ``id(function)`` to the recorded construct kinds it owns.
+
+    Schema 1.5: every occurrence names its owner function, so each named owner
+    is attributed. Constructs without occurrence records (pre-1.5 models) fall
+    back to the first-occurrence heuristic in :func:`_owns`.
+    """
     owners: dict[int, set[str]] = {}
     for construct in unit.unsupported_constructs:
+        if construct.occurrences:
+            for occ in construct.occurrences:
+                for fn in unit.functions:
+                    if fn.name == occ.function:
+                        owners.setdefault(id(fn), set()).add(construct.kind)
+                        break
+            continue
         for fn in unit.functions:
             if _owns(fn, construct):
                 owners.setdefault(id(fn), set()).add(construct.kind)
@@ -195,18 +212,24 @@ class UnattributedConstruct:
 def find_unattributed_constructs(units: Sequence[AnalysisUnit]) -> tuple[UnattributedConstruct, ...]:
     """Report construct occurrences that no function's gate reason accounts for.
 
-    For each parsed unit and kind: ``count`` minus the one occurrence attributed
-    to a function (or the full count when even the first is unattributable).
-    The inventory keeps only the first occurrence's owner, so these remainders
-    are surfaced explicitly rather than silently dropped or spread over
-    functions that may not own them. Sorted by unit then kind.
+    For each parsed unit and kind: ``count`` minus the occurrences attributed
+    to functions. Schema 1.5 attributes every occurrence whose owner function
+    name matches a function in the unit; models recorded before schema 1.5
+    attribute at most the first occurrence (via the first-occurrence
+    heuristic, or the full count when even the first is unattributable). The
+    remainders are surfaced explicitly rather than silently dropped or spread
+    over functions that may not own them. Sorted by unit then kind.
     """
     found: list[UnattributedConstruct] = []
     for unit in units:
         if unit.status != "parsed":
             continue
+        function_names = {fn.name for fn in unit.functions}
         for construct in sorted(unit.unsupported_constructs, key=lambda c: c.kind):
-            attributed = 1 if any(_owns(fn, construct) for fn in unit.functions) else 0
+            if construct.occurrences:
+                attributed = sum(1 for occ in construct.occurrences if occ.function in function_names)
+            else:
+                attributed = 1 if any(_owns(fn, construct) for fn in unit.functions) else 0
             remaining = construct.count - attributed
             if remaining > 0:
                 found.append(UnattributedConstruct(unit.path, construct.kind, remaining))
