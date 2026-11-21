@@ -242,7 +242,9 @@ def import_mapped_csv(
     cases: list[DataDrivenTestCase] = []
     outcomes: list[RowOutcome] = []
     seen_ids: dict[str, int] = {}
-    for number, record in enumerate((r for r in records if any(c.strip() for c in r)), start=1):
+    for number, record in enumerate(records, start=1):
+        if not any(c.strip() for c in record):
+            continue  # a blank line is not a case; it still counts, so row numbers match the source
         if len(record) != len(header):
             outcomes.append(
                 RowOutcome(number, "rejected", None, "ragged_row", f"expected {len(header)} cells, found {len(record)}")

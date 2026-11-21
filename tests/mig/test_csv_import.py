@@ -211,3 +211,11 @@ def test_imported_cases_survive_the_tests_file_writer_and_parser() -> None:
 
     assert [(c.case_id, c.content_digest) for c in parsed.cases] == [(c.case_id, c.content_digest) for c in imported.cases]
     assert not any(c.stale for c in parsed.cases)
+
+
+def test_row_numbers_count_blank_lines_so_they_match_the_source() -> None:
+    mapping = {"id": "id", "unit": "unit", "function": "function"}
+
+    result = import_mapped_csv("id,unit,function\n\nc1,u,f\n,,\n,u,f\n", mapping)
+
+    assert [(r.row, r.status) for r in result.rows] == [(2, "converted"), (4, "rejected")]
