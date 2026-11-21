@@ -39,6 +39,7 @@ from ectt.rep.model import (
     report_model_to_dict,
     test_entry,
 )
+from ectt.rep.pdf import render_pdf
 from ectt.rep.render import render_json, render_text
 from ectt.rep.summary import (
     CoverageTrend,
@@ -60,6 +61,7 @@ __all__ = ["cobertura_rate",
     "import_lcov",
     "render_cobertura",
     "render_html",
+    "render_pdf",
     "render_junit",
         "FORMAT_CHANGELOG",
     "REPORT_FORMAT_CONTRACT",
