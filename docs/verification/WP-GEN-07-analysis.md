@@ -60,7 +60,16 @@ output is written by a user callback.
 - **Sequence exhaustion keeps the last value and flags it** rather than inventing a
   default or restarting, so a test can assert it did not overrun the sequence.
 - **Typedefs per stub** (`ectt_stub_<name>_arg_<param>_t` and so on) keep declarators
-  valid for pointer, qualified and typedef'd types.
+  valid for pointer, qualified and typedef'd types. Top-level qualifiers (`const int x`,
+  `char *const p`, a `const` return) are dropped from the storage typedefs only, because the
+  journal and the programmed value are assigned to; a pointee qualifier (`const char *`) stays.
+  The definition names its own parameters (`ectt_argN`), so a user parameter can never collide
+  with a generated local. Typedefs of scalars are recognised through the analyser's
+  `ref:type.<id>` graph shape as well as through C spellings.
+- **Values are one balanced expression.** Beyond the character allow-list, a placed value must
+  have balanced brackets outside literals, closed literals and no top-level comma, so it cannot
+  append a second call to the generated statement.
+- **`call_order(i)` is 0 for a call that did not happen** (a reset keeps old journal entries).
 
 ## Not covered (recorded, not guessed)
 
