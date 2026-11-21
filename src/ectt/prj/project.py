@@ -33,6 +33,7 @@ from ectt.prj.paths import (
     validate_project_path,
 )
 from ectt.prj.references import DanglingReference, find_dangling_references
+from ectt.prj.shards import ShardStore
 from ectt.prj.yaml_adapter import (
     RestrictedYamlAdapter,
     SerializationAdapter,
@@ -40,11 +41,17 @@ from ectt.prj.yaml_adapter import (
 )
 
 __all__ = [
+    "PROJECT_LAYOUTS",
     "PROJECT_ROOT_MARKER",
     "Project",
 ]
 
 PROJECT_ROOT_MARKER = "ectt.project"
+
+#: Storage layouts for :meth:`Project.save`. The single-file manifest is the
+#: default; the sharded layout (TOOL-PRJ-60/WP-PRJ-02, ectt.prj.shards) is
+#: chosen by this explicit argument only — never switched automatically.
+PROJECT_LAYOUTS: tuple[str, ...] = ("single", "sharded")
 
 
 class Project:
@@ -416,14 +423,78 @@ class Project:
     def save(
         self,
         *,
+        layout: str = "single",
         discard_comments: bool = False,
         token: CancellationToken | None = None,
     ) -> Path:
-        """Save the root ectt.project marker file."""
-        return self.save_file(
-            PROJECT_ROOT_MARKER,
-            self.document.data,
-            kind=PROJECT_KIND,
-            discard_comments=discard_comments,
-            token=token,
-        )
+        """Save the project store in the chosen layout (default: single file).
+
+        ``layout="single"`` (the default) writes only the root ``ectt.project``
+        manifest. ``layout="sharded"`` additionally writes every top-level
+        concern of the document as one plain-text shard under ``shards/``
+        (TOOL-PRJ-060, WP-PRJ-02), each through the same save discipline
+        (byte-stable no-op when unchanged, atomic otherwise, journalled for
+        rollback), and writes the manifest last as the commit point. The
+        layout is chosen by this explicit argument only; there is no
+        automatic switch.
+        """
+        if layout not in PROJECT_LAYOUTS:
+            raise ProjectError(
+                f"unknown project layout {layout!r} (known: {', '.join(PROJECT_LAYOUTS)})",
+                reason="unknown_layout",
+            )
+        if layout == "single":
+            return self.save_file(
+                PROJECT_ROOT_MARKER,
+                self.document.data,
+                kind=PROJECT_KIND,
+                discard_comments=discard_comments,
+                token=token,
+            )
+
+        shard_store = ShardStore(self.root)
+        # Validate every shard name before writing anything (fail fast, no partial layout).
+        for key in self.document.data:
+            shard_store.shard_path(str(key))
+        with self.transaction(token):
+            for key in sorted(self.document.data):
+                self.save_file(
+                    Path("shards") / f"{key}.yaml",
+                    {key: self.document.data[key]},
+                    discard_comments=discard_comments,
+                    token=token,
+                )
+            # The manifest is written last: it is the commit point of the layout.
+            return self.save_file(
+                PROJECT_ROOT_MARKER,
+                self.document.data,
+                kind=PROJECT_KIND,
+                discard_comments=discard_comments,
+                token=token,
+            )
+
+    def read_shards(self) -> dict[str, Any]:
+        """Read the sharded layout back into a document dictionary (TOOL-PRJ-060).
+
+        Each shard carries exactly one top-level key; the merged mapping is
+        returned with all keys present. Raises a named error when the store
+        has no sharded layout or a shard is malformed.
+        """
+        shard_dir = self.root / "shards"
+        if not shard_dir.is_dir():
+            raise ProjectError(
+                f"no sharded layout present in '{self.root}'",
+                reason="no_sharded_layout",
+                path=shard_dir,
+            )
+        result: dict[str, Any] = {}
+        for path in sorted(shard_dir.glob("*.yaml")):
+            data = self.adapter.load(path.read_text(encoding="utf-8"), path=path)
+            if not isinstance(data, dict) or len(data) != 1:
+                raise ProjectError(
+                    f"shard '{path.name}' must hold exactly one top-level key",
+                    reason="invalid_shard",
+                    path=path,
+                )
+            result.update(data)
+        return result
