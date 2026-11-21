@@ -312,3 +312,51 @@ def test_bindings_follow_case_content(tmp_path: Path) -> None:
     changed = [_case("tc.one"), _case("tc.two", expected="9")]
     assert bindings_from_cases(CASES) != bindings_from_cases(changed)
     assert current_digests(changed)["tc.two"] == changed[1].content_digest
+
+
+def test_recorded_bindings_are_ordered_by_test_id(tmp_path: Path) -> None:
+    """verifies: TOOL-CBT-010 — the record's bindings are canonically ordered by
+    test id, never by digest, whatever order the caller supplied (D-02: stable
+    ids order the record; digests bind the content). Mutation A6 survivor test:
+    an ordering-key swap silently reorders the canonical record body."""
+    root = tmp_path / "proj"
+    (root / "build").mkdir(parents=True)
+    (root / "build" / "h.py").write_text("print('RESULT tc.a pass')" + chr(10), encoding="utf-8")
+    # tc.a carries "b"*64 and tc.b carries "a"*64, so sorting by digest would
+    # reverse the test-id order; only the test id is a canonical order (D-02).
+    supplied = [exh_runner.TestBinding("tc.b", "a" * 64), exh_runner.TestBinding("tc.a", "b" * 64)]
+    record = record_compiled_suite(root, "build/h.py", EXECUTION, supplied)
+    assert [b.test_id for b in record.bindings] == ["tc.a", "tc.b"]
+    import json
+
+    dumped = json.loads(dump_suite_record(record))
+    assert [b["test_id"] for b in dumped["bindings"]] == ["tc.a", "tc.b"]
+
+
+def test_a_resolved_path_escape_is_refused(tmp_path: Path) -> None:
+    """verifies: TOOL-CBT-010 — confinement holds after resolving: a path that
+    only escapes once symlinks/junctions are resolved is refused (the string
+    pre-checks alone do not catch it). Mutation A6 survivor test."""
+    import sys as _sys
+
+    if _sys.platform != "win32":
+        pytest.skip("junction-based escape reproduction is Windows-specific")
+    try:
+        import _winapi  # type: ignore[import-not-found]
+    except ImportError:  # pragma: no cover
+        pytest.skip("_winapi unavailable")
+
+    root = tmp_path / "proj"
+    (root / "build").mkdir(parents=True)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "h.py").write_text("print('RESULT tc.one pass')" + chr(10), encoding="utf-8")
+    junction = root / "build" / "escape"
+    try:
+        _winapi.CreateJunction(str(outside), str(junction))
+    except OSError:  # pragma: no cover - filesystem without junction support
+        pytest.skip("cannot create a junction on this filesystem")
+    # The recorded path stays inside root as a string, but resolves outside it.
+    with pytest.raises(CbtError) as excinfo:
+        record_compiled_suite(root, "build/escape/h.py", EXECUTION, bindings_from_cases(CASES))
+    assert excinfo.value.reason == "path_escape"
