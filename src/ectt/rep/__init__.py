@@ -7,6 +7,12 @@ Every report format renders from the single documented intermediate model
 (TOOL-REP-100).
 """
 
+from ectt.rep.coverage_interchange import (
+    export_cobertura,
+    export_lcov,
+    import_cobertura,
+    import_lcov,
+)
 from ectt.rep.errors import ReportModelError
 from ectt.rep.formats import (
     REPORT_FORMAT_CONTRACT,
@@ -48,6 +54,10 @@ from ectt.rep.summary import (
 )
 
 __all__ = ["cobertura_rate",
+    "export_cobertura",
+    "export_lcov",
+    "import_cobertura",
+    "import_lcov",
     "render_cobertura",
     "render_html",
     "render_junit",
