@@ -39,7 +39,7 @@ from typing import Any
 
 from ectt.cbt.errors import CbtError
 from ectt.core.determinism import canonical_json, stable_id
-from ectt.exh.results import ExecutionMetadata
+from ectt.exh.results import ExecutionMetadata, ResultSet
 from ectt.exh.runner import (
     ExecutedRun,
     ParallelUnit,
@@ -59,6 +59,7 @@ __all__ = [
     "ParallelReExecution",
     "ReExecution",
     "ReExecutionSpec",
+    "SubsetReExecution",
     "bindings_from_cases",
     "current_digests",
     "dump_suite_record",
@@ -66,6 +67,7 @@ __all__ = [
     "record_compiled_suite",
     "reexecute_isolated",
     "reexecute_parallel",
+    "reexecute_subset",
     "reexecute_suite",
 ]
 
@@ -222,15 +224,22 @@ def load_suite_record(text: str) -> CompiledSuiteRecord:
     return record
 
 
-def _checked_attempt(record: CompiledSuiteRecord, root: Path | str, run_label: str) -> tuple[RunAttempt, Path]:
+def _checked_attempt(
+    record: CompiledSuiteRecord,
+    root: Path | str,
+    run_label: str,
+    allocations: Sequence[TestBinding] | None = None,
+) -> tuple[RunAttempt, Path]:
     """Shared re-execution integrity gate: record, binary, then a built attempt.
 
     Validates the run label and the record's own digest, confines and
     existence-checks the recorded executable, refuses a binary whose content
     no longer matches the recorded build, and returns the built attempt (with
     a run id naming this record and this re-execution) plus the executable
-    path. Every re-execution form — plain, isolated, parallel — goes through
-    exactly this gate, so runner choice cannot weaken integrity.
+    path. Every re-execution form — plain, isolated, parallel, subset — goes
+    through exactly this gate, so runner or selection choice cannot weaken
+    integrity. ``allocations`` narrows the attempt's bindings (subset
+    execution); the default is the record's full binding set.
     """
     if not isinstance(run_label, str) or not run_label.strip() or any(c.isspace() for c in run_label):
         raise CbtError("run_label must be a non-empty string without whitespace", reason="invalid_run_label")
@@ -251,7 +260,7 @@ def _checked_attempt(record: CompiledSuiteRecord, root: Path | str, run_label: s
             path=exe,
         )
 
-    attempt = allocate_attempt(record.execution(), record.bindings)
+    attempt = allocate_attempt(record.execution(), allocations if allocations is not None else record.bindings)
     attempt = mark_built(attempt)
     attempt = _distinct(attempt, record, run_label)
     return attempt, exe
@@ -320,6 +329,89 @@ class ReExecutionSpec:
     root: Path | str
     current: Mapping[str, str]
     run_label: str
+
+
+@dataclass(frozen=True)
+class SubsetReExecution:
+    """A subset execution of a recorded suite (TOOL-CBT-030/040).
+
+    ``selected`` and ``not_selected`` partition the record's test ids;
+    ``not_selected`` is computed from the record — independent of what the
+    harness reported — so the partiality of the run is data, not prose
+    (TOOL-CBT-040). ``suite_view`` re-issues the executed run's result set
+    with ``partial=True`` and the unselected tests listed as not executed,
+    which is the view every report of a subset run must consume.
+    """
+
+    reexecution: ReExecution
+    selected: tuple[str, ...]
+    not_selected: tuple[str, ...]
+    suite_view: ResultSet
+
+    @property
+    def partial(self) -> bool:
+        return bool(self.not_selected)
+
+
+def reexecute_subset(
+    record: CompiledSuiteRecord,
+    root: Path | str,
+    current: Mapping[str, str],
+    *,
+    subset: Sequence[str],
+    run_label: str,
+    timeout_seconds: float,
+    argv_prefix: Sequence[str] = (),
+    cwd: Path | str | None = None,
+) -> SubsetReExecution:
+    """Execute only the selected tests of a recorded suite (TOOL-CBT-030).
+
+    The selection must be a non-empty, duplicate-free set of the record's own
+    test ids; anything else is refused with a named reason before anything
+    runs. The attempt is allocated (NR-17) from exactly the selected bindings
+    and passes the same integrity gate as a full re-execution; each selected
+    test runs in its own harness process with the runner's isolation and
+    timeout semantics. The attempt id binds the record id, the label and the
+    sorted selection, so a subset run and a full run under the same label
+    never collide.
+    """
+    selected_set = set(subset)
+    if not selected_set:
+        raise CbtError("a subset execution needs at least one selected test", reason="no_selection")
+    if len(selected_set) != len(subset):
+        raise CbtError("a subset execution selects each test at most once", reason="duplicate_selection")
+    record_ids = {b.test_id for b in record.bindings}
+    unknown = selected_set - record_ids
+    if unknown:
+        raise CbtError(
+            f"the selection names test(s) the recorded suite does not have: {', '.join(sorted(unknown))}",
+            reason="unknown_selection",
+        )
+    ordered = tuple(b for b in record.bindings if b.test_id in selected_set)
+
+    attempt, exe = _checked_attempt(record, root, run_label, allocations=ordered)
+    attempt = replace(attempt, attempt_id=stable_id(record.record_id, run_label, *sorted(selected_set)))
+    run = run_isolated(
+        attempt,
+        exe,
+        current_digests=current,
+        timeout_seconds=timeout_seconds,
+        argv_prefix=argv_prefix,
+        cwd=cwd,
+    )
+    rexec = ReExecution(run=run, record_id=record.record_id, executable_digest=record.executable_digest)
+    not_selected = tuple(sorted(record_ids - selected_set))
+    suite_view = (
+        replace(run.result_set, partial=True, not_executed=not_selected)
+        if not_selected
+        else run.result_set
+    )
+    return SubsetReExecution(
+        reexecution=rexec,
+        selected=tuple(sorted(selected_set)),
+        not_selected=not_selected,
+        suite_view=suite_view,
+    )
 
 
 @dataclass(frozen=True)
