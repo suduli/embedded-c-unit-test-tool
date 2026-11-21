@@ -57,3 +57,16 @@ def test_write_inside_caller_transaction_does_not_end_it(tmp_path: Path) -> None
         raise RuntimeError("boom")
     assert not (root.root / "one.json").exists()
     assert not (root.root / "two.json").exists()
+
+
+def test_cancelled_token_is_honoured_when_joining_a_caller_transaction(tmp_path: Path) -> None:
+    root = _root(tmp_path)
+    token = CancellationToken()
+    token.cancel()
+    with pytest.raises(CancelledError), root.transaction():
+        write_analysis_model(root, "joined.json", _model_doc_1_1(), token=token)
+    assert not (root.root / "joined.json").exists()
+    with root.transaction():
+        with pytest.raises(CancelledError):
+            write_analysis_model(root, "joined.json", _model_doc_1_1(), token=token)
+        assert not (root.root / "joined.json").exists()
