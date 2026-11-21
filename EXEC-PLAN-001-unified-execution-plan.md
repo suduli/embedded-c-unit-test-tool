@@ -24,7 +24,7 @@
 ## 2. State of the project at the as-of date
 
 <!-- BEGIN GENERATED: snapshot -->
-**As of 2026-11-19** · HEAD `cb320a8` on `glm-night/20261117` (14 commits ahead of `origin/main`, **not pushed**).
+**As of 2026-11-21** · HEAD `377715b` on `glm-night/20261120-tracker (lanes: glm-night/20261120-a, glm-night/20261120-b; scratch merge: glm-night/20261120-merge-check)` (14 commits ahead of `origin/main`, **not pushed**).
 
 | Source plan | Implemented | Landed | In Progress | Planned | Blocked | Total |
 |---|---|---|---|---|---|---|
@@ -38,7 +38,7 @@
 - **Work packages:** 191 · 642 person-weeks.
 - **Review track (vcast-findings):** 16 of 22 landed. Not landed: `T-01` (Blocked), `T-02` (Blocked), `T-04` (Blocked), `T-14` (Blocked), `T-05` (Blocked), `T-06` (Blocked).
 - **Gates at HEAD:** plan_check — exit 0 — 346 requirements; 344 unique primary allocations; 191 packages; 642 person-weeks; 52-week lower bound. trace_check — exit 0 — 344/344 in-scope requirements allocated; 259 design elements.
-- **Tests at HEAD:** 970 passed, 0 failed, 4 skipped. Failing:  (fixed by `TASK-001`).
+- **Tests at HEAD:** 3097 passed, 0 failed, 6 skipped. Failing:  (fixed by `TASK-001`).
 - **Overnight backlog budget:** core queue sums to 2,940k tokens (its header says 2,850k); reserve 1,250k.
 - **Startable right now:** `TASK-016`, `TASK-019`, `TASK-020`, `TASK-021`, `TASK-022` (dependencies met, not blocked).
 
@@ -51,6 +51,7 @@
 5. design/trace/requirement-matrix.csv and trace-graph.json list 323 requirements (stale generated artefacts); the live counts (346) come from SRS-001 and plan_check.
 6. BACKLOG §3.2 tells agents to push glm-night/20261117; that branch is cut from the unpushed docs/pending-decisions, so a push would publish those 10 commits. This plan makes the push owner-approved.
 7. 2026-11-19: GLM-night queues merged locally into glm-night/20261117 (chat1 41 items, chat2 35 items; no shared paths, no file overlap). Fixes on the trunk: test cwd leak (98d9963), trust gate enforced before extension execution and bound to content (1746291), regeneration refuses to drop a user region (cb320a8). Nothing pushed. WP item state lives in docs/glm-night/CHAT1_LEDGER.md and CHAT2_LEDGER.md until the owner reconciles it.
+8. 2026-11-21: two further GLM-night lanes were run by Claude (not GLM) from local main 7765236: lane A (9 items) on glm-night/20261120-a and lane B (12 items) on glm-night/20261120-b, followed by four independent review passes whose fixes are merged into the lanes (24 further defects fixed). Merged tree: 3097 passed, 6 skipped; ruff, mypy, plan_check, trace_check clean. Nothing pushed. Per-work-package state lives in docs/glm-night/overnight-20261120/LANE_A_LEDGER.md and LANE_B_LEDGER.md; the 13 packages below carry a delivery note but their status is deliberately left Planned: PLAN-001 5.4 recorded no exit criterion for them, so the criteria were derived by the executor and a status change is the owner's reconciliation (rule 5.3). Open items: SECOND_PASS_A.md, SECOND_PASS_B.md, MORNING_REVIEW.md. Generated C (WP-GEN-07, FIX-GENPROTO) was never compiled or run.
 <!-- END GENERATED: snapshot -->
 
 ---
@@ -1909,8 +1910,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-GEN-06`, `WP-TCM-02` · no decision block · ADR — · PR —
 - Reqs: `TOOL-STB-040`, `TOOL-STB-050`, `TOOL-STB-060`, `TOOL-STB-070`
 - Accept: Every owned requirement is verified by its Appendix A method (T×4; techniques: BOUNDARY VALUE ANALYSIS, EQUIVALENCE PARTITIONING, STATE TRANSITION) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/gen/`, `tests/gen/` · Branch: `feat/wp-gen-07 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/gen/`, `tests/gen/` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/gen/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit fa024d4); evidence docs/verification/WP-GEN-07-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: generated C was parsed with libclang but never compiled or run (no C compiler available); struct outputs not supported. Status left Planned for owner reconciliation.
 
 #### WP-GEN-08 — Stub scope control and indirect-call stubbing
 
@@ -1972,8 +1974,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-EXH-01`, `WP-TCM-02` · no decision block · ADR — · PR —
 - Reqs: `TOOL-CBT-010`
 - Accept: Every owned requirement is verified by its Appendix A method (T×1; techniques: EQUIVALENCE PARTITIONING) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/cbt/`, `tests/cbt/` · Branch: `feat/wp-cbt-01 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/cbt/`, `tests/cbt/` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/cbt/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit bdb4afc); evidence docs/verification/WP-CBT-01-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: record_compiled_suite is not yet called by the build step; remote targets and selective re-execution not covered. Status left Planned for owner reconciliation.
 
 #### WP-GUI-06 — Execution control and per-test result presentation
 
@@ -2008,8 +2011,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-MIG-01`, `WP-ING-01` · no decision block · ADR — · PR —
 - Reqs: `TOOL-MIG-020`
 - Accept: Every owned requirement is verified by its Appendix A method (T×1; techniques: EQUIVALENCE PARTITIONING) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `feat/wp-mig-02 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/mig/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit a4ef3dd); evidence docs/verification/WP-MIG-02-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: TEST_CASE expansion, followed :import: files and tools/flags translation not covered. Status left Planned for owner reconciliation.
 
 #### WP-REP-12 — Reconstructable open result export with test-case coordination
 
@@ -2026,8 +2030,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TCM-06`, `WP-REP-12` · no decision block · ADR — · PR —
 - Reqs: `TOOL-MIG-100`
 - Accept: Every owned requirement is verified by its Appendix A method (I×1; techniques: INSPECTION CHECKLIST) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/mig/`, `tests/mig/`, `docs/verification/WP-MIG-03-analysis.md` · Branch: `feat/wp-mig-03 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/mig/`, `tests/mig/`, `docs/verification/WP-MIG-03-analysis.md` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/mig/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit c41e295); evidence docs/verification/WP-MIG-03-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: rendered reference not yet published under docs/; project file format not in the registry. Status left Planned for owner reconciliation.
 
 #### WP-QUA-03 — User-executable validation suite
 
@@ -2206,8 +2211,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TCM-02`, `WP-ANA-02` · no decision block · ADR — · PR —
 - Reqs: `TOOL-TCD-110`, `TOOL-TCD-120`
 - Accept: Every owned requirement is verified by its Appendix A method (T×2; techniques: BOUNDARY VALUE ANALYSIS, EQUIVALENCE PARTITIONING) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/tcm/`, `tests/tcm/` · Branch: `feat/wp-tcm-07 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/tcm/`, `tests/tcm/` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/tcm/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit cb96fe4); evidence docs/verification/WP-TCM-07-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: integer ranges and declared classes only; no type-derived defaults. Status left Planned for owner reconciliation.
 
 #### WP-MIG-04 — Commercial tool and CSV test data import
 
@@ -2215,8 +2221,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TCM-06` · no decision block · ADR — · PR —
 - Reqs: `TOOL-MIG-030`, `TOOL-MIG-050`
 - Accept: Every owned requirement is verified by its Appendix A method (T×2; techniques: EQUIVALENCE PARTITIONING, PAIRWISE) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `feat/wp-mig-04 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/mig/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit f3d5cb9); evidence docs/verification/WP-MIG-04-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: PARTIAL: tabular exports only; tool-specific non-tabular adapters need documented samples. Status left Planned for owner reconciliation.
 
 #### WP-BLD-03 — Cross-compiled target build
 
@@ -2314,8 +2321,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TCM-02` · schedule/port `^WP-EXH-01` · no decision block · ADR — · PR —
 - Reqs: `TOOL-ATG-040`, `TOOL-ATG-050`, `TOOL-ATG-070`, `TOOL-ATG-080`
 - Accept: Every owned requirement is verified by its Appendix A method (I×1, T×3; techniques: DECISION TABLE, EQUIVALENCE PARTITIONING, INSPECTION CHECKLIST, STATE TRANSITION) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/atg/`, `tests/atg/`, `docs/verification/WP-ATG-01-analysis.md` · Branch: `feat/wp-atg-01 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/atg/`, `tests/atg/`, `docs/verification/WP-ATG-01-analysis.md` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/atg/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit ea2da2d); evidence docs/verification/WP-ATG-01-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: stub validation port only; real port, report rendering of machine-generated marks not wired. Status left Planned for owner reconciliation.
 
 #### WP-MIG-05 — Import fidelity reporting
 
@@ -2323,8 +2331,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-MIG-04` · no decision block · ADR — · PR —
 - Reqs: `TOOL-MIG-040`, `TOOL-MIG-110`
 - Accept: Every owned requirement is verified by its Appendix A method (T×2; techniques: DECISION TABLE, EQUIVALENCE PARTITIONING) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `feat/wp-mig-05 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/mig/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit 76da821); evidence docs/verification/WP-MIG-05-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: CSV and Ceedling adapters only. Status left Planned for owner reconciliation.
 
 #### WP-SEC-06 — Restricted execution context for harnesses
 
@@ -2350,8 +2359,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-ATG-01` · no decision block · ADR — · PR —
 - Reqs: `TOOL-ATG-060`, `TOOL-ATG-100`, `TOOL-ATG-110`
 - Accept: Every owned requirement is verified by its Appendix A method (D×1, T×2; techniques: BOUNDARY VALUE ANALYSIS, EQUIVALENCE PARTITIONING, SCENARIO (demonstration)) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/atg/`, `tests/atg/` · Branch: `feat/wp-atg-05 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/atg/`, `tests/atg/` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/atg/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit 13b4907); evidence docs/verification/WP-ATG-05-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: stub port only; Python-heap memory bound; inline assembly not detectable from the model. Status left Planned for owner reconciliation.
 
 #### WP-COV-04 — Function and function-call coverage
 
@@ -2521,8 +2531,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-EXT-03`, `WP-EXH-01` · no decision block · ADR — · PR —
 - Reqs: `TOOL-TGT-070`, `TOOL-TGT-130`
 - Accept: PLAN-001 §5.4 exit criterion: A host-executed result carries a versioned host profile naming the target→host derivation and its known ABI differences, with unmeasured differences shown as unknown; host success is never displayed as target behavior
-- Files: `src/ectt/ext/`, `tests/ext/` · Branch: `feat/wp-ext-04 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/ext/`, `tests/ext/` · Branch: `glm-night/20261120-a`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/ext/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-a (commit 600e951); evidence docs/verification/WP-EXT-04-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: TOOL-TGT-130 host profile is NOT implemented, so the acceptance criterion in PLAN-001 5.4 is not met; plan, case and outcome checks only. Status left Planned for owner reconciliation.
 
 #### WP-COV-06 — Uninstrumentable expression detection
 
@@ -2656,8 +2667,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-MIG-05` · no decision block · ADR — · PR —
 - Reqs: `TOOL-MIG-090`
 - Accept: Every owned requirement is verified by its Appendix A method (T×1; techniques: STATE TRANSITION) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `feat/wp-mig-07 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/mig/`, `tests/mig/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/mig/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit 38ff925); evidence docs/verification/WP-MIG-07-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: CSV and Ceedling adapters only; counted effort, no durations. Status left Planned for owner reconciliation.
 
 #### WP-REP-06 — Report provenance and format version stability
 
@@ -2755,8 +2767,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TRC-01`, `WP-ANA-02` · no decision block · ADR — · PR —
 - Reqs: `TOOL-TRC-080`, `TOOL-TRC-090`
 - Accept: Every owned requirement is verified by its Appendix A method (T×2; techniques: EQUIVALENCE PARTITIONING, STATE TRANSITION) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/trc/`, `tests/trc/` · Branch: `feat/wp-trc-05 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/trc/`, `tests/trc/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/trc/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit dd71a54); evidence docs/verification/WP-TRC-05-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: range links are approximate: the analysis model has no function end line. Status left Planned for owner reconciliation.
 
 #### WP-COV-10 — Unique-cause MC/DC support or documented gap
 
@@ -2800,8 +2813,9 @@ Every PLAN-001 work package that is not Implemented, in execution order, with al
 - deps `WP-TRC-03` · no decision block · ADR — · PR —
 - Reqs: `TOOL-TRC-070`, `TOOL-TRC-100`
 - Accept: Every owned requirement is verified by its Appendix A method (T×2; techniques: DECISION TABLE, PAIRWISE) and the exit evidence is recorded; full gate green.
-- Files: `src/ectt/trc/`, `tests/trc/` · Branch: `feat/wp-trc-04 (new branch; base origin/main once docs/pending-decisions is merged — not scheduled yet)`
+- Files: `src/ectt/trc/`, `tests/trc/` · Branch: `glm-night/20261120-b`
 - Verify: `.venv/Scripts/python -m pytest -q -p no:cacheprovider tests/trc/`; G-FULL
+- Notes: 2026-11-21 delivered on glm-night/20261120-b (commit d83e54b); evidence docs/verification/WP-TRC-04-analysis.md; executor-derived criteria (none recorded in PLAN-001 5.4); not done: PARTIAL: ReqIF export done and schema-validated; TOOL-TRC-100 external tool adapter not done. Status left Planned for owner reconciliation.
 
 #### WP-AIF-12 — Certification evidence review and exclusion mode
 
