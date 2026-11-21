@@ -14,14 +14,14 @@ Nothing was pushed, merged into `main`, or written to the board, the tracker, `d
 
 | Branch | Tip | What it is |
 |---|---|---|
-| `glm-night/20261120-a` | `d5025d3` | Lane A, 9 of 9 items, cut from `main` `7765236` |
-| `glm-night/20261120-b` | `3695b68` | Lane B, 12 of 12 items (10 DONE, 2 PARTIAL) plus one review-fix commit |
+| `glm-night/20261120-a` | `d84139e` | Lane A, 9 of 9 items, cut from `main` `7765236`, plus review fixes |
+| `glm-night/20261120-b` | `6e365bf` | Lane B, 12 of 12 items (10 DONE, 2 PARTIAL), plus review fixes |
 | `glm-night/20261120-merge-check` | this branch | **Scratch, not for `main`.** Lane A with lane B merged in, only to prove they combine; it also holds this file |
 
-Worktrees: `../wt-n20-a`, `../wt-n20-b`, `../wt-n20-merge-check`, each with its own `.venv`.
+Worktrees: `../wt-n20-a`, `../wt-n20-b`, `../wt-n20-merge-check`, and four review worktrees `../wt-rv1` to `../wt-rv4` (branches `glm-night/20261120-rv1-atg-cbt`, `-rv2-gen-tcm-ext`, `-rv3-mig`, `-rv4-trc-rep-core`, already merged into lanes A and B), each with its own `.venv`.
 
-Merging lane A and then lane B into `main` is conflict-free. On the combined tree: **3006 passed, 6 skipped**
-(baseline 1457 passed, 5 skipped), ruff clean, mypy clean (163 source files), `plan_check` 346 / 344 / 191 / 642 / 52,
+Merging lane A and then lane B into `main` is conflict-free. On the combined tree: **3097 passed, 6 skipped**
+(baseline 1457 passed, 5 skipped; lane A alone 2823, lane B alone 1731), ruff clean, mypy clean (163 source files), `plan_check` 346 / 344 / 191 / 642 / 52,
 `trace_check` OK. The one extra skip is the optional ReqIF schema test (below). To take the work, from a clean
 `main`:
 
@@ -42,6 +42,26 @@ host-side reader, and by structural assertions. "State from one test never leaks
 state machine's text, not demonstrated by running two tests. Please verify on a machine with a C toolchain before
 relying on either. If you want one here, `ziglang` from PyPI provides `python -m ziglang cc`; I did not download it
 unattended.
+
+## Review round (four independent review agents, all fixes merged into the lanes)
+
+Each agent reviewed one package set, wrote a failing test per confirmed defect, then fixed it. **24 more real
+defects were fixed** (2 + 7 + 9 + 6), on top of the two below. Highlights: the Unity and cmocka output parser could
+aggregate a run to *pass* after a crash mid-test or when a repeated test name overwrote an earlier failure; generated
+stubs did not compile for `const` parameters or typedef'd output pointers and accepted a value that injected a second
+call; a report merge gave a different id when shards were merged in a different order; project rollback left a created
+parent directory behind; the ReqIF `creation_time` accepted forms that fail the OMG schema; the Ceedling importer
+crashed on a test directory that links outside the project; NaN generation limits were silently unenforced.
+
+**Left for you (the agents correctly did not change them):**
+- `src/ectt/core/fs.py` `OutputRoot._rollback` has the same shallow-first directory-removal bug that was fixed in
+  `Project._rollback` (sort created directories deepest first); and `OutputRoot.transaction` is not re-entrant (a nested
+  scope resets the outer journal; `ana.persist` works around it).
+- A truncated Unity run (crash mid-run, no `N Tests N Failures` summary line) still aggregates to pass; fixing it needs
+  a rule on that summary line and the existing tests use stubs without one.
+- `src/ectt/gen/stubs.py` `_required_type_declarations` (WP-GEN-06) emits `typedef ref:type.unsigned_char u8;` for the
+  analyser's real typedef shape, which is not valid C.
+- `ectt.exh`/CLI exit-code table has no `execution` category (the fallback gives the same code, so no behaviour change).
 
 ## Two defects found at the end by checking against primary sources (fixed)
 
@@ -86,6 +106,10 @@ reports.
   otherwise untouched and clean).
 - The three new worktrees and their `.venv` folders (remove with `git worktree remove` once merged).
 - `xmlschema` is installed in the lane B and merge-check venvs only (it is not a project dependency).
+- The review worktrees `../wt-rv1` to `../wt-rv4` and their branches and `.venv` folders (all merged; remove after merging).
+- A review agent overwrote the shared Git Bash `/tmp/gate.sh` with a copy hardcoded to its own worktree, so two interim
+  'combined gate' runs of mine were really lane B alone; the figures above come from `/tmp/gate_strict.sh`, run in each of the
+  three trees with the directory printed.
 - Scratch files outside the repo: `C:\tmp\reqif\reqif.xsd`, `C:\tmp\ceed_tpl.yml`, and helper scripts in the Git Bash
   `/tmp` (`gate.sh`, `commit.py`, `propmut.py`, `flat_probe.py`).
 - The session asked the app to keep the computer awake while it ran.
