@@ -11,6 +11,7 @@ from ectt.cbt.compare import (
 )
 from ectt.cbt.errors import CbtError
 from ectt.cbt.impact import ImpactResult, SourceChange, affected_cases
+from ectt.cbt.minimize import Minimization, minimize_suite
 from ectt.cbt.reexecute import (
     SUITE_RECORD_VERSION,
     CompiledSuiteRecord,
@@ -36,6 +37,7 @@ __all__ = [
     "CoverageComparison",
     "ImpactResult",
     "MetricDelta",
+    "Minimization",
     "RunComparison",
     "ParallelReExecution",
     "ReExecution",
@@ -46,6 +48,7 @@ __all__ = [
     "bindings_from_cases",
     "compare_coverage",
     "compare_runs",
+    "minimize_suite",
     "current_digests",
     "dump_suite_record",
     "load_suite_record",
