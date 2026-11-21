@@ -351,11 +351,9 @@ def write_analysis_model(
         raise TypeError(f"Expected AnalysisModel or Mapping, got {type(model).__name__}")
 
     data = canonical_json_bytes(doc, first_keys=("schema_version",))
-    if output_root._journal is not None:
-        # OutputRoot.transaction is not re-entrant (core/fs.py); join the caller's scope.
-        if token is not None:
-            token.raise_if_cancelled()
-        return output_root.write_bytes(rel_path, data)
+    # OutputRoot.transaction is re-entrant: when the caller already holds a
+    # transaction scope this nested scope joins it, and the caller's scope
+    # decides durability.
     with output_root.transaction(token):
         return output_root.write_bytes(rel_path, data)
 
