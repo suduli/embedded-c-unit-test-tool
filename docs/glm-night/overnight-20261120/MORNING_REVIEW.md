@@ -43,6 +43,20 @@ state machine's text, not demonstrated by running two tests. Please verify on a 
 relying on either. If you want one here, `ziglang` from PyPI provides `python -m ziglang cc`; I did not download it
 unattended.
 
+## Tracker and GitHub project
+
+- **Tracker updated** on branch `glm-night/20261120-tracker` (commit `bbed6d9`, from the scratch merge-check branch): the
+  meta block and 13 work packages carry delivery notes and branch pointers; the Markdown plan was regenerated and
+  `unified_plan_sync.py --check` passes. **Statuses were left `Planned` on purpose**: PLAN-001 5.4 recorded no exit
+  criterion for these packages, so the criteria were derived by the executor and flipping status is your reconciliation
+  (tracker rule 5.3). WP-EXT-04 in particular does not meet its recorded criterion (TOOL-TGT-130 host profile).
+- **GitHub project 5 (ECTT - Delivery) was not written**, at your choice. The importer syncs only PLAN-001 content, so it
+  cannot express tonight's work; its read-only preview would update 7 public issues (WP-EXT-04, COV-02, COV-05, COV-06,
+  TRC-01, PKG-01, QUA-03) for older register changes and would cite the unpushed revision `377715b`. The preview is saved as
+  `github-plan-preview.json` (bound to the remote state at 2026-11-21 03:59 UTC; re-run `plan` before applying). After you
+  push: `python tools/github_projects.py plan --project-number 5`, review, then `apply`. `ECTT_PROJECTS_SYNC_ENABLED`
+  remains `false`.
+
 ## Review round (four independent review agents, all fixes merged into the lanes)
 
 Each agent reviewed one package set, wrote a failing test per confirmed defect, then fixed it. **24 more real
