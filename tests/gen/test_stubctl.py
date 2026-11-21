@@ -389,3 +389,17 @@ def test_a_parameter_named_like_a_generated_identifier_still_compiles(pname: str
     unit = generate_programmable_stubs((Sig("probe_fn", "int", (("int", "first"), ("int *", pname))),))
 
     assert _errors(unit.source) == []
+
+
+def test_a_typedef_of_a_scalar_is_an_output_parameter_in_the_analysers_own_type_graph_shape() -> None:
+    # The analyser spells a typedef's target as 'ref:type.<id>' and the builtin carries the C name.
+    types = {
+        "type.unsigned_char": TypeModel(kind="builtin", name="unsigned char"),
+        "type.u8": TypeModel(kind="typedef", name="u8", underlying_type="ref:type.unsigned_char"),
+        "type.u8b": TypeModel(kind="typedef", name="u8b", underlying_type="ref:type.u8"),
+        "type.struct.X": TypeModel(kind="struct", name="X"),
+        "type.X": TypeModel(kind="typedef", name="X", underlying_type="ref:type.struct.X"),
+    }
+    signature = Sig("probe_fn", "void", (("u8 *", "p"), ("u8b *", "q"), ("X *", "r")))
+
+    assert out_parameter_names(signature, types=types) == ("p", "q")

@@ -116,8 +116,13 @@ def _is_scalar(type_text: str, types: dict[str, TypeModel] | None) -> bool:
     if types is not None:
         for key in _candidate_keys(type_text):
             model = types.get(key)
-            if model is not None and model.kind == "typedef" and model.underlying_type:
+            if model is None:
+                continue
+            if model.kind == "typedef" and model.underlying_type:
                 return _is_scalar(model.underlying_type.strip(), types)
+            # the analyser's graph spells a typedef's target as ``ref:type.<id>`` and the builtin carries the C name
+            if model.kind == "builtin" and model.name and model.name != type_text:
+                return _is_scalar(model.name.strip(), None)
     return False
 
 
