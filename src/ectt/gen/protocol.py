@@ -103,6 +103,7 @@ void ectt_fail(const char *assertion, const char *expected, const char *actual,
 void ectt_end_test(void);
 int ectt_register_state_reset(void (*fn)(void));
 unsigned ectt_unattributed_failure_count(void);
+const char *ectt_number_token(unsigned long value);
 
 void ectt_report_result(const char *test_id, const char *outcome) {
     ECTT_STREAM_WRITE("RESULT ");
@@ -184,6 +185,32 @@ void ectt_end_test(void) {
 }
 
 unsigned ectt_unattributed_failure_count(void) { return ectt_unattributed_failures; }
+
+/* The number as a protocol token, for generated checks that report an actual
+   count (for example a stub call-count expectation). The buffer is shared:
+   ectt_fail consumes the token synchronously, before any other call. */
+const char *ectt_number_token(unsigned long value) {
+    static char ectt_number_text[24];
+    unsigned long rest = value;
+    unsigned n = 0;
+    unsigned i;
+    if (rest == 0) {
+        ectt_number_text[0] = '0';
+        ectt_number_text[1] = 0;
+        return ectt_number_text;
+    }
+    while (rest > 0 && n < sizeof ectt_number_text - 1u) {
+        ectt_number_text[n++] = (char)('0' + (int)(rest % 10ul));
+        rest /= 10ul;
+    }
+    for (i = 0; i < n / 2u; i++) {
+        char swap = ectt_number_text[i];
+        ectt_number_text[i] = ectt_number_text[n - 1u - i];
+        ectt_number_text[n - 1u - i] = swap;
+    }
+    ectt_number_text[n] = 0;
+    return ectt_number_text;
+}
 """
 
 SETUP_TEARDOWN_BLOCK: Final[str] = r"""static void (*ectt_setup_hook)(void) = 0;

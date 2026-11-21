@@ -24,6 +24,7 @@ Satisfies: TOOL-HAR-010, TOOL-HAR-020, TOOL-HAR-040, TOOL-HAR-050.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final
 
@@ -35,6 +36,8 @@ from ectt.gen.errors import (
     UnknownUnitError,
 )
 from ectt.gen.protocol import RESULT_PROTOCOL_BLOCK, SETUP_TEARDOWN_BLOCK
+from ectt.gen.stubs import FunctionSignature
+from ectt.gen.testbody import StubbedCase, case_render, render_case_functions
 
 __all__ = [
     "ExposedFunction",
@@ -79,6 +82,7 @@ class GeneratedHarness:
     variables: tuple[ExposedVariable, ...]
     tool_version: str = "0.1.0"
     interface_fingerprint: str = ""
+    case_section: str = ""  # per-case functions, empty when no cases were wired
 
     def has_result_protocol(self) -> bool:
         """Whether the RESULT/FAILURE stream runtime is present in the source."""
@@ -151,10 +155,16 @@ class HarnessGenerator:
         *,
         uut_path: str | None = None,
         tool_version: str = "0.1.0",
+        cases: Sequence[StubbedCase] | None = None,
+        stub_signatures: Mapping[str, FunctionSignature] | None = None,
+        stub_types: Mapping[str, TypeModel] | None = None,
     ) -> None:
         self._model = model
         self._uut_path = uut_path
         self._tool_version = tool_version
+        self._cases = tuple(cases) if cases is not None else ()
+        self._stub_signatures = dict(stub_signatures) if stub_signatures is not None else {}
+        self._stub_types = dict(stub_types) if stub_types is not None else {}
 
     def _select_unit(self) -> AnalysisUnit:
         units = self._model.units
@@ -228,7 +238,8 @@ class HarnessGenerator:
         variables = self._exposed_variables(unit)
         header = _header_for(unit.path)
         fingerprint = _interface_fingerprint(functions, variables)
-        source = self._render(header, functions, variables, fingerprint)
+        case_section = self._case_section()
+        source = self._render(header, functions, variables, fingerprint, case_section)
         return GeneratedHarness(
             uut_path=unit.path,
             uut_header=header,
@@ -237,7 +248,29 @@ class HarnessGenerator:
             variables=variables,
             tool_version=self._tool_version,
             interface_fingerprint=fingerprint,
+            case_section=case_section,
         )
+
+    def _case_section(self) -> str:
+        """The per-case C section, wired from the case stubs (empty without cases).
+
+        Every case's stub specs are rendered through ``ectt.gen.testbody`` —
+        ``render_stub_setup`` programs the stubs, ``render_stub_expectations``
+        become checks reported through ``ectt_fail``. The stub set must be the
+        one the stub unit was generated for, and it is also what decides
+        whether ``ectt_stub_reset_all`` exists to register as a state reset.
+        """
+        if not self._cases:
+            return ""
+        renders = tuple(
+            case_render(
+                case,
+                self._stub_signatures,
+                types=self._stub_types or None,
+            )
+            for case in self._cases
+        )
+        return render_case_functions(renders, stubbed=bool(self._stub_signatures))
 
     def _render(
         self,
@@ -245,6 +278,7 @@ class HarnessGenerator:
         functions: tuple[ExposedFunction, ...],
         variables: tuple[ExposedVariable, ...],
         fingerprint: str,
+        case_section: str,
     ) -> str:
         lines: list[str] = [
             _BANNER,
@@ -280,4 +314,12 @@ class HarnessGenerator:
             )
             lines.append("")
         lines.extend(_USER_REGION_SLOTS)
+        if case_section:
+            # A generated region of its own, after the user regions: the
+            # per-case functions are tool output, never user text, so
+            # regeneration keeps treating the user slots as the only
+            # user-owned text.
+            lines.append("/* ectt:generated-cases begin */")
+            lines.append(case_section.rstrip("\n"))
+            lines.append("/* ectt:generated-cases end */")
         return "\n".join(lines)
