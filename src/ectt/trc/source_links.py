@@ -56,6 +56,15 @@ class SourceLink:
     end_line: int | None = None
 
     def __post_init__(self) -> None:
+        for name, value, expected in (
+            ("requirement_id", self.requirement_id, str),
+            ("unit", self.unit, str),
+            ("function", self.function, str),
+            ("start_line", self.start_line, int),
+            ("end_line", self.end_line, int),
+        ):
+            if value is not None and not isinstance(value, expected):
+                raise TrcError(f"source link field '{name}' must be a {expected.__name__}", reason="invalid_link")
         if not self.requirement_id or any(c.isspace() for c in self.requirement_id):
             raise TrcError("requirement id must be a non-empty string without whitespace", reason="invalid_id")
         if not self.unit or not self.unit.strip():
