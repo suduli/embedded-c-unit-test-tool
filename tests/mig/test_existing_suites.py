@@ -197,3 +197,56 @@ def test_real_cmocka_ok_spelling_is_a_pass() -> None:
     assert {r.test_id: r.outcome for r in records} == {"reads_channel": "pass", "calibrates": "error"}
     assert all("OK" not in line for line in context if line.startswith("[       OK"))
     assert "[       OK ] reads_channel" not in context
+
+
+# --- review-fix regressions --------------------------------------------------------------
+
+
+def test_unity_windows_drive_letter_path_is_recognised() -> None:
+    """Regression: a Windows ``__FILE__`` such as a drive-letter path contains a colon."""
+    records, unrecognised = parse_unity_output(
+        "C:" + chr(92) + "proj" + chr(92) + "test_a.c:12:test_x:PASS\n"
+        "C:/proj/test_a.c:20:test_y:FAIL: Expected 1 Was 2\n"
+    )
+
+    assert {r.test_id: r.outcome for r in records} == {"test_x": "pass", "test_y": "fail"}
+    assert records[1].failures[0].location.file == "C:/proj/test_a.c"
+    assert unrecognised == ()
+
+
+def test_repeated_test_name_cannot_mask_an_earlier_failure(tmp_path: Path) -> None:
+    script, prefix = _stub_suite(tmp_path, "a.c:1:test_x:FAIL: Expected 1 Was 2\nb.c:1:test_x:PASS\n")
+
+    run = run_existing_suite(script, "unity", argv_prefix=prefix)
+
+    assert len(run.records) == 2
+    assert run.aggregate == "failed"
+
+
+def test_cmocka_test_started_but_never_finished_is_an_error_not_a_pass(tmp_path: Path) -> None:
+    """A crash after ``[ RUN ]`` leaves no verdict line; the run must not aggregate to pass."""
+    text = "[ RUN      ] t1\n[       OK ] t1\n[ RUN      ] t2\n"
+    records, _ = parse_cmocka_output(text)
+    assert {r.test_id: r.outcome for r in records} == {"t1": "pass", "t2": "error"}
+
+    script, prefix = _stub_suite(tmp_path, text)
+    assert run_existing_suite(script, "cmocka", argv_prefix=prefix).aggregate == "failed"
+
+
+def test_cmocka_unfinished_test_before_next_run_is_an_error() -> None:
+    records, _ = parse_cmocka_output("[ RUN      ] t1\n[ RUN      ] t2\n[       OK ] t2\n")
+
+    assert {r.test_id: r.outcome for r in records} == {"t1": "error", "t2": "pass"}
+
+
+def test_undecodable_suite_output_does_not_crash_the_run(tmp_path: Path) -> None:
+    script = tmp_path / "suite_bytes.py"
+    script.write_text(
+        "import sys\nsys.stdout.buffer.write(bytes([97, 46, 99, 58, 49, 58, 116, 58, 80, 65, 83, 83, 10, 129, 254, 10]))\n",
+        encoding="utf-8",
+    )
+
+    run = run_existing_suite(script, "unity", argv_prefix=[sys.executable])
+
+    assert run.aggregate == "pass"
+    assert len(run.unrecognised_lines) == 1
