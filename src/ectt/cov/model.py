@@ -1,12 +1,11 @@
-# implements: TOOL-COV-010, TOOL-COV-020
+# implements: TOOL-COV-010, TOOL-COV-020, TOOL-COV-030, TOOL-COV-040
 """Coverage model for the GCC gcov backend (CMP-COV).
 
 The model mirrors the documented GCC gcov JSON format (GCC 14.4, "Invoking Gcov →
-GCOV JSON Format") restricted to the statement and branch/decision scope of
-TOOL-COV-010/TOOL-COV-020. `functions[]` records belong to WP-COV-04 and are not
-modelled here.
+GCOV JSON Format"): statement and branch/decision scope (TOOL-COV-010/020,
+WP-COV-01) plus function and function-call records (TOOL-COV-030/040, WP-COV-04).
 
-Satisfies: TOOL-COV-010, TOOL-COV-020.
+Satisfies: TOOL-COV-010, TOOL-COV-020, TOOL-COV-030, TOOL-COV-040.
 """
 
 from __future__ import annotations
@@ -20,7 +19,9 @@ from ectt.core.determinism import canonical_json_bytes
 __all__ = [
     "SCHEMA_VERSION_CURRENT",
     "GcovBranch",
+    "GcovCall",
     "GcovCondition",
+    "GcovFunction",
     "GcovLine",
     "GcovFile",
     "GcovDocument",
@@ -79,8 +80,68 @@ class GcovBranch:
 
 
 @dataclass(frozen=True)
+class GcovCall:
+    """One call site on an instrumented line (gcov format version 2+).
+
+    ``returned`` is the number of times the call returned (the call count equals
+    the line's ``count``); a call is covered iff ``returned > 0`` (TOOL-COV-040).
+    """
+
+    returned: int
+    source_block_id: int | None = None
+    destination_block_id: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        res: dict[str, Any] = {"returned": self.returned}
+        if self.source_block_id is not None:
+            res["source_block_id"] = self.source_block_id
+        if self.destination_block_id is not None:
+            res["destination_block_id"] = self.destination_block_id
+        return res
+
+
+@dataclass(frozen=True)
+class GcovFunction:
+    """One function record of a file (documented gcov function form, TOOL-COV-030).
+
+    ``blocks`` is the static number of basic blocks in the function,
+    ``blocks_executed`` the number executed in this run, ``execution_count`` the
+    number of executions of the function. Line and column numbers are 1-based.
+    """
+
+    name: str
+    start_line: int
+    end_line: int
+    execution_count: int
+    blocks: int | None = None
+    blocks_executed: int | None = None
+    demangled_name: str | None = None
+    start_column: int | None = None
+    end_column: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        res: dict[str, Any] = {
+            "name": self.name,
+            "start_line": self.start_line,
+            "end_line": self.end_line,
+            "execution_count": self.execution_count,
+        }
+        if self.blocks is not None:
+            res["blocks"] = self.blocks
+        if self.blocks_executed is not None:
+            res["blocks_executed"] = self.blocks_executed
+        if self.demangled_name is not None:
+            res["demangled_name"] = self.demangled_name
+        if self.start_column is not None:
+            res["start_column"] = self.start_column
+        if self.end_column is not None:
+            res["end_column"] = self.end_column
+        return res
+
+
+@dataclass(frozen=True)
 class GcovLine:
-    """One instrumented statement line with its branches and condition outcomes."""
+    """One instrumented statement line with its branches, conditions, and calls."""
 
     line_number: int
     count: int
@@ -88,6 +149,7 @@ class GcovLine:
     function_name: str | None = None
     branches: tuple[GcovBranch, ...] = ()
     conditions: tuple[GcovCondition, ...] = ()
+    calls: tuple[GcovCall, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         res: dict[str, Any] = {
@@ -101,26 +163,30 @@ class GcovLine:
             res["branches"] = [b.to_dict() for b in self.branches]
         if self.conditions:
             res["conditions"] = [c.to_dict() for c in self.conditions]
+        if self.calls:
+            res["calls"] = [c.to_dict() for c in self.calls]
         return res
 
 
 @dataclass(frozen=True)
 class GcovFile:
-    """Per-source-file coverage: the instrumented statement lines in line order."""
+    """Per-source-file coverage: functions and instrumented statement lines."""
 
     file: str
+    functions: tuple[GcovFunction, ...] = ()
     lines: tuple[GcovLine, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "file": self.file,
-            "lines": [line.to_dict() for line in self.lines],
-        }
+        res: dict[str, Any] = {"file": self.file}
+        if self.functions:
+            res["functions"] = [f.to_dict() for f in self.functions]
+        res["lines"] = [line.to_dict() for line in self.lines]
+        return res
 
 
 @dataclass(frozen=True)
 class GcovDocument:
-    """A parsed gcov JSON document (statement and branch scope)."""
+    """A parsed gcov JSON document (statement, branch, function and call scope)."""
 
     format_version: str
     gcc_version: str

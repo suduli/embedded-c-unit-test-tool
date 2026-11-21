@@ -34,9 +34,11 @@ from typing import Any
 from ectt.cov.errors import CoverageParseError
 from ectt.cov.model import (
     GcovBranch,
+    GcovCall,
     GcovCondition,
     GcovDocument,
     GcovFile,
+    GcovFunction,
     GcovLine,
 )
 
@@ -207,6 +209,24 @@ def _build_file(value: Any, idx: int) -> GcovFile:
     where = f"files[{idx}]"
     entry = _require_object(value, where)
     file_name = _require_str(entry, "file", where)
+    functions_raw = entry.get("functions", [])
+    if not isinstance(functions_raw, list):
+        raise CoverageParseError(
+            f"gcov document {where} field 'functions' must be an array when present",
+            reason="invalid_optional_key",
+        )
+    functions: list[GcovFunction] = []
+    seen_functions: set[str] = set()
+    for fn_idx, fn_raw in enumerate(functions_raw):
+        function = _build_function(fn_raw, f"{where}.functions[{fn_idx}]")
+        if function.name in seen_functions:
+            raise CoverageParseError(
+                f"gcov document {where} records function '{function.name}' more than once",
+                reason="duplicate_function",
+            )
+        seen_functions.add(function.name)
+        functions.append(function)
+    functions.sort(key=lambda fn: (fn.start_line, fn.name))
     lines_raw = entry.get("lines")
     if not isinstance(lines_raw, list):
         raise CoverageParseError(
@@ -225,7 +245,7 @@ def _build_file(value: Any, idx: int) -> GcovFile:
         seen_lines.add(line.line_number)
         lines.append(line)
     lines.sort(key=lambda line: line.line_number)
-    return GcovFile(file=file_name, lines=tuple(lines))
+    return GcovFile(file=file_name, functions=tuple(functions), lines=tuple(lines))
 
 
 def _build_line(value: Any, where: str) -> GcovLine:
@@ -258,6 +278,14 @@ def _build_line(value: Any, where: str) -> GcovLine:
         _build_condition(c, f"{where}.conditions[{i}]") for i, c in enumerate(conditions_raw)
     )
 
+    calls_raw = entry.get("calls", [])
+    if not isinstance(calls_raw, list):
+        raise CoverageParseError(
+            f"gcov document {where} field 'calls' must be an array when present",
+            reason="invalid_optional_key",
+        )
+    calls = tuple(_build_call(c, f"{where}.calls[{i}]") for i, c in enumerate(calls_raw))
+
     return GcovLine(
         line_number=line_number,
         count=count,
@@ -265,6 +293,33 @@ def _build_line(value: Any, where: str) -> GcovLine:
         function_name=function_name,
         branches=branches,
         conditions=conditions,
+        calls=calls,
+    )
+
+def _build_function(value: Any, where: str) -> GcovFunction:
+    entry = _require_object(value, where)
+    name = _require_str(entry, "name", where)
+    blocks = entry.get("blocks")
+    blocks_executed = entry.get("blocks_executed")
+    demangled_name = _optional_str(entry, "demangled_name")
+    return GcovFunction(
+        name=name,
+        start_line=_require_int(entry, "start_line", where, minimum=1),
+        end_line=_require_int(entry, "end_line", where, minimum=1),
+        execution_count=_require_int(entry, "execution_count", where, minimum=0),
+        blocks=None if blocks is None else _optional_int(entry, "blocks"),
+        blocks_executed=None if blocks_executed is None else _optional_int(entry, "blocks_executed"),
+        demangled_name=demangled_name,
+        start_column=_optional_int(entry, "start_column"),
+        end_column=_optional_int(entry, "end_column"),
+    )
+
+def _build_call(value: Any, where: str) -> GcovCall:
+    entry = _require_object(value, where)
+    return GcovCall(
+        returned=_require_int(entry, "returned", where, minimum=0),
+        source_block_id=_optional_int(entry, "source_block_id"),
+        destination_block_id=_optional_int(entry, "destination_block_id"),
     )
 
 

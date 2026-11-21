@@ -27,7 +27,15 @@ from typing import Any
 
 from ectt.cov.errors import CoverageError
 from ectt.cov.metrics import MetricTotals, branch_coverage, statement_coverage
-from ectt.cov.model import GcovBranch, GcovCondition, GcovDocument, GcovFile, GcovLine
+from ectt.cov.model import (
+    GcovBranch,
+    GcovCall,
+    GcovCondition,
+    GcovDocument,
+    GcovFile,
+    GcovFunction,
+    GcovLine,
+)
 
 __all__ = [
     "COMPLETENESS_STATES",
@@ -281,7 +289,49 @@ def _merge_files(existing: GcovFile, incoming: GcovFile, where: str) -> GcovFile
             lines_by_number[line.line_number] = line
         else:
             lines_by_number[line.line_number] = _merge_lines(current, line, f"{where}:{line.line_number}")
-    return GcovFile(file=existing.file, lines=tuple(lines_by_number[n] for n in sorted(lines_by_number)))
+    functions_by_name: dict[str, GcovFunction] = {fn.name: fn for fn in existing.functions}
+    for function in incoming.functions:
+        current_fn = functions_by_name.get(function.name)
+        if current_fn is None:
+            functions_by_name[function.name] = function
+        else:
+            functions_by_name[function.name] = _merge_functions(current_fn, function, f"{where}:{function.name}")
+    return GcovFile(
+        file=existing.file,
+        functions=tuple(functions_by_name[name] for name in sorted(functions_by_name)),
+        lines=tuple(lines_by_number[n] for n in sorted(lines_by_number)),
+    )
+
+
+def _merge_functions(a: GcovFunction, b: GcovFunction, where: str) -> GcovFunction:
+    """Merge one function's records across runs (TOOL-COV-030).
+
+    ``execution_count`` sums across runs. ``blocks`` is a static instrumentation
+    count: it must agree across runs and is never summed.
+    ``blocks_executed`` takes the maximum (executed in any run).
+    """
+    if a.blocks is not None and b.blocks is not None and a.blocks != b.blocks:
+        raise CoverageError(
+            f"coverage records for {where} disagree on the static block count "
+            f"({a.blocks} vs {b.blocks})",
+            reason="blocks_mismatch",
+        )
+    if a.demangled_name is not None and b.demangled_name is not None and a.demangled_name != b.demangled_name:
+        raise CoverageError(
+            f"coverage records for {where} disagree on demangled_name",
+            reason="function_demangled_mismatch",
+        )
+    return GcovFunction(
+        name=a.name,
+        start_line=min(a.start_line, b.start_line),
+        end_line=max(a.end_line, b.end_line),
+        execution_count=a.execution_count + b.execution_count,
+        blocks=a.blocks if a.blocks is not None else b.blocks,
+        blocks_executed=max(a.blocks_executed or 0, b.blocks_executed or 0) or None,
+        demangled_name=a.demangled_name if a.demangled_name is not None else b.demangled_name,
+        start_column=a.start_column if a.start_column is not None else b.start_column,
+        end_column=a.end_column if a.end_column is not None else b.end_column,
+    )
 
 
 def _merge_lines(a: GcovLine, b: GcovLine, where: str) -> GcovLine:
@@ -311,6 +361,14 @@ def _merge_lines(a: GcovLine, b: GcovLine, where: str) -> GcovLine:
         _merge_conditions(x, y, where) for x, y in zip(a.conditions, b.conditions, strict=True)
     )
 
+    if len(a.calls) != len(b.calls):
+        raise CoverageError(
+            f"coverage records for {where} disagree on call-site count "
+            f"({len(a.calls)} vs {len(b.calls)})",
+            reason="call_count_mismatch",
+        )
+    merged_calls = tuple(_merge_calls(x, y, where) for x, y in zip(a.calls, b.calls, strict=True))
+
     return GcovLine(
         line_number=a.line_number,
         count=a.count + b.count,
@@ -318,6 +376,7 @@ def _merge_lines(a: GcovLine, b: GcovLine, where: str) -> GcovLine:
         function_name=a.function_name if a.function_name is not None else b.function_name,
         branches=merged_branches,
         conditions=merged_conditions,
+        calls=merged_calls,
     )
 
 
@@ -336,6 +395,30 @@ def _merge_branches(a: GcovBranch, b: GcovBranch, where: str) -> GcovBranch:
         count=a.count + b.count,
         fallthrough=a.fallthrough if a.fallthrough is not None else b.fallthrough,
         throw=a.throw if a.throw is not None else b.throw,
+        source_block_id=a.source_block_id if a.source_block_id is not None else b.source_block_id,
+        destination_block_id=a.destination_block_id
+        if a.destination_block_id is not None
+        else b.destination_block_id,
+    )
+
+
+def _merge_calls(a: GcovCall, b: GcovCall, where: str) -> GcovCall:
+    if a.source_block_id is not None and b.source_block_id is not None and a.source_block_id != b.source_block_id:
+        raise CoverageError(
+            f"coverage records for {where} disagree on call source_block_id",
+            reason="call_block_id_mismatch",
+        )
+    if (
+        a.destination_block_id is not None
+        and b.destination_block_id is not None
+        and a.destination_block_id != b.destination_block_id
+    ):
+        raise CoverageError(
+            f"coverage records for {where} disagree on call destination_block_id",
+            reason="call_block_id_mismatch",
+        )
+    return GcovCall(
+        returned=a.returned + b.returned,
         source_block_id=a.source_block_id if a.source_block_id is not None else b.source_block_id,
         destination_block_id=a.destination_block_id
         if a.destination_block_id is not None

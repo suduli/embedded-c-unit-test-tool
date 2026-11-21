@@ -26,6 +26,8 @@ from ectt.cov.model import GcovDocument, GcovFile, MetricTotals
 __all__ = [
     "statement_coverage",
     "branch_coverage",
+    "function_coverage",
+    "call_coverage",
 ]
 
 
@@ -66,9 +68,50 @@ def branch_coverage(files: Iterable[GcovFile]) -> MetricTotals:
     return MetricTotals(covered=covered, total=total)
 
 
+def function_coverage(files: Iterable[GcovFile]) -> MetricTotals:
+    """Covered/total functions across the given files (TOOL-COV-030).
+
+    A function is covered iff ``execution_count > 0``. When no file carries any
+    function record the total is ``None`` — function coverage is not
+    applicable, and no 100% figure is fabricated.
+    """
+    covered = 0
+    total = 0
+    for file in files:
+        for function in file.functions:
+            total += 1
+            if function.execution_count > 0:
+                covered += 1
+    if total == 0:
+        return MetricTotals(covered=0, total=None)
+    return MetricTotals(covered=covered, total=total)
+
+
+def call_coverage(files: Iterable[GcovFile]) -> MetricTotals:
+    """Covered/total call sites across the given files (TOOL-COV-040).
+
+    A call is covered iff ``returned > 0`` (the call was made and returned).
+    When no file carries any call record the total is ``None`` — call coverage
+    is not applicable.
+    """
+    covered = 0
+    total = 0
+    for file in files:
+        for line in file.lines:
+            for call in line.calls:
+                total += 1
+                if call.returned > 0:
+                    covered += 1
+    if total == 0:
+        return MetricTotals(covered=0, total=None)
+    return MetricTotals(covered=covered, total=total)
+
+
 def document_metrics(document: GcovDocument) -> dict[str, MetricTotals]:
-    """Statement and branch totals across all files of a document."""
+    """Statement, branch, function and call totals across all files of a document."""
     return {
         "statements": statement_coverage(document.files),
         "branches": branch_coverage(document.files),
+        "functions": function_coverage(document.files),
+        "calls": call_coverage(document.files),
     }
