@@ -185,3 +185,10 @@ def test_empty_baseline_flags_every_requirement_as_new() -> None:
     report = detect_changes(record_baseline([]), [R1, R2], _associations())
     assert report.new == ("REQ-1", "REQ-2")
     assert json.dumps(report.to_dict(), sort_keys=True)
+
+
+def test_load_baseline_rejects_digest_with_trailing_newline() -> None:
+    digest = "a" * 64 + "\n"
+    text = json.dumps({"baseline_version": "1", "digests": {"R1": digest}})
+    with pytest.raises(TrcError):
+        load_baseline(text)
