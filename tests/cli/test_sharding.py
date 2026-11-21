@@ -202,3 +202,14 @@ def test_end_to_end_shard_then_merge_reproduces_the_whole_suite() -> None:
     assert merged.test_statuses() == whole.test_statuses()
     assert len(merged.test_statuses()) == len(SIX)
     assert merged.run_id == "shard-0+shard-1+shard-2"
+
+
+def test_merged_report_id_and_dump_are_input_order_free() -> None:
+    first = _shard_report("run-a", ("t1",))
+    second = _shard_report("run-b", ("t2",))
+
+    forward = merge_reports([first, second], clock=CLOCK)
+    backward = merge_reports([second, first], clock=CLOCK)
+
+    assert forward.report_id == backward.report_id
+    assert dump_report_model(forward) == dump_report_model(backward)
