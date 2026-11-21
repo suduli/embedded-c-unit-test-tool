@@ -115,7 +115,8 @@ class Project:
                     path.write_bytes(original)
             except OSError as exc:
                 notes.append(f"rollback could not restore '{path}': {exc}")
-        for directory in self._created_dirs or []:
+        # Deepest first: a shared new parent can only be removed after all its children.
+        for directory in sorted(self._created_dirs or [], key=lambda d: len(d.parts), reverse=True):
             try:
                 directory.rmdir()
             except FileNotFoundError:
