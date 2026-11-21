@@ -42,23 +42,30 @@ from ectt.core.determinism import canonical_json, stable_id
 from ectt.exh.results import ExecutionMetadata
 from ectt.exh.runner import (
     ExecutedRun,
+    ParallelUnit,
     RunAttempt,
     TestBinding,
     allocate_attempt,
     mark_built,
     run_harness,
+    run_isolated,
+    run_parallel,
 )
 from ectt.tcm.datacases import DataDrivenTestCase
 
 __all__ = [
     "SUITE_RECORD_VERSION",
     "CompiledSuiteRecord",
+    "ParallelReExecution",
     "ReExecution",
+    "ReExecutionSpec",
     "bindings_from_cases",
     "current_digests",
     "dump_suite_record",
     "load_suite_record",
     "record_compiled_suite",
+    "reexecute_isolated",
+    "reexecute_parallel",
     "reexecute_suite",
 ]
 
@@ -215,21 +222,15 @@ def load_suite_record(text: str) -> CompiledSuiteRecord:
     return record
 
 
-def reexecute_suite(
-    record: CompiledSuiteRecord,
-    root: Path | str,
-    current: Mapping[str, str],
-    *,
-    run_label: str,
-    argv_prefix: Sequence[str] = (),
-) -> ReExecution:
-    """Run the recorded suite again exactly as built; never regenerates or rebuilds.
+def _checked_attempt(record: CompiledSuiteRecord, root: Path | str, run_label: str) -> tuple[RunAttempt, Path]:
+    """Shared re-execution integrity gate: record, binary, then a built attempt.
 
-    ``current`` maps test ids to their current content digests; tests whose
-    digest differs from the recorded one are not executed and are reported in
-    ``stale_test_ids``. ``run_label`` distinguishes this re-execution from
-    others of the same record (it becomes part of the run id).
-    ``argv_prefix`` is for interpreter-hosted stub harnesses in tests.
+    Validates the run label and the record's own digest, confines and
+    existence-checks the recorded executable, refuses a binary whose content
+    no longer matches the recorded build, and returns the built attempt (with
+    a run id naming this record and this re-execution) plus the executable
+    path. Every re-execution form — plain, isolated, parallel — goes through
+    exactly this gate, so runner choice cannot weaken integrity.
     """
     if not isinstance(run_label, str) or not run_label.strip() or any(c.isspace() for c in run_label):
         raise CbtError("run_label must be a non-empty string without whitespace", reason="invalid_run_label")
@@ -253,8 +254,140 @@ def reexecute_suite(
     attempt = allocate_attempt(record.execution(), record.bindings)
     attempt = mark_built(attempt)
     attempt = _distinct(attempt, record, run_label)
+    return attempt, exe
+
+
+def reexecute_suite(
+    record: CompiledSuiteRecord,
+    root: Path | str,
+    current: Mapping[str, str],
+    *,
+    run_label: str,
+    argv_prefix: Sequence[str] = (),
+) -> ReExecution:
+    """Run the recorded suite again exactly as built; never regenerates or rebuilds.
+
+    ``current`` maps test ids to their current content digests; tests whose
+    digest differs from the recorded one are not executed and are reported in
+    ``stale_test_ids``. ``run_label`` distinguishes this re-execution from
+    others of the same record (it becomes part of the run id).
+    ``argv_prefix`` is for interpreter-hosted stub harnesses in tests.
+    """
+    attempt, exe = _checked_attempt(record, root, run_label)
     run = run_harness(attempt, exe, current_digests=current, argv_prefix=argv_prefix)
     return ReExecution(run=run, record_id=record.record_id, executable_digest=record.executable_digest)
+
+
+def reexecute_isolated(
+    record: CompiledSuiteRecord,
+    root: Path | str,
+    current: Mapping[str, str],
+    *,
+    run_label: str,
+    timeout_seconds: float,
+    argv_prefix: Sequence[str] = (),
+    cwd: Path | str | None = None,
+) -> ReExecution:
+    """Re-execute through ``ectt.exh.run_isolated`` (process-granularity isolation).
+
+    The same integrity gate as :func:`reexecute_suite` (record digest, binary
+    digest, NR-19 binding check inside the runner); each non-stale test runs
+    in its own harness process with ``--ectt-select``. A crash costs one
+    ``error`` record, a hang past ``timeout_seconds`` one ``timeout`` record;
+    the remaining tests still execute.
+    """
+    attempt, exe = _checked_attempt(record, root, run_label)
+    run = run_isolated(
+        attempt,
+        exe,
+        current_digests=current,
+        timeout_seconds=timeout_seconds,
+        argv_prefix=argv_prefix,
+        cwd=cwd,
+    )
+    return ReExecution(run=run, record_id=record.record_id, executable_digest=record.executable_digest)
+
+
+@dataclass(frozen=True)
+class ReExecutionSpec:
+    """One recorded suite to re-execute in parallel, with its run inputs.
+
+    ``root`` is that record's project root and ``current`` its current
+    test-content digests; specs may come from different projects.
+    """
+
+    record: CompiledSuiteRecord
+    root: Path | str
+    current: Mapping[str, str]
+    run_label: str
+
+
+@dataclass(frozen=True)
+class ParallelReExecution:
+    """Per-record re-executions in input order plus the aggregated outcome."""
+
+    reexecutions: tuple[ReExecution, ...]
+    outcome: str
+    worker_dirs: tuple[str, ...] = ()
+
+
+def reexecute_parallel(
+    specs: Sequence[ReExecutionSpec],
+    *,
+    concurrency: int,
+    timeout_seconds: float,
+    worker_root: Path | str | None = None,
+    argv_prefix: Sequence[str] = (),
+) -> ParallelReExecution:
+    """Re-execute recorded suites concurrently through ``ectt.exh.run_parallel``.
+
+    Every spec passes the integrity gate *before* any process starts: one
+    tampered or missing binary refuses the whole call (no partial side
+    effects). Two specs with the same record and run label would collide on
+    the run id and are refused. Results are returned in input order; the
+    outcome aggregates per-record outcomes (pass only when every
+    re-execution passed).
+    """
+    if not specs:
+        raise CbtError("parallel re-execution requires at least one recorded suite", reason="no_specs")
+    seen: set[str] = set()
+    checked: list[tuple[ReExecutionSpec, RunAttempt, Path]] = []
+    for spec in specs:
+        run_id = stable_id(spec.record.record_id, spec.run_label)
+        if run_id in seen:
+            raise CbtError(
+                f"two specs share record '{spec.record.record_id}' and run label '{spec.run_label}'; "
+                "their run ids would collide",
+                reason="duplicate_run",
+            )
+        seen.add(run_id)
+        attempt, exe = _checked_attempt(spec.record, spec.root, spec.run_label)
+        checked.append((spec, attempt, exe))
+
+    units = tuple(
+        ParallelUnit(attempt=attempt, executable=exe, current_digests=spec.current)
+        for spec, attempt, exe in checked
+    )
+    parallel = run_parallel(
+        units,
+        concurrency=concurrency,
+        timeout_seconds=timeout_seconds,
+        worker_root=worker_root,
+        argv_prefix=argv_prefix,
+    )
+    reexecutions = tuple(
+        ReExecution(
+            run=unit,
+            record_id=spec.record.record_id,
+            executable_digest=spec.record.executable_digest,
+        )
+        for (spec, _attempt, _exe), unit in zip(checked, parallel.units, strict=True)
+    )
+    return ParallelReExecution(
+        reexecutions=reexecutions,
+        outcome=parallel.outcome,
+        worker_dirs=parallel.worker_dirs,
+    )
 
 
 def _distinct(attempt: RunAttempt, record: CompiledSuiteRecord, run_label: str) -> RunAttempt:
