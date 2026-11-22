@@ -183,7 +183,7 @@ def host_profile_view(labelled: LabelledResults) -> dict[str, Any]:
                 "profile_label": label.profile_label,
                 "test_id": label.test_id,
             }
-            for label in sorted(labelled.labels, key=lambda l: l.test_id)
+            for label in sorted(labelled.labels, key=lambda item: item.test_id)
         ],
     }
 
