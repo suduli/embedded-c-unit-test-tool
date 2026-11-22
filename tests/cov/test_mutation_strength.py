@@ -24,7 +24,7 @@ from typing import Any
 
 import pytest
 
-from ectt.cov.errors import CoverageError, CoverageParseError
+from ectt.cov.errors import CoverageError
 from ectt.cov.gcov import read_gcov_document
 from ectt.cov.merge import merge_run_coverage
 from ectt.cov.thresholds import MetricThreshold
@@ -71,10 +71,7 @@ def _real_duplicate_line(text: str) -> int:
 def _m2_duplicate_line_dropped(text: str) -> int:
     """FAULT: the duplicate-line-number check is removed."""
     payload = json_loads(text)
-    lines: list[Any] = []
-    for raw in payload["files"][0]["lines"]:
-        lines.append(raw)
-    return len(lines)
+    return len(list(payload["files"][0]["lines"]))
 
 
 def _real_unknown_version(version: str) -> str:
@@ -167,13 +164,17 @@ def _m7_threshold_range_dropped(minimum: Fraction) -> str:
     return "accepted"
 
 
+def _probe_m1() -> bool:
+    return _real_condition({"count": 4, "covered": 9}) != _m1_condition_sanity_dropped({"count": 4, "covered": 9})
+
+
 MUTANTS = [
-    ("cov-m1-condition-sanity-dropped", lambda: _real_condition({"count": 4, "covered": 9}) != _m1_condition_sanity_dropped({"count": 4, "covered": 9})),
-    ("cov-m2-duplicate-line-dropped", lambda: _probe_duplicate()),
-    ("cov-m3-unknown-version-accepted", lambda: _probe_version()),
-    ("cov-m4-quarantine-dropped", lambda: _probe_quarantine()),
-    ("cov-m6-count-max-not-sum", lambda: _probe_count()),
-    ("cov-m7-threshold-range-dropped", lambda: _probe_threshold()),
+    ("cov-m1-condition-sanity-dropped", _probe_m1),
+    ("cov-m2-duplicate-line-dropped", _probe_duplicate),
+    ("cov-m3-unknown-version-accepted", _probe_version),
+    ("cov-m4-quarantine-dropped", _probe_quarantine),
+    ("cov-m6-count-max-not-sum", _probe_count),
+    ("cov-m7-threshold-range-dropped", _probe_threshold),
 ]
 
 
