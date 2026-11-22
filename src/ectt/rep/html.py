@@ -17,11 +17,16 @@ Satisfies: TOOL-REP-030, TOOL-REP-040, TOOL-REP-090, TOOL-REP-100.
 from __future__ import annotations
 
 import html
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING
 
+from ectt.atg.lifecycle import format_mark, report_marks
 from ectt.core.determinism import canonical_text
 from ectt.cov.justification import AnnotatedCoverage
 from ectt.rep.model import ReportModel
+
+if TYPE_CHECKING:
+    from ectt.tcm.datacases import DataDrivenTestCase
 
 __all__ = [
     "render_html",
@@ -48,13 +53,17 @@ def render_html(
     model: ReportModel,
     annotated: AnnotatedCoverage,
     sources: Mapping[str, str],
+    *,
+    cases: Sequence[DataDrivenTestCase] = (),
 ) -> str:
     """Render the combined HTML report (TOOL-REP-030/TOOL-REP-040).
 
     ``annotated`` carries per-line statuses (from the coverage backend);
     ``sources`` maps a file path to its source text. A file annotated but
     without supplied source is listed under "source not available" — surfaced,
-    never silently omitted.
+    never silently omitted. ``cases`` (optional) adds the machine-generated /
+    unreviewed marks section (TOOL-ATG-070); without cases the section is
+    absent and the output is byte-identical to the unmarked report.
     """
     statuses = model.test_statuses()
     figures = model.coverage_figures()
@@ -100,6 +109,20 @@ def render_html(
         for test_id in sorted(statuses)
     )
     out.append("</table>")
+
+    marks = report_marks(cases)
+    if marks["cases"]:
+        out.append("<h2>Marks</h2>")
+        out.append(
+            f"<p>machine_generated={marks['machine_generated']}"
+            f" unreviewed_expectations={marks['unreviewed_expectations']}</p>"
+        )
+        out.append("<table><tr><th>case</th><th>mark</th></tr>")
+        out.extend(
+            f"<tr><td>{_e(case.case_id)}</td><td>{_e(format_mark(case))}</td></tr>"
+            for case in sorted(cases, key=lambda c: c.case_id)
+        )
+        out.append("</table>")
 
     out.append("<h2>Coverage</h2>")
     out.append("<table><tr><th>unit</th><th>covered</th><th>total</th></tr>")

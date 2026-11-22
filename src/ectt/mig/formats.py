@@ -438,7 +438,7 @@ INTERCHANGE_FORMATS: tuple[FormatSpec, ...] = (
         "Analysis model S1 (JSON)",
         "both",
         "json",
-        "1.4",
+        "1.5",
         "ectt.ana.persist",
         "One JSON object with `schema_version` first, `provenance`, `units` (path, status, diagnostics, functions, unsupported constructs), `types`, "
         "`capabilities`, `decision_inventory`. One published JSON Schema per version under `ectt/ana/schema`.",
@@ -448,7 +448,7 @@ INTERCHANGE_FORMATS: tuple[FormatSpec, ...] = (
         _analysis_example,
         _analysis_reader,
         _analysis_version,
-        ("ectt.ana.schema", "analysis-model-1.4.schema.json"),
+        ("ectt.ana.schema", "analysis-model-1.5.schema.json"),
     ),
     FormatSpec(
         "reqif",

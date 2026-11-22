@@ -23,8 +23,10 @@ from ectt.trc.change_detection import (
 from ectt.trc.errors import TrcError
 from ectt.trc.imports import (
     CSV_COLUMNS,
+    ReqIfImport,
     RequirementRecord,
     import_reqif,
+    import_reqif_with_associations,
     import_requirements_csv,
     import_requirements_text,
     requirement_universe,
@@ -82,6 +84,8 @@ __all__ = [
     "build_matrix",
     "find_unlinked",
     "import_reqif",
+    "import_reqif_with_associations",
+    "ReqIfImport",
     "import_requirements_csv",
     "import_requirements_text",
     "requirement_universe",

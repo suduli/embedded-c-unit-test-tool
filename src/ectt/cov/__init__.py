@@ -12,6 +12,13 @@ Satisfies: TOOL-COV-010, TOOL-COV-020.
 
 from __future__ import annotations
 
+from ectt.cov.baremetal import (
+    DumpFrame,
+    dump_frame,
+    parse_dump,
+    retrieve_coverage,
+    retrieve_run_coverage,
+)
 from ectt.cov.errors import (
     CoverageError,
     CoverageFormatError,
@@ -64,6 +71,7 @@ from ectt.cov.thresholds import (
 __all__ = [
     "COMPLETENESS_STATES",
     "CoverageError",
+    "DumpFrame",
     "CoverageFormatError",
     "CoverageParseError",
     "ExcludedRun",
@@ -106,5 +114,9 @@ __all__ = [
     "evaluate_justification",
     "separate_coverage",
     "statement_coverage",
+    "parse_dump",
     "read_gcov_document",
+    "retrieve_coverage",
+    "retrieve_run_coverage",
+    "dump_frame",
 ]
