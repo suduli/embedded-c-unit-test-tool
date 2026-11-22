@@ -41,9 +41,13 @@ from ectt.cbt.diffmap import (
 )
 from ectt.cbt.minimize import minimize_suite
 from ectt.cbt.reexecute import load_suite_record, reexecute_subset
+from ectt.cbt.reexecute import load_suite_record as _load_suite_record
 from ectt.cli.exit_codes import EXIT_TEST_FAILURE, exit_code_for_category
+from ectt.cli.hostprep import prepare_and_run_host_suite
 from ectt.core.errors import EcttError
 from ectt.cov.metrics import MetricTotals
+from ectt.ext.parity import ExecutionConfig, ExecutionPlan
+from ectt.ext.profile import load_host_profile
 from ectt.rep.views import minimized_suite_view, run_comparison_view, subset_run_view
 
 __all__ = [
@@ -58,6 +62,7 @@ COMMAND_NAMES: tuple[str, ...] = (
     "cbt-minimize-suite",
     "cbt-subset-run",
     "cbt-compare-runs",
+    "host-run",
 )
 
 
@@ -156,6 +161,41 @@ def run_minimize_command(args: argparse.Namespace, stdout: TextIO) -> int:
     return 0
 
 
+def run_host_command(args: argparse.Namespace, stdout: TextIO) -> int:
+    """``host-run``: parity-gated, profile-labelled execution of a recorded suite."""
+    profile = load_host_profile(Path(args.profile).read_text(encoding="utf-8"))
+
+    def plan(data: dict[str, Any]) -> ExecutionPlan:
+        config = ExecutionConfig(
+            kind=str(data["config"]["kind"]),
+            toolchain=str(data["config"]["toolchain"]),
+            runner=str(data["config"]["runner"]),
+            transport=str(data["config"]["transport"]),
+            target_id=data["config"].get("target_id"),
+            settings={str(k): str(v) for k, v in data["config"].get("settings", {}).items()},
+        )
+        return ExecutionPlan(
+            case_digests={str(k): str(v) for k, v in data["case_digests"].items()},
+            generated_code_digest=str(data["generated_code_digest"]),
+            config=config,
+        )
+
+    record = _load_suite_record(Path(args.record).read_text(encoding="utf-8"))
+    outcome = prepare_and_run_host_suite(
+        profile=profile,
+        host_plan=plan(_load_json(args.host_plan)),
+        target_plan=plan(_load_json(args.target_plan)),
+        record=record,
+        root=Path(args.root),
+        current={str(k): str(v) for k, v in _load_json(args.current).items()},
+        run_label=args.run_label,
+        timeout_seconds=args.timeout,
+        argv_prefix=tuple(_load_json(args.argv_prefix)) if args.argv_prefix else (),
+    )
+    _print_json(outcome.view, stdout)
+    return 0 if outcome.reexecution.run.outcome == "pass" else EXIT_TEST_FAILURE
+
+
 # --- the parser and the catalogue extension ---------------------------------------------------
 
 
@@ -196,6 +236,17 @@ def build_cbt_parser() -> argparse.ArgumentParser:
 
     minimize = subparsers.add_parser("cbt-minimize-suite", help="the loss-free minimized suite")
     minimize.add_argument("--coverage", required=True, help="JSON object of test id -> list of constructs")
+
+    host = subparsers.add_parser("host-run", help="parity-gated, profile-labelled execution of a recorded suite")
+    host.add_argument("--profile", required=True, help="path to the stored host profile JSON")
+    host.add_argument("--host-plan", required=True, help="JSON: {case_digests, generated_code_digest, config}")
+    host.add_argument("--target-plan", required=True, help="JSON: {case_digests, generated_code_digest, config}")
+    host.add_argument("--record", required=True, help="path to the stored suite record JSON")
+    host.add_argument("--root", required=True, help="project root the record was written against")
+    host.add_argument("--current", required=True, help="JSON object of test id -> current content digest")
+    host.add_argument("--run-label", required=True, help="single-token label naming this re-execution")
+    host.add_argument("--timeout", type=float, default=30.0, help="per-test timeout in seconds")
+    host.add_argument("--argv-prefix", help="JSON list prepended to the executable (interpreter stubs)")
     return parser
 
 
@@ -215,6 +266,7 @@ def cbt_catalogue_extensions(catalogue: Catalogue | None = None) -> Catalogue:
         ("cbt-minimize-suite", "the loss-free minimized suite"),
         ("cbt-subset-run", "execute the selected tests of a recorded suite"),
         ("cbt-compare-runs", "compare a run against a baseline"),
+        ("host-run", "parity-gated, profile-labelled execution of a recorded suite"),
     ):
         merged.register(Operation(name=name, summary=summary, cli_equivalent=f"ectt {name}"))
     return merged
@@ -225,6 +277,7 @@ _HANDLERS = {
     "cbt-minimize-suite": run_minimize_command,
     "cbt-subset-run": run_subset_command,
     "cbt-compare-runs": run_compare_command,
+    "host-run": run_host_command,
 }
 
 
