@@ -1,22 +1,21 @@
-# Tonight's plan (2026-11-21)
+# Plan to run now (2026-11-22)
 
-Last night's work (both chats) is merged into local `main`. All checks pass: 3097 tests, ruff, mypy, plan_check, trace_check. Nothing is pushed.
+Everything from the last two nights is merged into local `main`. All checks pass: 3558 tests, ruff, mypy, plan_check, trace_check. The coverage threshold fix is in. Nothing is pushed.
 
 ## What to do
 1. Open two GLM (ZAI) chats, Chat A and Chat B.
-2. Paste into Chat A the whole file `docs/glm-night/overnight-20261121/LANE_A_queue.md`.
-3. Paste into Chat B the whole file `docs/glm-night/overnight-20261121/LANE_B_queue.md`.
-4. Sleep. Both stop by themselves at 05:30.
+2. Paste into Chat A the whole file `docs/glm-night/overnight-20261122/LANE_A_queue.md`.
+3. Paste into Chat B the whole file `docs/glm-night/overnight-20261122/LANE_B_queue.md`.
+4. Both stop by themselves at 05:30, or earlier when their list is done.
 
 ## What each chat does
-- Chat A (10 tasks): connect the build step, harness generator, host profile and generation run to the pieces built earlier; nested expected values; extra tests; then 3 change-impact and run-comparison tasks (they wait for Chat B's coverage merge and skip themselves if it is not ready).
-- Chat B (20 tasks): the new coverage chain first (GCC first, per your answer): coverage readers, merge, thresholds, function coverage, report outputs (JUnit, Cobertura, HTML, PDF, interchange). Then analysis model update (function lines, global types, every unsupported spot), exact requirement links, safer saves, report marks, format reference doc, project save layout, ReqIF relations, extra tests.
+- Chat A (7 tasks): connect the finished pieces to the command line (generation run, impact, subset runs, comparison, minimization, host profile), reach file-level variables in generated harnesses, map source changes to coverage items, extra tests. The CLI items wait for Chat B's report views (item B2) and skip themselves if not ready.
+- Chat B (8 tasks): report views for the new results first, then a fix so coverage merge does not depend on input order, coverage thresholds in project settings, more GCC coverage test cases, DRAFT user documentation pages, a DRAFT security policy, extra tests.
 
-## Note
-There is no C compiler here, so coverage code is tested on hand-written GCC coverage sample files. Real GCC output is not checked until you run it on a machine with GCC.
-Still held: MC/DC (SRS-Q2), packaging (ADR-007), GUI, AI-provider work.
+## Notes
+- No C compiler here: generated C and coverage code are tested on hand-written samples only. Run it once on a machine with GCC.
+- Still held: MC/DC (SRS-Q2), packaging (ADR-007), GUI, AI-provider work, CBMC test generation (CBMC not installed, design not written).
 
-## Your own to-do list
-- Read `SECOND_PASS_A.md` and `SECOND_PASS_B.md` in `docs/glm-night/overnight-20261120/`.
-- Decide: ADR-003, ADR-004, ADR-005, ADR-007, SRS-Q2, SRS-Q9.
-- Decide whether to keep the ReqIF schema file in the repo (see the second-pass list).
+## Your to-do after
+- Review the DRAFT pages and security policy before copying them into the repo.
+- Update SDD-005, the tracker and the execution plan, which still say AGPL.
