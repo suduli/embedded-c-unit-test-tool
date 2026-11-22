@@ -272,12 +272,26 @@ def _merge_documents(documents: Sequence[GcovDocument]) -> GcovDocument:
             files_by_path.setdefault(file.file, GcovFile(file=file.file, lines=()))
             files_by_path[file.file] = _merge_files(files_by_path[file.file], file, file.file)
     merged_files = tuple(files_by_path[path] for path in sorted(files_by_path))
+
+    # Provenance is a pure function of the run SET, not of the input order
+    # (review finding, B1): the merged data_file is the sorted, comma-joined
+    # list of every contributing document's data file (identical for a single
+    # document), and the merged working directory is the sorted-first distinct
+    # value (None only when every document lacks one). Counts are unaffected.
+    data_file = ",".join(sorted({doc.data_file for doc in documents}))
+    cwd_values = {doc.current_working_directory for doc in documents}
+    if len(cwd_values) == 1:
+        current_working_directory = next(iter(cwd_values))
+    else:
+        present = sorted(cwd for cwd in cwd_values if cwd is not None)
+        current_working_directory = present[0] if present else None
+
     return GcovDocument(
         format_version=first.format_version,
         gcc_version=first.gcc_version,
-        data_file=first.data_file,
+        data_file=data_file,
         files=merged_files,
-        current_working_directory=first.current_working_directory,
+        current_working_directory=current_working_directory,
     )
 
 
