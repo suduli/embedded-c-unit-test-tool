@@ -9,6 +9,13 @@ from ectt.cbt.compare import (
     compare_runs,
     run_outcomes,
 )
+from ectt.cbt.diffmap import (
+    DiffImpact,
+    LineRange,
+    SourceDiff,
+    changed_constructs,
+    impacts_of,
+)
 from ectt.cbt.errors import CbtError
 from ectt.cbt.impact import ImpactResult, SourceChange, affected_cases
 from ectt.cbt.minimize import Minimization, minimize_suite
@@ -35,10 +42,13 @@ __all__ = [
     "CbtError",
     "CompiledSuiteRecord",
     "CoverageComparison",
+    "DiffImpact",
     "ImpactResult",
+    "LineRange",
     "MetricDelta",
     "Minimization",
     "RunComparison",
+    "SourceDiff",
     "ParallelReExecution",
     "ReExecution",
     "ReExecutionSpec",
@@ -46,8 +56,10 @@ __all__ = [
     "SubsetReExecution",
     "affected_cases",
     "bindings_from_cases",
+    "changed_constructs",
     "compare_coverage",
     "compare_runs",
+    "impacts_of",
     "minimize_suite",
     "current_digests",
     "dump_suite_record",
