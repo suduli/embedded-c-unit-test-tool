@@ -41,6 +41,16 @@ from ectt.gen.exposure import (
     generate_integration_harness,
     generate_with_statics,
 )
+from ectt.gen.globals import (
+    MECHANISM_EXTERN_DECLARATION,
+    MECHANISM_NOT_REACHABLE,
+    MECHANISM_SOURCE_INCLUSION,
+    REASON_TYPE_NOT_RECORDED,
+    GlobalExposure,
+    render_global_exposure_block,
+    resolve_global_exposures,
+    spell_type,
+)
 from ectt.gen.harness import (
     UNRESOLVED_TYPE_MARKER,
     ExposedFunction,
@@ -129,6 +139,15 @@ __all__ = [
     "out_parameter_names",
     "render_stub_expectations",
     "render_stub_setup",
+    # Type-resolved global exposure (HAR-040)
+    "MECHANISM_EXTERN_DECLARATION",
+    "MECHANISM_NOT_REACHABLE",
+    "MECHANISM_SOURCE_INCLUSION",
+    "REASON_TYPE_NOT_RECORDED",
+    "GlobalExposure",
+    "render_global_exposure_block",
+    "resolve_global_exposures",
+    "spell_type",
     # Per-case test bodies (A2)
     "GENERATED_FILE_TOKEN",
     "STATE_RESET_REGISTRATION_NAME",

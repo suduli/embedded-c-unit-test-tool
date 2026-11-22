@@ -35,6 +35,11 @@ from ectt.gen.errors import (
     UnitNotParsedError,
     UnknownUnitError,
 )
+from ectt.gen.globals import (
+    GlobalExposure,
+    render_global_exposure_block,
+    resolve_global_exposures,
+)
 from ectt.gen.protocol import RESULT_PROTOCOL_BLOCK, SETUP_TEARDOWN_BLOCK
 from ectt.gen.stubs import FunctionSignature
 from ectt.gen.testbody import StubbedCase, case_render, render_case_functions
@@ -83,6 +88,7 @@ class GeneratedHarness:
     tool_version: str = "0.1.0"
     interface_fingerprint: str = ""
     case_section: str = ""  # per-case functions, empty when no cases were wired
+    global_exposures: tuple[GlobalExposure, ...] = ()  # resolved model globals (1.5), empty for pre-1.5
 
     def has_result_protocol(self) -> bool:
         """Whether the RESULT/FAILURE stream runtime is present in the source."""
@@ -239,7 +245,8 @@ class HarnessGenerator:
         header = _header_for(unit.path)
         fingerprint = _interface_fingerprint(functions, variables)
         case_section = self._case_section()
-        source = self._render(header, functions, variables, fingerprint, case_section)
+        exposures = resolve_global_exposures(unit, self._model.types)
+        source = self._render(header, functions, variables, fingerprint, case_section, exposures)
         return GeneratedHarness(
             uut_path=unit.path,
             uut_header=header,
@@ -249,6 +256,7 @@ class HarnessGenerator:
             tool_version=self._tool_version,
             interface_fingerprint=fingerprint,
             case_section=case_section,
+            global_exposures=exposures,
         )
 
     def _case_section(self) -> str:
@@ -279,6 +287,7 @@ class HarnessGenerator:
         variables: tuple[ExposedVariable, ...],
         fingerprint: str,
         case_section: str,
+        global_exposures: tuple[GlobalExposure, ...] = (),
     ) -> str:
         lines: list[str] = [
             _BANNER,
@@ -312,6 +321,10 @@ class HarnessGenerator:
                 f"/* {_GLOBAL_EXPOSURE_MARKER}: {variable.name} {variable.access} */"
                 for variable in variables
             )
+            lines.append("")
+        exposure_block = render_global_exposure_block(global_exposures)
+        if exposure_block:
+            lines.append(exposure_block)
             lines.append("")
         lines.extend(_USER_REGION_SLOTS)
         if case_section:

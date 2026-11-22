@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 from ectt.ana.model import AnalysisModel
 from ectt.gen.errors import GenError
+from ectt.gen.globals import resolve_global_exposures
 from ectt.gen.harness import (
     ExposedFunction,
     GeneratedHarness,
@@ -102,6 +103,19 @@ def generate_with_statics(
         + ") */"
         for function in exposed
     )
+    # File-static variables are reachable here: the source include above makes
+    # their definitions visible (TOOL-HAR-040, schema 1.5 inventory). The
+    # record carries the resolved type; a variable whose type the model cannot
+    # resolve is recorded as not reachable, never guessed.
+    static_variable_records = [
+        exposure.record()
+        for exposure in resolve_global_exposures(unit, model.types)
+        if exposure.mechanism == "source-inclusion"
+    ]
+    if static_variable_records:
+        lines.append("/* File-static variables reached through this source include. */")
+        lines.extend(static_variable_records)
+        lines.append("")
     source = "\n".join(lines) + "\n"
     from ectt.gen.harness import _interface_fingerprint
 
