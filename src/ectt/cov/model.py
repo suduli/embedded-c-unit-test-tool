@@ -190,6 +190,9 @@ class GcovDocument:
 
     format_version: str
     gcc_version: str
+    #: Name of the data file (GCDA). For a MERGED document: the sorted,
+    #: comma-joined data files of every contributing document, so the merged
+    #: provenance is a pure function of the run set, never of the input order.
     data_file: str
     files: tuple[GcovFile, ...] = ()
     current_working_directory: str | None = None
