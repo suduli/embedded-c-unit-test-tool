@@ -18,6 +18,15 @@ from ectt.exh.errors import (
     UnknownTestResultError,
     WrongAttemptStateError,
 )
+from ectt.exh.restricted import (
+    RestrictedContext,
+    RestrictedContextError,
+    RestrictedRunResult,
+    WallClockExceeded,
+    build_context,
+    default_starter,
+    run_restricted,
+)
 from ectt.exh.results import (
     EXECUTED_OUTCOMES,
     AssertionFailure,
@@ -51,6 +60,14 @@ from ectt.exh.runner import (
 )
 
 __all__ = [
+    # Restricted execution context (WP-SEC-06)
+    "RestrictedContext",
+    "RestrictedContextError",
+    "RestrictedRunResult",
+    "WallClockExceeded",
+    "build_context",
+    "default_starter",
+    "run_restricted",
     # Errors
     "ExhError",
     "InvalidResultRecordError",
