@@ -1,21 +1,23 @@
-# Plan to run now (2026-11-22)
+# Plan to run now (2026-11-23 queues)
 
-Everything from the last two nights is merged into local `main`. All checks pass: 3558 tests, ruff, mypy, plan_check, trace_check. The coverage threshold fix is in. Nothing is pushed.
+Last night's work is merged into local `main` (b8ae29f). All checks pass: 3710 tests, ruff, mypy, plan_check, trace_check. Nothing is pushed.
 
 ## What to do
 1. Open two GLM (ZAI) chats, Chat A and Chat B.
-2. Paste into Chat A the whole file `docs/glm-night/overnight-20261122/LANE_A_queue.md`.
-3. Paste into Chat B the whole file `docs/glm-night/overnight-20261122/LANE_B_queue.md`.
+2. Paste into Chat A the whole file `docs/glm-night/overnight-20261123/LANE_A_queue.md`.
+3. Paste into Chat B the whole file `docs/glm-night/overnight-20261123/LANE_B_queue.md`.
 4. Both stop by themselves at 05:30, or earlier when their list is done.
 
 ## What each chat does
-- Chat A (7 tasks): connect the finished pieces to the command line (generation run, impact, subset runs, comparison, minimization, host profile), reach file-level variables in generated harnesses, map source changes to coverage items, extra tests. The CLI items wait for Chat B's report views (item B2) and skip themselves if not ready.
-- Chat B (8 tasks): report views for the new results first, then a fix so coverage merge does not depend on input order, coverage thresholds in project settings, more GCC coverage test cases, DRAFT user documentation pages, a DRAFT security policy, extra tests.
+- Chat A (9 tasks): a validation suite you can run yourself, a known-error list, a software bill of materials, a dependency check, a safer way to start test programs, debugger launch command, a check that the tool's own files are unchanged, extra tests.
+- Chat B (7 tasks): a certification report with a clear "what this does not claim" statement, detection of code the coverage tool cannot measure, control and data coupling analysis, safety tests for report files, import/export round trips, extra tests.
+- The two chats touch different folders, so they do not wait for each other.
 
 ## Notes
-- No C compiler here: generated C and coverage code are tested on hand-written samples only. Run it once on a machine with GCC.
-- Still held: MC/DC (SRS-Q2), packaging (ADR-007), GUI, AI-provider work, CBMC test generation (CBMC not installed, design not written).
+- Last night both chats finished in under an hour, so these lists are longer. The backlog is now thin: most of what is left is held on your decisions or needs a compiler or GUI.
+- Release signing is not built (needs your keys); the chat records it as a to-do for you.
+- Still held: MC/DC (SRS-Q2), packaging (ADR-007), GUI, AI-provider work, CBMC test generation.
 
 ## Your to-do after
-- Review the DRAFT pages and security policy before copying them into the repo.
+- Review the DRAFT pages and security policy from last night before copying them into the repo.
 - Update SDD-005, the tracker and the execution plan, which still say AGPL.
