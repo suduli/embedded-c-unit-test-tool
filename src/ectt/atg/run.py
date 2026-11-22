@@ -48,6 +48,7 @@ from ectt.atg.lifecycle import (
     GenerationCandidate,
     GenerationOutcome,
     TestValidationPort,
+    case_marks,
     validate_one,
 )
 from ectt.core.determinism import canonical_json
@@ -62,6 +63,7 @@ __all__ = [
     "GenerationRun",
     "MonotonicClock",
     "RunLimits",
+    "RunMarks",
     "RunReport",
     "dump_run_report",
     "python_heap_probe",
@@ -144,6 +146,27 @@ class CoverageReport:
 
 
 @dataclass(frozen=True)
+class RunMarks:
+    """The machine-generated and review marks of one run's cases (TOOL-ATG-070/080).
+
+    The facts travel with the run report, so a renderer can show the
+    machine-generated and unreviewed marks without re-deriving them from the
+    cases; the per-case marks come from ``ectt.atg.lifecycle.case_marks``.
+    """
+
+    machine_generated: int
+    unreviewed_expectations: int
+    cases: tuple[dict[str, Any], ...]  # per presented case, sorted by case id
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "cases": list(self.cases),
+            "machine_generated": self.machine_generated,
+            "unreviewed_expectations": self.unreviewed_expectations,
+        }
+
+
+@dataclass(frozen=True)
 class RunReport:
     """The per-run report of TOOL-ATG-060, bounds of TOOL-ATG-100, limits of TOOL-ATG-110."""
 
@@ -158,6 +181,7 @@ class RunReport:
     limits: RunLimits
     coverage: CoverageReport
     limitations: tuple[Limitation, ...]
+    marks: RunMarks
 
     def to_dict(self) -> dict[str, Any]:
         discard_counts: dict[str, int] = {}
@@ -174,6 +198,7 @@ class RunReport:
             "function": self.function,
             "limitations": [limitation.to_dict() for limitation in self.limitations],
             "limits": self.limits.to_dict(),
+            "marks": self.marks.to_dict(),
             "not_assessed_limitation_kinds": list(NOT_ASSESSED_KINDS),
             "not_attempted": self.not_attempted,
             "terminated_by": self.terminated_by,
@@ -286,6 +311,12 @@ def run_generation(
         discarded=tuple(sorted(discarded, key=lambda d: (d.candidate_id, d.reason))),
         candidates=received,
     )
+    case_mark_list = tuple(case_marks(case) for case in sorted(cases, key=lambda c: c.case_id))
+    marks = RunMarks(
+        machine_generated=sum(1 for m in case_mark_list if m["machine_generated"]),
+        unreviewed_expectations=sum(1 for m in case_mark_list if m["expected"] == "unreviewed"),
+        cases=case_mark_list,
+    )
     report = RunReport(
         engine=engine.label,
         function=function,
@@ -298,6 +329,7 @@ def run_generation(
         limits=bounds,
         coverage=coverage,
         limitations=tuple(sorted(limitations, key=lambda x: (x.unit, x.function, x.kind, x.evidence))),
+        marks=marks,
     )
     return GenerationRun(outcome, report)
 

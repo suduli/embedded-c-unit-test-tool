@@ -36,21 +36,25 @@ from ectt.core.determinism import stable_id
 from ectt.exh.results import ResultSet
 from ectt.ext.channels import CHANNEL_SEMIHOSTING, CHANNEL_SERIAL_UART
 from ectt.ext.errors import ExtError
+from ectt.ext.profile import HostProfile, ProfileError, profile_is_intact
 from ectt.tcm.datacases import DataDrivenTestCase
 
 __all__ = [
     "HOST_TRANSPORT",
+    "HostProxyRunPreparation",
     "ExecutionConfig",
     "ExecutionPlan",
     "OutcomeComparison",
     "OutcomeDivergence",
     "ParityError",
+    "ParityGateError",
     "ParityReport",
     "PortabilityIssue",
     "Violation",
     "check_parity",
     "compare_outcomes",
     "find_portability_issues",
+    "prepare_host_proxy_run",
 ]
 
 HOST_TRANSPORT = "stdout"
@@ -176,6 +180,58 @@ def check_parity(host: ExecutionPlan, target: ExecutionPlan) -> ParityReport:
     )
 
 
+# --- the run-preparation gate (A4) ---------------------------------------------------------------
+
+
+class ParityGateError(ParityError):
+    """A run on the host on behalf of a target was refused: parity failed.
+
+    ``reasons`` names every violation kind found (the named reasons of the
+    gate); the run is never started on a refused preparation.
+    """
+
+    def __init__(self, violations: Sequence[Violation], *, scope: str = "host proxy run") -> None:
+        self.violations: tuple[Violation, ...] = tuple(violations)
+        self.reasons: tuple[str, ...] = tuple(v.kind for v in self.violations)
+        lines = "; ".join(f"{v.kind} ({v.subject}): {v.detail}" for v in self.violations)
+        super().__init__(
+            f"{scope} refused: parity check failed with {len(self.violations)} violation(s): {lines}",
+            reason="parity_gate_refused",
+        )
+
+
+@dataclass(frozen=True)
+class HostProxyRunPreparation:
+    """A prepared host-on-behalf-of-target run, gated by parity and profiled."""
+
+    profile: HostProfile
+    parity: ParityReport
+    host_plan: ExecutionPlan
+    target_plan: ExecutionPlan
+
+
+def prepare_host_proxy_run(
+    profile: HostProfile,
+    host_plan: ExecutionPlan,
+    target_plan: ExecutionPlan,
+) -> HostProxyRunPreparation:
+    """Prepare a host run on behalf of a target build, or refuse it by name.
+
+    The run preparation wires :func:`check_parity` in front of the run (the
+    gate): the two plans must describe the same cases and the same generated
+    code — only the configuration may differ — and the governing host profile
+    must be intact (its id binds its content). A refusal names every parity
+    violation found and nothing is prepared. Preparing a run is not evidence:
+    host success never establishes target behavior (TOOL-TGT-130).
+    """
+    if not profile_is_intact(profile):
+        raise ProfileError("governing host profile id does not match its content", reason="digest_mismatch")
+    report = check_parity(host_plan, target_plan)
+    if not report.ok:
+        raise ParityGateError(report.violations)
+    return HostProxyRunPreparation(profile=profile, parity=report, host_plan=host_plan, target_plan=target_plan)
+
+
 # --- portability lint ---------------------------------------------------------------------------
 
 
@@ -204,7 +260,12 @@ def _values(case: DataDrivenTestCase) -> Iterable[tuple[str, str]]:
     for name, value in sorted(case.inputs.global_inits.items()):
         yield f"inputs.globals.{name}", value
     if case.expected.return_value is not None:
-        yield "expected.return", case.expected.return_value
+        if isinstance(case.expected.return_value, Mapping):
+            # A composite return: every authored path-keyed value is scanned.
+            for name, value in sorted(case.expected.return_value.items()):
+                yield f"expected.return.{name}", value
+        else:
+            yield "expected.return", case.expected.return_value
     for name, value in sorted(case.expected.global_finals.items()):
         yield f"expected.globals.{name}", value
     for name, value in sorted(case.expected.out_parameters.items()):

@@ -139,6 +139,30 @@ def test_discards_are_counted_by_reason_in_the_report_document() -> None:
     assert document["candidates"] == 4 and document["attempted"] == 3 and document["cases_generated"] == 1
 
 
+def test_the_report_carries_the_machine_generated_and_review_marks() -> None:
+    """verifies: TOOL-ATG-070, TOOL-ATG-080 — the run report carries the marks
+    (A5): every presented case machine-generated with an unreviewed expectation,
+    in the dumped document for renderers to show without re-deriving."""
+    run = _run(ScriptedPort(FULL), _cands("1", "2"))
+    marks = run.report.marks
+    assert marks.machine_generated == 2
+    assert marks.unreviewed_expectations == 2
+    assert [m["case_id"] for m in marks.cases] == ["atg.1", "atg.2"]
+    assert all(m["engine"] == ENGINE.label for m in marks.cases)
+
+    document = json.loads(dump_run_report(run.report))
+    assert document["marks"]["machine_generated"] == 2
+    assert document["marks"]["unreviewed_expectations"] == 2
+    assert [m["case_id"] for m in document["marks"]["cases"]] == ["atg.1", "atg.2"]
+
+
+def test_the_marks_count_only_presented_cases() -> None:
+    """verifies: TOOL-ATG-070 — a discarded candidate has no case, so no marks."""
+    run = _run(ScriptedPort(FULL, bad={"1": "crash"}), _cands("1", "2"))
+    assert run.report.marks.machine_generated == 1
+    assert run.report.marks.unreviewed_expectations == 1
+
+
 def test_a_port_reporting_an_unknown_construct_is_refused() -> None:
     with pytest.raises(AtgError) as excinfo:
         _run(ScriptedPort({"1": ("L1", "NOPE")}), _cands("1"))

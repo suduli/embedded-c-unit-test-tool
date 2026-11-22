@@ -45,11 +45,13 @@ from ectt.ana.errors import (
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
+    ConstructOccurrenceModel,
     DecisionInventoryModel,
     Diagnostic,
     EnumeratorModel,
     FunctionModel,
     GlobalAccessModel,
+    GlobalVariableModel,
     InputFileModel,
     ParameterModel,
     ParsedTranslationUnit,

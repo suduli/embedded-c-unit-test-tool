@@ -63,7 +63,7 @@ READER_MIN_MINOR: int = 0
 # and moves only this line; tests must assert this constant, never a literal,
 # so a bump cannot silently strand them (root cause of the 1.0 -> 1.1 -> 1.2
 # test drift fixed in TASK-001).
-SCHEMA_VERSION_CURRENT: str = "1.4"
+SCHEMA_VERSION_CURRENT: str = "1.5"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
 
 # Errors that describe one translation unit only (TOOL-PAR-130). Anything else is
@@ -210,6 +210,7 @@ def assemble_analysis_model(
                         functions=extracted.functions,
                         types=extracted.types,
                         unsupported_constructs=extracted.unsupported_constructs,
+                        global_variables=extracted.global_variables,
                     )
                 )
         elif isinstance(item, AnalysisUnit):
@@ -241,6 +242,7 @@ def assemble_analysis_model(
                         functions=item.functions,
                         types=item.types,
                         unsupported_constructs=item.unsupported_constructs,
+                        global_variables=item.global_variables,
                     )
                 )
         else:
@@ -349,11 +351,9 @@ def write_analysis_model(
         raise TypeError(f"Expected AnalysisModel or Mapping, got {type(model).__name__}")
 
     data = canonical_json_bytes(doc, first_keys=("schema_version",))
-    if output_root._journal is not None:
-        # OutputRoot.transaction is not re-entrant (core/fs.py); join the caller's scope.
-        if token is not None:
-            token.raise_if_cancelled()
-        return output_root.write_bytes(rel_path, data)
+    # OutputRoot.transaction is re-entrant: when the caller already holds a
+    # transaction scope this nested scope joins it, and the caller's scope
+    # decides durability.
     with output_root.transaction(token):
         return output_root.write_bytes(rel_path, data)
 
@@ -534,6 +534,97 @@ def read_analysis_model(
                         f"Unit at index {u_idx} carries a 'failure' record but is not failed (schema >= 1.4)",
                         reason="unexpected_unit_failure",
                     )
+
+    # 6e. Minor-version-gated schema 1.5 additions: function extent, per-
+    # occurrence unsupported-construct records, and the global-variable
+    # inventory (TOOL-PAR-050). Additive: every new field is optional, but a
+    # present field must carry a valid value (fail-closed per SDD-002 §3);
+    # an unknown value is rejected, never interpreted.
+    if doc_minor >= 5:
+        units_for_1_5 = doc.get("units")
+        if isinstance(units_for_1_5, list):
+            for u_idx, unit_doc in enumerate(units_for_1_5):
+                if not isinstance(unit_doc, dict):
+                    continue
+                if unit_doc.get("status") == "failed" and unit_doc.get("global_variables"):
+                    raise AnalysisModelError(
+                        f"Failed unit at index {u_idx} must not carry global_variables (schema >= 1.5)",
+                        reason="failed_unit_has_global_variables",
+                    )
+                functions_1_5 = unit_doc.get("functions")
+                if isinstance(functions_1_5, list):
+                    for fn_doc in functions_1_5:
+                        if not isinstance(fn_doc, dict):
+                            continue
+                        start = fn_doc.get("start_line")
+                        end = fn_doc.get("end_line")
+                        for name, value in (("start_line", start), ("end_line", end)):
+                            if value is not None and (
+                                isinstance(value, bool) or not isinstance(value, int) or value < 1
+                            ):
+                                raise AnalysisModelError(
+                                    f"Function '{fn_doc.get('name', '')}' in unit at index {u_idx} "
+                                    f"carries an invalid {name} {value!r} (schema >= 1.5)",
+                                    reason="invalid_function_extent",
+                                )
+                        if start is not None and end is not None and end < start:
+                            raise AnalysisModelError(
+                                f"Function '{fn_doc.get('name', '')}' in unit at index {u_idx} "
+                                f"carries end_line {end} before start_line {start} (schema >= 1.5)",
+                                reason="invalid_function_extent",
+                            )
+                constructs_1_5 = unit_doc.get("unsupported_constructs")
+                if isinstance(constructs_1_5, list):
+                    for uc_doc in constructs_1_5:
+                        if not isinstance(uc_doc, dict):
+                            continue
+                        occurrences = uc_doc.get("occurrences")
+                        if occurrences is None:
+                            continue
+                        if not isinstance(occurrences, list):
+                            raise AnalysisModelError(
+                                f"Unsupported construct '{uc_doc.get('kind', '')}' in unit at index {u_idx} "
+                                f"carries a non-list 'occurrences' (schema >= 1.5)",
+                                reason="invalid_construct_occurrence",
+                            )
+                        for occ_doc in occurrences:
+                            if (
+                                not isinstance(occ_doc, dict)
+                                or not isinstance(occ_doc.get("function"), str)
+                                or not occ_doc.get("function")
+                            ):
+                                raise AnalysisModelError(
+                                    f"Unsupported construct '{uc_doc.get('kind', '')}' in unit at index {u_idx} "
+                                    f"carries an occurrence without a named owner function (schema >= 1.5)",
+                                    reason="invalid_construct_occurrence",
+                                )
+                        count = uc_doc.get("count")
+                        if occurrences and isinstance(count, int) and not isinstance(count, bool) and count != len(occurrences):
+                            raise AnalysisModelError(
+                                f"Unsupported construct '{uc_doc.get('kind', '')}' in unit at index {u_idx} "
+                                f"records count {count} but carries {len(occurrences)} occurrences (schema >= 1.5)",
+                                reason="occurrence_count_mismatch",
+                            )
+                globals_1_5 = unit_doc.get("global_variables")
+                if globals_1_5 is not None:
+                    if not isinstance(globals_1_5, list):
+                        raise AnalysisModelError(
+                            f"Unit at index {u_idx} carries a non-list 'global_variables' (schema >= 1.5)",
+                            reason="invalid_global_variables",
+                        )
+                    for gv_doc in globals_1_5:
+                        if (
+                            not isinstance(gv_doc, dict)
+                            or not isinstance(gv_doc.get("name"), str)
+                            or not gv_doc.get("name")
+                            or not isinstance(gv_doc.get("type"), str)
+                            or not isinstance(gv_doc.get("has_initializer"), bool)
+                            or gv_doc.get("storage_class") not in ("none", "static", "extern")
+                        ):
+                            raise AnalysisModelError(
+                                f"Unit at index {u_idx} carries an invalid global_variables record (schema >= 1.5)",
+                                reason="invalid_global_variable_record",
+                            )
 
     # 7. Type closure validation over merged map on read (SDD-002 §4.2)
     types_obj = doc["types"]

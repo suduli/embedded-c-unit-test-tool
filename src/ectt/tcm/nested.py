@@ -15,6 +15,17 @@ A key with no ``.`` and no ``[`` is a plain name, exactly as before, so existing
 files remain valid and, because the file model is unchanged, byte-stable (the content
 digest and the dumped text do not move).
 
+The path syntax covers three kinds of authored value:
+
+* **expected.globals / expected.out_parameters** — as above, complete values,
+  compared by :func:`compare_expected`;
+* **inputs.globals** (initial nested values) — validated by
+  :func:`resolve_input_values` with the same structural rules, but completeness
+  is not required (C zero-initializes what an initializer omits);
+* **a composite return value** — ``expected.return`` is a mapping of path keys
+  *relative to the return value* (``header.len: "4"``), compared by
+  :func:`compare_return`; the flat scalar return (a plain string) is unchanged.
+
 ``compare_expected`` turns the paths of one name into the nested value the comparison
 engine (``ectt.tcm.compare``) takes, **validated against the declared type**:
 
@@ -61,11 +72,13 @@ from ectt.tcm.errors import InvalidComparisonSpecError, ValueParseError
 __all__ = [
     "ExpectedPath",
     "compare_expected",
+    "compare_return",
     "ctype_from_model",
     "expected_trees",
     "flatten_expected",
     "is_nested_key",
     "parse_expected_path",
+    "resolve_input_values",
     "validate_expected_keys",
 ]
 
@@ -251,6 +264,86 @@ def compare_expected(
         expected = _resolve(node, declared[root], root, active)
         results[root] = compare(declared[root], expected, actual[root], path=root, tolerances=tolerances, active_members=active)
     return results
+
+
+def _relative_tree(entries: Mapping[str, str]) -> Node:
+    """One nested node from keys relative to an unnamed value (the return).
+
+    ``header.len`` means member ``header`` then member ``len``; a plain key is
+    the first member. The value/parent and member/index conflicts of
+    :func:`expected_trees` apply unchanged, reported with the authored key.
+    """
+    node: dict[str | int, Any] = {}
+    for key in sorted(entries):
+        path = parse_expected_path(key)
+        steps: list[str | int] = [path.root, *path.steps]
+        cursor: dict[str | int, Any] = node
+        walked = ""
+        for position, step in enumerate(steps):
+            last = position == len(steps) - 1
+            walked = str(step) if position == 0 else (f"{walked}[{step}]" if isinstance(step, int) else f"{walked}.{step}")
+            if any(isinstance(k, int) != isinstance(step, int) for k in cursor):
+                raise ValueParseError(f"'{key}': '{walked}' mixes member and element paths", reason="mixed_path")
+            if last:
+                if step in cursor:
+                    raise ValueParseError(f"'{key}': '{walked}' is given more than once", reason="conflicting_path")
+                cursor[step] = entries[key]
+            else:
+                child = cursor.setdefault(step, {})
+                if not isinstance(child, dict):
+                    raise ValueParseError(
+                        f"'{key}': '{walked}' is given both as a value and with member or element paths",
+                        reason="conflicting_path",
+                    )
+                cursor = child
+    if not node:
+        raise ValueParseError("a return expectation needs at least one path key", reason="empty_value")
+    return node
+
+
+def compare_return(
+    entries: Mapping[str, str],
+    declared: CType,
+    actual: Any,
+    *,
+    tolerances: Mapping[str, Tolerance] | None = None,
+) -> ComparisonResult:
+    """Compare a composite return expectation with the observed return value.
+
+    Path keys are relative to the return value itself (``header.len: "4"``);
+    the flat scalar return (a plain string, no paths) is authored as before and
+    never enters here. Validation is the expected-value discipline — unknown
+    members, indices outside the array, scalar/composite confusion and an
+    ambiguous union are refused — and every declared member must be given.
+    Mismatches carry the full path (``return.header.len``).
+    """
+    node = _relative_tree(entries)
+    _validate(node, declared, "return")
+    active: dict[str, str] = {}
+    expected = _resolve(node, declared, "return", active)
+    return compare(declared, expected, actual, path="return", tolerances=tolerances, active_members=active)
+
+
+def resolve_input_values(
+    entries: Mapping[str, str],
+    declared: Mapping[str, CType],
+) -> dict[str, Node]:
+    """Validate initial global values (``inputs.globals``) against the declared types.
+
+    The structural rules are the expected-value rules: an unknown member, an
+    index outside the array, a scalar where a composite is declared (or the
+    reverse) and a union given more than one member are refused. Completeness
+    is **not** required: C zero-initializes what an initializer omits, so a
+    partial initializer is a valid initial state. Returns, per root, the
+    validated tree (string leaves, member/index dict nodes) for the initializer
+    rendering.
+    """
+    trees = expected_trees(entries)
+    for root, node in trees.items():
+        if root not in declared:
+            raise ValueParseError(f"initial value names '{root}', which has no declared type", reason="unknown_variable")
+        _validate(node, declared[root], root)
+    return trees
 
 
 def flatten_expected(root: str, value: Any) -> dict[str, str]:

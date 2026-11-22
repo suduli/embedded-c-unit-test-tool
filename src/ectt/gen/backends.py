@@ -18,6 +18,7 @@ from typing import Any
 
 from ectt.gen.errors import GenError
 from ectt.gen.harness import GeneratedHarness
+from ectt.gen.testbody import CaseSections
 
 __all__ = [
     "UNITY_BACKEND_ID",
@@ -141,7 +142,7 @@ _UNITY_TEMPLATE = """\
 #include "{uut_header}"
 #include "{framework_header}"
 #include "ectt_harness.h"
-
+{case_section}
 void setUp(void)
 {
 {setup_hook}
@@ -165,7 +166,7 @@ _CMOCKA_TEMPLATE = """\
 #include "{uut_header}"
 #include "{framework_header}"
 #include "ectt_harness.h"
-
+{case_section}
 int setup(void **state)
 {
 {setup_hook}
@@ -253,9 +254,36 @@ def render_framework_test(
     test_invocations: str = "",
     setup_hook: str = "",
     teardown_hook: str = "",
+    test_cases: CaseSections | None = None,
 ) -> str:
-    """Render the harness surface into the back-end's C test file."""
+    """Render the harness surface into the back-end's C test file.
+
+    With ``test_cases`` (a ``ectt.gen.testbody.CaseSections``), the back-end
+    emits the per-case functions — ``ectt_begin_test`` / ``ectt_end_test``
+    markers, stub programming, expectation checks reported through
+    ``ectt_fail`` — and the framework entry points run them. The
+    ``{case_section}`` template slot carries the file-scope section; a
+    template without the slot cannot host cases and is refused with a named
+    error. Without ``test_cases`` the render is byte-identical to the
+    slot-less history.
+    """
     backend = registry.lookup(backend_id)
+    case_text = ""
+    if test_cases is not None:
+        if "{case_section}" not in backend.template:
+            raise FrameworkBackendError(
+                f"back-end '{backend_id}' template has no {{case_section}} slot; "
+                "it cannot host generated per-case functions",
+                reason="missing_case_section_slot",
+            )
+        case_text = str(test_cases.case_section) + "\n"
+        if test_invocations:
+            raise FrameworkBackendError(
+                "test_cases and test_invocations are mutually exclusive; "
+                "the case section renders its own invocations",
+                reason="conflicting_invocation_sources",
+            )
+        test_invocations = str(test_cases.test_invocations)
     prototypes = "\n".join(
         f"/* exposes: {function.return_type} {function.name}("
         + (
@@ -269,6 +297,7 @@ def render_framework_test(
         backend.template.replace("{backend_id}", backend.backend_id)
         .replace("{uut_header}", harness.uut_header)
         .replace("{framework_header}", backend.framework_header)
+        .replace("{case_section}\n", case_text)
         .replace("{function_prototypes}", prototypes)
         .replace("{setup_hook}", setup_hook)
         .replace("{teardown_hook}", teardown_hook)

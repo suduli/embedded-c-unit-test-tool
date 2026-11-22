@@ -21,7 +21,7 @@ from __future__ import annotations
 import csv
 import io
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from typing import Any
 
@@ -106,6 +106,33 @@ def _parse_json_cell(text: str, *, column: str, row: str) -> Any:
         ) from None
 
 
+def _return_cell(value: str | Mapping[str, str] | None) -> str:
+    """The expected_return cell: a plain value, or JSON for the path-key form."""
+    if not value:
+        return ""
+    if isinstance(value, Mapping):
+        return _json_cell(dict(sorted(value.items())))
+    return value
+
+
+def _parse_return_cell(text: str, *, column: str, row: str) -> str | dict[str, str] | None:
+    """The expected_return cell back to its model form (scalar or path mapping)."""
+    stripped = (text or "").strip()
+    if not stripped:
+        return None
+    if not stripped.startswith("{"):
+        return stripped  # the flat scalar return, unchanged since v1
+    parsed = _parse_json_cell(stripped, column=column, row=row)
+    if not isinstance(parsed, dict) or not all(
+        isinstance(k, str) and isinstance(v, str) for k, v in parsed.items()
+    ):
+        raise InterchangeError(
+            f"row for '{row}': column '{column}' must be a JSON object of string to string "
+            "when it carries the composite (path-key) return form"
+        )
+    return dict(parsed)
+
+
 @dataclass(frozen=True)
 class InterchangeExport:
     """The interchange text plus everything the format could not express."""
@@ -151,7 +178,7 @@ def _case_row(case: DataDrivenTestCase) -> tuple[list[str], list[str]]:
         "true" if case.robustness else "false",
         _json_cell(dict(case.inputs.parameters)),
         _json_cell(dict(case.inputs.global_inits)),
-        case.expected.return_value or "",
+        _return_cell(case.expected.return_value),
         _json_cell(dict(case.expected.global_finals)),
         _json_cell(dict(case.expected.out_parameters)),
         _json_cell({k: dict(v) for k, v in case.expected.comparison.items()}),
@@ -269,7 +296,9 @@ def import_cases(text: str) -> InterchangeImport:
             function=function,
             inputs=TestCaseInputs(parameters=parameters, global_inits=global_inits),
             expected=TestCaseExpected(
-                return_value=(row["expected_return"] or "").strip() or None,
+                return_value=_parse_return_cell(
+                    row["expected_return"], column="expected_return", row=case_id
+                ),
                 global_finals=expected_globals,
                 out_parameters=out_parameters,
                 comparison={key: dict(value) for key, value in comparison.items()},

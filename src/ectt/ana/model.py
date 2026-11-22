@@ -26,6 +26,8 @@ __all__ = [
     "EnumeratorModel",
     "TypeModel",
     "UnsupportedConstructModel",
+    "ConstructOccurrenceModel",
+    "GlobalVariableModel",
     "DecisionInventoryModel",
     "UnitFailureModel",
     "AnalysisUnit",
@@ -388,6 +390,11 @@ class FunctionModel:
     # omitted from to_dict() while unset so the persisted SDD-002 §4.1 shape
     # is unchanged until the schema bump lands.
     complexity: int | None = None
+    # Schema 1.5 (function extent): 1-indexed first and last source line of
+    # the definition, populated by extraction. Optional; omitted from to_dict()
+    # while unset so pre-1.5 documents keep their exact shape.
+    start_line: int | None = None
+    end_line: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1."""
@@ -403,6 +410,10 @@ class FunctionModel:
         }
         if self.complexity is not None:
             result["complexity"] = self.complexity
+        if self.start_line is not None:
+            result["start_line"] = self.start_line
+        if self.end_line is not None:
+            result["end_line"] = self.end_line
         return result
 
     @classmethod
@@ -420,6 +431,8 @@ class FunctionModel:
             globals=tuple(GlobalAccessModel.from_dict(g) for g in data.get("globals", [])),
             calls=tuple(CallModel.from_dict(c) for c in data.get("calls", [])),
             complexity=data.get("complexity"),
+            start_line=int(data["start_line"]) if data.get("start_line") is not None else None,
+            end_line=int(data["end_line"]) if data.get("end_line") is not None else None,
         )
 
 
@@ -567,17 +580,55 @@ class TypeModel:
 
 
 @dataclass(frozen=True)
+class ConstructOccurrenceModel:
+    """One occurrence of an unsupported construct with its owner (TOOL-PAR-140).
+
+    Schema 1.5: the inventory records *every* occurrence instead of only the
+    first, naming the function that owns it and where that owner was defined.
+    ``count`` on the entry remains the total number of occurrences; when
+    ``occurrences`` is non-empty it equals ``len(occurrences)``.
+    """
+
+    function: str
+    location: SourceLocation | None = None
+    detail: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {"function": self.function}
+        if self.detail is not None:
+            res["detail"] = self.detail
+        if self.location is not None:
+            res["location"] = self.location.to_dict()
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ConstructOccurrenceModel:
+        """Create ConstructOccurrenceModel from dictionary representation."""
+        loc = data.get("location")
+        return cls(
+            function=data.get("function", ""),
+            detail=data.get("detail"),
+            location=SourceLocation.from_dict(loc) if isinstance(loc, dict) else None,
+        )
+
+
+@dataclass(frozen=True)
 class UnsupportedConstructModel:
     """One recorded construct the analyzer does not support (TOOL-PAR-140).
 
     ``count`` groups repeated occurrences of the same kind; ``location`` is
-    the first occurrence when known.
+    the first occurrence when known. Schema 1.5 additionally records every
+    occurrence in ``occurrences`` (owner function and location), in walk
+    order; it is omitted from to_dict() while empty so pre-1.5 documents keep
+    their exact shape.
     """
 
     kind: str
     count: int = 1
     detail: str | None = None
     location: SourceLocation | None = None
+    occurrences: tuple[ConstructOccurrenceModel, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation."""
@@ -586,6 +637,8 @@ class UnsupportedConstructModel:
             res["detail"] = self.detail
         if self.location is not None:
             res["location"] = self.location.to_dict()
+        if self.occurrences:
+            res["occurrences"] = [o.to_dict() for o in self.occurrences]
         return res
 
     @classmethod
@@ -596,6 +649,51 @@ class UnsupportedConstructModel:
             kind=data.get("kind", ""),
             count=int(data.get("count", 1)),
             detail=data.get("detail"),
+            location=SourceLocation.from_dict(loc) if isinstance(loc, dict) else None,
+            occurrences=tuple(
+                ConstructOccurrenceModel.from_dict(o) for o in data.get("occurrences", [])
+            ),
+        )
+
+
+@dataclass(frozen=True)
+class GlobalVariableModel:
+    """A global or file-static variable with type and initial-value presence.
+
+    Schema 1.5: recorded per unit so a harness can reach file-static data
+    (TOOL-PAR-050). ``type`` is a ``ref:type.*`` id resolvable in the model's
+    type graph; ``has_initializer`` says whether the recorded declaration
+    carries an initial value (a tentative definition does not);
+    ``storage_class`` is ``"none" | "static" | "extern"``.
+    """
+
+    name: str
+    type: str
+    has_initializer: bool
+    storage_class: str = "none"
+    location: SourceLocation | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {
+            "name": self.name,
+            "type": self.type,
+            "has_initializer": self.has_initializer,
+            "storage_class": self.storage_class,
+        }
+        if self.location is not None:
+            res["location"] = self.location.to_dict()
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> GlobalVariableModel:
+        """Create GlobalVariableModel from dictionary representation."""
+        loc = data.get("location")
+        return cls(
+            name=data.get("name", ""),
+            type=data.get("type", ""),
+            has_initializer=bool(data.get("has_initializer", False)),
+            storage_class=data.get("storage_class", "none"),
             location=SourceLocation.from_dict(loc) if isinstance(loc, dict) else None,
         )
 
@@ -679,6 +777,11 @@ class AnalysisUnit:
     types: dict[str, TypeModel] = field(default_factory=dict)
     unsupported_constructs: tuple[UnsupportedConstructModel, ...] = field(default_factory=tuple)
     failure: UnitFailureModel | None = None
+    # Schema 1.5 (global-variable inventory): globals and file-static variables
+    # of the unit with type and initial-value presence, sorted deterministically.
+    # Optional; omitted from to_dict() while empty so pre-1.5 documents keep
+    # their exact shape. A failed unit carries none.
+    global_variables: tuple[GlobalVariableModel, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1 unit shape."""
@@ -689,6 +792,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
+            **({"global_variables": [g.to_dict() for g in self.global_variables]} if self.global_variables else {}),
             **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
@@ -700,6 +804,7 @@ class AnalysisUnit:
             "diagnostics": [d.to_dict() for d in self.diagnostics],
             "functions": [f.to_dict() for f in self.functions],
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
+            **({"global_variables": [g.to_dict() for g in self.global_variables]} if self.global_variables else {}),
             "cfg": None,
             **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
@@ -722,6 +827,9 @@ class AnalysisUnit:
                 UnsupportedConstructModel.from_dict(u) for u in data.get("unsupported_constructs", [])
             ),
             failure=UnitFailureModel.from_dict(data["failure"]) if isinstance(data.get("failure"), dict) else None,
+            global_variables=tuple(
+                GlobalVariableModel.from_dict(g) for g in data.get("global_variables", [])
+            ),
         )
 
 

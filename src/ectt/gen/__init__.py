@@ -106,6 +106,18 @@ from ectt.gen.stubscope import (
     UnknownStubReferenceError,
     build_stub_plan,
 )
+from ectt.gen.testbody import (
+    GENERATED_FILE_TOKEN,
+    STATE_RESET_REGISTRATION_NAME,
+    CaseSections,
+    StubbedCase,
+    TestCaseRender,
+    case_render,
+    render_back_end_sections,
+    render_case_functions,
+    render_harness_interface_header,
+    render_state_reset_registration,
+)
 
 __all__ = [
     "JOURNAL_CAPACITY_MACRO",
@@ -117,6 +129,17 @@ __all__ = [
     "out_parameter_names",
     "render_stub_expectations",
     "render_stub_setup",
+    # Per-case test bodies (A2)
+    "GENERATED_FILE_TOKEN",
+    "STATE_RESET_REGISTRATION_NAME",
+    "CaseSections",
+    "StubbedCase",
+    "TestCaseRender",
+    "case_render",
+    "render_back_end_sections",
+    "render_case_functions",
+    "render_harness_interface_header",
+    "render_state_reset_registration",
     # Errors
     "GenError",
     "NoUnitError",

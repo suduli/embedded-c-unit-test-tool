@@ -1,6 +1,7 @@
 # implements: TOOL-ATG-040, TOOL-ATG-050, TOOL-ATG-070, TOOL-ATG-080
 """Generated test case lifecycle and validation port (CMP-ATG)."""
 
+from ectt.atg.binding import BoundValidationPort
 from ectt.atg.capabilities import (
     ASSESSED_KINDS,
     NOT_ASSESSED_KINDS,
@@ -67,6 +68,7 @@ __all__ = [
     "validate_one",
     "AtgError",
     "BuildOutcome",
+    "BoundValidationPort",
     "CoverageDelta",
     "Discard",
     "EngineInfo",

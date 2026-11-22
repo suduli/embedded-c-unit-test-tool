@@ -15,6 +15,18 @@ from ectt.bld.errors import (
     InvalidArtifactSpecError,
     InvalidSanitizerModeError,
 )
+from ectt.bld.harness_build import (
+    DEFAULT_OUTPUT_ROOT,
+    BuiltSuite,
+    HarnessBuildError,
+    HarnessBuildRefusedError,
+    HarnessBuildRequest,
+    SuiteBuildResult,
+    build_harness_suite,
+    environment_build_relpath,
+    load_stored_suite_record,
+    suite_record_relpath,
+)
 from ectt.bld.plan import (
     REASON_CONFIG_CHANGED,
     REASON_FLAGS_CHANGED,
@@ -66,4 +78,15 @@ __all__ = [
     "CrossBuildCommand",
     "CrossBuildPlan",
     "plan_cross_build",
+    # Harness-build step (plan -> build port -> suite record)
+    "DEFAULT_OUTPUT_ROOT",
+    "BuiltSuite",
+    "HarnessBuildError",
+    "HarnessBuildRefusedError",
+    "HarnessBuildRequest",
+    "SuiteBuildResult",
+    "build_harness_suite",
+    "environment_build_relpath",
+    "load_stored_suite_record",
+    "suite_record_relpath",
 ]
