@@ -80,20 +80,49 @@ def test_configured_metric_without_totals_is_refused() -> None:
     assert exc_info.value.reason == "missing_metric_totals"
 
 
-def test_not_applicable_metric_does_not_fail() -> None:
-    """A configured metric with no data records not_applicable, never a fabricated fail."""
-    result = enforce_thresholds(
-        {
-            "statements": MetricTotals(covered=0, total=0),
-            "branches": MetricTotals(covered=0, total=None),
-        },
-        [
-            MetricThreshold(metric="statements", minimum=Fraction(1, 1)),
-            MetricThreshold(metric="branches", minimum=Fraction(1, 1)),
-        ],
-    )
+_EMPTY = {
+    "statements": MetricTotals(covered=0, total=0),
+    "branches": MetricTotals(covered=0, total=None),
+}
+_BOTH = [
+    MetricThreshold(metric="statements", minimum=Fraction(1, 1)),
+    MetricThreshold(metric="branches", minimum=Fraction(1, 1)),
+]
+
+
+def test_empty_metric_fails_by_default() -> None:
+    """An empty or broken coverage run must not pass a required threshold."""
+    result = enforce_thresholds(_EMPTY, _BOTH)
+    assert result.passed is False
+    assert [e.state for e in result.evaluations] == ["no_data", "no_data"]
+
+
+def test_empty_metric_passes_only_when_explicitly_allowed() -> None:
+    result = enforce_thresholds(_EMPTY, _BOTH, allow_not_applicable={"statements", "branches"})
     assert result.passed is True
     assert [e.state for e in result.evaluations] == ["not_applicable", "not_applicable"]
+
+
+def test_allowing_one_metric_does_not_excuse_the_other() -> None:
+    result = enforce_thresholds(_EMPTY, _BOTH, allow_not_applicable={"branches"})
+    assert result.passed is False
+    assert [e.state for e in result.evaluations] == ["no_data", "not_applicable"]
+
+
+def test_allow_does_not_hide_a_real_failure() -> None:
+    result = enforce_thresholds(
+        {"statements": MetricTotals(covered=1, total=4)},
+        [MetricThreshold(metric="statements", minimum=Fraction(1, 2))],
+        allow_not_applicable={"statements"},
+    )
+    assert result.passed is False
+    assert result.evaluations[0].state == "fail"
+
+
+def test_unknown_metric_in_allow_list_is_refused() -> None:
+    with pytest.raises(CoverageError) as exc_info:
+        enforce_thresholds(_EMPTY, _BOTH, allow_not_applicable={"conditions"})
+    assert exc_info.value.reason == "unknown_metric"
 
 
 def test_unknown_metric_is_refused() -> None:

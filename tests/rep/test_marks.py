@@ -66,7 +66,7 @@ def test_marked_case_shows_mark_in_every_renderer() -> None:
 
     pdf = render_pdf(_model(), cases=[case]).decode("latin-1")
     # PDF string specials are escaped, so the mark text carries \( \)
-    assert "machine-generated \(ectt-gen\); expected value unreviewed" in pdf
+    assert r"machine-generated \(ectt-gen\); expected value unreviewed" in pdf
 
 
 def test_authored_case_shows_the_authored_mark() -> None:

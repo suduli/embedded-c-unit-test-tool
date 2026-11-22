@@ -6,14 +6,17 @@ metric and fail the run when they are not met.
 
 Thresholds are exact fractions (``fractions.Fraction``) in the unit interval —
 never floats. Only configured metrics are enforced; a configured metric whose
-totals are not applicable (no statements or no branches) records state
-``not_applicable`` explicitly and does not fail the run. The overall ``passed``
-flag is what the run-level caller turns into a run failure.
+totals are empty (no statements or no branches measured) records state
+``no_data`` and FAILS the run, because an empty or broken coverage run must not
+pass a required threshold. A caller that knows a metric genuinely has nothing to
+measure (for example a unit with no branches) names it in ``allow_not_applicable``;
+only then is the state ``not_applicable`` and the metric does not fail the run.
+The overall ``passed`` flag is what the run-level caller turns into a run failure.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Any
@@ -64,7 +67,7 @@ class ThresholdEvaluation:
     """One metric's threshold outcome, recorded exactly."""
 
     metric: str
-    state: str  # "pass" | "fail" | "not_applicable"
+    state: str  # "pass" | "fail" | "no_data" | "not_applicable"
     covered: int
     total: int | None
     minimum: Fraction
@@ -97,13 +100,22 @@ class ThresholdResult:
 def enforce_thresholds(
     metrics: Mapping[str, MetricTotals],
     thresholds: Sequence[MetricThreshold],
+    allow_not_applicable: Collection[str] = (),
 ) -> ThresholdResult:
     """Evaluate configured thresholds against metric totals (TOOL-COV-130).
 
-    A metric whose totals are not applicable (``total`` is ``None`` or ``0``)
-    records ``not_applicable`` and does not fail the run. Otherwise the metric
-    passes iff its exact covered/total fraction is >= the configured minimum.
+    A metric with no measured data (``total`` is ``None`` or ``0``) records
+    ``no_data`` and fails the run unless the metric is listed in
+    ``allow_not_applicable``, in which case it records ``not_applicable`` and does
+    not fail. Otherwise the metric passes iff its exact covered/total fraction is
+    >= the configured minimum.
     """
+    unknown = sorted(set(allow_not_applicable) - set(THRESHOLD_METRICS))
+    if unknown:
+        raise CoverageError(
+            f"unknown coverage metric in allow_not_applicable: {', '.join(unknown)}",
+            reason="unknown_metric",
+        )
     evaluations: list[ThresholdEvaluation] = []
     passed = True
     for threshold in thresholds:
@@ -114,10 +126,13 @@ def enforce_thresholds(
                 reason="missing_metric_totals",
             )
         if totals.total is None or totals.total == 0:
+            allowed = threshold.metric in allow_not_applicable
+            if not allowed:
+                passed = False
             evaluations.append(
                 ThresholdEvaluation(
                     metric=threshold.metric,
-                    state="not_applicable",
+                    state="not_applicable" if allowed else "no_data",
                     covered=totals.covered,
                     total=totals.total,
                     minimum=threshold.minimum,
