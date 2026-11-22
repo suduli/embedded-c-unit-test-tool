@@ -1,0 +1,11 @@
+# LANE A ledger — overnight 2026-11-23
+
+Branch `glm-night/20261123-a`, branched from local `main` 80cf5c6 (plan header referenced b8ae29f; main had moved — the queue file itself is the tip commit "Add 11-23 two-lane queues...", so the branch was cut from current main HEAD as the setup block literally specifies `main`).
+
+Baseline at branch point: 3710 passed, 6 skipped per plan (re-verified once on the fresh worktree; gates run per item).
+
+Stop clock: lane stops starting new items at local 05:30 Nov 24 (first occurrence; run started 00:11 Nov 23). No ZAI usage counter available in this harness — token budget cap ignored per plan instruction.
+
+| item | state | commit | est tokens | cumulative | notes |
+|------|-------|--------|-----------|------------|-------|
+| A1 | DONE | PENDING | 180k | 180k | executor: GLM (ZAI). TOOL-QUA-030. New src/ectt/qua/validation.py: ValidationCheck (id, proves, DECLARED cost class instant/quick/long - never measured, no wall clock in the record; requires = external tools), run_validation_suite (offline runner, bundled inputs only: missing-tool gate first -> not-run with reason missing_tool and the absent tools named, the callable NEVER invoked; True -> pass; False -> fail reason check_failed; raise -> fail reason check_error with no exception text recorded, so the record stays byte-stable), ValidationReport + dump_validation_report (canonical JSON, id-ordered results, counts; byte-stable across runs and independent of input order - tested), default_validation_checks (four bundled offline instant checks with requires=(): catalogue published, protocol version self-consistent, canonical-JSON determinism, operational specification renders). Analysis note docs/verification/WP-QUA-03-analysis.md in the house style (RECON: no PLAN-001 5.4 criterion; ACs derived from the SRS text; 4 ACs). Tests: tests/qua/test_validation.py (9): all pass, one fails, one not-run (never pass; partial tool sets refused), byte stability + order independence, record carries id/proves/cost, raising check fails without leaking details, invalid definitions refused, bundled checks pass offline, empty suite. Full gate green (3719 passed, 6 skipped; ruff/mypy/plan_check/trace_check). Second-pass: none (console entry point would be a pyproject change - noted in the analysis Not-covered). |
