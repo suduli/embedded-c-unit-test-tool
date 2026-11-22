@@ -31,6 +31,15 @@ from ectt.sec.policy import (
     DisclosurePolicy,
     disclosure_policy,
 )
+from ectt.sec.sbom import (
+    SIGNING_NOT_CONFIGURED,
+    InstalledPackage,
+    SbomComponent,
+    SbomResult,
+    dump_sbom,
+    generate_sbom,
+    read_installed_packages,
+)
 from ectt.sec.trust import (
     TRUST_RECORD_SCHEMA_VERSION,
     TrustDecision,
@@ -47,6 +56,14 @@ from ectt.sec.untrusted import (
 )
 
 __all__ = [
+    # SBOM generation (WP-SEC-01)
+    "SIGNING_NOT_CONFIGURED",
+    "InstalledPackage",
+    "SbomComponent",
+    "SbomResult",
+    "dump_sbom",
+    "generate_sbom",
+    "read_installed_packages",
     # Diagnostic content control (WP-SEC-04)
     "SecError",
     "SourceContentInDiagnosticError",
