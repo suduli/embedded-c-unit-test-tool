@@ -124,7 +124,9 @@ def _real_merge_outcome(runs: list[Any]) -> str:
 
 def _m4_quarantine_dropped(runs: list[Any]) -> str:
     """FAULT: the error/timeout quarantine is removed — every complete run merges."""
-    from ectt.cov.merge import _merge_documents  # the real aggregation, fault only in admission
+    from ectt.cov.merge import (
+        _merge_documents,  # the real aggregation, fault only in admission
+    )
 
     documents = [run.document for run in runs if run.completeness == "complete"]
     merged = _merge_documents(documents)  # type: ignore[arg-type]
@@ -168,16 +170,6 @@ def _probe_m1() -> bool:
     return _real_condition({"count": 4, "covered": 9}) != _m1_condition_sanity_dropped({"count": 4, "covered": 9})
 
 
-MUTANTS = [
-    ("cov-m1-condition-sanity-dropped", _probe_m1),
-    ("cov-m2-duplicate-line-dropped", _probe_duplicate),
-    ("cov-m3-unknown-version-accepted", _probe_version),
-    ("cov-m4-quarantine-dropped", _probe_quarantine),
-    ("cov-m6-count-max-not-sum", _probe_count),
-    ("cov-m7-threshold-range-dropped", _probe_threshold),
-]
-
-
 def _probe_duplicate() -> bool:
     payload = _document()
     payload["files"][0]["lines"].append(copy.deepcopy(payload["files"][0]["lines"][0]))
@@ -214,6 +206,16 @@ def _probe_count() -> bool:
 
 def _probe_threshold() -> bool:
     return _real_threshold_minimum(Fraction(3, 2)) != _m7_threshold_range_dropped(Fraction(3, 2))
+
+
+MUTANTS = [
+    ("cov-m1-condition-sanity-dropped", _probe_m1),
+    ("cov-m2-duplicate-line-dropped", _probe_duplicate),
+    ("cov-m3-unknown-version-accepted", _probe_version),
+    ("cov-m4-quarantine-dropped", _probe_quarantine),
+    ("cov-m6-count-max-not-sum", _probe_count),
+    ("cov-m7-threshold-range-dropped", _probe_threshold),
+]
 
 
 @pytest.mark.parametrize("name, killed", MUTANTS, ids=[m[0] for m in MUTANTS])

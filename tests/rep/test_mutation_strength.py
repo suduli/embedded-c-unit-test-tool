@@ -21,11 +21,10 @@ from typing import Any
 
 import pytest
 
-from ectt.cov.thresholds import ThresholdEvaluation, ThresholdResult
 from ectt.cbt.minimize import Minimization
+from ectt.cov.thresholds import ThresholdEvaluation, ThresholdResult
 from ectt.rep.machine_formats import cobertura_rate, render_junit
 from ectt.rep.views import minimized_suite_view, threshold_view
-
 
 # --- cobertura rate mutants ------------------------------------------------------------
 
@@ -148,12 +147,24 @@ def _probe_stale() -> bool:
     return mutant["view"] != real
 
 
+def _probe_m7() -> bool:
+    return _probe_rate(_m7_rate_zero_total_fabricates, 0, 0)
+
+
+def _probe_m8() -> bool:
+    return _probe_rate(_m8_rate_rounds_up, 1, 3)
+
+
+def _probe_m9() -> bool:
+    return _probe_junit({"t.a": "pass", "t.b": "not_run"})
+
+
 MUTANTS = [
-    ("rep-m7-rate-zero-total-fabricates", lambda: _probe_rate(_m7_rate_zero_total_fabricates, 0, 0)),
-    ("rep-m8-rate-rounds-up", lambda: _probe_rate(_m8_rate_rounds_up, 1, 3)),
-    ("rep-m9-junit-tests-count-drops-not-run", lambda: _probe_junit({"t.a": "pass", "t.b": "not_run"})),
-    ("rep-m10-no-data-displayed-pass", lambda: _probe_no_data()),
-    ("rep-m11-stale-minimization-accepted", lambda: _probe_stale()),
+    ("rep-m7-rate-zero-total-fabricates", _probe_m7),
+    ("rep-m8-rate-rounds-up", _probe_m8),
+    ("rep-m9-junit-tests-count-drops-not-run", _probe_m9),
+    ("rep-m10-no-data-displayed-pass", _probe_no_data),
+    ("rep-m11-stale-minimization-accepted", _probe_stale),
 ]
 
 
