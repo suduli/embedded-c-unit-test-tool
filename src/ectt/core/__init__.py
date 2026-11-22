@@ -59,6 +59,12 @@ from ectt.core.platform import (
     find_network_imports,
     platform_report,
 )
+from ectt.core.selfverify import (
+    SelfVerification,
+    SelfVerificationError,
+    verify_tree,
+    write_manifest,
+)
 from ectt.core.text import (
     DEFAULT_CATALOG_NAME,
     MessageCatalog,
@@ -68,6 +74,11 @@ from ectt.core.text import (
 )
 
 __all__ = [
+    # Self-verification (WP-CORE-08)
+    "SelfVerification",
+    "SelfVerificationError",
+    "verify_tree",
+    "write_manifest",
     # Determinism
     "Clock",
     "SystemClock",
