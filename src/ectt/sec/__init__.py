@@ -19,6 +19,7 @@ from ectt.sec.diagnostics import (
     location_reference,
 )
 from ectt.sec.errors import SecError, SourceContentInDiagnosticError
+from ectt.sec.pins import PinDifference, PinnedPackage, check_pins, load_pin_lock
 from ectt.sec.policy import (
     ACKNOWLEDGEMENT_COMMITMENT,
     POLICY_STATE,
@@ -56,6 +57,11 @@ from ectt.sec.untrusted import (
 )
 
 __all__ = [
+    # Pinned dependency integrity (WP-SEC-02)
+    "PinDifference",
+    "PinnedPackage",
+    "check_pins",
+    "load_pin_lock",
     # SBOM generation (WP-SEC-01)
     "SIGNING_NOT_CONFIGURED",
     "InstalledPackage",
