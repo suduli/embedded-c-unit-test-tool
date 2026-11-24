@@ -7,6 +7,12 @@ failure as a first-class record (T-14 NR-17), binding checks before every run
 (T-14 NR-18).
 """
 
+from ectt.exh.debugger import (
+    DebuggerLaunchError,
+    DebugLaunch,
+    build_debugger_launch,
+    start_debugger,
+)
 from ectt.exh.errors import (
     DuplicateTestResultError,
     ExecutableMissingError,
@@ -17,6 +23,15 @@ from ectt.exh.errors import (
     MalformedResultStreamError,
     UnknownTestResultError,
     WrongAttemptStateError,
+)
+from ectt.exh.restricted import (
+    RestrictedContext,
+    RestrictedContextError,
+    RestrictedRunResult,
+    WallClockExceeded,
+    build_context,
+    default_starter,
+    run_restricted,
 )
 from ectt.exh.results import (
     EXECUTED_OUTCOMES,
@@ -51,6 +66,19 @@ from ectt.exh.runner import (
 )
 
 __all__ = [
+    # Debugger launch (WP-EXH-04)
+    "DebugLaunch",
+    "DebuggerLaunchError",
+    "build_debugger_launch",
+    "start_debugger",
+    # Restricted execution context (WP-SEC-06)
+    "RestrictedContext",
+    "RestrictedContextError",
+    "RestrictedRunResult",
+    "WallClockExceeded",
+    "build_context",
+    "default_starter",
+    "run_restricted",
     # Errors
     "ExhError",
     "InvalidResultRecordError",

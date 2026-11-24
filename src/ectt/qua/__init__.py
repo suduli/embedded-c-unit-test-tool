@@ -7,6 +7,12 @@ packages (WP-QUA-01/02/03/05/06/08) are separate work packages.
 
 from __future__ import annotations
 
+from ectt.qua.known_errors import (
+    KnownError,
+    KnownErrorListError,
+    errors_for_release,
+    load_known_errors,
+)
 from ectt.qua.qualification_scope import (
     NON_CLAIM_SENTENCE,
     OverclaimError,
@@ -15,6 +21,17 @@ from ectt.qua.qualification_scope import (
     default_scope,
     render,
 )
+from ectt.qua.validation import (
+    STATE_FAIL,
+    STATE_NOT_RUN,
+    STATE_PASS,
+    CheckOutcome,
+    ValidationCheck,
+    ValidationReport,
+    default_validation_checks,
+    dump_validation_report,
+    run_validation_suite,
+)
 
 __all__ = [
     "NON_CLAIM_SENTENCE",
@@ -22,5 +39,18 @@ __all__ = [
     "ProvidedItem",
     "QualificationScope",
     "default_scope",
-    "render",
+    "render",    "STATE_FAIL",
+    "STATE_NOT_RUN",
+    "STATE_PASS",
+    "CheckOutcome",
+    "KnownError",
+    "KnownErrorListError",
+    "errors_for_release",
+    "load_known_errors",
+    "ValidationCheck",
+    "ValidationReport",
+    "default_validation_checks",
+    "dump_validation_report",
+    "run_validation_suite",
+
 ]

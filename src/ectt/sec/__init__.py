@@ -19,6 +19,7 @@ from ectt.sec.diagnostics import (
     location_reference,
 )
 from ectt.sec.errors import SecError, SourceContentInDiagnosticError
+from ectt.sec.pins import PinDifference, PinnedPackage, check_pins, load_pin_lock
 from ectt.sec.policy import (
     ACKNOWLEDGEMENT_COMMITMENT,
     POLICY_STATE,
@@ -30,6 +31,15 @@ from ectt.sec.policy import (
     SUPPORTED_VERSIONS_RULE,
     DisclosurePolicy,
     disclosure_policy,
+)
+from ectt.sec.sbom import (
+    SIGNING_NOT_CONFIGURED,
+    InstalledPackage,
+    SbomComponent,
+    SbomResult,
+    dump_sbom,
+    generate_sbom,
+    read_installed_packages,
 )
 from ectt.sec.trust import (
     TRUST_RECORD_SCHEMA_VERSION,
@@ -47,6 +57,19 @@ from ectt.sec.untrusted import (
 )
 
 __all__ = [
+    # Pinned dependency integrity (WP-SEC-02)
+    "PinDifference",
+    "PinnedPackage",
+    "check_pins",
+    "load_pin_lock",
+    # SBOM generation (WP-SEC-01)
+    "SIGNING_NOT_CONFIGURED",
+    "InstalledPackage",
+    "SbomComponent",
+    "SbomResult",
+    "dump_sbom",
+    "generate_sbom",
+    "read_installed_packages",
     # Diagnostic content control (WP-SEC-04)
     "SecError",
     "SourceContentInDiagnosticError",

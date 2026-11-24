@@ -1,0 +1,6 @@
+# SECOND PASS — lane A (items needing a human)
+
+| item | what is needed | why it needs a human | where |
+|------|----------------|---------------------|-------|
+| A3 | Release signing for the SBOM (signature field + key management) | signing needs keys only the owner holds; the mechanism (which keys, where stored, who signs) is an owner decision per the security policy | src/ectt/sec/sbom.py (SIGNING_NOT_CONFIGURED marker; the document carries no signature field) |
+| A9 | Fix verify_tree (src/ectt/core/selfverify.py): a deleted file is counted as BOTH changed and missing (the digest comparison `actual.get(path) != digest` fires when the path is absent); per the module's own contract, changed must require the path to be present in the tree (one-line guard: `path in actual and actual[path] != digest`). When fixed, un-xfail tests/core/test_properties_seeded.py::test_changed_excludes_missing_files (strict marker will force it) | the fix is a src/ectt/core change and A9 is a tests-only item (rule 6: never touch the other items' paths); found by A9's random-mutation oracle | src/ectt/core/selfverify.py, tests/core/test_properties_seeded.py::test_changed_excludes_missing_files (strict xfail) |
