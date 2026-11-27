@@ -220,6 +220,9 @@ def import_lcov(text: str, *, gcc_version: str = "unknown") -> GcovDocument:
         record = raw_line.strip()
         if not record:
             continue
+        if record.startswith("#"):
+            # Comment record (lcov format: ignored when a tracefile is read).
+            continue
         if record == "end_of_record":
             if current is None:
                 raise _error("end_of_record without an open SF record", "unterminated_record")
@@ -230,9 +233,25 @@ def import_lcov(text: str, *, gcc_version: str = "unknown") -> GcovDocument:
         if ":" not in record:
             raise _error(f"unknown LCOV record '{record}'", "unknown_record")
         tag, value = record.split(":", 1)
+        if tag == "VER":
+            # lcov 2.x tracefiles carry their format version in a VER record
+            # and come with records this reader does not read (FNL, FNA, FNC,
+            # MCDC, a reworked BRDA layout). Refusing here names the cause;
+            # reading further would mis-read the new BRDA layout.
+            raise _error(
+                f"lcov tracefile format version {value!r} is not supported; "
+                "this reader reads the lcov 1.x format",
+                "unsupported_lcov_version",
+            )
         if tag == "SF":
             if current is not None:
                 raise _error(f"SF record '{value}' opened before 'end_of_record'", "unterminated_record")
+            # lcov 2.x writes "SF:<index>,<path>" when later records name the
+            # file by index; the index is resolved while reading and is not
+            # part of the data.
+            indexed = re.match(r"^(\d+),(.*)$", value)
+            if indexed is not None:
+                value = indexed.group(2)
             if value in files:
                 raise _error(f"duplicate SF record for '{value}'", "duplicate_file")
             current = {
@@ -351,8 +370,11 @@ def import_cobertura(text: str, *, gcc_version: str = "unknown") -> GcovDocument
 
     Cobertura's aggregate ``condition-coverage`` carries no per-branch taken
     counts, so branch records are not invented: only per-line ``hits`` are
-    imported. A line element with a non-integer or negative ``hits`` value is a
-    named error.
+    imported, taken from the ``<lines>`` listing of the class itself. Line
+    elements a producer also nests under ``<method>`` (gcovr does) repeat the
+    class-level listing and are not read a second time — counting both would
+    double the statement counts. A line element with a non-integer or negative
+    ``hits`` value is a named error.
     """
     try:
         root = ET.fromstring(text)
@@ -364,7 +386,9 @@ def import_cobertura(text: str, *, gcc_version: str = "unknown") -> GcovDocument
         filename = class_element.get("filename")
         if not filename:
             raise _error("Cobertura class element without filename", "invalid_xml")
-        for line_element in class_element.iter("line"):
+        # Direct <lines> children of the class only: "lines/line" does not
+        # descend into a <method> element, whose listing repeats these lines.
+        for line_element in class_element.findall("lines/line"):
             number_raw = line_element.get("number")
             hits_raw = line_element.get("hits")
             if number_raw is None or hits_raw is None:
