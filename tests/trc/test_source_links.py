@@ -288,6 +288,16 @@ def test_range_reaching_beyond_the_extent_is_refused() -> None:
     assert (result.status, result.reason) == ("unresolved", "range_spans_functions")
 
 
+def test_range_ending_one_line_past_the_extent_is_refused() -> None:
+    """The boundary is inclusive and exact: a range ending on the first line
+    past the extent reaches into what follows and is refused (mutation
+    TRC-LINKS-1 survivor: `end <= end_line + 1` admitted these)."""
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=31, end_line=51))
+    assert (result.status, result.reason) == ("unresolved", "range_spans_functions")
+    result = _one_extent(SourceLink("REQ-1", "src/adc.c", start_line=50, end_line=51))
+    assert (result.status, result.reason) == ("unresolved", "range_spans_functions")
+
+
 def test_range_in_the_gap_between_extents_is_refused() -> None:
     """The approximate fallback would have attributed a gap range to the earlier
     function; the extent knows better and refuses."""
