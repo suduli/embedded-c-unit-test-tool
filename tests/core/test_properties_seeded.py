@@ -85,16 +85,7 @@ def test_random_mutations_are_named_exactly(seed: int, tmp_path: Path) -> None:
     assert verdict.unexpected == tuple(sorted(verdict.unexpected))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        'selfverify counts a deleted file as changed as well as missing (its '
-        'digest check fires on absent paths), contradicting the module own '
-        'contract changed = present in both, digest differs; the one-line fix '
-        'is queued in SECOND_PASS_A (A9) - src is outside this tests-only item '
-        'paths'
-    ),
-)
+@pytest.mark.parametrize("seed", SEEDS)
 def test_changed_excludes_missing_files(seed: int, tmp_path: Path) -> None:
     """verifies: WP-CORE-08 AC-2 — a deleted file is missing, NOT changed: the
     two lists partition the differences without overlap."""

@@ -140,7 +140,7 @@ def verify_tree(tree: Path | str, manifest_text: str) -> SelfVerification:
     actual = {
         relative.as_posix(): _digest(Path(tree) / relative) for relative in _relative_files(Path(tree))
     }
-    changed = tuple(sorted(path for path, digest in expected.items() if actual.get(path) != digest))
+    changed = tuple(sorted(path for path, digest in expected.items() if path in actual and actual[path] != digest))
     missing = tuple(sorted(path for path in expected if path not in actual))
     unexpected = tuple(sorted(path for path in actual if path not in expected))
     return SelfVerification(changed=changed, missing=missing, unexpected=unexpected)

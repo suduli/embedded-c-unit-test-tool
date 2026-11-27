@@ -391,7 +391,7 @@ def _coverage_section(
                     "total": evaluation.total,
                     "minimum": _fraction_text(evaluation.minimum),
                 }
-                for evaluation in criteria.evaluations
+                for evaluation in sorted(criteria.evaluations, key=lambda item: item.metric)
             ],
         }
     section = {
@@ -485,7 +485,7 @@ def _traceability_section(
                 "verdict": row.verdict,
                 "links": [
                     {"test_id": link.test_id, "status": link.status, "unreviewed": link.unreviewed}
-                    for link in row.links
+                    for link in sorted(row.links, key=lambda item: item.test_id)
                 ],
             }
             for row in rows

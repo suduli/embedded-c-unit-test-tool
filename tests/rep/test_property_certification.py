@@ -7,10 +7,7 @@ Property: for every seeded draw, the report is byte-identical whatever order
 its inputs arrive in - tests, coverage units, criteria evaluations,
 traceability rows, justifications.
 
-KNOWN FAILING PROPERTY, xfail(strict): the report currently renders criteria
-evaluations and traceability links in their input order. The fix (sorted by
-metric / by test id in ``_coverage_section`` / ``_traceability_section``) is
-queued in SECOND_PASS_B; src/ is outside this tests-only item.
+Criteria evaluations render sorted by metric and links sorted by test id.
 """
 
 from __future__ import annotations
@@ -19,8 +16,6 @@ import random
 from dataclasses import replace
 from fractions import Fraction
 from typing import Any
-
-import pytest
 
 from ectt.core.determinism import FixedClock
 from ectt.cov.justification import Justification
@@ -194,16 +189,6 @@ def _shuffled_links(rng: random.Random, links: tuple[_TestLink, ...]) -> tuple[_
     return tuple(shuffled)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "build_certification_report renders criteria evaluations and "
-        "traceability links in their input order (a sort is missing in "
-        "_coverage_section/_traceability_section), so the same content in "
-        "another order renders differently; the fix (sorted by metric / test "
-        "id) is queued in SECOND_PASS_B - src/ is outside this tests-only item"
-    ),
-)
 def test_the_report_is_stable_under_seeded_input_orders() -> None:
     """verifies: TOOL-REP-100 — the same content in any input order gives the
     same bytes, over seeded draws. Claims are drawn from the same data: a
