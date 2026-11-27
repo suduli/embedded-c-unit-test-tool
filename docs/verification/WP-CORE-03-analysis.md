@@ -63,3 +63,7 @@ and is reported `validated: false` until runner evidence exists.
   territory. (2) PLAN-001 §5.4 has no package-specific acceptance criterion for CMP-CORE —
   owner reconciliation of the derived criteria above. (3) Linux CI lane wiring (`*.yml` under
   `.github/`) is outside this item's allowed paths — maintained by the owner per D-03.
+
+## Requirement split, 2026-11-27
+
+The owner chose Windows only for the first release. TOOL-NFR-020 (M, P1) now covers Windows; macOS is the new TOOL-NFR-200 (S, P2). The macOS runner-evidence gap recorded above now applies to TOOL-NFR-200.

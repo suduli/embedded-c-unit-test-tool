@@ -30,4 +30,4 @@ Apply the four answers as one reviewed change. It touches the licence file, the 
 
 ## Update 2026-11-27
 
-D-02, D-03 and D-04 are applied: SDD-002/SDD-003 identity text, TOOL-NFR-010 (now M, P2) and TOOL-NFR-020 (now M, P1), and provisional markers on TOOL-NFR-030/040/150. TOOL-NFR-020 still names macOS as well as Windows.
+D-02, D-03 and D-04 are applied: SDD-002/SDD-003 identity text, TOOL-NFR-010 (now M, P2) and TOOL-NFR-020 (now M, P1), and provisional markers on TOOL-NFR-030/040/150. macOS was then split out of TOOL-NFR-020 into TOOL-NFR-200 (S, P2) at the owner's choice of Windows only.

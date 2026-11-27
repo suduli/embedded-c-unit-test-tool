@@ -28,7 +28,7 @@ document:
       # Independently counted; the checker errors if it parses a different
       # number, so a requirement lost to a formatting change cannot pass
       # unnoticed.
-      requirement_count: 346
+      requirement_count: 347
     - id: ADR-001
       version: "analysis, no decision recorded"
       path: ADR-001-architecture-decisions.md
@@ -174,7 +174,7 @@ components:
           a platform layer with Linux x86-64 as the reference implementation and
           Windows and macOS as conformant ports. No component branches on
           platform directly.
-        satisfies: [TOOL-NFR-010, TOOL-NFR-020]
+        satisfies: [TOOL-NFR-010, TOOL-NFR-020, TOOL-NFR-200]
         verification: T
       - id: DSN-CORE-080
         title: Message catalogue

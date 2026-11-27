@@ -2,7 +2,7 @@
 
 **Status:** Draft v0.2 — reconciled 2026-10-17; estimates are not commitments
 **Upstream:** [`SRS-001`](SRS-001-requirements.md) v0.1 (draft, not baselined) · [`ADR-001`](ADR-001-architecture-decisions.md) (accepted 2026-09-19) · [`SDD-001`](design/SDD-001-architecture.md) · [`SDD-002`](design/SDD-002-interfaces.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml)
-**Covers:** all 346 SRS-001 requirements
+**Covers:** all 347 SRS-001 requirements
 **Method:** specification-based, in three layers — specification analysis, work breakdown, and specification-based test design
 
 ---
@@ -33,13 +33,13 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 ## 2. The specification at a glance
 
-346 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
+347 requirements across 24 categories, counted directly from SRS-001. These figures describe specified scope, not implementation or executed verification.
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 216 · S 112 · C 16 · F 2 |
-| Phase | P1 38 · P2 155 · P3 108 · P4 43 · — 2 |
-| Verification | T 248 · I 52 · D 25 · A 19 · — 2 |
+| Priority | M 216 · S 113 · C 16 · F 2 |
+| Phase | P1 38 · P2 156 · P3 108 · P4 43 · — 2 |
+| Verification | T 249 · I 52 · D 25 · A 19 · — 2 |
 
 ### 2.1 Requirement load by category
 
@@ -56,7 +56,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | INS | 12 | 10 | 2 | 0 | 0 | 0 | 11 | 1 | 0 | 5 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 11 | 4 | 6 | 1 | 0 | 0 | 4 | 5 | 2 | 10 | 1 | 0 | 0 |
-| NFR | 19 | 13 | 6 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
+| NFR | 20 | 13 | 7 | 0 | 0 | 4 | 15 | 1 | 0 | 7 | 6 | 4 | 3 |
 | PAR | 17 | 8 | 8 | 1 | 0 | 0 | 16 | 1 | 0 | 16 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | PRJ | 11 | 9 | 2 | 0 | 0 | 0 | 8 | 1 | 2 | 7 | 4 | 0 | 0 |
@@ -209,11 +209,11 @@ Three rules were applied and are worth stating because they are where a work bre
 | Package start phase | Work packages | Requirements owned | Effort (person-weeks) | Dependency lower bound (weeks) |
 |---|---|---|---|---|
 | P0 | 3 | 0 | 4 | 2 |
-| P1 | 28 | 69 | 88 | 46 |
+| P1 | 28 | 70 | 88 | 46 |
 | P2 | 69 | 135 | 228 | 48 |
 | P3 | 65 | 104 | 230 | 52 |
 | P4 | 26 | 36 | 92 | 52 |
-| Total | 191 | 344 | 642 | 52 |
+| Total | 191 | 345 | 642 | 52 |
 
 Rows count requirements by their owning package's start phase; SRS delivery-phase counts appear in §7.3. Early-start packages can own later requirements. Historical 2026-08-27 estimate: 183 packages including spikes, 622 person-weeks, 52-week unconstrained path. Current revision adds 20 person-weeks in bounded packages. Estimates remain planning assumptions. Dependency lower bounds include all edge types, assume unlimited resources and allow phases to overlap; they are not staffed delivery dates. Sequential release gates, resource contention, integration and rework can lengthen them. No exact staffing level follows from effort divided by duration.
 
@@ -280,13 +280,13 @@ port-mediated edges, per §5.1. `●` marks ADR-sensitivity.
 
 #### L0 — Platform and Persistence
 
-13 work packages · 33 requirements · 38 person-weeks
+13 work packages · 34 requirements · 38 person-weeks
 
 | WP | Capability delivered | Comp | Start | Effort | Reqs | Depends on | ADR |
 |---|---|---|:--:|--:|---|---|:--:|
 | `WP-CORE-01` | Determinism, source immutability and output confinement | CMP-CORE | P1 | 3w | NFR-060 NFR-070 NFR-080 PRJ-050 PRJ-080 | — |  |
 | `WP-CORE-02` | Structured error model, fail-safe termination and cancellation | CMP-CORE | P1 | 3w | NFR-090 NFR-180 | CORE-01 |  |
-| `WP-CORE-03` | Platform baseline and offline guarantee | CMP-CORE | P1 | 2w | NFR-010 NFR-020 NFR-100 | — | ● |
+| `WP-CORE-03` | Platform baseline and offline guarantee | CMP-CORE | P1 | 2w | NFR-010 NFR-020 NFR-100 NFR-200 | — | ● |
 | `WP-CORE-04` | Provenance record and version identification | CMP-CORE | P2 | 2w | QUA-060 INS-110 | CORE-01 |  |
 | `WP-CORE-05` | Performance, scale and memory envelope | CMP-CORE | P2 | 4w | NFR-030 NFR-040 NFR-050 NFR-150 | ~ANA-04 ~GEN-01 | ● |
 | `WP-CORE-06` | Logging and diagnostic bundle | CMP-CORE | P2 | 2w | NFR-130 NFR-160 | CORE-02 SEC-04 |  |
@@ -545,7 +545,7 @@ method, with authored technique choices for test requirements where the rule wou
 
 | Technique | Requirements | Share |
 |---|---|---|
-| EQUIVALENCE PARTITIONING | 154 | 44.5% |
+| EQUIVALENCE PARTITIONING | 155 | 44.7% |
 | INSPECTION CHECKLIST | 52 | 15.0% |
 | BOUNDARY VALUE ANALYSIS | 28 | 8.1% |
 | DECISION TABLE | 25 | 7.2% |
@@ -554,7 +554,7 @@ method, with authored technique choices for test requirements where the rule wou
 | STATE TRANSITION | 20 | 5.8% |
 | ANALYSIS ARGUMENT | 19 | 5.5% |
 | — (deferred) | 2 | 0.6% |
-| Total | 346 | 100% |
+| Total | 347 | 100% |
 
 Technique choices are planning inputs, not test executions. Inspection and analysis retain explicit review deliverables.
 
@@ -564,7 +564,7 @@ Appendix A follows the current SRS verification method: I → inspection, A → 
 
 | Method | Requirements |
 |---|---|
-| T | 248 |
+| T | 249 |
 | I | 52 |
 | D | 25 |
 | A | 19 |
@@ -660,10 +660,10 @@ This section is regenerated from SRS-001 and §5.5 by plan_check.py. It proves w
 
 | Check | Result |
 |---|---|
-| SRS unique IDs | 346 |
-| Non-Future IDs | 344 |
-| Primary allocation entries | 344 |
-| Distinct allocated IDs | 344 |
+| SRS unique IDs | 347 |
+| Non-Future IDs | 345 |
+| Primary allocation entries | 345 |
+| Distinct allocated IDs | 345 |
 | Orphans / duplicate owners / allocated Future IDs | 0 / 0 / 0 |
 
 The allocation check uses current SRS and §5.5 directly; the separately generated design matrix must pass trace_check.py before design allocation completeness is claimed. A primary package coordinates acceptance; collaborators do not create a second primary allocation.
@@ -693,10 +693,10 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
 | M | 36 | 107 | 52 | 21 | 0 | 216 |
-| S | 2 | 47 | 47 | 16 | 0 | 112 |
+| S | 2 | 48 | 47 | 16 | 0 | 113 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
-| Total | 38 | 155 | 108 | 43 | 2 | 346 |
+| Total | 38 | 156 | 108 | 43 | 2 | 347 |
 
 P1–P3 belong to v1.0; P4 belongs to v1.1. M is mandatory within the assigned release; Future is outside this roadmap.
 
@@ -909,6 +909,7 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-NFR-170` | S | P3 | D | `WP-CORE-08` | SCENARIO (demonstration) |
 | `TOOL-NFR-180` | M | P2 | T | `WP-CORE-02` | STATE TRANSITION |
 | `TOOL-NFR-190` | S | P2 | I | `WP-CORE-07` | INSPECTION CHECKLIST |
+| `TOOL-NFR-200` | S | P2 | T | `WP-CORE-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-PAR-010` | M | P2 | T | `WP-ANA-01` | EQUIVALENCE PARTITIONING |
 | `TOOL-PAR-020` | M | P2 | T | `WP-ANA-01` | PAIRWISE |
 | `TOOL-PAR-030` | M | P2 | T | `WP-ANA-02` | EQUIVALENCE PARTITIONING |

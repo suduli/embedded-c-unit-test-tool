@@ -123,8 +123,8 @@ def _fixture_repo_with_changed_effort(tmp_path, effort: str, weeks_total: str) -
     changed = plan_text.replace(
         "| `WP-CORE-01` | Determinism, source immutability and output confinement | CMP-CORE | P1 | 3w |",
         f"| `WP-CORE-01` | Determinism, source immutability and output confinement | CMP-CORE | P1 | {effort} |",
-    ).replace("13 work packages · 33 requirements · 38 person-weeks",
-              f"13 work packages · 33 requirements · {weeks_total} person-weeks")
+    ).replace("13 work packages · 34 requirements · 38 person-weeks",
+              f"13 work packages · 34 requirements · {weeks_total} person-weeks")
     (fixture / "PLAN-001-changed.md").write_text(changed, encoding="utf-8", newline="\n")
     (fixture / "SRS-001-changed.md").write_text(srs_text, encoding="utf-8", newline="\n")
     return fixture

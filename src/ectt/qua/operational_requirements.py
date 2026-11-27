@@ -71,7 +71,7 @@ def default_specification() -> OperationalRequirements:
     return OperationalRequirements(
         environment=(
             OperatingEnvironmentFact(
-                statement="The tool runs on Windows and macOS.",
+                statement="The tool runs on Windows.",
                 srs_id="TOOL-NFR-020",
             ),
             OperatingEnvironmentFact(

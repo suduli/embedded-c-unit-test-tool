@@ -737,7 +737,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-NFR-010** *(M, P2, T)* — The tool shall run on Linux x86-64.
 
-**TOOL-NFR-020** *(M, P1, T)* — The tool shall run on Windows and macOS.
+**TOOL-NFR-020** *(M, P1, T)* — The tool shall run on Windows.
 
 **TOOL-NFR-030** *(M, P2, D)* — [PROVISIONAL, calibrate before WP-CORE-05 exits P2] Environment creation for a single translation unit of 1000 lines shall complete in under 30 seconds on typical developer hardware.
 
@@ -772,6 +772,8 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 **TOOL-NFR-180** *(M, P2, T)* — Long-running operations shall be interruptible, and interruption shall leave project data in a valid state.
 
 **TOOL-NFR-190** *(S, P2, I)* — User-facing text shall be externalized from code to permit translation, without translation being delivered in v1.0.
+
+**TOOL-NFR-200** *(S, P2, T)* — The tool shall run on macOS.
 
 ---
 

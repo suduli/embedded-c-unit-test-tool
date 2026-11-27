@@ -1,7 +1,7 @@
 # implements: DSN-CORE-010
 """Platform baseline and offline guarantee (WP-CORE-03).
 
-Implements: TOOL-NFR-010 (Linux x86-64), TOOL-NFR-020 (Windows/macOS),
+Implements: TOOL-NFR-010 (Linux x86-64), TOOL-NFR-020 (Windows), TOOL-NFR-200 (macOS),
 TOOL-NFR-100 (no network access for non-AI functionality).
 
 Platform order follows owner decision D-03 (owner answer, 2026-11-19, memo
