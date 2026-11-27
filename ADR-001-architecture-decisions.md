@@ -260,11 +260,15 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 **Bearing on other decisions:** none significant — this can be decided independently and late, provided the model layer is format-agnostic from the start.
 
 ### ADR-003 — Symbolic execution engine
+**Resolved — Accepted, 2026-11-21: CBMC.** CBMC is not yet installed and the adapter design is not yet written.
+
 **Question:** Adopt KLEE, adopt CBMC, support both, or defer automatic test generation entirely.
 **Why it matters:** SRS ATG-020 and ATG-030 are *(S/C, P3)*. KLEE's toolchain-version sensitivity is precisely the problem UTBotCpp solved with a client-server split; inheriting KLEE means inheriting that problem. CBMC has lighter integration cost but a different capability profile.
 **Bearing on other decisions:** significant. If KLEE is adopted, the isolation strategy chosen in §2.4 must accommodate a second toolchain-pinned component, and the case for the client-server architecture strengthens.
 
 ### ADR-004 — Coverage backend strategy
+**Resolved — Accepted, 2026-11-21: GCC is the primary path; Clang is added later.**
+
 **Question:** Whether to support the GCC and Clang coverage paths equally, or designate GCC as primary.
 **Why it matters:** the two paths differ materially. GCC's `-fcondition-coverage` with `gcov --conditions --json-format` is consumable end to end today, and gcovr supports it. Clang's `-fcoverage-mcdc` is ignored by current gcovr, so supporting it means parsing llvm-cov output directly. Supporting both equally roughly doubles the coverage layer's surface.
 **Bearing on other decisions:** moderate. It determines whether TCH-060 (declaring achievable metrics per compiler) is a small table or a substantial compatibility matrix.

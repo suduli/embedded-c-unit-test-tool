@@ -864,8 +864,8 @@ This document does not decide anything. It does narrow four open decisions:
 
 | ADR | What this document contributes |
 |---|---|
-| **ADR-003** — symbolic execution engine | KLEE forces a **second LLVM** (13–14) alongside CMP-ANA's 18.1. CBMC does not. That packaging cost, not raw capability, should drive the choice (§5.7, §6.2) |
-| **ADR-004** — coverage backend | Both open-source MC/DC sources give **masking** MC/DC, and each has a different silent-failure mode: Clang's 6-condition default and GCC's version-locked data files (§5.5) |
+| **ADR-003** — symbolic execution engine | KLEE forces a **second LLVM** (13–14) alongside CMP-ANA's 18.1. CBMC does not. That packaging cost, not raw capability, should drive the choice (§5.7, §6.2). Accepted 2026-11-21: CBMC |
+| **ADR-004** — coverage backend | Both open-source MC/DC sources give **masking** MC/DC, and each has a different silent-failure mode: Clang's 6-condition default and GCC's version-locked data files (§5.5). Accepted 2026-11-21: GCC first |
 | **ADR-005** — licence selection | Accepted 2026-11-21: Apache-2.0, which satisfies TOOL-LIC-010 (§3.2) |
 | **ADR-007** — distribution and packaging | TOOL-INS-030 plus K-04/K-05 rule out user-installed runtime/build prerequisites, not bundled offline runtimes. Python is accepted; additional runtimes require packaging/license assessment. Vendored Ninja is the selected build-tool packaging choice (§5.4) |
 

@@ -6,7 +6,7 @@
 
 **Sources (not modified by this plan):** [`PLAN-001`](PLAN-001-specification-analysis-and-work-breakdown.md) · [`SRS-001`](SRS-001-requirements.md) · [`BACKLOG_GLM_NIGHT.md`](BACKLOG_GLM_NIGHT.md) · [subsystem tracker](docs/reviews/2026-11-07-subsystem-requirements-and-tasks.md) · [vcast-findings review](docs/reviews/2026-11-06-vcast-findings-review-tracker.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml) · ADR-001/002/006/008.
 
-**Decisions D-01…D-04 are owner decisions. This plan does not resolve them and no agent may.** D-01 (licence) was answered by the owner on 2026-11-21: Apache-2.0 (section 6.1).
+**Decisions D-01…D-04 are owner decisions. This plan does not resolve them and no agent may.** D-01 to D-04, ADR-003 and ADR-004 have since been answered by the owner (section 6.1); task statuses elsewhere in this plan have not been re-derived from those answers.
 
 ---
 
@@ -461,7 +461,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Unblocks:** `T-01`, `T-02`, `WP-PKG-07`, `WP-PKG-08` · **Watch:** `TASK-015`, `TASK-019`, `TASK-022`
 - **Answer:** b. Apache-2.0, chosen by the owner and applied 2026-11-21.
 
-### D-02 · Identity model — **Pending user decision**
+### D-02 · Identity model — **Resolved (stable ids + digests)**
 
 **Question:** Stable ids + content digests vs revision entities? The T-04 memo recommends stable ids + digests (a recommendation, not a decision).
 
@@ -474,9 +474,9 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P0 · **References:** `T-04`, `NR-04`, `SDD-003 §6/§7`
 - **Gates:** T-04 → T-14 (run-integrity acceptance in WP-EXH-01/02, WP-CBT-01); WP-TCM-02 digest binding
 - **Unblocks:** `T-04`, `T-14` · **Watch:** `WP-TCM-02`
-- **Answer:** _awaiting decision — agents must not answer._
+- **Answer:** a. Stable ids plus content digests, answered by the owner 2026-11-19. The SDD-003 / SDD-002 text amendment is not yet applied.
 
-### D-03 · Platform order — **Pending user decision**
+### D-03 · Platform order — **Resolved (Windows first)**
 
 **Question:** Windows pilot first or Linux-first (NFR-010/020)?
 
@@ -489,9 +489,9 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P1 · **References:** `T-05`, `NR-05`, `NFR-010`, `NFR-020`
 - **Gates:** NFR-010/020 wording; WP-CORE-03 (platform baseline); WP-GUI-01 platform-support planning
 - **Unblocks:** `T-05`, `TASK-007`, `WP-CORE-03` · **Watch:** `WP-GUI-01`
-- **Answer:** _awaiting decision — agents must not answer._
+- **Answer:** a. Windows pilot first, Linux CI kept green, answered by the owner 2026-11-19. The TOOL-NFR-010/020 wording change is not yet applied.
 
-### D-04 · DR-06 NFR calibration — **Pending user decision**
+### D-04 · DR-06 NFR calibration — **Resolved (defer to post-pilot)**
 
 **Question:** How should DR-06 NFR calibration be handled before pilot data exists?
 
@@ -504,7 +504,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P2 · **References:** `T-06`, `NR-06`, `DR-06`
 - **Gates:** T-06; WP-CORE-05 NFR thresholds
 - **Unblocks:** `T-06` · **Watch:** `WP-CORE-05`
-- **Answer:** _awaiting decision — agents must not answer._
+- **Answer:** a. Defer to post-pilot and mark provisional, answered by the owner 2026-11-19. The SRS provisional markers are not yet applied.
 
 ### Other open gates (not in the D-01…D-04 queue)
 
@@ -512,8 +512,8 @@ The script needs only the Python standard library. Never hand-edit text between 
 |---|---|---|---|
 | `ADR-001` | Language, GUI, qualification tiers | Accepted 2026-09-19 | — |
 | `ADR-002` | Project data format (restricted YAML) | Accepted 2026-09-26 | — |
-| `ADR-003` | Symbolic execution | Open — not in the D-queue | `WP-ATG-02`, `WP-ATG-03` |
-| `ADR-004` | Coverage backend strategy | Open — not in the D-queue | `WP-COV-01` |
+| `ADR-003` | Symbolic execution | Accepted 2026-11-21 (CBMC) | `WP-ATG-02`, `WP-ATG-03` |
+| `ADR-004` | Coverage backend strategy | Accepted 2026-11-21 (GCC first, Clang later) | `WP-COV-01` |
 | `ADR-005` | Licence selection | Accepted 2026-11-21 (Apache-2.0) | `T-01`, `T-02`, `WP-PKG-07`, `WP-PKG-08` |
 | `ADR-006` | Fork or build fresh | Accepted 2026-09-19 (build fresh) | — |
 | `ADR-007` | Distribution / installer | Open — not in the D-queue | `WP-PKG-01` |
