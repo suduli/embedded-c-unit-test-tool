@@ -1,23 +1,21 @@
-# Plan to run now (2026-11-23 queues)
+# Plan to run now (2026-11-27 queues: MC/DC)
 
-Last night's work is merged into local `main` (b8ae29f). All checks pass: 3710 tests, ruff, mypy, plan_check, trace_check. Nothing is pushed.
+Local `main` is the starting point (c1fd70e). All checks pass: 4026 tests, ruff, mypy, plan_check, trace_check. Nothing is pushed.
 
 ## What to do
-1. Open two GLM (ZAI) chats, Chat A and Chat B.
-2. Paste into Chat A the whole file `docs/glm-night/overnight-20261123/LANE_A_queue.md`.
-3. Paste into Chat B the whole file `docs/glm-night/overnight-20261123/LANE_B_queue.md`.
-4. Both stop by themselves at 05:30, or earlier when their list is done.
+1. Start Docker Desktop and leave it running.
+2. Open two GLM (ZAI) chats, Chat A and Chat B.
+3. Paste into Chat A the whole file `docs/glm-night/overnight-20261127/LANE_A_queue.md`.
+4. Paste into Chat B the whole file `docs/glm-night/overnight-20261127/LANE_B_queue.md`.
+5. Both stop by themselves at 05:30, or earlier when their list is done.
 
 ## What each chat does
-- Chat A (9 tasks): a validation suite you can run yourself, a known-error list, a software bill of materials, a dependency check, a safer way to start test programs, debugger launch command, a check that the tool's own files are unchanged, extra tests.
-- Chat B (7 tasks): a certification report with a clear "what this does not claim" statement, detection of code the coverage tool cannot measure, control and data coupling analysis, safety tests for report files, import/export round trips, extra tests.
-- The two chats touch different folders, so they do not wait for each other.
+- Chat A (5 tasks): list every decision and condition in the analyzed code, MC/DC compiler flags and version check, compile the generated test code with a real compiler for the first time, small leftovers, extra tests.
+- Chat B (7 tasks): MC/DC results, worked examples with hand-computed answers, real coverage checks, MC/DC minimums, code the compiler cannot measure (waits for Chat A's first task), report detail and a DRAFT page on what MC/DC does and does not show, extra tests.
 
 ## Notes
-- Last night both chats finished in under an hour, so these lists are longer. The backlog is now thin: most of what is left is held on your decisions or needs a compiler or GUI.
-- Release signing is not built (needs your keys); the chat records it as a to-do for you.
-- Still held: MC/DC (SRS-Q2), packaging (ADR-007), GUI, AI-provider work, CBMC test generation.
+- GCC 14.4.0 is installed only as a Docker image (`gcc:14`, about 2.2 GB). Nothing was installed into Windows.
+- Still held: GUI, AI-provider work, CBMC test generation, packaging (ADR-007).
 
 ## Your to-do after
-- Review the DRAFT pages and security policy from last night before copying them into the repo.
-- Update SDD-005, the tracker and the execution plan, which still say AGPL.
+- Read the security draft and the guide pages in `docs/user/`.
