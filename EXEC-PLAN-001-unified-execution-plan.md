@@ -6,7 +6,7 @@
 
 **Sources (not modified by this plan):** [`PLAN-001`](PLAN-001-specification-analysis-and-work-breakdown.md) · [`SRS-001`](SRS-001-requirements.md) · [`BACKLOG_GLM_NIGHT.md`](BACKLOG_GLM_NIGHT.md) · [subsystem tracker](docs/reviews/2026-11-07-subsystem-requirements-and-tasks.md) · [vcast-findings review](docs/reviews/2026-11-06-vcast-findings-review-tracker.md) · [`design/trace/design-elements.yaml`](design/trace/design-elements.yaml) · ADR-001/002/006/008.
 
-**Decisions D-01…D-04 are pending user decisions. This plan does not resolve them and no agent may.**
+**Decisions D-01…D-04 are owner decisions. This plan does not resolve them and no agent may.** D-01 (licence) was answered by the owner on 2026-11-21: Apache-2.0 (section 6.1).
 
 ---
 
@@ -445,7 +445,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 ### 6.1 Pending user decisions and open gates
 
 <!-- BEGIN GENERATED: decisions -->
-### D-01 · Licence posture — **Pending user decision**
+### D-01 · Licence posture — **Resolved (Apache-2.0)**
 
 **Question:** Which licence does the project ship under? The repo is public showing AGPL-3.0 but SRS LIC-010 requires a permissive licence — one of the two must move.
 
@@ -459,7 +459,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P0 · **References:** `T-01`, `NR-01`, `ADR-005`, `LIC-010`
 - **Gates:** publicising the repo / contributor solicitation; WP-PKG-07 (LIC-010..060); T-02 no-import rule (ADR-005 anchor)
 - **Unblocks:** `T-01`, `T-02`, `WP-PKG-07`, `WP-PKG-08` · **Watch:** `TASK-015`, `TASK-019`, `TASK-022`
-- **Answer:** _awaiting decision — agents must not answer._
+- **Answer:** b. Apache-2.0, chosen by the owner and applied 2026-11-21.
 
 ### D-02 · Identity model — **Pending user decision**
 
@@ -514,7 +514,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 | `ADR-002` | Project data format (restricted YAML) | Accepted 2026-09-26 | — |
 | `ADR-003` | Symbolic execution | Open — not in the D-queue | `WP-ATG-02`, `WP-ATG-03` |
 | `ADR-004` | Coverage backend strategy | Open — not in the D-queue | `WP-COV-01` |
-| `ADR-005` | Licence selection | Open (same question as D-01) | `T-01`, `T-02`, `WP-PKG-07`, `WP-PKG-08` |
+| `ADR-005` | Licence selection | Accepted 2026-11-21 (Apache-2.0) | `T-01`, `T-02`, `WP-PKG-07`, `WP-PKG-08` |
 | `ADR-006` | Fork or build fresh | Accepted 2026-09-19 (build fresh) | — |
 | `ADR-007` | Distribution / installer | Open — not in the D-queue | `WP-PKG-01` |
 | `ADR-008` | AI structured-decision provider | Accepted 2026-09-19 | — |

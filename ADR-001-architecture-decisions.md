@@ -270,6 +270,8 @@ ADR-001 deliberately covers three coupled decisions. The following remain open a
 **Bearing on other decisions:** moderate. It determines whether TCH-060 (declaring achievable metrics per compiler) is a small table or a substantial compatibility matrix.
 
 ### ADR-005 — License selection
+**Resolved — Accepted, 2026-11-21: Apache-2.0.** The correction note of 2026-10-17 above predates this decision.
+
 **Question:** Apache-2.0 or MIT.
 **Why it matters:** LIC-010 requires a permissive license but does not name one, and the difference is not cosmetic in this domain. **Apache-2.0 includes an express patent grant and a patent retaliation clause; MIT does not.** For a tool used in automotive, avionics, and medical device development — patent-dense industries where corporate legal review gates adoption — the explicit patent grant materially reduces the friction of that review. Apache-2.0 also aligns with LLVM, cmocka, and StrictDoc. MIT's advantage is brevity and Unity/CMock alignment.
 **Recommendation, stated here because it is low-controversy:** Apache-2.0.

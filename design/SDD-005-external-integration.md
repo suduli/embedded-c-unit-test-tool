@@ -136,6 +136,8 @@ than hard-coding one framework — and it is a requirement, not a preference.
 
 ### 3.2 An inconsistency in the repository that must be resolved
 
+> Resolved 2026-11-21: the owner chose **Apache-2.0**; `LICENSE`, `LICENSEES` and the README now state it, which satisfies TOOL-LIC-010. The rest of this section is kept as the record of the conflict as it stood before that decision.
+
 SRS-001 requires the tool's own licence to be permissive:
 
 > **TOOL-LIC-010** *(M, P1, I)* — The tool's own source code shall be released under a permissive open-source license.
@@ -864,7 +866,7 @@ This document does not decide anything. It does narrow four open decisions:
 |---|---|
 | **ADR-003** — symbolic execution engine | KLEE forces a **second LLVM** (13–14) alongside CMP-ANA's 18.1. CBMC does not. That packaging cost, not raw capability, should drive the choice (§5.7, §6.2) |
 | **ADR-004** — coverage backend | Both open-source MC/DC sources give **masking** MC/DC, and each has a different silent-failure mode: Clang's 6-condition default and GCC's version-locked data files (§5.5) |
-| **ADR-005** — licence selection | The repository's AGPL-3.0 `LICENSE` contradicts TOOL-LIC-010. **This should be settled before the dependency set is frozen** (§3.2) |
+| **ADR-005** — licence selection | Accepted 2026-11-21: Apache-2.0, which satisfies TOOL-LIC-010 (§3.2) |
 | **ADR-007** — distribution and packaging | TOOL-INS-030 plus K-04/K-05 rule out user-installed runtime/build prerequisites, not bundled offline runtimes. Python is accepted; additional runtimes require packaging/license assessment. Vendored Ninja is the selected build-tool packaging choice (§5.4) |
 
 ### 10.2 Version claims that must be re-verified before baseline

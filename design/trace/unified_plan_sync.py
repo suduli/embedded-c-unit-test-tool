@@ -174,7 +174,7 @@ def b_decisions(m: Model) -> str:
                 f"- **Priority:** {d['priority']} · **References:** {code(d['refs'])}",
                 "- **Gates:** " + "; ".join(d["gates"]),
                 f"- **Unblocks:** {code(d['unblocks'])} · **Watch:** {code(d['watch'])}",
-                "- **Answer:** _awaiting decision — agents must not answer._", ""]
+                f"- **Answer:** {d.get('answer', '_awaiting decision — agents must not answer._')}", ""]
     out += ["### Other open gates (not in the D-01…D-04 queue)", "", table(["ID", "Title", "State", "Gates"], [[f"`{a['id']}`", a["title"], a["state"], code(a["gates"])] for a in m.d["adrs"]])]
     return "\n".join(out)
 

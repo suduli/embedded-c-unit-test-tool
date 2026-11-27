@@ -102,6 +102,8 @@ defect, and a technology choice the SRS defers *on purpose* (it lists nine such 
 | **F-15** | INCOMPLETE | minor | HAR-100, STB-120 | Both promise to "preserve user modifications … or report conflicts" without defining what makes a user region untenable. `DSN-GEN-070` defines the contract; the SRS does not |
 | **F-16** | CONFLICT | **blocker** | LIC-010 | **The repository contradicts its own P1 requirement today.** `LIC-010` (M, **P1**, I) requires the tool's source under a *permissive* licence; `LICENSE`, `LICENSEES` and the README all state **AGPL-3.0**, the strongest copyleft available |
 
+> **F-16 and R-8:** Resolved 2026-11-21: the owner chose **Apache-2.0**; `LICENSE`, `LICENSEES` and the README now state it, which satisfies TOOL-LIC-010. The finding and risk text below describe the state before that date.
+
 **F-16 deserves separate mention** because it is the only finding that is already false in the repository
 rather than merely unresolved in the specification. `LIC-010` is Must-priority, P1, and verified by
 inspection — so it is checkable today, and today it fails. The tension is sharpened by `LIC-020`, which
