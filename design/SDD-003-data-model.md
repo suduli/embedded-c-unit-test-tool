@@ -250,7 +250,7 @@ rather than a packaging convenience.
 
 ## 6. Identity and references
 
-> **Amendment (on owner approval of D-02, option a).** Test and result identities are stable ids bound to content digests (§7). Separate revision entities are not adopted. Digest binding is the staleness mechanism.
+> **Amendment (D-02, option a, approved by the owner 2026-11-19).** Test and result identities are stable ids bound to content digests (§7). Separate revision entities are not adopted. Digest binding is the staleness mechanism.
 
 | Identifier | Assigned | Stable across | Requirement |
 |---|---|---|---|
@@ -275,7 +275,7 @@ referencing file, the missing target, and whether it was required
 
 ## 7. Digest-bound records
 
-> **Amendment (on owner approval of D-02, option a).** Test and result records join this pattern per §6: a result record binds to the digest of the test definition it executed, so editing a test invalidates prior results instead of silently outdating them. Separate revision entities are not adopted.
+> **Amendment (D-02, option a, approved by the owner 2026-11-19).** Test and result records join this pattern per §6: a result record binds to the digest of the test definition it executed, so editing a test invalidates prior results instead of silently outdating them. Separate revision entities are not adopted.
 
 Four record types carry a digest of something outside themselves. In each case
 the digest exists so a change *invalidates* the record instead of silently

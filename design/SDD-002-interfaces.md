@@ -160,6 +160,8 @@ instrument is indistinguishable from one that was fully covered.
 
 ## 5. S2 — Test Case Model
 
+**Identity (D-02, approved 2026-11-19):** a test case is identified by a stable id bound to a content digest of its definition (SDD-003 §6 and §7); there are no separate revision entities.
+
 **Owner:** `CMP-TCM`. **Consumers:** `CMP-GEN`, `CMP-ATG`, `CMP-EXH`,
 `CMP-EXT`, `CMP-TRC`, `CMP-MIG`, `CMP-AIF`; and `CMP-GUI` across the engine API.
 **Requirements:** TOOL-TCD-020..060, TOOL-TCD-140. **Elements:** DSN-TCM-020,
@@ -214,6 +216,8 @@ ADR-002 chooses.
 ---
 
 ## 6. S3 — Result Set
+
+**Identity (D-02, approved 2026-11-19):** each result record binds to the content digest of the test definition it executed (SDD-003 §7), so editing a test invalidates its earlier results.
 
 **Producers:** `CMP-EXH`, `CMP-EXT`. **Consumers:** `CMP-COV` and `CMP-REP`
 directly; `CMP-CBT` reads *persisted* result sets from the store rather than

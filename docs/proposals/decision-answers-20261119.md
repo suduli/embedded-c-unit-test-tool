@@ -27,3 +27,7 @@ Apply the four answers as one reviewed change. It touches the licence file, the 
 - ADR-003 auto test generation: CBMC. Recorded here only; ADR-001 section text not yet edited.
 - ReqIF schema file: keep `reqif.xsd` in the repository so the export check runs in CI (needs the OMG licence terms to allow redistribution, which has not been checked).
 - Still open: ADR-005 record location, ADR-007, SRS-Q2, SRS-Q9.
+
+## Update 2026-11-27
+
+D-02, D-03 and D-04 are applied: SDD-002/SDD-003 identity text, TOOL-NFR-010 (now M, P2) and TOOL-NFR-020 (now M, P1), and provisional markers on TOOL-NFR-030/040/150. TOOL-NFR-020 still names macOS as well as Windows.

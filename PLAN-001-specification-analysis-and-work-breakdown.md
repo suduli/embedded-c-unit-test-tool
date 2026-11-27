@@ -37,7 +37,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 
 | Attribute | Distribution |
 |---|---|
-| Priority | M 215 · S 113 · C 16 · F 2 |
+| Priority | M 216 · S 112 · C 16 · F 2 |
 | Phase | P1 38 · P2 155 · P3 108 · P4 43 · — 2 |
 | Verification | T 248 · I 52 · D 25 · A 19 · — 2 |
 
@@ -56,7 +56,7 @@ Section 5.5 is the editable work-package source. SRS-001 supplies requirement at
 | INS | 12 | 10 | 2 | 0 | 0 | 0 | 11 | 1 | 0 | 5 | 1 | 6 | 0 |
 | LIC | 7 | 5 | 2 | 0 | 0 | 3 | 3 | 1 | 0 | 0 | 7 | 0 | 0 |
 | MIG | 11 | 4 | 6 | 1 | 0 | 0 | 4 | 5 | 2 | 10 | 1 | 0 | 0 |
-| NFR | 19 | 12 | 7 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
+| NFR | 19 | 13 | 6 | 0 | 0 | 4 | 14 | 1 | 0 | 6 | 6 | 4 | 3 |
 | PAR | 17 | 8 | 8 | 1 | 0 | 0 | 16 | 1 | 0 | 16 | 0 | 0 | 1 |
 | PLG | 10 | 6 | 4 | 0 | 0 | 0 | 5 | 5 | 0 | 5 | 2 | 1 | 2 |
 | PRJ | 11 | 9 | 2 | 0 | 0 | 0 | 8 | 1 | 2 | 7 | 4 | 0 | 0 |
@@ -692,8 +692,8 @@ These are work-plan checks. Source-level layer enforcement remains the responsib
 
 | Priority | P1 | P2 | P3 | P4 | Deferred | Total |
 |---|---|---|---|---|---|---|
-| M | 36 | 106 | 52 | 21 | 0 | 215 |
-| S | 2 | 48 | 47 | 16 | 0 | 113 |
+| M | 36 | 107 | 52 | 21 | 0 | 216 |
+| S | 2 | 47 | 47 | 16 | 0 | 112 |
 | C | 0 | 1 | 9 | 6 | 0 | 16 |
 | F | 0 | 0 | 0 | 0 | 2 | 2 |
 | Total | 38 | 155 | 108 | 43 | 2 | 346 |
@@ -890,8 +890,8 @@ Generated attributes and primary owners from SRS-001 and §5.5. Technique choice
 | `TOOL-MIG-090` | C | P4 | T | `WP-MIG-07` | STATE TRANSITION |
 | `TOOL-MIG-100` | M | P2 | I | `WP-MIG-03` | INSPECTION CHECKLIST |
 | `TOOL-MIG-110` | S | P3 | T | `WP-MIG-05` | EQUIVALENCE PARTITIONING |
-| `TOOL-NFR-010` | M | P1 | T | `WP-CORE-03` | BOUNDARY VALUE ANALYSIS |
-| `TOOL-NFR-020` | S | P2 | T | `WP-CORE-03` | EQUIVALENCE PARTITIONING |
+| `TOOL-NFR-010` | M | P2 | T | `WP-CORE-03` | BOUNDARY VALUE ANALYSIS |
+| `TOOL-NFR-020` | M | P1 | T | `WP-CORE-03` | EQUIVALENCE PARTITIONING |
 | `TOOL-NFR-030` | M | P2 | D | `WP-CORE-05` | SCENARIO (demonstration) |
 | `TOOL-NFR-040` | S | P2 | D | `WP-CORE-05` | SCENARIO (demonstration) |
 | `TOOL-NFR-050` | M | P2 | A | `WP-CORE-05` | ANALYSIS ARGUMENT |

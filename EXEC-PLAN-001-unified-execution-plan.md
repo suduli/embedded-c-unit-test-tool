@@ -474,7 +474,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P0 · **References:** `T-04`, `NR-04`, `SDD-003 §6/§7`
 - **Gates:** T-04 → T-14 (run-integrity acceptance in WP-EXH-01/02, WP-CBT-01); WP-TCM-02 digest binding
 - **Unblocks:** `T-04`, `T-14` · **Watch:** `WP-TCM-02`
-- **Answer:** a. Stable ids plus content digests, answered by the owner 2026-11-19. The SDD-003 / SDD-002 text amendment is not yet applied.
+- **Answer:** a. Stable ids plus content digests, answered by the owner 2026-11-19. SDD-002 and SDD-003 text updated.
 
 ### D-03 · Platform order — **Resolved (Windows first)**
 
@@ -489,7 +489,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P1 · **References:** `T-05`, `NR-05`, `NFR-010`, `NFR-020`
 - **Gates:** NFR-010/020 wording; WP-CORE-03 (platform baseline); WP-GUI-01 platform-support planning
 - **Unblocks:** `T-05`, `TASK-007`, `WP-CORE-03` · **Watch:** `WP-GUI-01`
-- **Answer:** a. Windows pilot first, Linux CI kept green, answered by the owner 2026-11-19. The TOOL-NFR-010/020 wording change is not yet applied.
+- **Answer:** a. Windows pilot first, Linux CI kept green, answered by the owner 2026-11-19. TOOL-NFR-010/020 priorities updated in SRS-001.
 
 ### D-04 · DR-06 NFR calibration — **Resolved (defer to post-pilot)**
 
@@ -504,7 +504,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 - **Priority:** P2 · **References:** `T-06`, `NR-06`, `DR-06`
 - **Gates:** T-06; WP-CORE-05 NFR thresholds
 - **Unblocks:** `T-06` · **Watch:** `WP-CORE-05`
-- **Answer:** a. Defer to post-pilot and mark provisional, answered by the owner 2026-11-19. The SRS provisional markers are not yet applied.
+- **Answer:** a. Defer to post-pilot and mark provisional, answered by the owner 2026-11-19. TOOL-NFR-030/040/150 are marked provisional in SRS-001.
 
 ### Other open gates (not in the D-01…D-04 queue)
 

@@ -735,13 +735,13 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 ## 20. Non-Functional Requirements (NFR)
 
-**TOOL-NFR-010** *(M, P1, T)* — The tool shall run on Linux x86-64.
+**TOOL-NFR-010** *(M, P2, T)* — The tool shall run on Linux x86-64.
 
-**TOOL-NFR-020** *(S, P2, T)* — The tool shall run on Windows and macOS.
+**TOOL-NFR-020** *(M, P1, T)* — The tool shall run on Windows and macOS.
 
-**TOOL-NFR-030** *(M, P2, D)* — Environment creation for a single translation unit of 1000 lines shall complete in under 30 seconds on typical developer hardware.
+**TOOL-NFR-030** *(M, P2, D)* — [PROVISIONAL, calibrate before WP-CORE-05 exits P2] Environment creation for a single translation unit of 1000 lines shall complete in under 30 seconds on typical developer hardware.
 
-**TOOL-NFR-040** *(S, P2, D)* — Incremental re-execution of an unchanged test suite of 100 test cases shall complete in under 10 seconds on host.
+**TOOL-NFR-040** *(S, P2, D)* — [PROVISIONAL, calibrate before WP-CORE-05 exits P2] Incremental re-execution of an unchanged test suite of 100 test cases shall complete in under 10 seconds on host.
 
 **TOOL-NFR-050** *(M, P2, A)* — The tool shall scale to projects of at least 500 translation units and 10,000 test cases.
 
@@ -763,7 +763,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 
 **TOOL-NFR-140** *(M, P2, A)* — The tool's own test suite shall achieve and maintain a documented coverage threshold of its own source.
 
-**TOOL-NFR-150** *(S, P2, D)* — The tool shall operate within a documented memory ceiling on a project of the scale defined in TOOL-NFR-050, and shall degrade predictably rather than exhausting host memory.
+**TOOL-NFR-150** *(S, P2, D)* — [PROVISIONAL, calibrate before WP-CORE-05 exits P2] The tool shall operate within a documented memory ceiling on a project of the scale defined in TOOL-NFR-050, and shall degrade predictably rather than exhausting host memory.
 
 **TOOL-NFR-160** *(M, P2, T)* — The tool shall produce, on request, a diagnostic bundle containing version information, configuration, and logs sufficient to reproduce a reported defect, with its contents documented per TOOL-SEC-120.
 
