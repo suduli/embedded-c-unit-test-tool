@@ -7,6 +7,15 @@ Every report format renders from the single documented intermediate model
 (TOOL-REP-100).
 """
 
+from ectt.rep.certification import (
+    CERTIFICATION_CLAIMS,
+    CERTIFICATION_REPORT_SCHEMA_VERSION,
+    KNOWN_COVERAGE_METRICS,
+    UNMEASURED_METRICS,
+    CertificationInputs,
+    CertificationReport,
+    build_certification_report,
+)
 from ectt.rep.coverage_interchange import (
     export_cobertura,
     export_lcov,
@@ -96,4 +105,11 @@ __all__ = ["cobertura_rate",
     "report_model_to_dict",
     "result_set_from_dict",
     "test_entry",
+    "CERTIFICATION_CLAIMS",
+    "CERTIFICATION_REPORT_SCHEMA_VERSION",
+    "KNOWN_COVERAGE_METRICS",
+    "UNMEASURED_METRICS",
+    "CertificationInputs",
+    "CertificationReport",
+    "build_certification_report",
 ]

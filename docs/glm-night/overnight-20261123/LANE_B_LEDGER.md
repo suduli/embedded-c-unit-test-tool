@@ -1,0 +1,40 @@
+# Lane B ledger — overnight 2026-11-23
+
+Setup: worktree wt-night-23b branched from local main b9b1262 ("Merge
+glm-night/20261123-a into main"). The queue text named b8ae29f as the branch
+point; main had moved 22 commits further when this run started (lane A's
+20261123 work plus the tracker merge are already in), so the queue was written
+before lane A merged. Branched from current main as the setup block instructs.
+
+Baseline gates at the actual branch point (each gate run and checked
+separately):
+
+- pytest: 3819 passed, 6 skipped, 1 xfailed, 1 warning — NOT the 3710 / 6 the
+  queue states for b8ae29f. The +109 passed and the xfail are lane A's merged
+  work, not lane B changes.
+- ruff, mypy (198 files), plan_check (346 requirements / 344 allocations / 191
+  packages), trace_check: all clean.
+
+Pre-existing at the branch point, recorded here so lane B effects can be told
+apart from them (lane B does not touch either one; both are outside this lane's
+allowed paths):
+
+- xfail(strict) `tests/core/test_properties_seeded.py::test_changed_excludes_missing_files`
+  — lane A's recorded selfverify defect, fix queued in SECOND_PASS_A (A9).
+- warning `PytestCollectionWarning` raised from `tests/cli/test_compose.py`
+  (a `TestCase*` dataclass name that pytest tries to collect).
+
+Assumptions taken (unattended run, conservative reading):
+- B1: "a claim not supported by data is refused" is read as a caller-named claim: the
+  caller lists the claims the report may make, and each is checked against the supplied
+  data. Claims are opt-in; with none requested the report makes none and lists every
+  known claim under `not_claimed`.
+- B1: "no target execution unless the data says so" resolves to "never claimed", because
+  no data the tool records can say so today (target run plans only; execution metadata
+  is documented as never branched on; a host profile is not target evidence).
+- B1: this run started on 2026-11-27 (afternoon), not on the queue's night; the 05:30
+  stop rule is measured from the start of the run.
+
+| item | state | commit | est tokens | cumulative | notes |
+|---|---|---|---|---|---|
+| B1 | DONE | (pending) | ~140k | ~140k | WP-REP-05 (TOOL-REP-060, TOOL-REP-140): ectt.rep.certification builds a certification verification report from result, coverage and trace data via narrow data-class imports only (MetricTotals, ThresholdResult, Justification, TraceabilityMatrix, HostProfile). Contents: tool version/build/dependency and schema versions/provenance digest; execution facts recorded verbatim (never interpreted) plus host profile; every test with status and definition digest; coverage per metric as raw counters beside the stated criteria with unmeasured / not-applicable / not-measured lists; justified exclusions as valid / invalidated / unverifiable (an unverifiable or invalidated justification is never counted); the traceability matrix; a scope statement naming units, tests, requirements and what is excluded (tests not executed, partial run, untraced tests, unverified requirements, metrics not measured). Missing data: each absent input named in missing_inputs, the section reads missing, an undeterminable list is None (never empty), absent criteria never read as met. Claims: opt-in and checked against the data; an unsupported claim is refused (claim_not_supported) before anything is written; target_executed and mcdc_measured are never supported and are always under not_claimed, so every known claim is either made or explicitly not claimed with a reason. Fail-closed: unknown_claim, unknown_metric (incl. mcdc passed in as a figure), criteria_metrics_mismatch, unknown_verdict. Byte-identical under input order; no clock read; creation timestamp not rendered. 44 tests. Analysis note: docs/verification/WP-REP-05-analysis.md. SECOND_PASS_B: TOOL-REP-140 says every report; only this report carries a scope statement. Gate: 3863 passed / 6 skipped / 1 xfailed (pre-existing) / 1 warning (pre-existing); ruff, mypy (199 files), plan_check, trace_check clean — each gate checked on its own. Real GCC output: not applicable to this item. |
