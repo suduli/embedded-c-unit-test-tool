@@ -942,7 +942,7 @@ Every requirement carries: **Priority**, **Phase**, **Verification method**.
 The following require decisions before this specification is baselined:
 
 1. **Standalone GUI technology** — TOOL-UIX-030 mandates a standalone application but deliberately does not name a technology. The choice (native toolkit vs. bundled-runtime desktop app) must be made before UI implementation, and it constrains TOOL-UIX-340 (Linux + Windows) and the contributor base.
-2. **MC/DC form** — TOOL-COV-090 permits documenting the gap rather than implementing unique-cause MC/DC. Confirm whether target users' certification authorities accept masking MC/DC.
+2. **MC/DC form** — TOOL-COV-090 permits documenting the gap rather than implementing unique-cause MC/DC. Confirm whether target users' certification authorities accept masking MC/DC. *Owner answer, 2026-11-27: measure masking MC/DC and document the gap to unique-cause (TOOL-COV-090). Acceptance by certification authorities has not been checked.*
 3. **Symbolic execution engine** — TOOL-ATG-020 does not name an engine. Decide between adopting an existing KLEE-based implementation and building fresh.
 4. **Implementation language** — not yet specified. Affects TOOL-NFR-020 (Windows support) and contributor availability.
 5. **Qualification scope** — TOOL-QUA-010 through TOOL-QUA-100 represent substantial effort. Confirm whether v1.0 targets qualification support or defers it entirely.

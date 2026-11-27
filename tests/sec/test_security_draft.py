@@ -4,7 +4,7 @@
 docs/proposals/SECURITY-draft.md is the owner-review draft the owner copies
 to the repository root as SECURITY.md. The draft must stay consistent with
 the frozen policy data in ectt.sec.policy, must carry the DRAFT state, must
-not invent contact addresses (the OWNER-CONTACT-REQUIRED placeholder), and
+not invent contact addresses (reporting goes through GitHub), and
 must not exist at the repository root yet (that promotion is the owner's).
 """
 
@@ -38,12 +38,13 @@ def test_draft_is_present_and_marked_owner_review() -> None:
     assert "owner" in text.lower()
 
 
-def test_draft_uses_the_placeholder_and_invents_no_contact() -> None:
-    """verifies: B5 — contact addresses are never invented."""
+def test_draft_names_github_reporting_and_invents_no_contact() -> None:
+    """verifies: B5 — the owner chose GitHub private reporting; no address is published."""
     text = _draft_text()
-    assert "OWNER-CONTACT-REQUIRED" in text
+    assert "Report a vulnerability" in text
+    assert "OWNER-CONTACT-REQUIRED" not in text
     # no plausible email or @handle crept in
-    assert "@" not in text.replace("OWNER-CONTACT-REQUIRED", "")
+    assert "@" not in text
 
 
 def test_draft_is_not_promoted_to_the_root() -> None:

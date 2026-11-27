@@ -7,14 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 > **Status: owner-review draft** (WP-SEC-05, TOOL-SEC-080). This page is a
 > proposal: the owner copies it to the repository root as `SECURITY.md` after
 > reviewing the commitments — they bind the project only once the owner accepts
-> them. Contact details are deliberately **not invented**: every place that
-> needs one carries the placeholder `OWNER-CONTACT-REQUIRED`.
+> them. The reporting channel is GitHub private
+> vulnerability reporting (owner's choice, 2026-11-27); no email address is
+> published. Switch it on in the repository settings before promoting this page.
 
 ## Reporting a vulnerability
 
 Report vulnerabilities **privately** — via GitHub Security Advisories
-("Report a vulnerability" on this repository) or to
-`OWNER-CONTACT-REQUIRED`. Do **not** open a public issue for an unpatched
+("Report a vulnerability" on this repository's Security tab). Do **not** open a public issue for an unpatched
 vulnerability.
 
 Please include:
@@ -61,6 +61,4 @@ claims more.
 
 Machine-readable carrier: `ectt.sec.policy.disclosure_policy()` (version
 `1`, state `owner-review-draft`) — the commitments above are the same data,
-and a test keeps the two consistent. Placeholder `OWNER-CONTACT-REQUIRED`
-must be replaced by the real contact (and the reporting-channel sentence
-adjusted if the channel differs) when the owner promotes this draft.
+and a test keeps the two consistent.

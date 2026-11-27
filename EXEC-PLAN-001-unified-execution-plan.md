@@ -518,7 +518,7 @@ The script needs only the Python standard library. Never hand-edit text between 
 | `ADR-006` | Fork or build fresh | Accepted 2026-09-19 (build fresh) | — |
 | `ADR-007` | Distribution / installer | Open — not in the D-queue | `WP-PKG-01` |
 | `ADR-008` | AI structured-decision provider | Accepted 2026-09-19 | — |
-| `SRS-Q2` | SRS §27 q2 — MC/DC form | Open — not in the D-queue | `WP-COV-05` |
+| `SRS-Q2` | SRS §27 q2 — MC/DC form | Answered 2026-11-27 (masking, document the gap) | `WP-COV-05` |
 | `SRS-Q9` | SRS §27 q9 — debugger front-end | Open — not in the D-queue | `WP-EXH-04` |
 <!-- END GENERATED: decisions -->
 

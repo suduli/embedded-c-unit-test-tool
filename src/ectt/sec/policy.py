@@ -31,7 +31,7 @@ POLICY_STATE = "owner-review-draft"
 
 REPORTING_CHANNEL = (
     "GitHub Security Advisories (private vulnerability reporting) on this "
-    "repository, or the maintainer contact in pyproject.toml. Do not open a "
+    "repository. Do not open a "
     "public issue for an unpatched vulnerability."
 )
 
