@@ -14,16 +14,22 @@ deterministic policy (exact rational, round-half-even to six decimal places,
 trailing zeros stripped), so the rate is a function of the same figures every
 other renderer reports — renderers cannot disagree on any figure.
 
+Text that escaping cannot protect is refused with a named reason before
+anything is written (``ectt.rep.output_text``): a character XML 1.0 does not
+allow, and text that cannot be written as UTF-8. A consumer is never left to
+find a document that does not parse.
+
 Satisfies: TOOL-REP-010, TOOL-REP-020, TOOL-REP-090, TOOL-REP-100.
 """
 
 from __future__ import annotations
 
 from fractions import Fraction
-from xml.sax.saxutils import escape, quoteattr
+from xml.sax.saxutils import escape
 
 from ectt.core.determinism import canonical_text
 from ectt.rep.model import TEST_STATUSES, ReportModel
+from ectt.rep.output_text import describe, xml_attribute
 
 __all__ = [
     "render_cobertura",
@@ -52,9 +58,14 @@ def _xml(text: str) -> str:
     return escape(text)
 
 
-def _attr(value: str) -> str:
-    """Escape an attribute value."""
-    return quoteattr(value)
+def _attr(value: str, what: str = "attribute value") -> str:
+    """Quote an attribute value so that it reads back unchanged.
+
+    Markup and quotes are escaped. Text that escaping cannot protect, the
+    renderer refuses with a named reason rather than write a document that
+    does not parse (``xml_illegal_character``, ``unencodable_text``).
+    """
+    return xml_attribute(value, what)
 
 
 def _element_counts(statuses: dict[str, str]) -> dict[str, int]:
@@ -75,11 +86,12 @@ def render_junit(model: ReportModel) -> str:
     statuses = model.test_statuses()
     counts = _element_counts(statuses)
     suite_name = f"ectt run {model.run_id}"
+    run_what = f"run id {describe(model.run_id)}"
     lines: list[str] = [
         '<?xml version="1.0" encoding="utf-8"?>',
         "<testsuites>",
         (
-            f"  <testsuite name={_attr(suite_name)} tests={_attr(str(len(statuses)))}"
+            f"  <testsuite name={_attr(suite_name, run_what)} tests={_attr(str(len(statuses)))}"
             f" failures={_attr(str(counts['fail']))} errors={_attr(str(counts['error'] + counts['timeout']))}"
             f" skipped={_attr(str(counts['not_run']))}>"
         ),
@@ -87,8 +99,13 @@ def render_junit(model: ReportModel) -> str:
     digests = {entry.test_id: entry.digest for entry in model.tests}
     for test_id in sorted(statuses):
         status = statuses[test_id]
-        digest_attr = f' hostname={_attr(digests[test_id])}' if digests.get(test_id) else ""
-        lines.append(f"    <testcase name={_attr(test_id)} classname={_attr(suite_name)}{digest_attr}>")
+        id_what = f"test id {describe(test_id)}"
+        digest_attr = (
+            f" hostname={_attr(digests[test_id], f'digest of {id_what}')}" if digests.get(test_id) else ""
+        )
+        lines.append(
+            f"    <testcase name={_attr(test_id, id_what)} classname={_attr(suite_name, run_what)}{digest_attr}>"
+        )
         element = _JUNIT_STATUS_ELEMENTS.get(status)
         if element == "failure":
             lines.append(f"      <failure message={_attr('test failed')} type={_attr('failure')}/>")
@@ -149,8 +166,9 @@ def render_cobertura(model: ReportModel) -> str:
     for unit in sorted(figures):
         covered, total = figures[unit]
         rate = cobertura_rate(covered, total)
+        unit_what = f"coverage unit {describe(unit)}"
         lines.append(
-            f"        <class name={_attr(unit)} filename={_attr(unit)}"
+            f"        <class name={_attr(unit, unit_what)} filename={_attr(unit, unit_what)}"
             f" line-rate={_attr(rate)} branch-rate={_attr('0')} complexity={_attr('0')}>"
         )
         lines.append("          <methods />")

@@ -12,10 +12,15 @@ provenance. Cobertura's aggregate ``condition-coverage`` does not carry
 per-branch taken counts, so a Cobertura import records statement counts only
 and never invents branch data. Everything is deterministic: sorted output, no
 wall-clock (``timestamp="0"``), no network.
+
+Text a format cannot carry is refused with a named reason before anything is
+written (``ectt.rep.output_text``): a line break or NUL in an LCOV name, a
+character XML 1.0 does not allow, and text that cannot be written as UTF-8.
 """
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
 from typing import Any
@@ -29,6 +34,7 @@ from ectt.cov.model import (
     GcovLine,
 )
 from ectt.rep.errors import ReportModelError
+from ectt.rep.output_text import describe, refuse_characters, xml_attribute
 
 __all__ = [
     "export_cobertura",
@@ -39,13 +45,27 @@ __all__ = [
 
 _LCOV_TAKEN_NONE = "-"
 
+#: An LCOV record ends at its line break and the format has no escaping, so a
+#: name carrying a line break would split into records that read back as
+#: something else; a NUL makes the tracefile binary to the tools that read it.
+_LCOV_FORBIDDEN = re.compile(r"[\r\n\x00]")
+
 
 def _error(message: str, reason: str) -> ReportModelError:
     return ReportModelError(message, reason=reason)
 
 
-def _xml_escape(text: str) -> str:
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+def _lcov_name(value: str, what: str) -> str:
+    """``value`` as text on one LCOV record line, or a named refusal."""
+    refuse_characters(
+        value,
+        what,
+        forbidden=_LCOV_FORBIDDEN,
+        reason="lcov_illegal_character",
+        problem="a line break or NUL",
+        carrier="an LCOV record",
+    )
+    return value
 
 
 # --- export: LCOV ---------------------------------------------------------------
@@ -58,9 +78,22 @@ def export_lcov(document: GcovDocument) -> str:
     (``FN``/``FNDA``/``FNF``/``FNH``), branch records (``BRDA``/``BRF``/``BRH``)
     and line records (``DA``/``LF``/``LH``), then ``end_of_record``. A branch on
     a never-executed line reports ``taken`` as ``-`` (the LCOV convention).
+
+    A data file, source file or function name carrying a line break or NUL is
+    refused with ``lcov_illegal_character``, and one that cannot be written as
+    UTF-8 with ``unencodable_text``: the format has no escaping, so such a
+    tracefile would not read back as what was written.
     """
-    out: list[str] = [f"TN:{document.data_file}"]
-    for file in sorted(document.files, key=lambda f: f.file):
+    data_file = _lcov_name(document.data_file, f"data file {describe(document.data_file)}")
+    files = sorted(document.files, key=lambda f: f.file)
+    for file in files:
+        file_what = f"source file {describe(file.file)}"
+        _lcov_name(file.file, file_what)
+        for function in file.functions:
+            _lcov_name(function.name, f"function {describe(function.name)} of {file_what}")
+
+    out: list[str] = [f"TN:{data_file}"]
+    for file in files:
         out.append(f"SF:{file.file}")
         functions = sorted(file.functions, key=lambda fn: (fn.start_line, fn.name))
         out.extend(f"FN:{fn.start_line},{fn.end_line},{fn.name}" for fn in functions)
@@ -117,8 +150,11 @@ def export_cobertura(document: GcovDocument) -> str:
         "      <classes>",
     ]
     for file in sorted(document.files, key=lambda f: f.file):
+        # The name is written as an attribute: markup is escaped, and text XML
+        # cannot carry is refused rather than written as a broken document.
+        file_attr = xml_attribute(file.file, f"source file {describe(file.file)}")
         out.append(
-            f'        <class name="{_xml_escape(file.file)}" filename="{_xml_escape(file.file)}"'
+            f"        <class name={file_attr} filename={file_attr}"
             ' line-rate="0" branch-rate="0" complexity="0">'
         )
         out.append("          <methods />")
