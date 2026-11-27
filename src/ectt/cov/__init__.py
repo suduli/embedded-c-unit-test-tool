@@ -19,6 +19,17 @@ from ectt.cov.baremetal import (
     retrieve_coverage,
     retrieve_run_coverage,
 )
+from ectt.cov.coupling import (
+    COUPLING_SCHEMA_VERSION,
+    COUPLING_STATUSES,
+    DATA_PAIR_BASIS,
+    CallPair,
+    CallSite,
+    CouplingReport,
+    CouplingVariable,
+    DataPair,
+    analyze_coupling,
+)
 from ectt.cov.errors import (
     CoverageError,
     CoverageFormatError,
@@ -119,4 +130,13 @@ __all__ = [
     "retrieve_coverage",
     "retrieve_run_coverage",
     "dump_frame",
+    "COUPLING_SCHEMA_VERSION",
+    "COUPLING_STATUSES",
+    "DATA_PAIR_BASIS",
+    "CallPair",
+    "CallSite",
+    "CouplingReport",
+    "CouplingVariable",
+    "DataPair",
+    "analyze_coupling",
 ]
