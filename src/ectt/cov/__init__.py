@@ -36,6 +36,16 @@ from ectt.cov.errors import (
     CoverageParseError,
 )
 from ectt.cov.gcov import KNOWN_FORMAT_VERSIONS, read_gcov_document
+from ectt.cov.justification import (
+    LINE_STATUSES,
+    AnnotatedCoverage,
+    AnnotatedFile,
+    AnnotatedLine,
+    Justification,
+    annotate_coverage,
+    compute_source_digest,
+    evaluate_justification,
+)
 from ectt.cov.merge import (
     COMPLETENESS_STATES,
     KNOWN_RUN_OUTCOMES,
