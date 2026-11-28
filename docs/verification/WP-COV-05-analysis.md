@@ -33,3 +33,7 @@ decision reads `no_condition_record`.
 - No MC/DC thresholds, project setting, report rendering, user page or CLI.
 - No build step applies the MC/DC flags yet.
 - Condition-index order matching source order is observed, not documented by GCC.
+- GCC reports a condition under an odd number of `!` inverted; undone from the
+  analyzer's `negated` flag. A ternary with a negated condition reports unknown
+  direction, because GCC may swap its arms. Verified at -O0 only
+  (`tests/cov/test_mcdc_polarity.py`).

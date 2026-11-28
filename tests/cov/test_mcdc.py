@@ -36,7 +36,7 @@ def _measure(name: str = "mcdc", **kwargs: object) -> McdcResult:
     return measure_mcdc(_document(name), f"{name}.c", **kwargs)  # type: ignore[arg-type]
 
 
-def _status(result: McdcResult, function: str) -> list[tuple[str | None, bool, bool]]:
+def _status(result: McdcResult, function: str) -> list[tuple[str | None, bool | None, bool | None]]:
     (decision,) = [d for d in result.decisions if d.function == function]
     return [(c.expression, c.seen_true, c.seen_false) for c in decision.conditions]
 
@@ -74,6 +74,8 @@ def test_without_decisions_nothing_is_claimed_complete() -> None:
     result = _measure(decisions=None)
     assert result.status == "measured" and not result.decisions_known and not result.complete
     assert all(d.expression is None for d in result.decisions)
+    assert all(c.seen_true is None for d in result.decisions for c in d.conditions)
+    assert (result.covered, result.total) == (12, 30)
 
 
 @pytest.mark.parametrize(("limit", "reason"), [(64, "over_condition_limit"), (None, "no_condition_record")])
@@ -101,7 +103,7 @@ def test_records_that_cannot_be_told_apart_are_not_guessed() -> None:
     twin = next(d for d in decisions if d.function == "and2")
     result = _measure(decisions=(*decisions, twin))
     assert [u.reason for u in result.unmeasured if u.function == "and2"] == ["ambiguous_record"] * 2
-    assert _status(result, "and2") == [(None, True, True), (None, True, False)]
+    assert _status(result, "and2") == [(None, None, None), (None, None, None)]
 
 
 @pytest.mark.parametrize(

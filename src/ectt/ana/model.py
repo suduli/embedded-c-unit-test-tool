@@ -708,12 +708,16 @@ class ConditionModel:
     column: int
     expression: str
     constant: bool = False
+    # Under an odd number of ``!``: GCC reports such a condition inverted.
+    negated: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation."""
         res: dict[str, Any] = {"line": self.line, "column": self.column, "expression": self.expression}
         if self.constant:
             res["constant"] = True
+        if self.negated:
+            res["negated"] = True
         return res
 
     @classmethod
@@ -724,6 +728,7 @@ class ConditionModel:
             column=data.get("column", 0),
             expression=data.get("expression", ""),
             constant=bool(data.get("constant", False)),
+            negated=bool(data.get("negated", False)),
         )
 
 

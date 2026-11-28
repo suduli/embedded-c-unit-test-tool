@@ -22,6 +22,7 @@ called directly.
 from __future__ import annotations
 
 import ctypes
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -91,12 +92,15 @@ class _Walker:
             return list(node.get_children())
         return None
 
-    def _leaves(self, node: Any) -> list[Any]:
+    def _leaves(self, node: Any, negated: bool = False) -> list[tuple[Any, bool]]:
+        """The conditions in order, each with whether it sits under an odd number of ``!``."""
         node = self._strip(node)
         operands = self._logical_operands(node)
         if operands is None:
-            return [node]
-        return [leaf for operand in operands for leaf in self._leaves(operand)]
+            return [(node, negated)]
+        if node.kind.name == "UNARY_OPERATOR":
+            negated = not negated
+        return [leaf for operand in operands for leaf in self._leaves(operand, negated)]
 
     def _is_logical_tree(self, node: Any) -> bool:
         """True when a ``&&`` / ``||`` sits at the top, possibly under ``!``."""
@@ -139,11 +143,23 @@ class _Walker:
             return True
         return any(self._from_macro(child) for child in children)
 
-    def _condition(self, leaf: Any) -> ConditionModel:
+    def _condition(self, leaf: Any, negated: bool) -> ConditionModel:
         macro = self._from_macro(leaf)
         text = leaf.spelling if macro and leaf.spelling else self._text(leaf)
         line, column = leaf.extent.start.line, leaf.extent.start.column
-        return ConditionModel(line=line, column=column, expression=text, constant=self._is_constant(leaf))
+        return ConditionModel(
+            line=line, column=column, expression=text, constant=self._is_constant(leaf), negated=negated
+        )
+
+    def _conditions(self, leaves: list[tuple[Any, bool]]) -> tuple[ConditionModel, ...]:
+        found = [self._condition(leaf, negated) for leaf, negated in leaves]
+        # Conditions from one macro use all read as the macro call: number them.
+        texts = [c.expression for c in found]
+        for i, condition in enumerate(found):
+            if texts.count(condition.expression) > 1 and self._from_macro(leaves[i][0]):
+                part = texts[: i + 1].count(condition.expression)
+                found[i] = replace(condition, expression=f"{condition.expression} (part {part})")
+        return tuple(found)
 
     def _record(self, kind: str, expression: Any, line: int, start_line: int) -> None:
         leaves = self._leaves(expression)
@@ -156,11 +172,11 @@ class _Walker:
                 start_line=min(start_line, expression.extent.start.line),
                 end_line=expression.extent.end.line,
                 expression=self._text(expression),
-                conditions=tuple(self._condition(leaf) for leaf in leaves),
+                conditions=self._conditions(leaves),
                 macro=self._from_macro(expression),
             )
         )
-        for leaf in leaves:
+        for leaf, _ in leaves:
             self.visit(leaf)
 
     def _operator_line(self, left: Any, right: Any, symbol: str, fallback: int) -> int:

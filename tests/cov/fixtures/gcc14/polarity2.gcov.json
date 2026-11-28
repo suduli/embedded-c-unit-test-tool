@@ -1,0 +1,726 @@
+{
+ "current_working_directory": "/w",
+ "data_file": "polarity2.o",
+ "files": [
+  {
+   "file": "polarity2.c",
+   "functions": [
+    {
+     "blocks": 2,
+     "blocks_executed": 2,
+     "demangled_name": "g",
+     "end_column": 26,
+     "end_line": 2,
+     "execution_count": 13,
+     "name": "g",
+     "start_column": 5,
+     "start_line": 2
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "if_else_not",
+     "end_column": 76,
+     "end_line": 3,
+     "execution_count": 1,
+     "name": "if_else_not",
+     "start_column": 5,
+     "start_line": 3
+    },
+    {
+     "blocks": 4,
+     "blocks_executed": 4,
+     "demangled_name": "if_empty_then",
+     "end_column": 76,
+     "end_line": 4,
+     "execution_count": 1,
+     "name": "if_empty_then",
+     "start_column": 5,
+     "start_line": 4
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "while_not",
+     "end_column": 72,
+     "end_line": 5,
+     "execution_count": 1,
+     "name": "while_not",
+     "start_column": 5,
+     "start_line": 5
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "do_not",
+     "end_column": 71,
+     "end_line": 6,
+     "execution_count": 1,
+     "name": "do_not",
+     "start_column": 5,
+     "start_line": 6
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "for_not",
+     "end_column": 72,
+     "end_line": 7,
+     "execution_count": 1,
+     "name": "for_not",
+     "start_column": 5,
+     "start_line": 7
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "tern_const",
+     "end_column": 44,
+     "end_line": 8,
+     "execution_count": 1,
+     "name": "tern_const",
+     "start_column": 5,
+     "start_line": 8
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "tern_call",
+     "end_column": 49,
+     "end_line": 9,
+     "execution_count": 1,
+     "name": "tern_call",
+     "start_column": 5,
+     "start_line": 9
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "tern_and",
+     "end_column": 62,
+     "end_line": 10,
+     "execution_count": 1,
+     "name": "tern_and",
+     "start_column": 5,
+     "start_line": 10
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "tern_and_not",
+     "end_column": 66,
+     "end_line": 11,
+     "execution_count": 1,
+     "name": "tern_and_not",
+     "start_column": 5,
+     "start_line": 11
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "tern_plain",
+     "end_column": 49,
+     "end_line": 12,
+     "execution_count": 1,
+     "name": "tern_plain",
+     "start_column": 5,
+     "start_line": 12
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 3,
+     "demangled_name": "if_eq_zero",
+     "end_column": 63,
+     "end_line": 13,
+     "execution_count": 1,
+     "name": "if_eq_zero",
+     "start_column": 5,
+     "start_line": 13
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "if_ne_zero",
+     "end_column": 63,
+     "end_line": 14,
+     "execution_count": 1,
+     "name": "if_ne_zero",
+     "start_column": 5,
+     "start_line": 14
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "not_eq",
+     "end_column": 62,
+     "end_line": 15,
+     "execution_count": 1,
+     "name": "not_eq",
+     "start_column": 5,
+     "start_line": 15
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 3,
+     "demangled_name": "cast_not",
+     "end_column": 62,
+     "end_line": 16,
+     "execution_count": 1,
+     "name": "cast_not",
+     "start_column": 5,
+     "start_line": 16
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 3,
+     "demangled_name": "not_cast",
+     "end_column": 63,
+     "end_line": 17,
+     "execution_count": 1,
+     "name": "not_cast",
+     "start_column": 5,
+     "start_line": 17
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 3,
+     "demangled_name": "comma_not",
+     "end_column": 70,
+     "end_line": 18,
+     "execution_count": 1,
+     "name": "comma_not",
+     "start_column": 5,
+     "start_line": 18
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "not_not_and",
+     "end_column": 75,
+     "end_line": 19,
+     "execution_count": 1,
+     "name": "not_not_and",
+     "start_column": 5,
+     "start_line": 19
+    },
+    {
+     "blocks": 19,
+     "blocks_executed": 19,
+     "demangled_name": "main",
+     "end_column": 1,
+     "end_line": 25,
+     "execution_count": 1,
+     "name": "main",
+     "start_column": 5,
+     "start_line": 20
+    }
+   ],
+   "lines": [
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 13,
+     "function_name": "g",
+     "line_number": 2,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "if_else_not",
+     "line_number": 3,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "if_empty_then",
+     "line_number": 4,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "while_not",
+     "line_number": 5,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        1
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "do_not",
+     "line_number": 6,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "for_not",
+     "line_number": 7,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "tern_const",
+     "line_number": 8,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "tern_call",
+     "line_number": 9,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "tern_and",
+     "line_number": 10,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "tern_and_not",
+     "line_number": 11,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "tern_plain",
+     "line_number": 12,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "if_eq_zero",
+     "line_number": 13,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "if_ne_zero",
+     "line_number": 14,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "not_eq",
+     "line_number": 15,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "cast_not",
+     "line_number": 16,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "not_cast",
+     "line_number": 17,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "comma_not",
+     "line_number": 18,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "not_not_and",
+     "line_number": 19,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 20,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 21,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      7,
+      8,
+      9,
+      10,
+      11
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 22,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 23,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      19
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 24,
+     "unexecuted_block": false
+    }
+   ]
+  }
+ ],
+ "format_version": "2",
+ "gcc_version": "14.4.0"
+}

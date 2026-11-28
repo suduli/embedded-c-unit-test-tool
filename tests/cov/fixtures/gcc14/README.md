@@ -16,3 +16,7 @@ and the line carries no condition records.
 which constructs get a record and which line it is attached to: the `if`
 keyword, the loop condition, the `?` of a ternary, and the top operator of a
 value `&&` / `||`.
+
+`polarity1.c` and `polarity2.c` call every function once with known values, to
+show which way round GCC reports a condition: inverted under an odd number of
+`!`, and (for a ternary with one constant arm) sometimes with the arms swapped.

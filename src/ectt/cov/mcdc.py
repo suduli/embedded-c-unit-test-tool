@@ -14,7 +14,10 @@ ever counted as covered or as zero:
   limit only when its condition count exceeds the *probed* maximum passed in,
   never from a constant held here.
 * A record that matches no known decision is still counted and listed
-  without expression text.
+  without expression text, and which outcome was seen is unknown (None).
+* GCC reports a condition under an odd number of ``!`` inverted; this is
+  undone using the analyzer's ``negated`` flag. GCC may also swap the arms
+  of a ternary whose condition has a ``!``, so there it is unknown too.
 * Without decisions from the analyzer, ``decisions_known`` is False: nothing
   can then be said about decisions the compiler skipped.
 """
@@ -49,12 +52,18 @@ class _Condition(Protocol):
     @property
     def constant(self) -> bool: ...
 
+    @property
+    def negated(self) -> bool: ...
+
 
 class _Decision(Protocol):
     """The parts of an analysis-model decision this module reads."""
 
     @property
     def function(self) -> str: ...
+
+    @property
+    def kind(self) -> str: ...
 
     @property
     def line(self) -> int: ...
@@ -74,12 +83,16 @@ class _Decision(Protocol):
 
 @dataclass(frozen=True)
 class ConditionStatus:
-    """One condition of a measured decision (TOOL-COV-070)."""
+    """One condition of a measured decision (TOOL-COV-070).
+
+    ``seen_true`` / ``seen_false`` refer to the condition as written in the
+    source, and are None when the direction cannot be known.
+    """
 
     index: int
     expression: str | None
-    seen_true: bool
-    seen_false: bool
+    seen_true: bool | None
+    seen_false: bool | None
 
 
 @dataclass(frozen=True)
@@ -91,14 +104,11 @@ class DecisionCoverage:
     line: int
     expression: str | None
     conditions: tuple[ConditionStatus, ...]
+    covered: int  # outcomes covered; known even when their direction is not
 
     @property
     def total(self) -> int:
         return 2 * len(self.conditions)
-
-    @property
-    def covered(self) -> int:
-        return sum(c.seen_true + c.seen_false for c in self.conditions)
 
 
 @dataclass(frozen=True)
@@ -218,19 +228,30 @@ def _records(document: GcovDocument, file: str) -> list[DecisionCoverage] | None
                         conditions=tuple(
                             ConditionStatus(i, None, i not in not_true, i not in not_false) for i in range(terms)
                         ),
+                        covered=record.covered,
                     )
                 )
     return found
 
 
 def _named(record: DecisionCoverage, decision: _Decision) -> DecisionCoverage:
-    """Attach source text; GCC numbers the non-constant conditions in order."""
-    texts = [c.expression for c in decision.conditions if not c.constant]
-    return replace(
-        record,
-        expression=decision.expression,
-        conditions=tuple(replace(c, expression=texts[c.index]) for c in record.conditions),
-    )
+    """Attach source text and restore each condition's direction as written.
+
+    GCC numbers the non-constant conditions in order.
+    """
+    written = [c for c in decision.conditions if not c.constant]
+    swappable = decision.kind == "ternary" and any(c.negated for c in written)
+
+    def restore(status: ConditionStatus) -> ConditionStatus:
+        source = written[status.index]
+        if swappable:
+            return replace(status, expression=source.expression, seen_true=None, seen_false=None)
+        true, false = status.seen_true, status.seen_false
+        if source.negated:
+            true, false = false, true
+        return replace(status, expression=source.expression, seen_true=true, seen_false=false)
+
+    return replace(record, expression=decision.expression, conditions=tuple(map(restore, record.conditions)))
 
 
 def _width(decision: _Decision) -> int:
@@ -347,6 +368,14 @@ def measure_mcdc(
             skipped.append(
                 UnmeasuredDecision(decision.function, decision.line, decision.expression, width, reason, detail)
             )
+
+    # A record nobody named has no known direction.
+    records = [
+        r
+        if r.expression is not None
+        else replace(r, conditions=tuple(replace(c, seen_true=None, seen_false=None) for c in r.conditions))
+        for r in records
+    ]
 
     return McdcResult(
         file=file,

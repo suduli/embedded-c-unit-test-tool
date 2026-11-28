@@ -610,6 +610,9 @@
                       },
                       "constant": {
                         "type": "boolean"
+                      },
+                      "negated": {
+                        "type": "boolean"
                       }
                     }
                   }
