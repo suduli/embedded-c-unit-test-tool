@@ -96,7 +96,7 @@ def test_failed_unit_round_trips_through_the_1_4_reader() -> None:
     model = _assemble(_parse_all())
     doc = model.to_dict()
 
-    assert doc["schema_version"] == SCHEMA_VERSION_CURRENT == "1.5"
+    assert doc["schema_version"] == SCHEMA_VERSION_CURRENT == "1.6"
     reloaded = read_analysis_model(doc)
 
     assert _by_path(reloaded)["bad.c"].failure == _by_path(model)["bad.c"].failure

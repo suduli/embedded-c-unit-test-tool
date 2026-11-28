@@ -1,0 +1,603 @@
+{
+ "current_working_directory": "/w",
+ "data_file": "lines.o",
+ "files": [
+  {
+   "file": "lines.c",
+   "functions": [
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "ifsplit",
+     "end_column": 1,
+     "end_line": 9,
+     "execution_count": 1,
+     "name": "ifsplit",
+     "start_column": 5,
+     "start_line": 3
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "retsplit",
+     "end_column": 1,
+     "end_line": 13,
+     "execution_count": 1,
+     "name": "retsplit",
+     "start_column": 5,
+     "start_line": 10
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "tsplit",
+     "end_column": 1,
+     "end_line": 19,
+     "execution_count": 1,
+     "name": "tsplit",
+     "start_column": 5,
+     "start_line": 14
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "mac",
+     "end_column": 44,
+     "end_line": 20,
+     "execution_count": 1,
+     "name": "mac",
+     "start_column": 5,
+     "start_line": 20
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 5,
+     "demangled_name": "forsplit",
+     "end_column": 1,
+     "end_line": 27,
+     "execution_count": 1,
+     "name": "forsplit",
+     "start_column": 5,
+     "start_line": 21
+    },
+    {
+     "blocks": 4,
+     "blocks_executed": 3,
+     "demangled_name": "sw",
+     "end_column": 69,
+     "end_line": 28,
+     "execution_count": 1,
+     "name": "sw",
+     "start_column": 5,
+     "start_line": 28
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "gnu",
+     "end_column": 33,
+     "end_line": 29,
+     "execution_count": 1,
+     "name": "gnu",
+     "start_column": 5,
+     "start_line": 29
+    },
+    {
+     "blocks": 2,
+     "blocks_executed": 0,
+     "demangled_name": "szof",
+     "end_column": 54,
+     "end_line": 30,
+     "execution_count": 0,
+     "name": "szof",
+     "start_column": 5,
+     "start_line": 30
+    },
+    {
+     "blocks": 4,
+     "blocks_executed": 3,
+     "demangled_name": "comma",
+     "end_column": 59,
+     "end_line": 31,
+     "execution_count": 1,
+     "name": "comma",
+     "start_column": 5,
+     "start_line": 31
+    },
+    {
+     "blocks": 4,
+     "blocks_executed": 3,
+     "demangled_name": "doubleneg",
+     "end_column": 53,
+     "end_line": 32,
+     "execution_count": 1,
+     "name": "doubleneg",
+     "start_column": 5,
+     "start_line": 32
+    },
+    {
+     "blocks": 8,
+     "blocks_executed": 6,
+     "demangled_name": "castbool",
+     "end_column": 71,
+     "end_line": 33,
+     "execution_count": 1,
+     "name": "castbool",
+     "start_column": 5,
+     "start_line": 33
+    },
+    {
+     "blocks": 8,
+     "blocks_executed": 6,
+     "demangled_name": "cmpbool",
+     "end_column": 68,
+     "end_line": 34,
+     "execution_count": 1,
+     "name": "cmpbool",
+     "start_column": 5,
+     "start_line": 34
+    },
+    {
+     "blocks": 13,
+     "blocks_executed": 13,
+     "demangled_name": "main",
+     "end_column": 161,
+     "end_line": 35,
+     "execution_count": 1,
+     "name": "main",
+     "start_column": 5,
+     "start_line": 35
+    }
+   ],
+   "lines": [
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "ifsplit",
+     "line_number": 3,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "ifsplit",
+     "line_number": 4,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      3
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "ifsplit",
+     "line_number": 5,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 0,
+     "function_name": "ifsplit",
+     "line_number": 7,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "ifsplit",
+     "line_number": 8,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "retsplit",
+     "line_number": 10,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "retsplit",
+     "line_number": 12,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "tsplit",
+     "line_number": 14,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "tsplit",
+     "line_number": 15,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "tsplit",
+     "line_number": 17,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "tsplit",
+     "line_number": 18,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "mac",
+     "line_number": 20,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "forsplit",
+     "line_number": 21,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "forsplit",
+     "line_number": 23,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 2,
+       "not_covered_false": [],
+       "not_covered_true": []
+      }
+     ],
+     "count": 3,
+     "function_name": "forsplit",
+     "line_number": 24,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      3
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 2,
+     "function_name": "forsplit",
+     "line_number": 25,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "forsplit",
+     "line_number": 26,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "sw",
+     "line_number": 28,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "gnu",
+     "line_number": 29,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 0,
+     "function_name": "szof",
+     "line_number": 30,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "comma",
+     "line_number": 31,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "doubleneg",
+     "line_number": 32,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      },
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "castbool",
+     "line_number": 33,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      },
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "cmpbool",
+     "line_number": 34,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 35,
+     "unexecuted_block": false
+    }
+   ]
+  }
+ ],
+ "format_version": "2",
+ "gcc_version": "14.4.0"
+}

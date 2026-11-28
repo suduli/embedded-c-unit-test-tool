@@ -27,7 +27,7 @@ from ectt.ana.persist import assemble_analysis_model, write_analysis_model
 from ectt.core.determinism import FixedClock
 from ectt.core.fs import OutputRoot
 
-SCHEMA_RESOURCE = "analysis-model-1.5.schema.json"
+SCHEMA_RESOURCE = "analysis-model-1.6.schema.json"
 
 HEADER = """\
 typedef unsigned short u16;
@@ -142,6 +142,8 @@ def test_emitted_model_validates_against_previous_1_4_schema(emitted_doc: dict[s
     doc = copy.deepcopy(emitted_doc)
     for unit in doc["units"]:
         unit.pop("global_variables", None)
+        unit.pop("decisions", None)  # schema 1.6
+        unit.pop("decisions_complete", None)
         for fn in unit["functions"]:
             fn.pop("start_line", None)
             fn.pop("end_line", None)

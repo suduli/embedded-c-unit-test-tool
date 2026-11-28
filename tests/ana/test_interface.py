@@ -295,6 +295,8 @@ def test_to_dict_matches_sdd002_exact_shape() -> None:
     assert isinstance(fn_data["calls"], list)
 
     # Verify out-of-scope fields are absent
-    for forbidden in ("decisions", "complexity", "cfg", "annotations"):
+    assert data["decisions"] == []  # schema 1.6: extracted, and this function has none
+    for forbidden in ("complexity", "cfg", "annotations"):
+        assert "decisions" not in fn_data
         assert forbidden not in fn_data
         assert forbidden not in data

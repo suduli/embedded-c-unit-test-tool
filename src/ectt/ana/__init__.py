@@ -45,8 +45,10 @@ from ectt.ana.errors import (
 from ectt.ana.model import (
     AnalysisModel,
     AnalysisUnit,
+    ConditionModel,
     ConstructOccurrenceModel,
     DecisionInventoryModel,
+    DecisionModel,
     Diagnostic,
     EnumeratorModel,
     FunctionModel,
@@ -116,6 +118,8 @@ def __getattr__(name: str) -> Any:
 
 
 __all__ = [
+    "ConditionModel",
+    "DecisionModel",
     "EligibilityRecord",
     "CONSTRUCT_REASON_PREFIX",
     "UnattributedConstruct",

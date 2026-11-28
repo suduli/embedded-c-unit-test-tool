@@ -11,3 +11,8 @@ The `.gcov.json` files are the decompressed gcov output, re-indented with sorted
 Observed: a decision with 64 conditions is measured; with 65 conditions GCC warns
 `Too many conditions (found 65); giving up coverage [-Wcoverage-too-many-conditions]`
 and the line carries no condition records.
+
+`shapes.c` and `lines.c` were captured the same way (without `-b`). They show
+which constructs get a record and which line it is attached to: the `if`
+keyword, the loop condition, the `?` of a ternary, and the top operator of a
+value `&&` / `||`.
