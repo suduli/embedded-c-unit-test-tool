@@ -85,8 +85,10 @@ class _Decision(Protocol):
 class ConditionStatus:
     """One condition of a measured decision (TOOL-COV-070).
 
-    ``seen_true`` / ``seen_false`` refer to the condition as written in the
-    source, and are None when the direction cannot be known.
+    ``seen_true`` / ``seen_false`` mean the condition was shown to decide the
+    outcome while having that value (masking MC/DC). False does NOT mean the
+    condition never had that value: it may have been masked. Both refer to the
+    condition as written, and are None when the direction cannot be known.
     """
 
     index: int
@@ -310,6 +312,28 @@ def _match(
     return named, problems
 
 
+def _skipped(
+    decisions: Sequence[_Decision], problems: dict[int, str], max_conditions: int | None
+) -> tuple[UnmeasuredDecision, ...]:
+    """The decisions without a usable record, in order, each with its reason."""
+    found: list[UnmeasuredDecision] = []
+    for i, decision in enumerate(decisions):
+        width = _width(decision)
+        if width == 0:
+            reason, detail = "constant_decision", "every condition is constant; GCC records nothing"
+        elif i not in problems:
+            continue
+        elif max_conditions is not None and width > max_conditions:
+            reason = "over_condition_limit"
+            detail = f"{width} conditions exceed the probed maximum of {max_conditions}"
+        elif problems[i] == "ambiguous_record":
+            reason, detail = "ambiguous_record", "records on this line cannot be told apart"
+        else:
+            reason, detail = "no_condition_record", "GCC recorded nothing; the cause is not known"
+        found.append(UnmeasuredDecision(decision.function, decision.line, decision.expression, width, reason, detail))
+    return tuple(found)
+
+
 def measure_mcdc(
     document: GcovDocument | None,
     file: str,
@@ -325,7 +349,9 @@ def measure_mcdc(
     MC/DC. ``max_conditions`` is the probed limit, or None when unknown.
     """
 
-    def unmeasured(reason: str, version: str | None) -> McdcResult:
+    def unmeasured(
+        reason: str, version: str | None, skipped: tuple[UnmeasuredDecision, ...] = ()
+    ) -> McdcResult:
         return McdcResult(
             file=file,
             status="unmeasured",
@@ -333,6 +359,7 @@ def measure_mcdc(
             compiler_version=version,
             max_conditions=max_conditions,
             decisions_known=decisions is not None,
+            unmeasured=skipped,
         )
 
     version = None if document is None else document.gcc_version
@@ -346,28 +373,16 @@ def measure_mcdc(
 
     expected = decisions is not None and any(_width(d) > 0 for d in decisions)
     if not records and (decisions is None or expected):
-        # No record anywhere: the build most likely lacked -fcondition-coverage.
-        return unmeasured("no_condition_data", version)
+        # No record anywhere: the build may have lacked -fcondition-coverage, so
+        # nothing is measured. Each known decision is still named with its reason.
+        none_found = {i: "no_condition_record" for i, d in enumerate(decisions or ()) if _width(d) > 0}
+        named = _skipped(decisions or (), none_found, max_conditions)
+        return unmeasured("no_condition_data", version, named)
 
-    skipped: list[UnmeasuredDecision] = []
+    skipped: tuple[UnmeasuredDecision, ...] = ()
     if decisions is not None:
         records, problems = _match(records, decisions)
-        for i, decision in enumerate(decisions):
-            width = _width(decision)
-            if width == 0:
-                reason, detail = "constant_decision", "every condition is constant; GCC records nothing"
-            elif i not in problems:
-                continue
-            elif max_conditions is not None and width > max_conditions:
-                reason = "over_condition_limit"
-                detail = f"{width} conditions exceed the probed maximum of {max_conditions}"
-            elif problems[i] == "ambiguous_record":
-                reason, detail = "ambiguous_record", "records on this line cannot be told apart"
-            else:
-                reason, detail = "no_condition_record", "GCC recorded nothing; the cause is not known"
-            skipped.append(
-                UnmeasuredDecision(decision.function, decision.line, decision.expression, width, reason, detail)
-            )
+        skipped = _skipped(decisions, problems, max_conditions)
 
     # A record nobody named has no known direction.
     records = [
@@ -385,5 +400,5 @@ def measure_mcdc(
         max_conditions=max_conditions,
         decisions_known=decisions is not None,
         decisions=tuple(records),
-        unmeasured=tuple(skipped),
+        unmeasured=skipped,
     )

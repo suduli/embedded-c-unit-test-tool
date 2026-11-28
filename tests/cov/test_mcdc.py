@@ -84,6 +84,10 @@ def test_a_decision_over_the_probed_limit(limit: int | None, reason: str) -> Non
     result = _measure("limit65", max_conditions=limit)
     # no records at all: the file has decisions, so this is not "measured zero"
     assert (result.status, result.reason, result.total) == ("unmeasured", "no_condition_data", None)
+    # the real file: the 65-condition decision is named, main's folded ternary too
+    named = {u.function: (u.conditions, u.reason) for u in result.unmeasured}
+    assert named["f"] == (65, reason)
+    assert named["main"] == (1, "no_condition_record")
     # next to a measured decision it is named individually
     decisions = _decisions("mcdc") + tuple(replace(d, function="f", line=900, start_line=900, end_line=900)
                                            for d in _decisions("limit65") if len(d.conditions) == 65)
