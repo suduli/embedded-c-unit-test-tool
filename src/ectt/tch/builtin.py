@@ -41,10 +41,11 @@ output:
   object_suffix: ".o"
   executable_suffix: ""
 coverage:
-  kinds: [line, branch]
+  kinds: [line, branch, mcdc]
   flags:
     line: ["--coverage"]
     branch: ["--coverage"]
+    mcdc: ["--coverage", "-fcondition-coverage"]
 """
 
 _CLANG_HOST_YAML = """\

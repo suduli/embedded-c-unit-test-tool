@@ -1,0 +1,58 @@
+{
+ "max_conditions": 64,
+ "attempts": [
+  {
+   "conditions": 2,
+   "instrumented": true
+  },
+  {
+   "conditions": 4,
+   "instrumented": true
+  },
+  {
+   "conditions": 8,
+   "instrumented": true
+  },
+  {
+   "conditions": 16,
+   "instrumented": true
+  },
+  {
+   "conditions": 32,
+   "instrumented": true
+  },
+  {
+   "conditions": 64,
+   "instrumented": true
+  },
+  {
+   "conditions": 128,
+   "instrumented": false
+  },
+  {
+   "conditions": 96,
+   "instrumented": false
+  },
+  {
+   "conditions": 80,
+   "instrumented": false
+  },
+  {
+   "conditions": 72,
+   "instrumented": false
+  },
+  {
+   "conditions": 68,
+   "instrumented": false
+  },
+  {
+   "conditions": 66,
+   "instrumented": false
+  },
+  {
+   "conditions": 65,
+   "instrumented": false
+  }
+ ],
+ "detail": "probed: 64 instrumented, 65 refused"
+}

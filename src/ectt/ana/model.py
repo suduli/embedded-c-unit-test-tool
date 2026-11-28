@@ -28,7 +28,9 @@ __all__ = [
     "UnsupportedConstructModel",
     "ConstructOccurrenceModel",
     "GlobalVariableModel",
+    "ConditionModel",
     "DecisionInventoryModel",
+    "DecisionModel",
     "UnitFailureModel",
     "AnalysisUnit",
     "InputFileModel",
@@ -699,6 +701,88 @@ class GlobalVariableModel:
 
 
 @dataclass(frozen=True)
+class ConditionModel:
+    """One condition of a decision, in source order (schema 1.6)."""
+
+    line: int
+    column: int
+    expression: str
+    constant: bool = False
+    # Under an odd number of ``!``: GCC reports such a condition inverted.
+    negated: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {"line": self.line, "column": self.column, "expression": self.expression}
+        if self.constant:
+            res["constant"] = True
+        if self.negated:
+            res["negated"] = True
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ConditionModel:
+        """Create ConditionModel from dictionary representation."""
+        return cls(
+            line=data.get("line", 0),
+            column=data.get("column", 0),
+            expression=data.get("expression", ""),
+            constant=bool(data.get("constant", False)),
+            negated=bool(data.get("negated", False)),
+        )
+
+
+@dataclass(frozen=True)
+class DecisionModel:
+    """One boolean decision of a function (schema 1.6, TOOL-PAR-150).
+
+    ``line`` is where GCC was observed to attach its record; ``start_line``
+    and ``end_line`` bound the decision.
+    """
+
+    function: str
+    kind: str
+    line: int
+    column: int
+    start_line: int
+    end_line: int
+    expression: str
+    conditions: tuple[ConditionModel, ...] = field(default_factory=tuple)
+    macro: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation."""
+        res: dict[str, Any] = {
+            "function": self.function,
+            "kind": self.kind,
+            "line": self.line,
+            "column": self.column,
+            "start_line": self.start_line,
+            "end_line": self.end_line,
+            "expression": self.expression,
+            "conditions": [c.to_dict() for c in self.conditions],
+        }
+        if self.macro:
+            res["macro"] = True
+        return res
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> DecisionModel:
+        """Create DecisionModel from dictionary representation."""
+        return cls(
+            function=data.get("function", ""),
+            kind=data.get("kind", ""),
+            line=data.get("line", 0),
+            column=data.get("column", 0),
+            start_line=data.get("start_line", 0),
+            end_line=data.get("end_line", 0),
+            expression=data.get("expression", ""),
+            conditions=tuple(ConditionModel.from_dict(c) for c in data.get("conditions", [])),
+            macro=bool(data.get("macro", False)),
+        )
+
+
+@dataclass(frozen=True)
 class DecisionInventoryModel:
     """Explicit decision inventory with recorded completeness (TOOL-PAR-150).
 
@@ -782,6 +866,19 @@ class AnalysisUnit:
     # Optional; omitted from to_dict() while empty so pre-1.5 documents keep
     # their exact shape. A failed unit carries none.
     global_variables: tuple[GlobalVariableModel, ...] = field(default_factory=tuple)
+    # Schema 1.6: the unit's decisions. None means not extracted (pre-1.6 or
+    # hand-built); an empty tuple means extracted and there are none.
+    # ``decisions_complete`` is False when some construct could not be walked.
+    decisions: tuple[DecisionModel, ...] | None = None
+    decisions_complete: bool = True
+
+    def _decision_fields(self) -> dict[str, Any]:
+        if self.decisions is None:
+            return {}
+        res: dict[str, Any] = {"decisions": [d.to_dict() for d in self.decisions]}
+        if not self.decisions_complete:
+            res["decisions_complete"] = False
+        return res
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation matching SDD-002 §4.1 unit shape."""
@@ -793,6 +890,7 @@ class AnalysisUnit:
             "types": {k: self.types[k].to_dict() for k in sorted(self.types.keys())},
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
             **({"global_variables": [g.to_dict() for g in self.global_variables]} if self.global_variables else {}),
+            **self._decision_fields(),
             **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
 
@@ -805,6 +903,7 @@ class AnalysisUnit:
             "functions": [f.to_dict() for f in self.functions],
             "unsupported_constructs": [u.to_dict() for u in self.unsupported_constructs],
             **({"global_variables": [g.to_dict() for g in self.global_variables]} if self.global_variables else {}),
+            **self._decision_fields(),
             "cfg": None,
             **({"failure": self.failure.to_dict()} if self.failure is not None else {}),
         }
@@ -830,6 +929,12 @@ class AnalysisUnit:
             global_variables=tuple(
                 GlobalVariableModel.from_dict(g) for g in data.get("global_variables", [])
             ),
+            decisions=(
+                tuple(DecisionModel.from_dict(d) for d in data["decisions"])
+                if isinstance(data.get("decisions"), list)
+                else None
+            ),
+            decisions_complete=bool(data.get("decisions_complete", True)),
         )
 
 

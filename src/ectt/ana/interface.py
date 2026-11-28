@@ -13,11 +13,13 @@ from typing import Any
 from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind  # type: ignore[import-untyped]
 
 from ectt.ana.callgraph import extract_calls
+from ectt.ana.decisions import extract_function_decisions
 from ectt.ana.errors import ExtractionRefusedError
 from ectt.ana.frontend import normalize_path, resolve_source_location_path
 from ectt.ana.model import (
     AnalysisUnit,
     ConstructOccurrenceModel,
+    DecisionModel,
     FunctionModel,
     GlobalAccessModel,
     GlobalVariableModel,
@@ -311,6 +313,8 @@ def extract_interfaces(
     )
 
     functions: list[FunctionModel] = []
+    decisions: list[DecisionModel] = []
+    decisions_complete = True
     unsupported: dict[str, UnsupportedConstructModel] = {}
 
     global_variables = _extract_global_variables(
@@ -387,6 +391,10 @@ def extract_interfaces(
                 lambda loc: _is_in_main_file(loc, norm_source_path, working_directory),
             )
 
+            found, walked = extract_function_decisions(child, working_directory)
+            decisions.extend(found)
+            decisions_complete = decisions_complete and walked
+
             functions.append(
                 FunctionModel(
                     name=name,
@@ -410,6 +418,8 @@ def extract_interfaces(
         types=dict(type_builder.types),
         unsupported_constructs=tuple(unsupported[k] for k in sorted(unsupported)),
         global_variables=global_variables,
+        decisions=tuple(decisions),
+        decisions_complete=decisions_complete,
     )
 
 

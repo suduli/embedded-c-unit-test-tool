@@ -5,7 +5,7 @@ Every format the tool consumes or produces (TOOL-MIG-100). Generated from the fo
 
 | Format | Direction | Media | Version |
 |---|---|---|---|
-| `analysis-model` | both | json | 1.5 |
+| `analysis-model` | both | json | 1.6 |
 | `ceedling-project` | consumed | yaml | unversioned |
 | `cmocka-output` | consumed | text | unversioned |
 | `fidelity-report` | both | json | 1 |
@@ -25,9 +25,9 @@ Every format the tool consumes or produces (TOOL-MIG-100). Generated from the fo
 
 - **Direction:** both
 - **Media:** json
-- **Version:** 1.5
+- **Version:** 1.6
 - **Implemented in:** `ectt.ana.persist`
-- **Published schema:** `ectt.ana.schema` / `analysis-model-1.5.schema.json`
+- **Published schema:** `ectt.ana.schema` / `analysis-model-1.6.schema.json`
 
 **Grammar.** One JSON object with `schema_version` first, `provenance`, `units` (path, status, diagnostics, functions, unsupported constructs), `types`, `capabilities`, `decision_inventory`. One published JSON Schema per version under `ectt/ana/schema`.
 

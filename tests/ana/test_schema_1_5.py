@@ -229,7 +229,7 @@ def test_pre_1_5_document_still_loads() -> None:
 
 
 def test_current_version_constant_is_1_5() -> None:
-    assert SCHEMA_VERSION_CURRENT == "1.5"
+    assert SCHEMA_VERSION_CURRENT == "1.6"
 
 
 # --- 5. Fail-closed reader rules for present 1.5 fields ----------------------

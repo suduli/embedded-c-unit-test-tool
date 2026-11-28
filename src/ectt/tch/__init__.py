@@ -59,6 +59,15 @@ from ectt.tch.gating import (
     gate_metrics,
     parse_compiler_version,
 )
+from ectt.tch.mcdc import (
+    MCDC_FORM,
+    MCDC_MECHANISM,
+    ConditionLimitProbe,
+    McdcPlan,
+    plan_mcdc,
+    probe_condition_limit,
+    probe_source,
+)
 from ectt.tch.multibuild import (
     ContainerSpecError,
     DuplicateToolchainError,
@@ -74,6 +83,13 @@ from ectt.tch.proprietary import (
 )
 
 __all__ = [
+    "MCDC_FORM",
+    "MCDC_MECHANISM",
+    "ConditionLimitProbe",
+    "McdcPlan",
+    "plan_mcdc",
+    "probe_condition_limit",
+    "probe_source",
     # Errors
     "TchError",
     "CompilerConfigReadError",

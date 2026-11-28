@@ -99,7 +99,7 @@ def test_builtins_are_produced_by_the_public_loader() -> None:
 
 def _render(config: CompilerConfigLike) -> str:
     kind_flags = "\n".join(
-        f"    {kind}: ['--coverage']" for kind in sorted(config.coverage_kinds)
+        f"    {kind}: [{', '.join(repr(f) for f in config.coverage_flags[kind])}]" for kind in sorted(config.coverage_kinds)
     )
     optimization = "\n".join(
         f"    {level}: [{', '.join(flags)}]"

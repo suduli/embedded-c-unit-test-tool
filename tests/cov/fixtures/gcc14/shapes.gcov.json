@@ -1,0 +1,684 @@
+{
+ "current_working_directory": "/w",
+ "data_file": "shapes.o",
+ "files": [
+  {
+   "file": "shapes.c",
+   "functions": [
+    {
+     "blocks": 4,
+     "blocks_executed": 3,
+     "demangled_name": "single",
+     "end_column": 48,
+     "end_line": 2,
+     "execution_count": 1,
+     "name": "single",
+     "start_column": 5,
+     "start_line": 2
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "notand",
+     "end_column": 63,
+     "end_line": 3,
+     "execution_count": 1,
+     "name": "notand",
+     "start_column": 5,
+     "start_line": 3
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "arg",
+     "end_column": 43,
+     "end_line": 4,
+     "execution_count": 1,
+     "name": "arg",
+     "start_column": 5,
+     "start_line": 4
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "tern1",
+     "end_column": 38,
+     "end_line": 5,
+     "execution_count": 1,
+     "name": "tern1",
+     "start_column": 5,
+     "start_line": 5
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "ternand",
+     "end_column": 54,
+     "end_line": 6,
+     "execution_count": 1,
+     "name": "ternand",
+     "start_column": 5,
+     "start_line": 6
+    },
+    {
+     "blocks": 12,
+     "blocks_executed": 12,
+     "demangled_name": "loops",
+     "end_column": 126,
+     "end_line": 7,
+     "execution_count": 1,
+     "name": "loops",
+     "start_column": 5,
+     "start_line": 7
+    },
+    {
+     "blocks": 7,
+     "blocks_executed": 6,
+     "demangled_name": "mixed",
+     "end_column": 67,
+     "end_line": 8,
+     "execution_count": 1,
+     "name": "mixed",
+     "start_column": 5,
+     "start_line": 8
+    },
+    {
+     "blocks": 5,
+     "blocks_executed": 4,
+     "demangled_name": "cmp",
+     "end_column": 65,
+     "end_line": 9,
+     "execution_count": 1,
+     "name": "cmp",
+     "start_column": 5,
+     "start_line": 9
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "multi",
+     "end_column": 1,
+     "end_line": 17,
+     "execution_count": 1,
+     "name": "multi",
+     "start_column": 5,
+     "start_line": 10
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 3,
+     "demangled_name": "konst",
+     "end_column": 74,
+     "end_line": 18,
+     "execution_count": 1,
+     "name": "konst",
+     "start_column": 5,
+     "start_line": 18
+    },
+    {
+     "blocks": 10,
+     "blocks_executed": 8,
+     "demangled_name": "innerarg",
+     "end_column": 77,
+     "end_line": 19,
+     "execution_count": 1,
+     "name": "innerarg",
+     "start_column": 5,
+     "start_line": 19
+    },
+    {
+     "blocks": 2,
+     "blocks_executed": 2,
+     "demangled_name": "plainassign",
+     "end_column": 67,
+     "end_line": 20,
+     "execution_count": 1,
+     "name": "plainassign",
+     "start_column": 5,
+     "start_line": 20
+    },
+    {
+     "blocks": 6,
+     "blocks_executed": 5,
+     "demangled_name": "condret",
+     "end_column": 56,
+     "end_line": 21,
+     "execution_count": 1,
+     "name": "condret",
+     "start_column": 5,
+     "start_line": 21
+    },
+    {
+     "blocks": 8,
+     "blocks_executed": 6,
+     "demangled_name": "twoline",
+     "end_column": 97,
+     "end_line": 22,
+     "execution_count": 1,
+     "name": "twoline",
+     "start_column": 5,
+     "start_line": 22
+    },
+    {
+     "blocks": 2,
+     "blocks_executed": 2,
+     "demangled_name": "g",
+     "end_column": 26,
+     "end_line": 23,
+     "execution_count": 2,
+     "name": "g",
+     "start_column": 5,
+     "start_line": 23
+    },
+    {
+     "blocks": 16,
+     "blocks_executed": 16,
+     "demangled_name": "main",
+     "end_column": 211,
+     "end_line": 24,
+     "execution_count": 1,
+     "name": "main",
+     "start_column": 5,
+     "start_line": 24
+    }
+   ],
+   "lines": [
+    {
+     "block_ids": [
+      2,
+      3,
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "single",
+     "line_number": 2,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "notand",
+     "line_number": 3,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "arg",
+     "line_number": 4,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "tern1",
+     "line_number": 5,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "ternand",
+     "line_number": 6,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 3,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      },
+      {
+       "count": 4,
+       "covered": 3,
+       "not_covered_false": [
+        1
+       ],
+       "not_covered_true": []
+      },
+      {
+       "count": 4,
+       "covered": 3,
+       "not_covered_false": [
+        1
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 9,
+     "function_name": "loops",
+     "line_number": 7,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 6,
+       "covered": 2,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1,
+        2
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "mixed",
+     "line_number": 8,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [
+        0,
+        1
+       ],
+       "not_covered_true": []
+      }
+     ],
+     "count": 1,
+     "function_name": "cmp",
+     "line_number": 9,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "multi",
+     "line_number": 10,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 6,
+       "covered": 2,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1,
+        2
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "multi",
+     "line_number": 12,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      4
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "multi",
+     "line_number": 13,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      5
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 0,
+     "function_name": "multi",
+     "line_number": 15,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "multi",
+     "line_number": 16,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 2,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": []
+      },
+      {
+       "count": 2,
+       "covered": 0,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "konst",
+     "line_number": 18,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      },
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "innerarg",
+     "line_number": 19,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "plainassign",
+     "line_number": 20,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "condret",
+     "line_number": 21,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [
+      {
+       "count": 4,
+       "covered": 1,
+       "not_covered_false": [
+        0
+       ],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      },
+      {
+       "count": 4,
+       "covered": 2,
+       "not_covered_false": [],
+       "not_covered_true": [
+        0,
+        1
+       ]
+      }
+     ],
+     "count": 1,
+     "function_name": "twoline",
+     "line_number": 22,
+     "unexecuted_block": true
+    },
+    {
+     "block_ids": [
+      2
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 2,
+     "function_name": "g",
+     "line_number": 23,
+     "unexecuted_block": false
+    },
+    {
+     "block_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ],
+     "branches": [],
+     "calls": [],
+     "conditions": [],
+     "count": 1,
+     "function_name": "main",
+     "line_number": 24,
+     "unexecuted_block": false
+    }
+   ]
+  }
+ ],
+ "format_version": "2",
+ "gcc_version": "14.4.0"
+}

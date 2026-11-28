@@ -452,5 +452,6 @@ def _merge_conditions(a: GcovCondition, b: GcovCondition, where: str) -> GcovCon
     # is recomputed from the merged sets.
     not_true = tuple(sorted(set(a.not_covered_true) & set(b.not_covered_true)))
     not_false = tuple(sorted(set(a.not_covered_false) & set(b.not_covered_false)))
-    covered = a.count - len(set(not_true) | set(not_false))
+    # Each index is two outcomes, true and false: count each list separately.
+    covered = a.count - len(not_true) - len(not_false)
     return GcovCondition(count=a.count, covered=covered, not_covered_true=not_true, not_covered_false=not_false)

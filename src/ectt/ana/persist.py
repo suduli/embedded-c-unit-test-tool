@@ -63,7 +63,8 @@ READER_MIN_MINOR: int = 0
 # and moves only this line; tests must assert this constant, never a literal,
 # so a bump cannot silently strand them (root cause of the 1.0 -> 1.1 -> 1.2
 # test drift fixed in TASK-001).
-SCHEMA_VERSION_CURRENT: str = "1.5"
+SCHEMA_VERSION_CURRENT: str = "1.6"
+DECISION_KINDS: tuple[str, ...] = ("if", "while", "do", "for", "ternary", "expression")
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
 
 # Errors that describe one translation unit only (TOOL-PAR-130). Anything else is
@@ -211,6 +212,8 @@ def assemble_analysis_model(
                         types=extracted.types,
                         unsupported_constructs=extracted.unsupported_constructs,
                         global_variables=extracted.global_variables,
+                        decisions=extracted.decisions,
+                        decisions_complete=extracted.decisions_complete,
                     )
                 )
         elif isinstance(item, AnalysisUnit):
@@ -243,6 +246,8 @@ def assemble_analysis_model(
                         types=item.types,
                         unsupported_constructs=item.unsupported_constructs,
                         global_variables=item.global_variables,
+                        decisions=item.decisions,
+                        decisions_complete=item.decisions_complete,
                     )
                 )
         else:
@@ -321,11 +326,22 @@ def assemble_analysis_model(
         units=tuple(final_units),
         types=merged_types,
         capabilities={"cfg": False},
-        decision_inventory=DecisionInventoryModel(
-            status="not_extracted",
-            detail="decision extraction is not implemented in this analyzer build (capabilities.cfg is false)",
-        ),
+        decision_inventory=_decision_inventory(final_units),
     )
+
+
+def _decision_inventory(units: Sequence[AnalysisUnit]) -> DecisionInventoryModel:
+    """The model-wide completeness of the decision inventory (TOOL-PAR-150)."""
+    if not any(unit.decisions is not None for unit in units):
+        return DecisionInventoryModel(status="not_extracted", detail="no unit carries a decision inventory")
+    gaps = sorted(
+        unit.path
+        for unit in units
+        if unit.status != "parsed" or unit.decisions is None or not unit.decisions_complete
+    )
+    if gaps:
+        return DecisionInventoryModel(status="partial", detail="decisions may be missing in: " + ", ".join(gaps))
+    return DecisionInventoryModel(status="complete")
 
 
 def write_analysis_model(
@@ -626,6 +642,19 @@ def read_analysis_model(
                                 reason="invalid_global_variable_record",
                             )
 
+    # 6f. Minor-version-gated decision inventory (schema 1.6). Fail-closed: a
+    # present record must name a known kind and carry well-formed conditions.
+    if doc_minor >= 6 and isinstance(doc.get("units"), list):
+        for u_idx, unit_doc in enumerate(doc["units"]):
+            if not isinstance(unit_doc, dict) or "decisions" not in unit_doc:
+                continue
+            records = unit_doc["decisions"]
+            if not isinstance(records, list) or not all(_is_decision_doc(r) for r in records):
+                raise AnalysisModelError(
+                    f"Unit at index {u_idx} carries an invalid decision record (schema >= 1.6)",
+                    reason="invalid_decision_record",
+                )
+
     # 7. Type closure validation over merged map on read (SDD-002 §4.2)
     types_obj = doc["types"]
     if not isinstance(types_obj, dict):
@@ -651,6 +680,30 @@ def read_analysis_model(
 
 # Canonical alias for reader
 load_analysis_model = read_analysis_model
+
+
+def _is_decision_doc(value: Any) -> bool:
+    """True when a decision record is well formed (schema 1.6)."""
+
+    def is_line(item: Any) -> bool:
+        return isinstance(item, int) and not isinstance(item, bool) and item >= 1
+
+    return (
+        isinstance(value, dict)
+        and value.get("kind") in DECISION_KINDS
+        and isinstance(value.get("function"), str)
+        and isinstance(value.get("expression"), str)
+        and all(is_line(value.get(key)) for key in ("line", "column", "start_line", "end_line"))
+        and isinstance(value.get("conditions"), list)
+        and bool(value["conditions"])
+        and all(
+            isinstance(c, dict)
+            and is_line(c.get("line"))
+            and is_line(c.get("column"))
+            and isinstance(c.get("expression"), str)
+            for c in value["conditions"]
+        )
+    )
 
 
 def _is_failure_doc(value: Any) -> bool:
