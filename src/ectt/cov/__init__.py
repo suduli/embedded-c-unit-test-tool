@@ -46,6 +46,15 @@ from ectt.cov.justification import (
     compute_source_digest,
     evaluate_justification,
 )
+from ectt.cov.mcdc import (
+    MCDC_FORM,
+    MCDC_MECHANISM,
+    ConditionStatus,
+    DecisionCoverage,
+    McdcResult,
+    UnmeasuredDecision,
+    measure_mcdc,
+)
 from ectt.cov.merge import (
     COMPLETENESS_STATES,
     KNOWN_RUN_OUTCOMES,
@@ -90,6 +99,13 @@ from ectt.cov.thresholds import (
 )
 
 __all__ = [
+    "MCDC_FORM",
+    "MCDC_MECHANISM",
+    "ConditionStatus",
+    "DecisionCoverage",
+    "McdcResult",
+    "UnmeasuredDecision",
+    "measure_mcdc",
     "COMPLETENESS_STATES",
     "CoverageError",
     "DumpFrame",
