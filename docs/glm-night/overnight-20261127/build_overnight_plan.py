@@ -14,7 +14,7 @@ spec.loader.exec_module(prev)  # type: ignore[union-attr]
 
 DAY = "20261127"
 BASE = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=HERE).stdout.strip()
-PASSED = "4026 passed, 6 skipped"
+PASSED = "4064 passed, 6 skipped"
 
 OWNER = ("Owner answers (2026-11-27), quoted: MC/DC is 'Masking + document gap'; a GCC older than 14 is 'Say not "
          "available' (run the other coverage, show MC/DC as unmeasured with the reason, and a configured MC/DC minimum "
@@ -25,29 +25,24 @@ DOCKER = ("A real GCC 14.4.0 is available ONLY as the local Docker image `gcc:14
           "running, say so in the ledger and work from the committed fixtures. The test suite must not need Docker: "
           "commit captured output as fixtures, with the commands used.")
 DOC = " Write the analysis note to docs/verification/{wp}-analysis.md in the same style as the existing notes there."
+DONE_ALREADY = ("Already on main, build on it and do not rebuild: analysis model schema 1.6 `AnalysisUnit.decisions` "
+                "(ectt.ana, each condition has `constant` and `negated`); `ectt.tch.plan_mcdc` and "
+                "`probe_condition_limit`; `ectt.cov.measure_mcdc` returning `McdcResult` (decisions, unmeasured "
+                "with reasons). Read docs/verification/WP-COV-05-analysis.md first.")
 REAL = (" Real output samples are in tests/cov/fixtures/gcc14/ (see its README): in a condition record `count` is two "
-        "outcomes per condition, `not_covered_true` / `not_covered_false` are condition indexes; 64 conditions are "
-        "measured, 65 give a warning and no records.")
+        "outcomes per condition; 64 conditions are measured, 65 give no records. `seen_true` / `seen_false` mean the "
+        "condition was SHOWN TO DECIDE the outcome with that value; False never means it never had that value; None "
+        "means the direction is unknown. GCC reports conditions under `!` inverted (already undone in ectt.cov).")
 
 # key -> (title, goal, allowed paths, est k)
 ITEMS = {
-    "A1": ("Decision and condition extraction in the analysis model (schema 1.6)",
-        "The model's decision inventory is hard-coded 'not_extracted'. Extract every boolean decision with its "
-        "conditions in source order (file, line, column, expression text, owning function, macro-expansion flag) into "
-        "decisions[], set status complete or partial honestly, bump the schema to 1.6 with a new schema file, and update "
-        "every consumer that pins the version (search for 1.5; ectt.mig has a FormatSpec). Check on real source that "
-        "GCC's condition order matches yours using Docker, on tests/cov/fixtures/gcc14/mcdc.c. Tests: a&&b, nested, "
-        "repeated operand, macro condition, constant, ternary, loop conditions, older 1.5 documents still read." +
-        DOC.format(wp="WP-ANA-08-decisions"),
-        ["src/ectt/ana/", "src/ectt/mig/", "tests/ana/", "tests/mig/", "docs/verification/WP-ANA-08-decisions-analysis.md"], 220),
-    "A2": ("MC/DC capability, version gate and build flags",
-        "In ectt.tch declare condition coverage as available for GCC 14 or newer only, with the probed maximum of 64 "
-        "conditions recorded as run evidence (TOOL-COV-190: probed, not taken from documentation; give a probe function "
-        "with an injected runner, and capture the real probe with Docker as a fixture). In ectt.bld add "
-        "-fcondition-coverage to compile flags and --conditions to gcov only when MC/DC is requested and available. "
-        "Older GCC: build the other coverage and return a named 'mcdc_not_available' reason. Tests: GCC 13 vs 14, "
-        "flags present and absent, probe result recorded, probe failure is 'unknown', never a guessed number.",
-        ["src/ectt/tch/", "src/ectt/bld/", "tests/tch/", "tests/bld/"], 170),
+    "A2": ("Apply the MC/DC flags in the build and CLI, and map coverage file names",
+        "The core is done but nothing applies it. When MC/DC is requested, the harness build and the CLI run path must "
+        "use `plan_mcdc`: add its compile flags and gcov flags, pass the probed limit on, and when it is not available "
+        "run the other coverage and carry the reason into the result. Add a function that maps an analysis-model unit "
+        "path to the gcov `file` name (absolute, relative and basename-collision cases; ambiguous is refused, never "
+        "guessed). Check one full run with Docker. Tests: flags present and absent, GCC 13, mapping cases.",
+        ["src/ectt/bld/", "src/ectt/cli/", "src/ectt/tch/", "tests/bld/", "tests/cli/", "tests/tch/"], 170),
     "A3": ("Compile the generated harnesses and stubs with a real compiler",
         "Generated C has only ever been parsed. Generate harnesses and stubs for a few representative units (scalars, "
         "structs, arrays, file statics, function pointers, GoogleTest excluded), compile, link and run them with Docker "
@@ -65,38 +60,26 @@ ITEMS = {
         "seeded random boolean expressions: extracted condition count and order match the generator. Report to "
         "docs/glm-night/overnight-20261127/mutation-ana-tch-bld.md. No src/ edits.",
         ["tests/ana/", "tests/tch/", "tests/bld/", "docs/glm-night/overnight-20261127/"], 140),
-    "B1": ("WP-COV-05: MC/DC measurement and form declaration",
-        "In ectt.cov turn gcov condition records into MC/DC results: per decision the conditions not exercised true and "
-        "not exercised false (TOOL-COV-070), totals, and on every result the form 'masking' and the mechanism 'GCC "
-        "-fcondition-coverage' with the compiler version (TOOL-COV-060). No condition data is 'unmeasured' with a named "
-        "reason, never zero and never covered. Merge across runs must be correct for conditions (TOOL-COV-110). "
-        "Condition expression text is optional (it comes from lane A item A1): show index and line without it." + REAL +
-        DOC.format(wp="WP-COV-05"),
-        ["src/ectt/cov/", "tests/cov/", "docs/verification/WP-COV-05-analysis.md"], 220),
-    "B2": ("WP-COV-05: known-answer MC/DC corpus",
+    "B2": ("WP-COV-05: finish the known-answer MC/DC corpus",
         "TOOL-COV-210: a corpus of small C cases with HAND-COMPUTED expected results (a&&b independence matrix, nested, "
         "repeated and coupled operands, side-effecting operand not evaluated, macro condition, constant decision, a "
         "masking versus unique-cause divergent case with the difference written down). Write the expected values before "
-        "running; then capture real gcov output with Docker and compare. A disagreement is a finding: explain it, never "
-        "edit the expectation just to match." + REAL,
+        "running; then capture real gcov output with Docker and compare through `measure_mcdc`. A disagreement is a "
+        "finding: explain it, never edit the expectation just to match. Also run the cases at -O2 and report any "
+        "difference in condition direction or record placement (only -O0 has been checked)." + REAL,
         ["tests/cov/"], 160),
-    "B3": ("WP-COV-06: uninstrumentable decisions and the condition limit",
-        "Report decisions GCC could not instrument, including those over the recorded maximum (64): unmeasured with the "
-        "limit in the reason (TOOL-COV-080, TOOL-COV-190). Use the decision list from analysis model 1.6 to find "
-        "decisions that have no condition records. The limit is an input from run evidence, not a constant in cov. "
-        "Read ectt.ana only." + REAL + DOC.format(wp="WP-COV-06"),
-        ["src/ectt/cov/", "tests/cov/", "docs/verification/WP-COV-06-analysis.md"], 180),
     "B4": ("MC/DC thresholds and project configuration",
         "Add an 'mcdc' metric to coverage thresholds and the project thresholds section. A configured MC/DC minimum "
         "FAILS when MC/DC is unavailable or unmeasured, unless the project explicitly allows not-applicable. Existing "
         "files without it keep working.",
         ["src/ectt/cov/", "src/ectt/prj/", "tests/cov/", "tests/prj/"], 120),
     "B5": ("WP-REP-04 and WP-COV-10: MC/DC report detail and the documented gap",
-        "In ectt.rep render per-decision condition detail in the HTML report (TOOL-REP-050) and state form and mechanism "
+        "In ectt.rep render per-decision condition detail from `McdcResult` in the HTML report (TOOL-REP-050); never "
+        "word a False as 'was never true' (say 'not shown'), show None as 'unknown'; state form and mechanism "
         "in every report that carries coverage (TOOL-COV-060). Write docs/user/mcdc.md (DRAFT) stating precisely how "
         "masking MC/DC differs from unique-cause, with the corpus case that shows it (TOOL-COV-090). Do not claim any "
         "certification authority accepts masking MC/DC: that is unchecked. Update the certification report's not-claimed "
-        "list so MC/DC is claimed only when measured data is present, and never unique-cause." + DOC.format(wp="WP-REP-04"),
+        "list so MC/DC is claimed only when measured data is present, and never unique-cause." + REAL + DOC.format(wp="WP-REP-04"),
         ["src/ectt/rep/", "tests/rep/", "docs/user/", "docs/verification/WP-REP-04-analysis.md"], 220),
     "B6": ("End-to-end coverage check on real GCC output",
         "With Docker, build several small programs with coverage, run them one or more times, and check the reader, "
@@ -110,15 +93,8 @@ ITEMS = {
         "docs/glm-night/overnight-20261127/mutation-mcdc.md. No src/ edits.",
         ["tests/cov/", "tests/rep/", "docs/glm-night/overnight-20261127/"], 130),
 }
-LANE_A = ["A1", "A2", "A3", "A4", "A5"]
-LANE_B = ["B1", "B2", "B6", "B4", "B3", "B5", "B7"]
-CROSS = ("- CROSS-LANE DEPENDENCY on item `A1` (lane A, worktree `../wt-night-27a`). Before starting: look at "
-         "`docs/glm-night/overnight-20261127/LANE_A_LEDGER.md` there for an A1 row that is DONE. If so: "
-         "`git merge --no-edit glm-night/20261127-a`, run the full gate; if red, `git revert -m 1 HEAD` and treat as "
-         "not satisfied. If not satisfied: skip it now, retry once after the last item, then record `SKIPPED (dep)` "
-         "in the ledger and the second-pass file.")
-
-
+LANE_A = ["A2", "A3", "A4", "A5"]
+LANE_B = ["B2", "B6", "B4", "B5", "B7"]
 def block(n, lane, key):
     title, goal, allowed, est = ITEMS[key]
     ledger = f"docs/glm-night/overnight-{DAY}/LANE_{lane}_LEDGER.md"
@@ -127,8 +103,6 @@ def block(n, lane, key):
     lines = [f"### {n}. {key}: {title}", "",
              f"- Estimate {est}k tokens, hard cap {int(est * 1.3)}k, or 3 failed gate attempts, then PARTIAL and move on.",
              f"- Goal: {goal}"]
-    if key == "B3":
-        lines.append(CROSS)
     lines += [f"- Allowed paths: {paths}. Anything else: do not edit; write the needed change in the second-pass file.",
               "- Done when: tests pass (happy path plus at least two error cases), full gate green, one commit, one ledger row.", ""]
     return "\n".join(lines)
@@ -161,7 +135,7 @@ def main():
                     "Stop starting new items when your lane's cumulative reaches 1,450k tokens OR the local time reaches 05:30, whichever comes first.",
                     "Stop starting new items when the ZAI usage counter shows your lane has used 1,450k tokens (if there is no counter, ignore this token limit) OR the local time reaches 05:30, whichever comes first.")
         text = swap(text, "Open: ADR-003, ADR-004, ADR-005, ADR-007, SRS-Q2, SRS-Q9, PR #4.",
-                    f"{OWNER} {DOCKER} Open: ADR-007, SRS-Q9, the ADR-005 record location, PR #4. Before using "
+                    f"{OWNER} {DOCKER} {DONE_ALREADY} Open: ADR-007, SRS-Q9, the ADR-005 record location, PR #4. Before using "
                     "`xfail`, run the test without it and confirm it fails for the stated reason.")
         total = sum(ITEMS[k][3] for k in keys)
         parts = [block(i, lane, k) for i, k in enumerate(keys, 1)]
