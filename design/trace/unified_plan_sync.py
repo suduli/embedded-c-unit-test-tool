@@ -24,7 +24,7 @@ HTML = ROOT / "EXEC-PLAN-001-tracker.html"
 MD = ROOT / "EXEC-PLAN-001-unified-execution-plan.md"
 
 STATUSES = ["Implemented", "Landed", "In Progress", "Planned", "Blocked"]
-SOURCES = ["PLAN-001", "vcast-findings", "BACKLOG", "BACKLOG-RESERVE"]
+SOURCES = ["PLAN-001", "vcast-findings", "BACKLOG", "BACKLOG-RESERVE", "NIGHT-1127"]
 DONE = {"Implemented", "Landed"}
 LANE = {"done": "Done", "queue": "Ready queue", "reserve": "Reserve queue", "scheduled": "Scheduled via TASK", "blocked": "Blocked", "backlog": "Backlog (planned WP)"}
 
@@ -102,7 +102,7 @@ def b_snapshot(m: Model) -> str:
         f"- **Work packages:** {meta['srs']['packages']} · {meta['srs']['personWeeks']} person-weeks.",
         f"- **Review track (vcast-findings):** {landed} of {len(rt)} landed. Not landed: " + ", ".join(f"`{t['id']}` ({t['status']})" for t in rt if t["status"] != "Landed") + ".",
         f"- **Gates at HEAD:** plan_check — {meta['gates']['planCheck']}. trace_check — {meta['gates']['traceCheck']}.",
-        f"- **Tests at HEAD:** {meta['tests']['passed']} passed, {meta['tests']['failed']} failed, {meta['tests']['skipped']} skipped. Failing: " + ", ".join(f"`{x}`" for x in meta["tests"]["failing"]) + " (fixed by `TASK-001`).",
+        f"- **Tests at HEAD:** {meta['tests']['passed']} passed, {meta['tests']['failed']} failed, {meta['tests']['skipped']} skipped." + (" Failing: " + ", ".join(f"`{x}`" for x in meta["tests"]["failing"]) + "." if meta["tests"]["failing"] else ""),
         f"- **Overnight backlog budget:** core queue sums to {meta['backlog']['coreK']:,}k tokens (its header says {meta['backlog']['statedCoreK']:,}k); reserve {meta['backlog']['reserveK']:,}k.",
         f"- **Startable right now:** {', '.join(f'`{x}`' for x in startable) or 'none'} (dependencies met, not blocked).",
         "",
@@ -206,6 +206,8 @@ def card(m: Model, t: dict, level: str = "###") -> str:
         "- **Files likely touched:** " + (", ".join(f"`{f}`" for f in t["files"]) if t["files"] else "—"),
         "- **Acceptance criteria:**",
     ]
+    if t.get("aiAssist"):
+        lines.insert(-1, f"- **AI assist (Claude/Codex, high model):** {t['aiAssist']}")
     lines += [f"  {i}. {a}" for i, a in enumerate(t["acceptance"], 1)]
     lines.append(f"- **Verification** ({t['verifyState']}):")
     for v in t["verify"]:
@@ -225,7 +227,8 @@ def b_cards(m: Model) -> str:
         ("7.1 Ready queue — core overnight backlog (BACKLOG TASK-000 … TASK-024)", lambda t: t["source"] == "BACKLOG" and t["lane"] == "queue"),
         ("7.2 Reserve queue (TASK-101 … TASK-108; only after TASK-024)", lambda t: t["source"] == "BACKLOG-RESERVE"),
         ("7.3 Blocked backlog task", lambda t: t["source"] == "BACKLOG" and t["lane"] == "blocked"),
-        ("7.4 vcast-findings tasks not yet landed (T-01, T-02, T-04, T-05, T-06, T-14)", lambda t: t["source"] == "vcast-findings" and t["status"] != "Landed"),
+        ("7.4 vcast-findings tasks not yet landed", lambda t: t["source"] == "vcast-findings" and t["status"] != "Landed"),
+        ("7.4a Night queue 2026-11-27 (NIGHT-1127)", lambda t: t["source"] == "NIGHT-1127"),
         ("7.5 Implemented work packages (PLAN-001)", lambda t: t["source"] == "PLAN-001" and t["status"] == "Implemented"),
     ]
     out = []
@@ -255,6 +258,11 @@ def b_register(m: Model) -> str:
                 f"- Accept: {' '.join(t['acceptance'])}",
                 f"- Files: {code(t['files'])} · Branch: `{t['branch']}`",
                 "- Verify: " + "; ".join(("G-FULL" if "G-FULL" in v else f"`{v}`") for v in t["verify"])]
+        if t.get("delivery"):
+            r = t["delivery"]
+            out.append(f"- Delivery: {r['state']} · `{r['commit']}` · {r['ledger']}")
+        if t.get("aiAssist"):
+            out.append(f"- AI assist (Claude/Codex, high model): {t['aiAssist']}")
         if t["notes"]:
             out.append(f"- Notes: {t['notes']}")
         out.append("")
